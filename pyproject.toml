@@ -30,13 +30,13 @@ classifiers = [
     "Topic :: Software Development :: Documentation",
     "Topic :: Utilities",
 ]
-# One dependency. `argh` builds the CLI from the same functions the library exposes,
-# and the CLI is the product's only surface. The digest store deliberately needs
-# nothing: it is a small MutableMapping over a directory, so `dol`, `s3dol` or a
-# plain dict all substitute for it through the `digests_store=` seam without being
-# imported by anyone who does not use them. Nothing here reaches the network, at
-# import time or at run time.
-dependencies = ["argh"]
+# `dol` supplies the key-value store facade that makes the digest destination a
+# one-argument swap -- a local directory today, a git-synced one or blob storage
+# later, all the same interface -- and `argh` builds the CLI from the same functions
+# the library exposes. Two of dol's file-store defaults are wrong for this use and are
+# configured away rather than inherited; see openloops/store.py. Nothing here reaches
+# the network, at import time or at run time.
+dependencies = ["dol", "argh"]
 
 [project.scripts]
 ol = "openloops.__main__:main"

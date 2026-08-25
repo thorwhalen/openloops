@@ -32,10 +32,12 @@ import socket
 from collections.abc import Iterator, MutableMapping
 from pathlib import Path
 
+from dol.filesys import FileStringPersister, mk_dirs_if_missing, with_relative_paths
+
 from openloops.base import ARCHIVE, OPEN, STATES
 
 __all__ = [
-    "DigestFiles",
+    "Utf8TextFiles",
     "data_dir",
     "state_dir",
     "default_source",
@@ -48,74 +50,23 @@ __all__ = [
 ]
 
 
-class DigestFiles(MutableMapping):
-    """The default digest store: markdown files under a root, keyed ``a/b/c.md``.
+@with_relative_paths(prefix_attr="rootdir")
+class Utf8TextFiles(FileStringPersister):
+    """``dol``'s text-file store with the encoding pinned rather than inherited.
 
-    Deliberately small and owned. The seam is the ``MutableMapping`` interface, not any
-    particular library — a ``dol`` store, an ``s3dol`` bucket or a plain ``dict`` all
-    substitute for this without anything else changing. What a general file store gave
-    for free it also gave wrongly for this use: text opened in the *locale* encoding, so
-    a cron job with ``LANG`` unset dies on the em dash in every digest; and a delete that
-    sends the file to the desktop Trash, which for session digests is an undeclared
-    second copy of every superseded one, outside the store, indefinitely.
-
-    Keys are POSIX-style regardless of platform, because they are identifiers that get
-    written into a git-synced directory two machines may share — not paths.
-
-    >>> import tempfile
-    >>> store = DigestFiles(tempfile.mkdtemp())
-    >>> store['mac/open/s1.md'] = 'hello'
-    >>> store['mac/open/s1.md'], list(store), 'mac/open/s1.md' in store
-    ('hello', ['mac/open/s1.md'], True)
-    >>> del store['mac/open/s1.md']
-    >>> list(store)
-    []
+    ``dol`` opens text with ``encoding=None``, i.e. whatever the locale says. Every
+    digest contains an em dash, so on a machine where the locale resolves to ASCII — a
+    container or a cron job with ``LANG`` unset, an Alpine image — writing one raises,
+    and in a store two machines share it is worse: one writes bytes the other cannot
+    read back. Pinning UTF-8 is the whole fix.
     """
 
-    #: What counts as a digest. Anything else under the root is somebody else's.
-    suffix = ".md"
+    _read_open_kwargs = dict(FileStringPersister._read_open_kwargs, encoding="utf-8")
+    _write_open_kwargs = dict(FileStringPersister._write_open_kwargs, encoding="utf-8")
 
-    def __init__(self, rootdir: str | Path):
-        self.rootdir = Path(rootdir).expanduser()
 
-    def _path(self, key: str) -> Path:
-        parts = [p for p in re.split(r"[\\/]", str(key)) if p]
-        if not parts or any(p in (".", "..") for p in parts):
-            raise KeyError(f"not a usable digest key: {key!r}")
-        return self.rootdir.joinpath(*parts)
-
-    def __getitem__(self, key: str) -> str:
-        try:
-            return self._path(key).read_text(encoding="utf-8")
-        except OSError as exc:
-            raise KeyError(key) from exc
-
-    def __setitem__(self, key: str, value: str) -> None:
-        path = self._path(key)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(value, encoding="utf-8")
-
-    def __delitem__(self, key: str) -> None:
-        try:
-            self._path(key).unlink()
-        except OSError as exc:
-            raise KeyError(key) from exc
-
-    def __iter__(self) -> Iterator[str]:
-        if not self.rootdir.is_dir():
-            return
-        for path in sorted(self.rootdir.rglob(f"*{self.suffix}")):
-            if path.is_file():
-                yield path.relative_to(self.rootdir).as_posix()
-
-    def __len__(self) -> int:
-        return sum(1 for _ in self)
-
-    def __contains__(self, key: object) -> bool:
-        try:
-            return self._path(str(key)).is_file()
-        except KeyError:
-            return False
+#: Digests live two levels deep, so the store makes the directories it needs.
+_DigestFiles = mk_dirs_if_missing(Utf8TextFiles)
 
 
 _UNSAFE = re.compile(r"[^A-Za-z0-9._-]+")
@@ -207,10 +158,11 @@ def digests_store(rootdir: str | Path | None = None) -> MutableMapping[str, str]
     """
     root = Path(rootdir).expanduser() if rootdir else data_dir() / "digests"
     root.mkdir(parents=True, exist_ok=True)
-    # Delete means delete. The default sends the file to the desktop Trash, which for a
-    # store of session digests is an undeclared second copy of every superseded one,
-    # outside the store, indefinitely — and reclassification alone produces those daily.
-    return DigestFiles(root)
+    # `delete_func=os.remove`, because the default sends the file to the desktop Trash.
+    # For a store of session digests that is an undeclared second copy of every
+    # superseded one, outside the store, indefinitely — and reclassifying a session from
+    # `open` to `archive` produces those daily.
+    return _DigestFiles(str(root), delete_func=os.remove)
 
 
 def digest_key(source: str, state: str, session_key: str) -> str:

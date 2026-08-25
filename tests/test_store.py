@@ -92,16 +92,20 @@ def test_deleting_a_digest_deletes_it(tmp_path):
     assert not path.exists()
 
 
-def test_the_store_refuses_a_key_that_would_escape_its_root(tmp_path):
-    from openloops.store import DigestFiles
+def test_a_key_that_would_escape_the_store_is_refused_at_the_choke_point(tmp_path):
+    """The check belongs in `digest_key`, which every backend goes through.
 
-    store = DigestFiles(tmp_path)
-    for key in ("../escaped.md", "a/../../escaped.md", "", "."):
-        with pytest.raises(KeyError):
-            store[key] = "x"
+    A general-purpose file store will happily write through `..`; validating in the
+    library rather than in one backend is what makes the seam safe to inject into.
+    """
+    for bad in ("../escaped", "a/b", "..", "", "."):
+        with pytest.raises(ValueError):
+            digest_key("m", "open", bad)
+        with pytest.raises(ValueError):
+            digest_key(bad, "open", "s1")
 
 
-def test_store_keys_are_posix_on_every_platform(tmp_path):
+def test_store_keys_round_trip_through_the_backend(tmp_path):
     store = digests_store(rootdir=tmp_path)
     store["m/archive/s1.md"] = "body"
     assert list(store) == ["m/archive/s1.md"]

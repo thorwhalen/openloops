@@ -26,9 +26,10 @@ First release. The session-digest extractor and reader, and nothing else.
 - mtime-gated change detection, with the cache kept outside the digest store so that
   clearing one cannot reach the other, and versioned so that a change to the renderer
   re-derives instead of leaving old digests frozen.
-- One dependency: `argh`, for the CLI. The default digest store is a small
-  `MutableMapping` over a directory, so `dol`, `s3dol` or a `dict` substitute for it
-  through the seam without being imported by anyone who does not use them.
+- The default digest store is `dol` over a directory of markdown files, with its
+  encoding pinned to UTF-8 (the locale default breaks a `LANG`-unset cron job on the em
+  dash every digest contains) and its delete made a real delete rather than a move to
+  the desktop Trash. Any `MutableMapping[str, str]` substitutes for it through the seam.
 
 ### Notes for readers of the source
 

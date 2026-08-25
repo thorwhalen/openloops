@@ -132,9 +132,9 @@ openloops.sync(
 ```
 
 `transcript_source=` defaults to a direct reader of Claude Code's on-disk layout.
-`digests_store=` defaults to a directory of markdown files — thirty lines, owned here, so
-the package's only dependency is the CLI parser. Point it at a `dol` store, an S3-backed
-one, or a git-synced directory shared between machines, and nothing else changes.
+`digests_store=` defaults to a `dol` store over a directory of markdown files, with its
+encoding pinned to UTF-8 and its delete made a real delete. Point it at an S3-backed
+store, or at a git-synced directory shared between machines, and nothing else changes.
 
 Pass `state_dir=` too when you swap a seam in a test: the change-detection cache is
 separate from both, and left alone it would record your fixture's revisions in the real
@@ -217,8 +217,8 @@ These are tests in the suite, not aspirations:
   Digests whose transcripts have since been collected are *retained* — that is the
   point of the tool — and `ol status` counts them separately.
 - **The suite passes with no network, no credentials, and no `~/.claude` present.**
-- **`import openloops` does not import the CLI library**, and takes about twenty
-  milliseconds. The core has no opinion about how it is called.
+- **`import openloops` does not import the CLI library.** The core has no opinion about
+  how it is called.
 - **Nothing in this repository carries an absolute home path or credential-shaped
   text** — checked mechanically, by the same code that scrubs your digests.
 

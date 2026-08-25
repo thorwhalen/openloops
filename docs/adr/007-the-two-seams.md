@@ -25,14 +25,21 @@ implementation that needs no new dependency — useful out of the box, never a s
 Both are `Mapping`s, so a plain `dict` substitutes for either in a test, and the
 `{source}/{state}/{session}.md` key layout comes along with any backend.
 
-**The default store is thirty lines openloops owns, not a library.** A general-purpose
-file store was tried and removed: what it gave for free it also gave wrongly here —
-text opened in the *locale* encoding, so a cron job with `LANG` unset dies on the em dash
-every digest contains, and a delete that sends the file to the desktop Trash, which for
-session digests is an undeclared second copy of every superseded one, outside the store,
-indefinitely. The seam is the `MutableMapping` interface, so `dol`, `s3dol` or a `dict`
-still drop in unchanged — they are simply not imported by anyone who does not ask for
-them. The package has one dependency, and it is the CLI parser.
+**The default store is `dol`, with two of its defaults configured away rather than
+inherited.** Both were found by review and both are real: `dol` opens text in the
+*locale* encoding, so a cron job with `LANG` unset dies on the em dash every digest
+contains — worse in a shared store, where one machine writes bytes another cannot read
+back; and its delete sends the file to the desktop Trash, which for session digests is
+an undeclared second copy of every superseded one, outside the store, indefinitely, and
+reclassifying a session produces those daily. Pinning UTF-8 and passing `delete_func`
+fixes both through `dol`'s own building blocks.
+
+Owning a thirty-line store instead was tried and rejected. It is cheaper at import time
+and has no defaults to argue with, but it puts openloops outside the convention every
+other store in this ecosystem follows, for a saving that does not compound: the seam is
+the `Mapping` interface either way, so `s3dol` or a plain `dict` drop in regardless. A
+library whose defaults need configuring is an ordinary cost; a bespoke store is a
+permanent one.
 
 **Deliberately not seams**, written directly and on purpose: the digest markdown
 template, the classifier's rule set (its cue lists are ordinary keyword arguments, not
