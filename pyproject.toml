@@ -1,0 +1,89 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "openloops"
+version = "0.1.0"
+description = "Tells you what your Claude Code sessions were doing, after the transcripts are gone"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+keywords = [
+    "claude-code",
+    "agents",
+    "sessions",
+    "transcripts",
+    "digest",
+    "handoff",
+    "retention",
+]
+authors = [{ name = "Thor Whalen" }]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Utilities",
+]
+# One dependency. `argh` builds the CLI from the same functions the library exposes,
+# and the CLI is the product's only surface. The digest store deliberately needs
+# nothing: it is a small MutableMapping over a directory, so `dol`, `s3dol` or a
+# plain dict all substitute for it through the `digests_store=` seam without being
+# imported by anyone who does not use them. Nothing here reaches the network, at
+# import time or at run time.
+dependencies = ["argh"]
+
+[project.scripts]
+ol = "openloops.__main__:main"
+
+[project.urls]
+Documentation = "https://thorwhalen.github.io/openloops/"
+Homepage = "https://github.com/thorwhalen/openloops"
+Repository = "https://github.com/thorwhalen/openloops"
+Issues = "https://github.com/thorwhalen/openloops/issues"
+Changelog = "https://github.com/thorwhalen/openloops/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "pytest-cov>=4.0", "ruff>=0.1.0"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+exclude = [
+    "**/*.ipynb",
+    ".git",
+    ".venv",
+    "build",
+    "dist",
+    "tests",
+    "examples",
+    "scrap",
+]
+
+[tool.ruff.lint]
+select = ["D100"]
+ignore = ["D203", "E501", "B905"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/*" = ["D"]
+"**/examples/*" = ["D"]
+"**/scrap/*" = ["D"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests", "openloops"]
+doctest_optionflags = ["NORMALIZE_WHITESPACE", "ELLIPSIS"]
+
+[tool.wads.ci]
+project_name = "openloops"
+
+[tool.wads.ci.testing]
+python_versions = ["3.10", "3.12"]
