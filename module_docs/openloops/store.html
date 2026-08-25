@@ -1,0 +1,292 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openloops.store &mdash; openloops 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="openloops.tools" href="tools.html" />
+    <link rel="prev" title="openloops.job" href="job.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            openloops
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../openloops.html">openloops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="__main__.html">openloops.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_classify.html">openloops._classify</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_sync.html">openloops._sync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="digest.html">openloops.digest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="egress.html">openloops.egress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="job.html">openloops.job</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">openloops.store</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.store.DigestFiles"><code class="docutils literal notranslate"><span class="pre">DigestFiles</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.store.DigestFiles.suffix"><code class="docutils literal notranslate"><span class="pre">DigestFiles.suffix</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.store.data_dir"><code class="docutils literal notranslate"><span class="pre">data_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.store.default_source"><code class="docutils literal notranslate"><span class="pre">default_source()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.store.digest_key"><code class="docutils literal notranslate"><span class="pre">digest_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.store.digests_store"><code class="docutils literal notranslate"><span class="pre">digests_store()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.store.load_sync_state"><code class="docutils literal notranslate"><span class="pre">load_sync_state()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.store.parse_digest_key"><code class="docutils literal notranslate"><span class="pre">parse_digest_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.store.save_sync_state"><code class="docutils literal notranslate"><span class="pre">save_sync_state()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.store.state_dir"><code class="docutils literal notranslate"><span class="pre">state_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.store.sync_state_path"><code class="docutils literal notranslate"><span class="pre">sync_state_path()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">openloops.tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transcripts.html">openloops.transcripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">openloops</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">openloops.store</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/openloops/store.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-openloops.store">
+<span id="openloops-store"></span><h1>openloops.store<a class="headerlink" href="#module-openloops.store" title="Link to this heading"></a></h1>
+<p>Where digests live, and where the change-detection cache lives — two different things.</p>
+<p>The digest store is <strong>data</strong>: a local directory of markdown files under
+<code class="docutils literal notranslate"><span class="pre">~/.local/share/openloops/digests/</span></code>, addressed as a <code class="docutils literal notranslate"><span class="pre">MutableMapping[str,</span> <span class="pre">str]</span></code> so
+that swapping it for a git-synced directory or an S3-backed store is one keyword
+argument rather than a rewrite. Nothing in openloops opens a file by path.</p>
+<p>The sync cache is <strong>not data</strong>: it is a per-machine record of which transcript
+revisions have already been read, and deleting it is a distinct operation from deleting
+digests. That separation is ADR-010’s rule — a cache purge must not be able to reach
+the thing being cached — and it is what makes the regeneration test meaningful: wipe
+both, sync again, and every digest comes back byte-identical.</p>
+<p>Keys are <code class="docutils literal notranslate"><span class="pre">{source}/{state}/{session}.md</span></code>. The source segment is the machine (or
+person) that wrote the digest, so two machines syncing into one git repository never
+write the same path and there is nothing to reconcile. The state segment is <code class="docutils literal notranslate"><span class="pre">open</span></code> or
+<code class="docutils literal notranslate"><span class="pre">archive</span></code> — <strong>loop state, not process state</strong>. If it ever came to mean “a process is
+running”, this would be a session dashboard rather than a record of what sessions said.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">digest_key</span><span class="p">(</span><span class="s1">'laptop'</span><span class="p">,</span> <span class="s1">'open'</span><span class="p">,</span> <span class="s1">'abc-123'</span><span class="p">)</span>
+<span class="go">'laptop/open/abc-123.md'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parse_digest_key</span><span class="p">(</span><span class="s1">'laptop/open/abc-123.md'</span><span class="p">)</span>
+<span class="go">('laptop', 'open', 'abc-123')</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="openloops.store.DigestFiles">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.store.</span></span><span class="sig-name descname"><span class="pre">DigestFiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rootdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/openloops/store.html#DigestFiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.store.DigestFiles" title="Link to this definition"></a></dt>
+<dd><p>The default digest store: markdown files under a root, keyed <code class="docutils literal notranslate"><span class="pre">a/b/c.md</span></code>.</p>
+<p>Deliberately small and owned. The seam is the <code class="docutils literal notranslate"><span class="pre">MutableMapping</span></code> interface, not any
+particular library — a <code class="docutils literal notranslate"><span class="pre">dol</span></code> store, an <code class="docutils literal notranslate"><span class="pre">s3dol</span></code> bucket or a plain <code class="docutils literal notranslate"><span class="pre">dict</span></code> all
+substitute for this without anything else changing. What a general file store gave
+for free it also gave wrongly for this use: text opened in the <em>locale</em> encoding, so
+a cron job with <code class="docutils literal notranslate"><span class="pre">LANG</span></code> unset dies on the em dash in every digest; and a delete that
+sends the file to the desktop Trash, which for session digests is an undeclared
+second copy of every superseded one, outside the store, indefinitely.</p>
+<p>Keys are POSIX-style regardless of platform, because they are identifiers that get
+written into a git-synced directory two machines may share — not paths.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span> <span class="o">=</span> <span class="n">DigestFiles</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span><span class="p">[</span><span class="s1">'mac/open/s1.md'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'hello'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span><span class="p">[</span><span class="s1">'mac/open/s1.md'</span><span class="p">],</span> <span class="nb">list</span><span class="p">(</span><span class="n">store</span><span class="p">),</span> <span class="s1">'mac/open/s1.md'</span> <span class="ow">in</span> <span class="n">store</span>
+<span class="go">('hello', ['mac/open/s1.md'], True)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">del</span> <span class="n">store</span><span class="p">[</span><span class="s1">'mac/open/s1.md'</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">store</span><span class="p">)</span>
+<span class="go">[]</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="openloops.store.DigestFiles.suffix">
+<span class="sig-name descname"><span class="pre">suffix</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.md'</span></span><a class="headerlink" href="#openloops.store.DigestFiles.suffix" title="Link to this definition"></a></dt>
+<dd><p>What counts as a digest. Anything else under the root is somebody else’s.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.store.data_dir">
+<span class="sig-prename descclassname"><span class="pre">openloops.store.</span></span><span class="sig-name descname"><span class="pre">data_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="../../_modules/openloops/store.html#data_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.store.data_dir" title="Link to this definition"></a></dt>
+<dd><p>The project’s data root. Override with <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_DATA_DIR</span></code>.</p>
+<p>Per-kind subdirectories hang off this; nothing is written directly into it, so a
+later kind of data needs no second migration.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.store.default_source">
+<span class="sig-prename descclassname"><span class="pre">openloops.store.</span></span><span class="sig-name descname"><span class="pre">default_source</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/openloops/store.html#default_source"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.store.default_source" title="Link to this definition"></a></dt>
+<dd><p>This machine’s label for its digest folder. Override with <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_SOURCE</span></code>.</p>
+<p>A short, filename-safe name. It exists so several machines can sync digests into one
+place without colliding — not to identify anybody, though on a machine whose
+hostname was never changed it may well do; every <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">sync</span></code> prints it, and
+<code class="docutils literal notranslate"><span class="pre">OPENLOOPS_SOURCE</span></code> overrides it.</p>
+<p><strong>It is sticky.</strong> The hostname is a <em>seed</em>, written once to a file under the state
+directory and read thereafter. macOS rewrites the hostname when it joins a network
+where the name collides — appending <code class="docutils literal notranslate"><span class="pre">-2</span></code>, <code class="docutils literal notranslate"><span class="pre">-3</span></code> — and a label that moved would
+fork the store into two complete copies with no dedup and no warning.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.store.digest_key">
+<span class="sig-prename descclassname"><span class="pre">openloops.store.</span></span><span class="sig-name descname"><span class="pre">digest_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/openloops/store.html#digest_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.store.digest_key" title="Link to this definition"></a></dt>
+<dd><p>The store key for one session’s digest.</p>
+<p>Both segments are validated, not just the state. <code class="docutils literal notranslate"><span class="pre">transcript_source=</span></code> is a seam
+whose documented purpose is “another machine’s synced transcripts”, so a session id
+can come from a listing this process did not produce — and a key containing <code class="docutils literal notranslate"><span class="pre">..</span></code>
+would make a file-backed store write outside its own root while <code class="docutils literal notranslate"><span class="pre">sync</span></code> reported
+success. Validating here means every backend inherits the check.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">digest_key</span><span class="p">(</span><span class="s1">'mac'</span><span class="p">,</span> <span class="s1">'archive'</span><span class="p">,</span> <span class="s1">'s1'</span><span class="p">)</span>
+<span class="go">'mac/archive/s1.md'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">digest_key</span><span class="p">(</span><span class="s1">'mac'</span><span class="p">,</span> <span class="s1">'open'</span><span class="p">,</span> <span class="s1">'../../etc/passwd'</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">session key must be a single safe path segment, got '../../etc/passwd'</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.store.digests_store">
+<span class="sig-prename descclassname"><span class="pre">openloops.store.</span></span><span class="sig-name descname"><span class="pre">digests_store</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rootdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/openloops/store.html#digests_store"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.store.digests_store" title="Link to this definition"></a></dt>
+<dd><p>The default <code class="docutils literal notranslate"><span class="pre">digests_store</span></code>: markdown files under the data root.</p>
+<p>Any <code class="docutils literal notranslate"><span class="pre">MutableMapping[str,</span> <span class="pre">str]</span></code> works in its place — a plain <code class="docutils literal notranslate"><span class="pre">dict</span></code> for tests,
+a git-synced directory, an S3-backed store. The keys are what carry the layout, so
+a different backend gets the same <code class="docutils literal notranslate"><span class="pre">{source}/{state}/{session}.md</span></code> structure for
+free.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">store</span> <span class="o">=</span> <span class="n">digests_store</span><span class="p">(</span><span class="n">rootdir</span><span class="o">=</span><span class="s1">'/tmp/openloops-doctest-store'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span><span class="p">[</span><span class="s1">'demo/open/s1.md'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'# hi'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">sorted</span><span class="p">(</span><span class="n">store</span><span class="p">)</span>
+<span class="go">['demo/open/s1.md']</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">del</span> <span class="n">store</span><span class="p">[</span><span class="s1">'demo/open/s1.md'</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.store.load_sync_state">
+<span class="sig-prename descclassname"><span class="pre">openloops.store.</span></span><span class="sig-name descname"><span class="pre">load_sync_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/openloops/store.html#load_sync_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.store.load_sync_state" title="Link to this definition"></a></dt>
+<dd><p>Session id → the transcript revision last read. Missing or corrupt reads empty.</p>
+<p>A corrupt cache is treated as an absent one on purpose: the only cost of being
+wrong here is re-deriving digests that were already correct.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.store.parse_digest_key">
+<span class="sig-prename descclassname"><span class="pre">openloops.store.</span></span><span class="sig-name descname"><span class="pre">parse_digest_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/openloops/store.html#parse_digest_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.store.parse_digest_key" title="Link to this definition"></a></dt>
+<dd><p>Split a store key back into <code class="docutils literal notranslate"><span class="pre">(source,</span> <span class="pre">state,</span> <span class="pre">session_key)</span></code>.</p>
+<p>Both separators are accepted. A file-backed store hands keys back joined with the
+platform’s separator, so on Windows every key would fail to parse and every read
+path would quietly return nothing while <code class="docutils literal notranslate"><span class="pre">sync</span></code> reported digests written.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_digest_key</span><span class="p">(</span><span class="s1">'mac/archive/s1.md'</span><span class="p">)</span>
+<span class="go">('mac', 'archive', 's1')</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parse_digest_key</span><span class="p">(</span><span class="s1">'mac'</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">92</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'archive'</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">92</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'s1.md'</span><span class="p">)</span>
+<span class="go">('mac', 'archive', 's1')</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.store.save_sync_state">
+<span class="sig-prename descclassname"><span class="pre">openloops.store.</span></span><span class="sig-name descname"><span class="pre">save_sync_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="../../_modules/openloops/store.html#save_sync_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.store.save_sync_state" title="Link to this definition"></a></dt>
+<dd><p>Write the mtime cache, creating its directory. Returns the path written.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.store.state_dir">
+<span class="sig-prename descclassname"><span class="pre">openloops.store.</span></span><span class="sig-name descname"><span class="pre">state_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="../../_modules/openloops/store.html#state_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.store.state_dir" title="Link to this definition"></a></dt>
+<dd><p>Where per-machine caches and job logs go. Override with <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_STATE_DIR</span></code>.</p>
+<p>Deliberately not under <a class="reference internal" href="#openloops.store.data_dir" title="openloops.store.data_dir"><code class="xref py py-func docutils literal notranslate"><span class="pre">data_dir()</span></code></a>: everything here is disposable, and keeping
+it elsewhere means “clear the cache” can never be mistyped into “delete the digests”.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.store.sync_state_path">
+<span class="sig-prename descclassname"><span class="pre">openloops.store.</span></span><span class="sig-name descname"><span class="pre">sync_state_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="../../_modules/openloops/store.html#sync_state_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.store.sync_state_path" title="Link to this definition"></a></dt>
+<dd><p>Where the mtime cache lives. Deleting this file forces a full re-read.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="job.html" class="btn btn-neutral float-left" title="openloops.job" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tools.html" class="btn btn-neutral float-right" title="openloops.tools" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

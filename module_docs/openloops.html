@@ -1,0 +1,646 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openloops &mdash; openloops 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="openloops.__main__" href="openloops/__main__.html" />
+    <link rel="prev" title="Welcome to openloops’s documentation!" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            openloops
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">openloops</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.ClaudeCodeTranscripts"><code class="docutils literal notranslate"><span class="pre">ClaudeCodeTranscripts</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.ClaudeCodeTranscripts.changed_since"><code class="docutils literal notranslate"><span class="pre">ClaudeCodeTranscripts.changed_since()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.ClaudeCodeTranscripts.path_of"><code class="docutils literal notranslate"><span class="pre">ClaudeCodeTranscripts.path_of()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.ClaudeCodeTranscripts.revision"><code class="docutils literal notranslate"><span class="pre">ClaudeCodeTranscripts.revision()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.ClaudeCodeTranscripts.scratchpad_marker"><code class="docutils literal notranslate"><span class="pre">ClaudeCodeTranscripts.scratchpad_marker</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.CredentialFound"><code class="docutils literal notranslate"><span class="pre">CredentialFound</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.Digest"><code class="docutils literal notranslate"><span class="pre">Digest</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.Digest.as_dict"><code class="docutils literal notranslate"><span class="pre">Digest.as_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.Locator"><code class="docutils literal notranslate"><span class="pre">Locator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.Locator.as_dict"><code class="docutils literal notranslate"><span class="pre">Locator.as_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.Session"><code class="docutils literal notranslate"><span class="pre">Session</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.Session.as_dict"><code class="docutils literal notranslate"><span class="pre">Session.as_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.Session.compaction"><code class="docutils literal notranslate"><span class="pre">Session.compaction</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.Session.ended_mid_turn"><code class="docutils literal notranslate"><span class="pre">Session.ended_mid_turn</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.Session.ended_with_error"><code class="docutils literal notranslate"><span class="pre">Session.ended_with_error</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.Session.git_branch"><code class="docutils literal notranslate"><span class="pre">Session.git_branch</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.Session.heading"><code class="docutils literal notranslate"><span class="pre">Session.heading</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.Session.recap"><code class="docutils literal notranslate"><span class="pre">Session.recap</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.Verdict"><code class="docutils literal notranslate"><span class="pre">Verdict</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.Verdict.as_dict"><code class="docutils literal notranslate"><span class="pre">Verdict.as_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.Verdict.at"><code class="docutils literal notranslate"><span class="pre">Verdict.at</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.Verdict.confidence"><code class="docutils literal notranslate"><span class="pre">Verdict.confidence</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.asks_the_human"><code class="docutils literal notranslate"><span class="pre">asks_the_human()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.classify"><code class="docutils literal notranslate"><span class="pre">classify()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.data_dir"><code class="docutils literal notranslate"><span class="pre">data_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.default_source"><code class="docutils literal notranslate"><span class="pre">default_source()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.digest_key"><code class="docutils literal notranslate"><span class="pre">digest_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.digests_store"><code class="docutils literal notranslate"><span class="pre">digests_store()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.ls"><code class="docutils literal notranslate"><span class="pre">ls()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.make_digest"><code class="docutils literal notranslate"><span class="pre">make_digest()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.parse_session"><code class="docutils literal notranslate"><span class="pre">parse_session()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.render"><code class="docutils literal notranslate"><span class="pre">render()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.retained"><code class="docutils literal notranslate"><span class="pre">retained()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.scrub"><code class="docutils literal notranslate"><span class="pre">scrub()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.state_dir"><code class="docutils literal notranslate"><span class="pre">state_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.status"><code class="docutils literal notranslate"><span class="pre">status()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.sync"><code class="docutils literal notranslate"><span class="pre">sync()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="openloops/__main__.html">openloops.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openloops/_classify.html">openloops._classify</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openloops/_sync.html">openloops._sync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openloops/base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openloops/digest.html">openloops.digest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openloops/egress.html">openloops.egress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openloops/job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openloops/store.html">openloops.store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openloops/tools.html">openloops.tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openloops/transcripts.html">openloops.transcripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">openloops</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">openloops</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/module_docs/openloops.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-openloops">
+<span id="openloops"></span><h1>openloops<a class="headerlink" href="#module-openloops" title="Link to this heading"></a></h1>
+<p>What your Claude Code sessions were doing — kept after the transcripts are gone.</p>
+<p>Claude Code writes a JSONL transcript for every session and deletes it after about a
+month. openloops reads those transcripts, writes one short dated markdown digest per
+session, and keeps the digests. Nothing here calls a model, reaches the network, or
+needs an account: it reads files you already have and writes files you already own.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">openloops</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">report</span> <span class="o">=</span> <span class="n">openloops</span><span class="o">.</span><span class="n">sync</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">openloops</span><span class="o">.</span><span class="n">ls</span><span class="p">(</span><span class="n">state</span><span class="o">=</span><span class="s1">'open'</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">'session'</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">'ai_title'</span><span class="p">]</span> <span class="ow">or</span> <span class="n">row</span><span class="p">[</span><span class="s1">'title'</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>The whole design rests on one sentence, and everything else follows from it:</p>
+<p>&gt; <strong>A digest says what a session said, dated. It never says what is true now.</strong></p>
+<p>So a digest is filed under <code class="docutils literal notranslate"><span class="pre">open/</span></code> or <code class="docutils literal notranslate"><span class="pre">archive/</span></code> by what the session’s own last
+turn <em>read</em> like — not by whether a process is running, which would make this a session
+dashboard rather than a record of open loops. Nothing is asserted to be still
+outstanding, because openloops has checked nothing against the world.</p>
+<p>The two modules whose primary export shares their name — the sync engine and the
+classifier — are private (<code class="docutils literal notranslate"><span class="pre">openloops._sync</span></code>, <code class="docutils literal notranslate"><span class="pre">openloops._classify</span></code>), because a
+module and a function cannot both answer to <code class="docutils literal notranslate"><span class="pre">openloops.sync</span></code>. Everything they export
+is re-exported here, including the classifier’s cue tables.</p>
+<p>Two seams, both one keyword argument, both defaulting to something that works out of
+the box: <code class="docutils literal notranslate"><span class="pre">transcript_source=</span></code> (a reader of Claude Code’s on-disk layout) and
+<code class="docutils literal notranslate"><span class="pre">digests_store=</span></code> (a directory of markdown files under <code class="docutils literal notranslate"><span class="pre">~/.local/share/openloops/</span></code>).
+Swap either for a test fixture, a git-synced directory, or blob storage without
+touching anything else.</p>
+<p><strong>Not in this release, and deliberately:</strong> anything that tracks what you owe or are
+owed. That is the project’s headline claim and it is withheld pending a measurement —
+see the README.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="openloops.ClaudeCodeTranscripts">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">ClaudeCodeTranscripts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">since_days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projects</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_scratchpads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/transcripts.html#ClaudeCodeTranscripts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.ClaudeCodeTranscripts" title="Link to this definition"></a></dt>
+<dd><p>Claude Code’s persisted sessions, as a <code class="docutils literal notranslate"><span class="pre">Mapping[str,</span> <span class="pre">Session]</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">since_days</span></code> bounds the scan by file modification time (<code class="docutils literal notranslate"><span class="pre">None</span></code> scans
+everything); <code class="docutils literal notranslate"><span class="pre">projects</span></code> keeps only project directories whose name contains one of
+the given substrings; <code class="docutils literal notranslate"><span class="pre">skip_scratchpads</span></code> drops the throwaway directories the CLI
+creates under a temp root, which hold agent scratch sessions rather than work.</p>
+<p>ADR-010’s revision shape lives here: <a class="reference internal" href="#openloops.ClaudeCodeTranscripts.revision" title="openloops.ClaudeCodeTranscripts.revision"><code class="xref py py-meth docutils literal notranslate"><span class="pre">revision()</span></code></a> returns an opaque token —
+a file’s modification time for one session, a hash over all of them for the
+collection — and <a class="reference internal" href="#openloops.ClaudeCodeTranscripts.changed_since" title="openloops.ClaudeCodeTranscripts.changed_since"><code class="xref py py-meth docutils literal notranslate"><span class="pre">changed_since()</span></code></a> compares against it. mtime is a coarse
+signal that both misses content-preserving rewrites and fires on touches; that
+trade is accepted rather than reprocessing several thousand transcripts a tick.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">src</span> <span class="o">=</span> <span class="n">ClaudeCodeTranscripts</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s1">'/nonexistent-dir-for-doctest'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">src</span><span class="p">),</span> <span class="n">src</span><span class="o">.</span><span class="n">changed_since</span><span class="p">(</span><span class="s1">'0'</span><span class="p">)</span>
+<span class="go">([], False)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="openloops.ClaudeCodeTranscripts.changed_since">
+<span class="sig-name descname"><span class="pre">changed_since</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/openloops/transcripts.html#ClaudeCodeTranscripts.changed_since"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.ClaudeCodeTranscripts.changed_since" title="Link to this definition"></a></dt>
+<dd><p>Whether the current <a class="reference internal" href="#openloops.ClaudeCodeTranscripts.revision" title="openloops.ClaudeCodeTranscripts.revision"><code class="xref py py-meth docutils literal notranslate"><span class="pre">revision()</span></code></a> differs from <em>token</em>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openloops.ClaudeCodeTranscripts.path_of">
+<span class="sig-name descname"><span class="pre">path_of</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="../_modules/openloops/transcripts.html#ClaudeCodeTranscripts.path_of"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.ClaudeCodeTranscripts.path_of" title="Link to this definition"></a></dt>
+<dd><p>The transcript file backing <em>key</em>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openloops.ClaudeCodeTranscripts.revision">
+<span class="sig-name descname"><span class="pre">revision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/openloops/transcripts.html#ClaudeCodeTranscripts.revision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.ClaudeCodeTranscripts.revision" title="Link to this definition"></a></dt>
+<dd><p>An opaque change token: for one session, or for the whole collection.</p>
+<p>For a single key it is the transcript’s modification time in nanoseconds. For
+the collection it is a hash over every <code class="docutils literal notranslate"><span class="pre">(key,</span> <span class="pre">mtime)</span></code> pair, so a token can
+be compared without holding the whole index.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="openloops.ClaudeCodeTranscripts.scratchpad_marker">
+<span class="sig-name descname"><span class="pre">scratchpad_marker</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'-private-tmp'</span></span><a class="headerlink" href="#openloops.ClaudeCodeTranscripts.scratchpad_marker" title="Link to this definition"></a></dt>
+<dd><p>Project-directory names starting with this are scratchpads, not work.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="openloops.CredentialFound">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">CredentialFound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/egress.html#CredentialFound"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.CredentialFound" title="Link to this definition"></a></dt>
+<dd><p>Raised when text about to be written matches a credential pattern.</p>
+<p>The message names the pattern class and the offset. It never contains the matched
+text: an exception that quotes a secret has moved the secret into a log file.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openloops.Digest">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">Digest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verdict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="openloops/base.html#openloops.base.Verdict" title="openloops.base.Verdict"><span class="pre">Verdict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/base.html#Digest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.Digest" title="Link to this definition"></a></dt>
+<dd><p>One rendered digest: its store key and its markdown text.</p>
+<p><code class="docutils literal notranslate"><span class="pre">text</span></code> is a pure function of the <a class="reference internal" href="#openloops.Session" title="openloops.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a> it was built from. It carries
+no generation timestamp, which is what lets the regeneration test in
+<code class="docutils literal notranslate"><span class="pre">tests/test_sync.py</span></code> compare bytes rather than fields.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="openloops.Digest.as_dict">
+<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openloops/base.html#Digest.as_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.Digest.as_dict" title="Link to this definition"></a></dt>
+<dd><p>JSON-ready form (without the markdown body).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openloops.Locator">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">Locator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/base.html#Locator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.Locator" title="Link to this definition"></a></dt>
+<dd><p>A typed, human-readable pointer to something outside the digest.</p>
+<p>The exportable half of ADR-015’s evidence split: a short typed reference that
+another tool (or a person) can resolve, never a content hash and never a byte
+offset into a file that is garbage-collected after thirty days.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Locator</span><span class="p">(</span><span class="s2">"pr"</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s2">"https://github.com/o/r/pull/1"</span><span class="p">)</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()[</span><span class="s2">"type"</span><span class="p">]</span>
+<span class="go">'pr'</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="openloops.Locator.as_dict">
+<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openloops/base.html#Locator.as_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.Locator.as_dict" title="Link to this definition"></a></dt>
+<dd><p>JSON-ready form.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openloops.Session">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">Session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ai_title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cwd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">git_branches</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">started_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ended_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_turn_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_user_prompt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_prompt_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_assistant_text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recap_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compaction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compaction_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turn_count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ended_mid_turn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ended_with_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="openloops/base.html#openloops.base.Locator" title="openloops.base.Locator"><span class="pre">Locator</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/base.html#Session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.Session" title="Link to this definition"></a></dt>
+<dd><p>What one Claude Code session’s persisted state says, parsed but not judged.</p>
+<p>Every field is a <em>fact read from the transcript</em>, never an inference about the
+world. <code class="docutils literal notranslate"><span class="pre">last_assistant_text</span></code> is what the session said last; it is not a claim
+that the thing it describes is still true.</p>
+<p><code class="docutils literal notranslate"><span class="pre">key</span></code> is the session id. It is the only identifier openloops uses, and per
+ADR-014 nothing in the model hangs off it: a digest is a view keyed by session,
+not a record owned by one.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="openloops.Session.as_dict">
+<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openloops/base.html#Session.as_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.Session.as_dict" title="Link to this definition"></a></dt>
+<dd><p>JSON-ready form (<code class="docutils literal notranslate"><span class="pre">asdict</span></code> already flattens the nested locators).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="openloops.Session.compaction">
+<span class="sig-name descname"><span class="pre">compaction</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></span><a class="headerlink" href="#openloops.Session.compaction" title="Link to this definition"></a></dt>
+<dd><p>The context-compaction summary, a different and much longer thing than the recap,
+covering only the part of the session that preceded it.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="openloops.Session.ended_mid_turn">
+<span class="sig-name descname"><span class="pre">ended_mid_turn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#openloops.Session.ended_mid_turn" title="Link to this definition"></a></dt>
+<dd><p>The transcript’s final conversational record is an unanswered human prompt, or an
+assistant tool call whose result never arrived — i.e. the session stopped mid-turn.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="openloops.Session.ended_with_error">
+<span class="sig-name descname"><span class="pre">ended_with_error</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#openloops.Session.ended_with_error" title="Link to this definition"></a></dt>
+<dd><p>The last thing the session said is a usage-limit or API-error banner rather than
+the assistant’s own words: it was cut off, not finished.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="openloops.Session.git_branch">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">git_branch</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#openloops.Session.git_branch" title="Link to this definition"></a></dt>
+<dd><p>The branch the session opened on — the one that names it, when several ran.</p>
+<p>A third of sessions touch more than one branch, so a single value is a summary
+rather than a fact; <code class="xref py py-attr docutils literal notranslate"><span class="pre">git_branches</span></code> is what carries the truth.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="openloops.Session.heading">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">heading</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#openloops.Session.heading" title="Link to this definition"></a></dt>
+<dd><p>its description, else its label.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>What to call this session in prose</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="openloops.Session.recap">
+<span class="sig-name descname"><span class="pre">recap</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></span><a class="headerlink" href="#openloops.Session.recap" title="Link to this definition"></a></dt>
+<dd><p>Claude Code’s own end-of-turn recap (its <code class="docutils literal notranslate"><span class="pre">away_summary</span></code> record) — one to three
+sentences it wrote itself, usually naming what it thought came next. Reading it
+is retention, not duplication: it was generated and billed once already, and it
+disappears with the transcript.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openloops.Verdict">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">Verdict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reason</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cues</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'high'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/base.html#Verdict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.Verdict" title="Link to this definition"></a></dt>
+<dd><p>A loop-state judgement, with the rule that produced it and the cues it saw.</p>
+<p><code class="docutils literal notranslate"><span class="pre">reason</span></code> and <code class="docutils literal notranslate"><span class="pre">cues</span></code> exist so a reader can disagree. A classification whose
+grounds are not shown is an assertion, and openloops does not make assertions
+about sessions — it reports what they said and why it read them that way.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="openloops.Verdict.as_dict">
+<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openloops/base.html#Verdict.as_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.Verdict.as_dict" title="Link to this definition"></a></dt>
+<dd><p>JSON-ready form.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="openloops.Verdict.at">
+<span class="sig-name descname"><span class="pre">at</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></span><a class="headerlink" href="#openloops.Verdict.at" title="Link to this definition"></a></dt>
+<dd><p>When the text this verdict was read from was written. Usually the closing turn,
+but the recap rule reads text written later, and a heading dated to the wrong
+moment is exactly the thing ADR-005 forbids.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="openloops.Verdict.confidence">
+<span class="sig-name descname"><span class="pre">confidence</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'high'</span></span><a class="headerlink" href="#openloops.Verdict.confidence" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">&quot;high&quot;</span></code> when a rule actually fired, <code class="docutils literal notranslate"><span class="pre">&quot;low&quot;</span></code> when the state is the default
+and nothing in the transcript supported it. A classifier that hides which of the
+two it did is claiming knowledge it does not have.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.asks_the_human">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">asks_the_human</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">ask_cues</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">('want</span> <span class="pre">me</span> <span class="pre">to',</span> <span class="pre">'do</span> <span class="pre">you</span> <span class="pre">want',</span> <span class="pre">'would</span> <span class="pre">you</span> <span class="pre">like',</span> <span class="pre">'shall</span> <span class="pre">i',</span> <span class="pre">'should</span> <span class="pre">i',</span> <span class="pre">'let</span> <span class="pre">me</span> <span class="pre">know',</span> <span class="pre">'say</span> <span class="pre">the</span> <span class="pre">word',</span> <span class="pre">'your</span> <span class="pre">call',</span> <span class="pre">'up</span> <span class="pre">to</span> <span class="pre">you',</span> <span class="pre">'over</span> <span class="pre">to</span> <span class="pre">you',</span> <span class="pre">'which</span> <span class="pre">would</span> <span class="pre">you',</span> <span class="pre">'tell</span> <span class="pre">me</span> <span class="pre">which',</span> <span class="pre">&quot;if</span> <span class="pre">you'd</span> <span class="pre">prefer&quot;,</span> <span class="pre">'if</span> <span class="pre">you</span> <span class="pre">would</span> <span class="pre">prefer',</span> <span class="pre">'needs</span> <span class="pre">your</span> <span class="pre">input',</span> <span class="pre">'needs</span> <span class="pre">your</span> <span class="pre">review',</span> <span class="pre">'needs</span> <span class="pre">your</span> <span class="pre">decision',</span> <span class="pre">'needs</span> <span class="pre">your</span> <span class="pre">go-ahead',</span> <span class="pre">'needs</span> <span class="pre">your</span> <span class="pre">call')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1200</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openloops/_classify.html#asks_the_human"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.asks_the_human" title="Link to this definition"></a></dt>
+<dd><p>The ask cues in the closing lines, if those lines put a question to the reader.</p>
+<p>The primitive a retrospective measurement uses to ask “did this session end with a
+question directed at the human” — defined once, here, rather than twice.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">asks_the_human</span><span class="p">(</span><span class="s1">'I fixed it. Want me to open the PR?'</span><span class="p">)</span>
+<span class="go">('want me to',)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">asks_the_human</span><span class="p">(</span><span class="s1">'Was it broken? Yes, and I fixed it.'</span><span class="p">)</span>
+<span class="go">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">asks_the_human</span><span class="p">(</span><span class="s1">'All done.'</span><span class="p">)</span>
+<span class="go">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.classify">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">classify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="openloops/base.html#openloops.base.Session" title="openloops.base.Session"><span class="pre">Session</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">ask_cues</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">('want</span> <span class="pre">me</span> <span class="pre">to',</span> <span class="pre">'do</span> <span class="pre">you</span> <span class="pre">want',</span> <span class="pre">'would</span> <span class="pre">you</span> <span class="pre">like',</span> <span class="pre">'shall</span> <span class="pre">i',</span> <span class="pre">'should</span> <span class="pre">i',</span> <span class="pre">'let</span> <span class="pre">me</span> <span class="pre">know',</span> <span class="pre">'say</span> <span class="pre">the</span> <span class="pre">word',</span> <span class="pre">'your</span> <span class="pre">call',</span> <span class="pre">'up</span> <span class="pre">to</span> <span class="pre">you',</span> <span class="pre">'over</span> <span class="pre">to</span> <span class="pre">you',</span> <span class="pre">'which</span> <span class="pre">would</span> <span class="pre">you',</span> <span class="pre">'tell</span> <span class="pre">me</span> <span class="pre">which',</span> <span class="pre">&quot;if</span> <span class="pre">you'd</span> <span class="pre">prefer&quot;,</span> <span class="pre">'if</span> <span class="pre">you</span> <span class="pre">would</span> <span class="pre">prefer',</span> <span class="pre">'needs</span> <span class="pre">your</span> <span class="pre">input',</span> <span class="pre">'needs</span> <span class="pre">your</span> <span class="pre">review',</span> <span class="pre">'needs</span> <span class="pre">your</span> <span class="pre">decision',</span> <span class="pre">'needs</span> <span class="pre">your</span> <span class="pre">go-ahead',</span> <span class="pre">'needs</span> <span class="pre">your</span> <span class="pre">call')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defer_cues</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">('still</span> <span class="pre">open',</span> <span class="pre">'still</span> <span class="pre">owed',</span> <span class="pre">'still</span> <span class="pre">outstanding',</span> <span class="pre">'still</span> <span class="pre">pending',</span> <span class="pre">'next</span> <span class="pre">step',</span> <span class="pre">'next</span> <span class="pre">session',</span> <span class="pre">'left</span> <span class="pre">off',</span> <span class="pre">'waiting</span> <span class="pre">for</span> <span class="pre">you',</span> <span class="pre">'waiting</span> <span class="pre">on',</span> <span class="pre">'blocked</span> <span class="pre">on',</span> <span class="pre">'blocked</span> <span class="pre">by',</span> <span class="pre">'handoff',</span> <span class="pre">'hand-off',</span> <span class="pre">'pick</span> <span class="pre">it</span> <span class="pre">up',</span> <span class="pre">'pick</span> <span class="pre">this</span> <span class="pre">up',</span> <span class="pre">'pick</span> <span class="pre">that</span> <span class="pre">up',</span> <span class="pre">'i</span> <span class="pre">left</span> <span class="pre">it',</span> <span class="pre">'not</span> <span class="pre">yet</span> <span class="pre">done',</span> <span class="pre">'not</span> <span class="pre">yet</span> <span class="pre">merged',</span> <span class="pre">'not</span> <span class="pre">yet</span> <span class="pre">posted',</span> <span class="pre">'open</span> <span class="pre">question',</span> <span class="pre">'unresolved',</span> <span class="pre">'i</span> <span class="pre">could</span> <span class="pre">not',</span> <span class="pre">&quot;i</span> <span class="pre">couldn't&quot;,</span> <span class="pre">'was</span> <span class="pre">unable</span> <span class="pre">to',</span> <span class="pre">'were</span> <span class="pre">unable</span> <span class="pre">to',</span> <span class="pre">'did</span> <span class="pre">not</span> <span class="pre">finish',</span> <span class="pre">&quot;didn't</span> <span class="pre">finish&quot;,</span> <span class="pre">'needs</span> <span class="pre">a</span> <span class="pre">human',</span> <span class="pre">'needs</span> <span class="pre">you',</span> <span class="pre">'still</span> <span class="pre">needs',</span> <span class="pre">&quot;you'll</span> <span class="pre">need</span> <span class="pre">to&quot;,</span> <span class="pre">'you</span> <span class="pre">will</span> <span class="pre">need</span> <span class="pre">to',</span> <span class="pre">'requires</span> <span class="pre">you</span> <span class="pre">to')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">close_cues</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">('nothing</span> <span class="pre">half-finished',</span> <span class="pre">'nothing</span> <span class="pre">pending',</span> <span class="pre">'nothing</span> <span class="pre">is</span> <span class="pre">pending',</span> <span class="pre">'nothing</span> <span class="pre">left',</span> <span class="pre">'nothing</span> <span class="pre">is</span> <span class="pre">blocking',</span> <span class="pre">'nothing</span> <span class="pre">blocking',</span> <span class="pre">'nothing</span> <span class="pre">to</span> <span class="pre">clean',</span> <span class="pre">'nothing</span> <span class="pre">else</span> <span class="pre">outstanding',</span> <span class="pre">'nothing</span> <span class="pre">outstanding',</span> <span class="pre">'nothing</span> <span class="pre">further',</span> <span class="pre">'no</span> <span class="pre">next</span> <span class="pre">action',</span> <span class="pre">'no</span> <span class="pre">further</span> <span class="pre">action',</span> <span class="pre">'no</span> <span class="pre">action</span> <span class="pre">needed',</span> <span class="pre">'safe</span> <span class="pre">to</span> <span class="pre">close',</span> <span class="pre">'safe</span> <span class="pre">to</span> <span class="pre">exit',</span> <span class="pre">&quot;you're</span> <span class="pre">all</span> <span class="pre">set&quot;,</span> <span class="pre">'you</span> <span class="pre">are</span> <span class="pre">all</span> <span class="pre">set',</span> <span class="pre">'all</span> <span class="pre">done',</span> <span class="pre">'everything</span> <span class="pre">is</span> <span class="pre">done',</span> <span class="pre">'everything</span> <span class="pre">is</span> <span class="pre">green',</span> <span class="pre">'everything</span> <span class="pre">is</span> <span class="pre">verified',</span> <span class="pre">'not</span> <span class="pre">unfinished</span> <span class="pre">business',</span> <span class="pre">'ready</span> <span class="pre">to</span> <span class="pre">close')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1200</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="openloops/base.html#openloops.base.Verdict" title="openloops.base.Verdict"><span class="pre">Verdict</span></a></span></span><a class="reference internal" href="../_modules/openloops/_classify.html#classify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.classify" title="Link to this definition"></a></dt>
+<dd><p>Read a session’s loop state from its own last turn.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">openloops.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Session</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">classify</span><span class="p">(</span><span class="n">Session</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">'s'</span><span class="p">,</span> <span class="n">ended_with_error</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span><span class="o">.</span><span class="n">state</span>
+<span class="go">'open'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">v</span> <span class="o">=</span> <span class="n">classify</span><span class="p">(</span><span class="n">Session</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">'s'</span><span class="p">,</span> <span class="n">last_assistant_text</span><span class="o">=</span><span class="s1">'Blocked on your deploy key.'</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">v</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">cues</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">confidence</span>
+<span class="go">('open', ('blocked on',), 'high')</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.data_dir">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">data_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="../_modules/openloops/store.html#data_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.data_dir" title="Link to this definition"></a></dt>
+<dd><p>The project’s data root. Override with <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_DATA_DIR</span></code>.</p>
+<p>Per-kind subdirectories hang off this; nothing is written directly into it, so a
+later kind of data needs no second migration.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.default_source">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">default_source</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/openloops/store.html#default_source"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.default_source" title="Link to this definition"></a></dt>
+<dd><p>This machine’s label for its digest folder. Override with <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_SOURCE</span></code>.</p>
+<p>A short, filename-safe name. It exists so several machines can sync digests into one
+place without colliding — not to identify anybody, though on a machine whose
+hostname was never changed it may well do; every <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">sync</span></code> prints it, and
+<code class="docutils literal notranslate"><span class="pre">OPENLOOPS_SOURCE</span></code> overrides it.</p>
+<p><strong>It is sticky.</strong> The hostname is a <em>seed</em>, written once to a file under the state
+directory and read thereafter. macOS rewrites the hostname when it joins a network
+where the name collides — appending <code class="docutils literal notranslate"><span class="pre">-2</span></code>, <code class="docutils literal notranslate"><span class="pre">-3</span></code> — and a label that moved would
+fork the store into two complete copies with no dedup and no warning.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.digest_key">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">digest_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/openloops/store.html#digest_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.digest_key" title="Link to this definition"></a></dt>
+<dd><p>The store key for one session’s digest.</p>
+<p>Both segments are validated, not just the state. <code class="docutils literal notranslate"><span class="pre">transcript_source=</span></code> is a seam
+whose documented purpose is “another machine’s synced transcripts”, so a session id
+can come from a listing this process did not produce — and a key containing <code class="docutils literal notranslate"><span class="pre">..</span></code>
+would make a file-backed store write outside its own root while <code class="docutils literal notranslate"><span class="pre">sync</span></code> reported
+success. Validating here means every backend inherits the check.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">digest_key</span><span class="p">(</span><span class="s1">'mac'</span><span class="p">,</span> <span class="s1">'archive'</span><span class="p">,</span> <span class="s1">'s1'</span><span class="p">)</span>
+<span class="go">'mac/archive/s1.md'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">digest_key</span><span class="p">(</span><span class="s1">'mac'</span><span class="p">,</span> <span class="s1">'open'</span><span class="p">,</span> <span class="s1">'../../etc/passwd'</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">    </span><span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">session key must be a single safe path segment, got '../../etc/passwd'</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.digests_store">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">digests_store</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rootdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openloops/store.html#digests_store"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.digests_store" title="Link to this definition"></a></dt>
+<dd><p>The default <code class="docutils literal notranslate"><span class="pre">digests_store</span></code>: markdown files under the data root.</p>
+<p>Any <code class="docutils literal notranslate"><span class="pre">MutableMapping[str,</span> <span class="pre">str]</span></code> works in its place — a plain <code class="docutils literal notranslate"><span class="pre">dict</span></code> for tests,
+a git-synced directory, an S3-backed store. The keys are what carry the layout, so
+a different backend gets the same <code class="docutils literal notranslate"><span class="pre">{source}/{state}/{session}.md</span></code> structure for
+free.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">store</span> <span class="o">=</span> <span class="n">digests_store</span><span class="p">(</span><span class="n">rootdir</span><span class="o">=</span><span class="s1">'/tmp/openloops-doctest-store'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span><span class="p">[</span><span class="s1">'demo/open/s1.md'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'# hi'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">sorted</span><span class="p">(</span><span class="n">store</span><span class="p">)</span>
+<span class="go">['demo/open/s1.md']</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">del</span> <span class="n">store</span><span class="p">[</span><span class="s1">'demo/open/s1.md'</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.ls">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">ls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'open'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digests_store</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openloops/tools.html#ls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.ls" title="Link to this definition"></a></dt>
+<dd><p>The digests in the store, newest last-turn first.</p>
+<p><code class="docutils literal notranslate"><span class="pre">state</span></code> is <code class="docutils literal notranslate"><span class="pre">open</span></code>, <code class="docutils literal notranslate"><span class="pre">archive</span></code> or <code class="docutils literal notranslate"><span class="pre">all</span></code>. <code class="docutils literal notranslate"><span class="pre">source</span></code>, <code class="docutils literal notranslate"><span class="pre">project</span></code> and
+<code class="docutils literal notranslate"><span class="pre">confidence</span></code> narrow by the digest’s own header fields. Each row is that front
+matter plus its key.</p>
+<p><code class="docutils literal notranslate"><span class="pre">confidence='high'</span></code> is the one worth knowing about: most sessions land in <code class="docutils literal notranslate"><span class="pre">open</span></code>,
+and a good few of those are open only because nothing said otherwise. Filtering to
+<code class="docutils literal notranslate"><span class="pre">high</span></code> leaves the ones where the session itself said something.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rows</span> <span class="o">=</span> <span class="n">ls</span><span class="p">(</span><span class="n">digests_store</span><span class="o">=</span><span class="p">{</span><span class="s1">'m/open/s1.md'</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="s1">'---</span><span class="se">\n</span><span class="s1">session: s1</span><span class="se">\n</span><span class="s1">state: open</span><span class="se">\n</span><span class="s1">last_turn: T9</span><span class="se">\n</span><span class="s1">---</span><span class="se">\n</span><span class="s1">'</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">'session'</span><span class="p">],</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">'key'</span><span class="p">]</span>
+<span class="go">('s1', 'm/open/s1.md')</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.make_digest">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">make_digest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="openloops/base.html#openloops.base.Session" title="openloops.base.Session"><span class="pre">Session</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">verdict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="openloops/base.html#openloops.base.Verdict" title="openloops.base.Verdict"><span class="pre">Verdict</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="openloops/base.html#openloops.base.Digest" title="openloops.base.Digest"><span class="pre">Digest</span></a></span></span><a class="reference internal" href="../_modules/openloops/digest.html#make_digest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.make_digest" title="Link to this definition"></a></dt>
+<dd><p>Render, scrub, and key one digest.</p>
+<p>Raises <a class="reference internal" href="openloops/egress.html#openloops.egress.CredentialFound" title="openloops.egress.CredentialFound"><code class="xref py py-class docutils literal notranslate"><span class="pre">CredentialFound</span></code></a> when the rendered text matches a
+credential pattern — deliberately, so the caller skips that session loudly rather
+than writing a secret into a store that may be synced.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">openloops.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Session</span><span class="p">,</span> <span class="n">Verdict</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">make_digest</span><span class="p">(</span><span class="n">Session</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">'s1'</span><span class="p">),</span> <span class="n">Verdict</span><span class="p">(</span><span class="s1">'open'</span><span class="p">,</span> <span class="s1">'why'</span><span class="p">),</span> <span class="n">source</span><span class="o">=</span><span class="s1">'demo'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">key</span>
+<span class="go">'demo/open/s1.md'</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.parse_session">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">parse_session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="openloops/base.html#openloops.base.Session" title="openloops.base.Session"><span class="pre">Session</span></a></span></span><a class="reference internal" href="../_modules/openloops/transcripts.html#parse_session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.parse_session" title="Link to this definition"></a></dt>
+<dd><p>Read one transcript’s records into a <a class="reference internal" href="openloops/base.html#openloops.base.Session" title="openloops.base.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a>.</p>
+<p>Pure: same records in, same session out. Everything it reports is a fact about the
+document — no inference, no judgement, and nothing about running processes.</p>
+<p>Three details are corpus-driven rather than obvious, and getting them wrong
+mislabels a large fraction of real sessions:</p>
+<ul class="simple">
+<li><p><strong>Start and end come from ``min``/``max`` over every timestamp</strong>, not from the
+first and last line. Transcript lines are not written in timestamp order; on real
+data the first line holds the earliest timestamp only about four times in five.</p></li>
+<li><p><strong>The project comes from the *first* record’s ``cwd``.</strong> Four sessions in five
+visit more than one working directory (scratchpads, sibling repos, task dirs), and
+the last or most-frequent one names a different repository about half the time.</p></li>
+<li><p><strong>Branches are a tuple.</strong> A third of sessions touch more than one.</p></li>
+</ul>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">recs</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span> <span class="s2">"sessionId"</span><span class="p">:</span> <span class="s2">"s1"</span><span class="p">,</span> <span class="s2">"cwd"</span><span class="p">:</span> <span class="s2">"/w/proj"</span><span class="p">,</span> <span class="s2">"timestamp"</span><span class="p">:</span> <span class="s2">"T1"</span><span class="p">,</span>
+<span class="gp">... </span>     <span class="s2">"gitBranch"</span><span class="p">:</span> <span class="s2">"main"</span><span class="p">,</span>
+<span class="gp">... </span>     <span class="s2">"message"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"text"</span><span class="p">,</span> <span class="s2">"text"</span><span class="p">:</span> <span class="s2">"do it"</span><span class="p">}]}},</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"assistant"</span><span class="p">,</span> <span class="s2">"sessionId"</span><span class="p">:</span> <span class="s2">"s1"</span><span class="p">,</span> <span class="s2">"timestamp"</span><span class="p">:</span> <span class="s2">"T2"</span><span class="p">,</span>
+<span class="gp">... </span>     <span class="s2">"message"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"assistant"</span><span class="p">,</span> <span class="s2">"model"</span><span class="p">:</span> <span class="s2">"m"</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="s2">"content"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"text"</span><span class="p">,</span> <span class="s2">"text"</span><span class="p">:</span> <span class="s2">"done"</span><span class="p">}]}},</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">parse_session</span><span class="p">(</span><span class="n">recs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">turn_count</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">last_assistant_text</span>
+<span class="go">('s1', 'proj', 1, 'done')</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">started_at</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">ended_at</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">git_branch</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">ended_mid_turn</span>
+<span class="go">('T1', 'T2', 'main', False)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.render">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="openloops/base.html#openloops.base.Session" title="openloops.base.Session"><span class="pre">Session</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">verdict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="openloops/base.html#openloops.base.Verdict" title="openloops.base.Verdict"><span class="pre">Verdict</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/openloops/digest.html#render"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.render" title="Link to this definition"></a></dt>
+<dd><p>The markdown for one digest. Pure, dated, and bounded.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">openloops.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Session</span><span class="p">,</span> <span class="n">Verdict</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">'s1'</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="s1">'proj'</span><span class="p">,</span> <span class="n">started_at</span><span class="o">=</span><span class="s1">'T0'</span><span class="p">,</span> <span class="n">last_turn_at</span><span class="o">=</span><span class="s1">'T1'</span><span class="p">,</span>
+<span class="gp">... </span>            <span class="n">last_assistant_text</span><span class="o">=</span><span class="s1">'Shipped it.'</span><span class="p">,</span> <span class="n">turn_count</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">verdict</span> <span class="o">=</span> <span class="n">Verdict</span><span class="p">(</span><span class="s1">'archive'</span><span class="p">,</span> <span class="s1">'its closing lines declare it finished'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="n">render</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">verdict</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s1">'demo'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">'---'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">'state: archive'</span> <span class="ow">in</span> <span class="n">text</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">render</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">verdict</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s1">'demo'</span><span class="p">)</span> <span class="o">==</span> <span class="n">text</span>     <span class="c1"># pure: same in, same out</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.retained">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">retained</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sessions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="openloops/base.html#openloops.base.Session" title="openloops.base.Session"><span class="pre">Session</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openloops/_sync.html#retained"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.retained" title="Link to this definition"></a></dt>
+<dd><p>Digest keys whose session no longer has a transcript — the retention surplus.</p>
+<p>These are what makes openloops a retention device rather than a view: Claude Code
+garbage-collects transcripts, and a digest outlives the thing it was derived from.
+<a class="reference internal" href="#openloops.sync" title="openloops.sync"><code class="xref py py-func docutils literal notranslate"><span class="pre">sync()</span></code></a> never removes them, and they are the one part of the store that a
+from-scratch rebuild does not reproduce.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">retained</span><span class="p">({</span><span class="s1">'m/open/a.md'</span><span class="p">:</span> <span class="s1">''</span><span class="p">,</span> <span class="s1">'m/open/b.md'</span><span class="p">:</span> <span class="s1">''</span><span class="p">},</span> <span class="p">{</span><span class="s1">'a'</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
+<span class="go">['m/open/b.md']</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.scrub">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">scrub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">aliases</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/openloops/egress.html#scrub"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.scrub" title="Link to this definition"></a></dt>
+<dd><p>Rewrite paths and raise on credentials. The only way text leaves openloops.</p>
+<p><code class="docutils literal notranslate"><span class="pre">where</span></code> is a caller-supplied label (a session id, a file name) carried into the
+exception so a failed run can say <em>which</em> input tripped, without quoting it.</p>
+<p>The path check runs on the <strong>output</strong>, not the input, because <code class="docutils literal notranslate"><span class="pre">aliases</span></code> is
+caller-supplied: a rewrite can in principle produce a home path as easily as remove
+one, and a postcondition that is only true of benign inputs is not a postcondition.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">scrub</span><span class="p">(</span><span class="s2">"built /nowhere/proj/x"</span><span class="p">,</span> <span class="n">aliases</span><span class="o">=</span><span class="p">{</span><span class="s2">"/nowhere/proj"</span><span class="p">:</span> <span class="s2">"$PROJ"</span><span class="p">})</span>
+<span class="go">'built $PROJ/x'</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.show">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digests_store</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openloops/tools.html#show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.show" title="Link to this definition"></a></dt>
+<dd><p>One digest in full, found by session id or by a unique prefix of one.</p>
+<p>An exact id always wins over a prefix, so a session whose id happens to be a prefix
+of another stays reachable. <code class="docutils literal notranslate"><span class="pre">source</span></code> narrows a store that several machines write
+into, where the same session can legitimately appear more than once.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">store</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'m/open/abcdef.md'</span><span class="p">:</span> <span class="s1">'---</span><span class="se">\n</span><span class="s1">session: abcdef</span><span class="se">\n</span><span class="s1">---</span><span class="se">\n</span><span class="s1">body'</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">show</span><span class="p">(</span><span class="s1">'abc'</span><span class="p">,</span> <span class="n">digests_store</span><span class="o">=</span><span class="n">store</span><span class="p">)[</span><span class="s1">'key'</span><span class="p">]</span>
+<span class="go">'m/open/abcdef.md'</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.state_dir">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">state_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="../_modules/openloops/store.html#state_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.state_dir" title="Link to this definition"></a></dt>
+<dd><p>Where per-machine caches and job logs go. Override with <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_STATE_DIR</span></code>.</p>
+<p>Deliberately not under <a class="reference internal" href="#openloops.data_dir" title="openloops.data_dir"><code class="xref py py-func docutils literal notranslate"><span class="pre">data_dir()</span></code></a>: everything here is disposable, and keeping
+it elsewhere means “clear the cache” can never be mistyped into “delete the digests”.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.status">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">since_days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digests_store</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transcript_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="openloops/base.html#openloops.base.Session" title="openloops.base.Session"><span class="pre">Session</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openloops/tools.html#status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.status" title="Link to this definition"></a></dt>
+<dd><p>Where everything is, how much of it there is, and how stale the cache is.</p>
+<p>Reports the cache’s age because a read served from a cache that nothing has
+refreshed is the failure openloops is built to avoid — a periodic job that died
+leaves a confident, months-old answer behind, and the only defence is saying how
+old the answer is.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.sync">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">sync</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">transcript_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="openloops/base.html#openloops.base.Session" title="openloops.base.Session"><span class="pre">Session</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digests_store</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">since_days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openloops/_sync.html#sync"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.sync" title="Link to this definition"></a></dt>
+<dd><p>Bring the digest store up to date with the sessions, and say what changed.</p>
+<p><code class="docutils literal notranslate"><span class="pre">force</span></code> ignores the cache and re-derives everything; the result must be identical,
+which is what makes it safe to suggest when someone suspects a stale digest.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">openloops.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">STATES</span><span class="p">,</span> <span class="n">Session</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sessions</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'s1'</span><span class="p">:</span> <span class="n">Session</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">'s1'</span><span class="p">,</span>
+<span class="gp">... </span>                              <span class="n">last_assistant_text</span><span class="o">=</span><span class="s1">'Shipped it. Nothing is pending.'</span><span class="p">)}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">sync</span><span class="p">(</span><span class="n">transcript_source</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span> <span class="n">digests_store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s1">'demo'</span><span class="p">,</span>
+<span class="gp">... </span>         <span class="n">state_dir</span><span class="o">=</span><span class="s1">'/tmp/openloops-doctest-state'</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="p">[</span><span class="s1">'written'</span><span class="p">],</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">store</span><span class="p">)</span>
+<span class="go">(1, ['demo/archive/s1.md'])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sync</span><span class="p">(</span><span class="n">transcript_source</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span> <span class="n">digests_store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s1">'demo'</span><span class="p">,</span>
+<span class="gp">... </span>     <span class="n">state_dir</span><span class="o">=</span><span class="s1">'/tmp/openloops-doctest-state'</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="s1">'written'</span><span class="p">]</span>
+<span class="go">0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Welcome to openloops’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="openloops/__main__.html" class="btn btn-neutral float-right" title="openloops.__main__" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

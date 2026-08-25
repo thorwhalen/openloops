@@ -1,0 +1,361 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openloops._sync &mdash; openloops 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            openloops
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops.html">openloops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/__main__.html">openloops.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_classify.html">openloops._classify</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_sync.html">openloops._sync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/digest.html">openloops.digest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/egress.html">openloops.egress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/store.html">openloops.store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/tools.html">openloops.tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/transcripts.html">openloops.transcripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">openloops</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">openloops._sync</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openloops._sync</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""The incremental pass: read what changed, write the digests, report what happened.</span>
+
+<span class="sd">One function, :func:`sync`, and the two seams the release is built around are its two</span>
+<span class="sd">keyword arguments. ``transcript_source=`` decides where sessions are read from and</span>
+<span class="sd">``digests_store=`` decides where digests are written; both default to something that</span>
+<span class="sd">works on a fresh machine with no configuration, no credentials and no network.</span>
+
+<span class="sd">Change detection is mtime-gated, per ADR-010. A transcript whose revision token matches</span>
+<span class="sd">the cached one is not re-read. That misses a rewrite that preserves mtime and fires on</span>
+<span class="sd">a touch that changes nothing, and both are accepted: the alternative is re-deriving</span>
+<span class="sd">several thousand digests every tick to protect against a case that does not arise.</span>
+
+<span class="sd">Two properties this module has to preserve, because tests assert them:</span>
+
+<span class="sd">- **A digest is derived, never authored.** Deleting the store and the cache and syncing</span>
+<span class="sd">  again reproduces every digest byte-for-byte, for every session whose transcript still</span>
+<span class="sd">  exists. Digests whose transcripts have since been garbage-collected are *retained*</span>
+<span class="sd">  rather than regenerated — that is the point of the tool, and :func:`sync` never</span>
+<span class="sd">  deletes one.</span>
+<span class="sd">- **Nothing is written unscrubbed.** A session whose digest matches a credential</span>
+<span class="sd">  pattern is skipped, reported, and left out of the cache so the next run tries again.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">MutableMapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">STATES</span><span class="p">,</span> <span class="n">Session</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops._classify</span><span class="w"> </span><span class="kn">import</span> <span class="n">classify</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.digest</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_digest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.egress</span><span class="w"> </span><span class="kn">import</span> <span class="n">CredentialFound</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.store</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">default_source</span><span class="p">,</span>
+    <span class="n">digest_key</span><span class="p">,</span>
+    <span class="n">digests_store</span> <span class="k">as</span> <span class="n">default_digests_store</span><span class="p">,</span>
+    <span class="n">load_sync_state</span><span class="p">,</span>
+    <span class="n">other_state</span><span class="p">,</span>
+    <span class="n">parse_digest_key</span><span class="p">,</span>
+    <span class="n">save_sync_state</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.transcripts</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClaudeCodeTranscripts</span><span class="p">,</span> <span class="n">Revisioned</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"DIGEST_SCHEMA"</span><span class="p">,</span> <span class="s2">"sync"</span><span class="p">,</span> <span class="s2">"sync_report_lines"</span><span class="p">]</span>
+
+<span class="c1">#: Bumped whenever the rendered digest could differ for an unchanged transcript — a new</span>
+<span class="c1">#: front-matter field, a changed section, a widened cue table. It is folded into the</span>
+<span class="c1">#: cache value so the next tick re-derives instead of leaving every existing digest</span>
+<span class="c1">#: frozen at bytes an older version produced.</span>
+<span class="n">DIGEST_SCHEMA</span> <span class="o">=</span> <span class="s2">"1"</span>
+
+
+<div class="viewcode-block" id="sync">
+<a class="viewcode-back" href="../../module_docs/openloops/_sync.html#openloops.sync">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sync</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">transcript_source</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Session</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">digests_store</span><span class="p">:</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">since_days</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">state_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Bring the digest store up to date with the sessions, and say what changed.</span>
+
+<span class="sd">    ``force`` ignores the cache and re-derives everything; the result must be identical,</span>
+<span class="sd">    which is what makes it safe to suggest when someone suspects a stale digest.</span>
+
+<span class="sd">    &gt;&gt;&gt; from openloops.base import STATES, Session</span>
+<span class="sd">    &gt;&gt;&gt; sessions = {'s1': Session(key='s1',</span>
+<span class="sd">    ...                               last_assistant_text='Shipped it. Nothing is pending.')}</span>
+<span class="sd">    &gt;&gt;&gt; store = {}</span>
+<span class="sd">    &gt;&gt;&gt; r = sync(transcript_source=sessions, digests_store=store, source='demo',</span>
+<span class="sd">    ...          state_dir='/tmp/openloops-doctest-state', force=True)</span>
+<span class="sd">    &gt;&gt;&gt; r['written'], sorted(store)</span>
+<span class="sd">    (1, ['demo/archive/s1.md'])</span>
+<span class="sd">    &gt;&gt;&gt; sync(transcript_source=sessions, digests_store=store, source='demo',</span>
+<span class="sd">    ...      state_dir='/tmp/openloops-doctest-state', force=True)['written']</span>
+<span class="sd">    0</span>
+<span class="sd">    """</span>
+    <span class="n">sessions</span> <span class="o">=</span> <span class="n">Revisioned</span><span class="p">(</span>
+        <span class="n">ClaudeCodeTranscripts</span><span class="p">(</span><span class="n">since_days</span><span class="o">=</span><span class="n">since_days</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">transcript_source</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="n">transcript_source</span>
+    <span class="p">)</span>
+    <span class="n">store</span> <span class="o">=</span> <span class="n">default_digests_store</span><span class="p">()</span> <span class="k">if</span> <span class="n">digests_store</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">digests_store</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">default_source</span><span class="p">()</span> <span class="k">if</span> <span class="n">source</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">source</span>
+
+    <span class="n">cache</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">force</span> <span class="k">else</span> <span class="n">load_sync_state</span><span class="p">(</span><span class="n">state_dir</span><span class="p">)</span>
+    <span class="n">updated</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cache</span><span class="p">)</span>
+    <span class="n">scanned</span> <span class="o">=</span> <span class="n">written</span> <span class="o">=</span> <span class="n">unchanged</span> <span class="o">=</span> <span class="n">moved</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">errors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
+        <span class="n">scanned</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">revision</span> <span class="o">=</span> <span class="n">_stamp</span><span class="p">(</span><span class="n">sessions</span><span class="o">.</span><span class="n">revision</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="c1"># The transcript went away between listing and reading. One session's</span>
+            <span class="c1"># problem must not throw away the whole run — including the cache, which is</span>
+            <span class="c1"># only written at the end.</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"session"</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span> <span class="s2">"problem"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"unreadable: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">})</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">force</span> <span class="ow">and</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="n">revision</span> <span class="ow">and</span> <span class="n">_has_digest</span><span class="p">(</span><span class="n">store</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+            <span class="n">unchanged</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">continue</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">session</span> <span class="o">=</span> <span class="n">sessions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"session"</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span> <span class="s2">"problem"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"unreadable: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">})</span>
+            <span class="k">continue</span>
+        <span class="n">verdict</span> <span class="o">=</span> <span class="n">classify</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">digest</span> <span class="o">=</span> <span class="n">make_digest</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">verdict</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">CredentialFound</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="c1"># The previous digest of this session must not stand: the transcript still</span>
+            <span class="c1"># exists, so the retention argument does not apply, and leaving it would let</span>
+            <span class="c1"># `ol ls` serve a stale snapshot with no marker — the exact failure this</span>
+            <span class="c1"># package exists to prevent, produced by its own error path.</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"session"</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span> <span class="s2">"problem"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)})</span>
+            <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">STATES</span><span class="p">:</span>
+                <span class="n">store</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">digest_key</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">updated</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">_is_empty</span><span class="p">(</span><span class="n">session</span><span class="p">)</span> <span class="ow">and</span> <span class="n">_has_digest</span><span class="p">(</span><span class="n">store</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+            <span class="c1"># A transcript that read as nothing — truncated, mid-rewrite, or unreadable —</span>
+            <span class="c1"># yields a content-free digest, and writing it over a good one destroys the</span>
+            <span class="c1"># only surviving record of that session. For a retention device that is the</span>
+            <span class="c1"># worst available failure, so the existing digest stands and the run says so.</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">"session"</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span> <span class="s2">"problem"</span><span class="p">:</span> <span class="s2">"read as empty; kept the existing digest"</span><span class="p">}</span>
+            <span class="p">)</span>
+            <span class="n">updated</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="n">stale</span> <span class="o">=</span> <span class="n">digest_key</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">other_state</span><span class="p">(</span><span class="n">verdict</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">stale</span> <span class="ow">in</span> <span class="n">store</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">store</span><span class="p">[</span><span class="n">stale</span><span class="p">]</span>
+            <span class="n">moved</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">store</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">digest</span><span class="o">.</span><span class="n">key</span><span class="p">)</span> <span class="o">!=</span> <span class="n">digest</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+            <span class="n">store</span><span class="p">[</span><span class="n">digest</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">digest</span><span class="o">.</span><span class="n">text</span>
+            <span class="n">written</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">updated</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">revision</span>
+
+    <span class="n">save_sync_state</span><span class="p">(</span><span class="n">updated</span><span class="p">,</span> <span class="n">state_dir</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"source"</span><span class="p">:</span> <span class="n">source</span><span class="p">,</span>
+        <span class="s2">"scanned"</span><span class="p">:</span> <span class="n">scanned</span><span class="p">,</span>
+        <span class="s2">"written"</span><span class="p">:</span> <span class="n">written</span><span class="p">,</span>
+        <span class="s2">"unchanged"</span><span class="p">:</span> <span class="n">unchanged</span><span class="p">,</span>
+        <span class="s2">"moved"</span><span class="p">:</span> <span class="n">moved</span><span class="p">,</span>
+        <span class="s2">"errors"</span><span class="p">:</span> <span class="n">errors</span><span class="p">,</span>
+        <span class="s2">"digests"</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">store</span><span class="p">),</span>
+    <span class="p">}</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_empty</span><span class="p">(</span><span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether a session carried nothing worth keeping.</span>
+
+<span class="sd">    Not the same as "a short session": a real one has at least a turn, a closing text,</span>
+<span class="sd">    or a recap. Zero of all three means the read produced nothing, whatever the reason.</span>
+
+<span class="sd">    &gt;&gt;&gt; from openloops.base import Session</span>
+<span class="sd">    &gt;&gt;&gt; _is_empty(Session(key='s')), _is_empty(Session(key='s', turn_count=1))</span>
+<span class="sd">    (True, False)</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">turn_count</span>
+        <span class="ow">or</span> <span class="n">session</span><span class="o">.</span><span class="n">last_assistant_text</span>
+        <span class="ow">or</span> <span class="n">session</span><span class="o">.</span><span class="n">recap</span>
+        <span class="ow">or</span> <span class="n">session</span><span class="o">.</span><span class="n">compaction</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_stamp</span><span class="p">(</span><span class="n">revision</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A cache value: the transcript's revision *and* the schema that rendered it."""</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">revision</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">DIGEST_SCHEMA</span><span class="si">}</span><span class="s2">"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_has_digest</span><span class="p">(</span><span class="n">store</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether either loop state already holds a digest for this session."""</span>
+    <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">digest_key</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="ow">in</span> <span class="n">store</span> <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"open"</span><span class="p">,</span> <span class="s2">"archive"</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="retained">
+<a class="viewcode-back" href="../../module_docs/openloops.html#openloops.retained">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">retained</span><span class="p">(</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">sessions</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Session</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Digest keys whose session no longer has a transcript — the retention surplus.</span>
+
+<span class="sd">    These are what makes openloops a retention device rather than a view: Claude Code</span>
+<span class="sd">    garbage-collects transcripts, and a digest outlives the thing it was derived from.</span>
+<span class="sd">    :func:`sync` never removes them, and they are the one part of the store that a</span>
+<span class="sd">    from-scratch rebuild does not reproduce.</span>
+
+<span class="sd">    &gt;&gt;&gt; retained({'m/open/a.md': '', 'm/open/b.md': ''}, {'a': None})</span>
+<span class="sd">    ['m/open/b.md']</span>
+<span class="sd">    """</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">store</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">digest_source</span><span class="p">,</span> <span class="n">_state</span><span class="p">,</span> <span class="n">session_key</span> <span class="o">=</span> <span class="n">parse_digest_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">digest_source</span> <span class="o">!=</span> <span class="n">source</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">session_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<div class="viewcode-block" id="sync_report_lines">
+<a class="viewcode-back" href="../../module_docs/openloops/_sync.html#openloops.sync_report_lines">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sync_report_lines</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Human-readable lines for a :func:`sync` result, errors last and unmissable.</span>
+
+<span class="sd">    &gt;&gt;&gt; sync_report_lines({'source': 'mac', 'scanned': 3, 'written': 1, 'unchanged': 2,</span>
+<span class="sd">    ...                    'moved': 0, 'digests': 9, 'errors': []})</span>
+<span class="sd">    ['mac: 3 sessions scanned, 1 digest written, 2 unchanged, 0 moved; 9 digests in store.']</span>
+<span class="sd">    """</span>
+    <span class="n">written</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"written"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'source'</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'scanned'</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> sessions scanned, "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">written</span><span class="si">}</span><span class="s2"> digest</span><span class="si">{</span><span class="s1">''</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">written</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'s'</span><span class="si">}</span><span class="s2"> written, "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'unchanged'</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> unchanged, </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'moved'</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> moved; "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'digests'</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> digests in store."</span>
+    <span class="p">]</span>
+    <span class="n">errors</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"errors"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">errors</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span><span class="si">}</span><span class="s2"> session(s) SKIPPED because their digest matched a "</span>
+            <span class="s2">"credential pattern. Nothing was written for them, and nothing was "</span>
+            <span class="s2">"redacted — inspect the transcript before syncing again:"</span>
+        <span class="p">)</span>
+        <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"  - </span><span class="si">{</span><span class="n">e</span><span class="p">[</span><span class="s1">'session'</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="p">[</span><span class="s1">'problem'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">lines</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

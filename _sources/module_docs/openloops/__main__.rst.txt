@@ -1,0 +1,4 @@
+openloops.__main__
+==================
+.. automodule:: openloops.__main__
+   :members:

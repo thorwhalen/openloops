@@ -1,0 +1,189 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openloops._sync &mdash; openloops 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="openloops.base" href="base.html" />
+    <link rel="prev" title="openloops._classify" href="_classify.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            openloops
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../openloops.html">openloops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="__main__.html">openloops.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_classify.html">openloops._classify</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">openloops._sync</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#openloops._sync.DIGEST_SCHEMA"><code class="docutils literal notranslate"><span class="pre">DIGEST_SCHEMA</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops._sync.sync"><code class="docutils literal notranslate"><span class="pre">sync()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops._sync.sync_report_lines"><code class="docutils literal notranslate"><span class="pre">sync_report_lines()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="digest.html">openloops.digest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="egress.html">openloops.egress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="store.html">openloops.store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">openloops.tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transcripts.html">openloops.transcripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">openloops</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">openloops._sync</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/openloops/_sync.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-openloops._sync">
+<span id="openloops-sync"></span><h1>openloops._sync<a class="headerlink" href="#module-openloops._sync" title="Link to this heading"></a></h1>
+<p>The incremental pass: read what changed, write the digests, report what happened.</p>
+<p>One function, <a class="reference internal" href="#openloops._sync.sync" title="openloops._sync.sync"><code class="xref py py-func docutils literal notranslate"><span class="pre">sync()</span></code></a>, and the two seams the release is built around are its two
+keyword arguments. <code class="docutils literal notranslate"><span class="pre">transcript_source=</span></code> decides where sessions are read from and
+<code class="docutils literal notranslate"><span class="pre">digests_store=</span></code> decides where digests are written; both default to something that
+works on a fresh machine with no configuration, no credentials and no network.</p>
+<p>Change detection is mtime-gated, per ADR-010. A transcript whose revision token matches
+the cached one is not re-read. That misses a rewrite that preserves mtime and fires on
+a touch that changes nothing, and both are accepted: the alternative is re-deriving
+several thousand digests every tick to protect against a case that does not arise.</p>
+<p>Two properties this module has to preserve, because tests assert them:</p>
+<ul class="simple">
+<li><p><strong>A digest is derived, never authored.</strong> Deleting the store and the cache and syncing
+again reproduces every digest byte-for-byte, for every session whose transcript still
+exists. Digests whose transcripts have since been garbage-collected are <em>retained</em>
+rather than regenerated — that is the point of the tool, and <a class="reference internal" href="#openloops._sync.sync" title="openloops._sync.sync"><code class="xref py py-func docutils literal notranslate"><span class="pre">sync()</span></code></a> never
+deletes one.</p></li>
+<li><p><strong>Nothing is written unscrubbed.</strong> A session whose digest matches a credential
+pattern is skipped, reported, and left out of the cache so the next run tries again.</p></li>
+</ul>
+<dl class="py data">
+<dt class="sig sig-object py" id="openloops._sync.DIGEST_SCHEMA">
+<span class="sig-prename descclassname"><span class="pre">openloops._sync.</span></span><span class="sig-name descname"><span class="pre">DIGEST_SCHEMA</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'1'</span></span><a class="headerlink" href="#openloops._sync.DIGEST_SCHEMA" title="Link to this definition"></a></dt>
+<dd><p>Bumped whenever the rendered digest could differ for an unchanged transcript — a new
+front-matter field, a changed section, a widened cue table. It is folded into the
+cache value so the next tick re-derives instead of leaving every existing digest
+frozen at bytes an older version produced.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops._sync.sync">
+<span class="sig-prename descclassname"><span class="pre">openloops._sync.</span></span><span class="sig-name descname"><span class="pre">sync</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">transcript_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="base.html#openloops.base.Session" title="openloops.base.Session"><span class="pre">Session</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digests_store</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">since_days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/openloops/_sync.html#sync"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops._sync.sync" title="Link to this definition"></a></dt>
+<dd><p>Bring the digest store up to date with the sessions, and say what changed.</p>
+<p><code class="docutils literal notranslate"><span class="pre">force</span></code> ignores the cache and re-derives everything; the result must be identical,
+which is what makes it safe to suggest when someone suspects a stale digest.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">openloops.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">STATES</span><span class="p">,</span> <span class="n">Session</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sessions</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'s1'</span><span class="p">:</span> <span class="n">Session</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">'s1'</span><span class="p">,</span>
+<span class="gp">... </span>                              <span class="n">last_assistant_text</span><span class="o">=</span><span class="s1">'Shipped it. Nothing is pending.'</span><span class="p">)}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">sync</span><span class="p">(</span><span class="n">transcript_source</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span> <span class="n">digests_store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s1">'demo'</span><span class="p">,</span>
+<span class="gp">... </span>         <span class="n">state_dir</span><span class="o">=</span><span class="s1">'/tmp/openloops-doctest-state'</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="p">[</span><span class="s1">'written'</span><span class="p">],</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">store</span><span class="p">)</span>
+<span class="go">(1, ['demo/archive/s1.md'])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sync</span><span class="p">(</span><span class="n">transcript_source</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span> <span class="n">digests_store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s1">'demo'</span><span class="p">,</span>
+<span class="gp">... </span>     <span class="n">state_dir</span><span class="o">=</span><span class="s1">'/tmp/openloops-doctest-state'</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="s1">'written'</span><span class="p">]</span>
+<span class="go">0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops._sync.sync_report_lines">
+<span class="sig-prename descclassname"><span class="pre">openloops._sync.</span></span><span class="sig-name descname"><span class="pre">sync_report_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/openloops/_sync.html#sync_report_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops._sync.sync_report_lines" title="Link to this definition"></a></dt>
+<dd><p>Human-readable lines for a <a class="reference internal" href="#openloops._sync.sync" title="openloops._sync.sync"><code class="xref py py-func docutils literal notranslate"><span class="pre">sync()</span></code></a> result, errors last and unmissable.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sync_report_lines</span><span class="p">({</span><span class="s1">'source'</span><span class="p">:</span> <span class="s1">'mac'</span><span class="p">,</span> <span class="s1">'scanned'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">'written'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'unchanged'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+<span class="gp">... </span>                   <span class="s1">'moved'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'digests'</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span> <span class="s1">'errors'</span><span class="p">:</span> <span class="p">[]})</span>
+<span class="go">['mac: 3 sessions scanned, 1 digest written, 2 unchanged, 0 moved; 9 digests in store.']</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="_classify.html" class="btn btn-neutral float-left" title="openloops._classify" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="base.html" class="btn btn-neutral float-right" title="openloops.base" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,307 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openloops.base &mdash; openloops 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            openloops
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops.html">openloops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/__main__.html">openloops.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_classify.html">openloops._classify</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_sync.html">openloops._sync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/digest.html">openloops.digest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/egress.html">openloops.egress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/store.html">openloops.store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/tools.html">openloops.tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/transcripts.html">openloops.transcripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">openloops</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">openloops.base</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openloops.base</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Data structures shared across openloops: what a session is, and what a digest is.</span>
+
+<span class="sd">Nothing here does I/O and nothing here makes a judgement. :mod:`openloops.transcripts`</span>
+<span class="sd">reads sessions, :mod:`openloops._classify` judges them, :mod:`openloops.digest` renders</span>
+<span class="sd">them, and all three speak in the types defined here.</span>
+
+<span class="sd">The types are deliberately flat and JSON-shaped. A session read from Claude Code's</span>
+<span class="sd">on-disk state and a session supplied by some other reader are the same object to the</span>
+<span class="sd">rest of the package — that is what makes ``transcript_source=`` a one-argument swap.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">asdict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="c1">#: Loop state: the session's own last word left something for the human.</span>
+<span class="n">OPEN</span> <span class="o">=</span> <span class="s2">"open"</span>
+<span class="c1">#: Loop state: the session's own last word closed out.</span>
+<span class="n">ARCHIVE</span> <span class="o">=</span> <span class="s2">"archive"</span>
+<span class="c1">#: The two loop states, in the order they are shown.</span>
+<span class="n">STATES</span> <span class="o">=</span> <span class="p">(</span><span class="n">OPEN</span><span class="p">,</span> <span class="n">ARCHIVE</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Locator">
+<a class="viewcode-back" href="../../module_docs/openloops/base.html#openloops.Locator">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Locator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A typed, human-readable pointer to something outside the digest.</span>
+
+<span class="sd">    The exportable half of ADR-015's evidence split: a short typed reference that</span>
+<span class="sd">    another tool (or a person) can resolve, never a content hash and never a byte</span>
+<span class="sd">    offset into a file that is garbage-collected after thirty days.</span>
+
+<span class="sd">    &gt;&gt;&gt; Locator("pr", url="https://github.com/o/r/pull/1").as_dict()["type"]</span>
+<span class="sd">    'pr'</span>
+<span class="sd">    """</span>
+
+    <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+<div class="viewcode-block" id="Locator.as_dict">
+<a class="viewcode-back" href="../../module_docs/openloops/base.html#openloops.Locator.as_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""JSON-ready form."""</span>
+        <span class="k">return</span> <span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Session">
+<a class="viewcode-back" href="../../module_docs/openloops/base.html#openloops.Session">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Session</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""What one Claude Code session's persisted state says, parsed but not judged.</span>
+
+<span class="sd">    Every field is a *fact read from the transcript*, never an inference about the</span>
+<span class="sd">    world. ``last_assistant_text`` is what the session said last; it is not a claim</span>
+<span class="sd">    that the thing it describes is still true.</span>
+
+<span class="sd">    ``key`` is the session id. It is the only identifier openloops uses, and per</span>
+<span class="sd">    ADR-014 nothing in the model hangs off it: a digest is a view keyed by session,</span>
+<span class="sd">    not a record owned by one.</span>
+<span class="sd">    """</span>
+
+    <span class="n">key</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">ai_title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">cwd</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">project</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">git_branches</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="n">started_at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">ended_at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">last_turn_at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">last_user_prompt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">last_prompt_at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">last_assistant_text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="c1">#: Claude Code's own end-of-turn recap (its ``away_summary`` record) — one to three</span>
+    <span class="c1">#: sentences it wrote itself, usually naming what it thought came next. Reading it</span>
+    <span class="c1">#: is retention, not duplication: it was generated and billed once already, and it</span>
+    <span class="c1">#: disappears with the transcript.</span>
+    <span class="n">recap</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">recap_at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="c1">#: The context-compaction summary, a different and much longer thing than the recap,</span>
+    <span class="c1">#: covering only the part of the session that preceded it.</span>
+    <span class="n">compaction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">compaction_at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">turn_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="c1">#: The transcript's final conversational record is an unanswered human prompt, or an</span>
+    <span class="c1">#: assistant tool call whose result never arrived — i.e. the session stopped mid-turn.</span>
+    <span class="n">ended_mid_turn</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1">#: The last thing the session said is a usage-limit or API-error banner rather than</span>
+    <span class="c1">#: the assistant's own words: it was cut off, not finished.</span>
+    <span class="n">ended_with_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">locators</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Locator</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">git_branch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The branch the session opened on — the one that names it, when several ran.</span>
+
+<span class="sd">        A third of sessions touch more than one branch, so a single value is a summary</span>
+<span class="sd">        rather than a fact; :attr:`git_branches` is what carries the truth.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">git_branches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">git_branches</span> <span class="k">else</span> <span class="s2">""</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">heading</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""What to call this session in prose: its description, else its label."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ai_title</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">"session </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+
+<div class="viewcode-block" id="Session.as_dict">
+<a class="viewcode-back" href="../../module_docs/openloops/base.html#openloops.Session.as_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""JSON-ready form (``asdict`` already flattens the nested locators)."""</span>
+        <span class="k">return</span> <span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Verdict">
+<a class="viewcode-back" href="../../module_docs/openloops/base.html#openloops.Verdict">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Verdict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A loop-state judgement, with the rule that produced it and the cues it saw.</span>
+
+<span class="sd">    ``reason`` and ``cues`` exist so a reader can disagree. A classification whose</span>
+<span class="sd">    grounds are not shown is an assertion, and openloops does not make assertions</span>
+<span class="sd">    about sessions — it reports what they said and why it read them that way.</span>
+<span class="sd">    """</span>
+
+    <span class="n">state</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">cues</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="c1">#: When the text this verdict was read from was written. Usually the closing turn,</span>
+    <span class="c1">#: but the recap rule reads text written later, and a heading dated to the wrong</span>
+    <span class="c1">#: moment is exactly the thing ADR-005 forbids.</span>
+    <span class="n">at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="c1">#: ``"high"`` when a rule actually fired, ``"low"`` when the state is the default</span>
+    <span class="c1">#: and nothing in the transcript supported it. A classifier that hides which of the</span>
+    <span class="c1">#: two it did is claiming knowledge it does not have.</span>
+    <span class="n">confidence</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"high"</span>
+
+<div class="viewcode-block" id="Verdict.as_dict">
+<a class="viewcode-back" href="../../module_docs/openloops/base.html#openloops.Verdict.as_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""JSON-ready form."""</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"state"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span>
+            <span class="s2">"reason"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">reason</span><span class="p">,</span>
+            <span class="s2">"cues"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cues</span><span class="p">),</span>
+            <span class="s2">"at"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">at</span><span class="p">,</span>
+            <span class="s2">"confidence"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence</span><span class="p">,</span>
+        <span class="p">}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Digest">
+<a class="viewcode-back" href="../../module_docs/openloops/base.html#openloops.Digest">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Digest</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One rendered digest: its store key and its markdown text.</span>
+
+<span class="sd">    ``text`` is a pure function of the :class:`Session` it was built from. It carries</span>
+<span class="sd">    no generation timestamp, which is what lets the regeneration test in</span>
+<span class="sd">    ``tests/test_sync.py`` compare bytes rather than fields.</span>
+<span class="sd">    """</span>
+
+    <span class="n">key</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">session_key</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">state</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">verdict</span><span class="p">:</span> <span class="n">Verdict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">Verdict</span><span class="p">(</span><span class="n">ARCHIVE</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Digest.as_dict">
+<a class="viewcode-back" href="../../module_docs/openloops/base.html#openloops.Digest.as_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""JSON-ready form (without the markdown body)."""</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"key"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span>
+            <span class="s2">"session_key"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">session_key</span><span class="p">,</span>
+            <span class="s2">"source"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span>
+            <span class="s2">"state"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span>
+            <span class="s2">"verdict"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">verdict</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span>
+        <span class="p">}</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

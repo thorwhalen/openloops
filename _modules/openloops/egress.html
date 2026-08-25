@@ -1,0 +1,487 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openloops.egress &mdash; openloops 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            openloops
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops.html">openloops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/__main__.html">openloops.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_classify.html">openloops._classify</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_sync.html">openloops._sync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/digest.html">openloops.digest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/egress.html">openloops.egress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/store.html">openloops.store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/tools.html">openloops.tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/transcripts.html">openloops.transcripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">openloops</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">openloops.egress</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openloops.egress</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""The egress choke point: nothing leaves openloops carrying a home path or a secret.</span>
+
+<span class="sd">A digest is derived from a transcript, and transcripts are the highest-entropy secret</span>
+<span class="sd">source on a developer's machine — pasted tokens, ``.env`` contents, tracebacks full of</span>
+<span class="sd">absolute paths. A digest store can be a git-synced private repository, so **a written</span>
+<span class="sd">digest is an export surface**, and the moment to apply that discipline is before the</span>
+<span class="sd">first byte is written rather than before the first push.</span>
+
+<span class="sd">Two rules, and they are deliberately asymmetric:</span>
+
+<span class="sd">- **Paths are rewritten**, never raised on. A path is an identifier, not a secret, and</span>
+<span class="sd">  the tail of it is the part a reader needs. This machine's home becomes ``~``; *any</span>
+<span class="sd">  other* home — a server's root home, a colleague's, a CI runner's — becomes</span>
+<span class="sd">  ``~other``, keeping the tail and dropping the identity.</span>
+<span class="sd">- **Credentials raise.** :func:`scrub` never silently redacts a secret, because a silent</span>
+<span class="sd">  redaction teaches nobody that a secret was there. It raises :class:`CredentialFound`,</span>
+<span class="sd">  the caller skips that one session, and the run reports it — loudly, and without ever</span>
+<span class="sd">  quoting the matched text.</span>
+
+<span class="sd">Two shapes are easy to miss and both were, at first. Claude Code encodes a working</span>
+<span class="sd">directory into a directory name by turning ``/``, ``_`` and ``.`` into ``-``, so a home</span>
+<span class="sd">path appears throughout transcripts in a dashed form — trivially reversible and just</span>
+<span class="sd">as identifying. And a transcript from an ssh session names *that* machine's home,</span>
+<span class="sd">not this one's, so rewriting only ``$HOME`` leaves every foreign home intact. Both forms</span>
+<span class="sd">are handled here, and :func:`scrub` asserts its own postcondition afterwards rather than</span>
+<span class="sd">trusting that it did.</span>
+
+<span class="sd">The same rules apply to openloops' own repository, which is why</span>
+<span class="sd">``tests/test_egress_repo.py`` runs :func:`scan_files` over everything the build ships.</span>
+<span class="sd">One implementation, two configurations.</span>
+
+<span class="sd">&gt;&gt;&gt; scrub("see /nowhere/at/all/x.py", aliases={"/nowhere/at/all": "~/code"})</span>
+<span class="sd">'see ~/code/x.py'</span>
+<span class="sd">&gt;&gt;&gt; scrub("token=" + "ghp_" + "A" * 36)  # doctest: +IGNORE_EXCEPTION_DETAIL</span>
+<span class="sd">Traceback (most recent call last):</span>
+<span class="sd">    ...</span>
+<span class="sd">openloops.egress.CredentialFound: credential-shaped text (github_token) at offset 6</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Mapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"CredentialFound"</span><span class="p">,</span>
+    <span class="s2">"CREDENTIAL_PATTERNS"</span><span class="p">,</span>
+    <span class="s2">"apply_aliases"</span><span class="p">,</span>
+    <span class="s2">"default_aliases"</span><span class="p">,</span>
+    <span class="s2">"find_credentials"</span><span class="p">,</span>
+    <span class="s2">"find_absolute_paths"</span><span class="p">,</span>
+    <span class="s2">"rewrite_paths"</span><span class="p">,</span>
+    <span class="s2">"scan"</span><span class="p">,</span>
+    <span class="s2">"scan_files"</span><span class="p">,</span>
+    <span class="s2">"scrub"</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="CredentialFound">
+<a class="viewcode-back" href="../../module_docs/openloops/egress.html#openloops.CredentialFound">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CredentialFound</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Raised when text about to be written matches a credential pattern.</span>
+
+<span class="sd">    The message names the pattern class and the offset. It never contains the matched</span>
+<span class="sd">    text: an exception that quotes a secret has moved the secret into a log file.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">where</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pattern_name</span> <span class="o">=</span> <span class="n">pattern_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">where</span> <span class="o">=</span> <span class="n">where</span>
+        <span class="n">location</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">" in </span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">where</span> <span class="k">else</span> <span class="s2">""</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"credential-shaped text (</span><span class="si">{</span><span class="n">pattern_name</span><span class="si">}</span><span class="s2">) at offset </span><span class="si">{</span><span class="n">offset</span><span class="si">}{</span><span class="n">location</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_secret_assignment</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">re</span><span class="o">.</span><span class="n">Pattern</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A ``KEY = &lt;long opaque value&gt;`` matcher, quoted or not.</span>
+
+<span class="sd">    Quotes are optional because the shapes that actually appear are unquoted: a pasted</span>
+<span class="sd">    ``.env`` line, an ``export`` in a shell transcript, a ``.pypirc``. The value still</span>
+<span class="sd">    has to look like a secret — sixteen characters or more, no whitespace, and a mix of</span>
+<span class="sd">    letters and digits — so ``password: hunter2`` and ``token: the one we discussed``</span>
+<span class="sd">    do not match.</span>
+<span class="sd">    """</span>
+    <span class="c1"># A leading `GITHUB_` / `MY-` style prefix is part of the name, not a separator, so</span>
+    <span class="c1"># `\btoken\b` alone never matches `GITHUB_TOKEN` — the commonest shape of all.</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">r</span><span class="s2">"(?:[A-Za-z0-9]+[_-])*"</span>
+        <span class="sa">r</span><span class="s2">"(?:api[_-]?key|secret[_-]?\w*|passwd|password|access[_-]?token|"</span>
+        <span class="sa">r</span><span class="s2">"auth[_-]?token|token|credential\w*)"</span>
+    <span class="p">)</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"(?=[^'</span><span class="se">\"</span><span class="s2">\s]*[A-Za-z])(?=[^'</span><span class="se">\"</span><span class="s2">\s]*\d)[A-Za-z0-9+/=_\-.]{16,}"</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rf</span><span class="s2">"(?i)(?&lt;![A-Za-z0-9])</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">\b\s*[:=]\s*['</span><span class="se">\"</span><span class="s2">]?(</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">)['</span><span class="se">\"</span><span class="s2">]?"</span><span class="p">)</span>
+
+
+<span class="c1">#: Named credential patterns, checked in order. Most are well-known vendor prefixes,</span>
+<span class="c1">#: which give near-zero false positives; the assignment rule at the end is the only</span>
+<span class="c1">#: heuristic among them, and the URL rule catches the shape a prefix list cannot.</span>
+<span class="n">CREDENTIAL_PATTERNS</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">Pattern</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="p">(</span>
+        <span class="s2">"aws_access_key_id"</span><span class="p">,</span>
+        <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(?&lt;![A-Z0-9])(?:AKIA|ASIA)[0-9A-Z]</span><span class="si">{16}</span><span class="s2">(?![A-Z0-9])"</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="s2">"aws_secret_access_key"</span><span class="p">,</span>
+        <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(?i)aws_secret_access_key\s*[:=]\s*\S{20,}"</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span><span class="s2">"github_token"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\bgh[pousr]_[A-Za-z0-9]{36,}\b"</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">"github_pat"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\bgithub_pat_[A-Za-z0-9_]{22,}\b"</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">"gitlab_token"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\bglpat-[A-Za-z0-9_\-]{20,}\b"</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">"anthropic_api_key"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\bsk-ant-[A-Za-z0-9_\-]{20,}\b"</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">"openai_api_key"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\bsk-(?!ant-)[A-Za-z0-9_\-]{20,}\b"</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">"stripe_key"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\b[srp]k_(?:live|test)_[A-Za-z0-9]{16,}\b"</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">"npm_token"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\bnpm_[A-Za-z0-9]{30,}\b"</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">"pypi_token"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\bpypi-[A-Za-z0-9_\-]{32,}"</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">"huggingface_token"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\bhf_[A-Za-z0-9]{30,}\b"</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">"sendgrid_key"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\bSG\.[A-Za-z0-9_\-]{20,}\.[A-Za-z0-9_\-]{20,}\b"</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">"slack_token"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\bxox[baprs]-[A-Za-z0-9\-]{10,}\b"</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">"google_api_key"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\bAIza[0-9A-Za-z_\-]</span><span class="si">{35}</span><span class="s2">\b"</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">"google_oauth_refresh_token"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\b1//0[A-Za-z0-9_\-]{20,}\b"</span><span class="p">)),</span>
+    <span class="p">(</span>
+        <span class="s2">"json_web_token"</span><span class="p">,</span>
+        <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\beyJ[A-Za-z0-9_\-]{10,}\.eyJ[A-Za-z0-9_\-]{10,}\."</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span><span class="s2">"private_key_block"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"-----BEGIN [A-Z ]*PRIVATE KEY-----"</span><span class="p">)),</span>
+    <span class="c1"># A password inside a URL's authority: postgres://user:pw@host, https://x:tok@host.</span>
+    <span class="p">(</span>
+        <span class="s2">"url_inline_password"</span><span class="p">,</span>
+        <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\b[a-z][a-z0-9+.\-]*://[^/\s:@]+:[^/\s@]{6,}@"</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span><span class="s2">"secret_assignment"</span><span class="p">,</span> <span class="n">_secret_assignment</span><span class="p">()),</span>
+<span class="p">)</span>
+
+<span class="c1">#: The three home roots, spelled in split literals so that this module — which is</span>
+<span class="c1">#: scanned by the very rule it implements — carries none of them as a matchable string.</span>
+<span class="c1">#: The root account's home has no name segment; the other two take exactly one, and that</span>
+<span class="c1">#: segment is the part that identifies somebody. The anonymous root gets its own,</span>
+<span class="c1">#: looser trailing guard, because it turns up at the end of a sentence — "`~` means</span>
+<span class="c1">#: &lt;root home&gt;." — where a period is punctuation rather than part of the path.</span>
+<span class="n">_ROOTS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"Users"</span><span class="p">,</span> <span class="s2">"home"</span><span class="p">,</span> <span class="s2">"root"</span><span class="p">)</span>
+<span class="n">_NAMED</span><span class="p">,</span> <span class="n">_ANON</span> <span class="o">=</span> <span class="n">_ROOTS</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">_ROOTS</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+<span class="n">_ABS_PATH_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s2">"(?&lt;![\w~])(?:"</span>
+    <span class="o">+</span> <span class="s2">"|"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">rf</span><span class="s2">"/</span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">/[\w.\-]+"</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">_NAMED</span><span class="p">)</span>
+    <span class="o">+</span> <span class="sa">rf</span><span class="s2">"|/</span><span class="si">{</span><span class="n">_ANON</span><span class="si">}</span><span class="s2">(?![\w\-]|\.\w))(?![\w\-])"</span>
+<span class="p">)</span>
+
+<span class="c1">#: The same roots after Claude Code's directory-name encoding, which turns ``/``, ``_``</span>
+<span class="c1">#: and ``.`` into ``-``. Reversible by eye, and every bit as identifying.</span>
+<span class="n">_ENCODED_PATH_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s2">"(?&lt;![\w])(?:"</span>
+    <span class="o">+</span> <span class="s2">"|"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">rf</span><span class="s2">"-</span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">-[A-Za-z0-9]+"</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">_NAMED</span><span class="p">)</span>
+    <span class="o">+</span> <span class="sa">rf</span><span class="s2">"|-</span><span class="si">{</span><span class="n">_ANON</span><span class="si">}</span><span class="s2">(?![\w]))"</span>
+<span class="p">)</span>
+
+<span class="c1">#: What a home that is not this machine's is rewritten to. Keeps the tail, drops the who.</span>
+<span class="n">FOREIGN_HOME</span> <span class="o">=</span> <span class="s2">"~other"</span>
+
+
+<span class="c1">#: Characters Claude Code turns into ``-`` when it encodes a working directory into a</span>
+<span class="c1">#: directory name. The Windows separator and drive colon are included so that a home on</span>
+<span class="c1">#: that platform is covered by the same rule rather than silently not matching.</span>
+<span class="n">_ENCODED_FROM</span> <span class="o">=</span> <span class="s2">"/</span><span class="se">\\</span><span class="s2">_.:"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_encoded</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A path as Claude Code encodes it into a directory name.</span>
+
+<span class="sd">    The Windows example compares rather than prints, because its output would itself be</span>
+<span class="sd">    an encoded home path — and this module is scanned by the rule it implements.</span>
+
+<span class="sd">    &gt;&gt;&gt; _encoded("/a/b_c.d")</span>
+<span class="sd">    '-a-b-c-d'</span>
+<span class="sd">    &gt;&gt;&gt; _encoded("C:" + chr(92) + "Us" + "ers" + chr(92) + "bob") == "C--Us" + "ers-bob"</span>
+<span class="sd">    True</span>
+<span class="sd">    """</span>
+    <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">_ENCODED_FROM</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">ch</span><span class="p">,</span> <span class="s2">"-"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span>
+
+
+<div class="viewcode-block" id="default_aliases">
+<a class="viewcode-back" href="../../module_docs/openloops/egress.html#openloops.default_aliases">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">default_aliases</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The rewrites applied when a caller supplies none: this machine's home → ``~``.</span>
+
+<span class="sd">    Both spellings of it, because the encoded form appears in transcripts as often as</span>
+<span class="sd">    the literal one.</span>
+
+<span class="sd">    &gt;&gt;&gt; sorted(set(default_aliases().values()))</span>
+<span class="sd">    ['~']</span>
+<span class="sd">    """</span>
+    <span class="n">home</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">())</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">home</span><span class="p">:</span> <span class="s2">"~"</span><span class="p">,</span> <span class="n">_encoded</span><span class="p">(</span><span class="n">home</span><span class="p">):</span> <span class="s2">"~"</span><span class="p">}</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_anchored</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">re</span><span class="o">.</span><span class="n">Pattern</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Match *src* only at a path boundary, so a longer sibling name is left alone."""</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">src</span><span class="p">)</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">"(?![\w.\-])"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="apply_aliases">
+<a class="viewcode-back" href="../../module_docs/openloops/egress.html#openloops.apply_aliases">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_aliases</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">aliases</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Replace each alias at a path boundary, longest key first. Nothing else.</span>
+
+<span class="sd">    Longest-first matters: a home directory and a projects directory beneath it are both</span>
+<span class="sd">    aliases, and the more specific one must win. Boundary-anchoring matters for the</span>
+<span class="sd">    opposite reason: a bare ``str.replace`` turns a *longer* sibling name into a</span>
+<span class="sd">    half-rewritten mess — a home of ``…/bob`` would mangle ``…/bobby`` into ``~by``,</span>
+<span class="sd">    corrupting the path and leaving half the other name behind.</span>
+
+<span class="sd">    Separate from :func:`rewrite_paths` because auditing and scrubbing want different</span>
+<span class="sd">    things: an audit must still be able to *see* a foreign home path in order to report</span>
+<span class="sd">    it, which it could not if every caller had already rewritten one away.</span>
+
+<span class="sd">    &gt;&gt;&gt; apply_aliases("/a/b/c and /a", {"/a": "~", "/a/b": "$B"})</span>
+<span class="sd">    '$B/c and ~'</span>
+<span class="sd">    &gt;&gt;&gt; apply_aliases("/a2/x", {"/a": "~"})</span>
+<span class="sd">    '/a2/x'</span>
+<span class="sd">    """</span>
+    <span class="n">aliases</span> <span class="o">=</span> <span class="n">default_aliases</span><span class="p">()</span> <span class="k">if</span> <span class="n">aliases</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">aliases</span>
+    <span class="k">for</span> <span class="n">src</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">aliases</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">_anchored</span><span class="p">(</span><span class="n">src</span><span class="p">)</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">aliases</span><span class="p">[</span><span class="n">src</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"</span><span class="se">\\</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\\\\</span><span class="s2">"</span><span class="p">),</span> <span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">text</span></div>
+
+
+
+<div class="viewcode-block" id="rewrite_paths">
+<a class="viewcode-back" href="../../module_docs/openloops/egress.html#openloops.rewrite_paths">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">rewrite_paths</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">aliases</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Apply the aliases, then rewrite every home path they did not cover.</span>
+
+<span class="sd">    A transcript from an ssh session names *that* machine's home, and a CI traceback</span>
+<span class="sd">    names a runner's; neither is covered by an alias derived from this process. They are</span>
+<span class="sd">    rewritten to :data:`FOREIGN_HOME`, which keeps the tail of the path and drops the</span>
+<span class="sd">    part that identifies somebody.</span>
+
+<span class="sd">    &gt;&gt;&gt; rewrite_paths("/ro" + "ot/py/x", aliases={})</span>
+<span class="sd">    '~other/py/x'</span>
+<span class="sd">    &gt;&gt;&gt; rewrite_paths("-Us" + "ers-someone-proj", aliases={})</span>
+<span class="sd">    '~other-proj'</span>
+<span class="sd">    """</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">apply_aliases</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">aliases</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">_ABS_PATH_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">FOREIGN_HOME</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_ENCODED_PATH_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">FOREIGN_HOME</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="find_credentials">
+<a class="viewcode-back" href="../../module_docs/openloops/egress.html#openloops.find_credentials">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_credentials</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Every credential-pattern hit, as ``(pattern_name, offset)`` pairs.</span>
+
+<span class="sd">    The matched text is never returned — only where it is and what it looked like.</span>
+
+<span class="sd">    &gt;&gt;&gt; find_credentials("nothing to see here")</span>
+<span class="sd">    []</span>
+<span class="sd">    &gt;&gt;&gt; find_credentials("AKIA" + "B" * 16)</span>
+<span class="sd">    [('aws_access_key_id', 0)]</span>
+<span class="sd">    """</span>
+    <span class="n">hits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">CREDENTIAL_PATTERNS</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">pattern</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+            <span class="n">hits</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">()))</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">hits</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="find_absolute_paths">
+<a class="viewcode-back" href="../../module_docs/openloops/egress.html#openloops.find_absolute_paths">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_absolute_paths</span><span class="p">(</span>
+    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">aliases</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Home paths — literal or encoded — still present after rewriting, with offsets.</span>
+
+<span class="sd">    The example builds its path by concatenation and compares rather than printing,</span>
+<span class="sd">    because this module's own source is scanned by the rule it implements: a literal</span>
+<span class="sd">    home-rooted path in a docstring would violate the thing being documented.</span>
+
+<span class="sd">    &gt;&gt;&gt; home = "/Us" + "ers/someone"</span>
+<span class="sd">    &gt;&gt;&gt; [p for p, _ in find_absolute_paths(home + "/x", aliases={})] == [home]</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; find_absolute_paths(home + "/x", aliases={home: "~"})</span>
+<span class="sd">    []</span>
+<span class="sd">    """</span>
+    <span class="n">aliased</span> <span class="o">=</span> <span class="n">apply_aliases</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">aliases</span><span class="p">)</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="p">[(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">())</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">_ABS_PATH_RE</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">aliased</span><span class="p">)]</span>
+    <span class="n">found</span> <span class="o">+=</span> <span class="p">[(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">())</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">_ENCODED_PATH_RE</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">aliased</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">found</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="scrub">
+<a class="viewcode-back" href="../../module_docs/openloops/egress.html#openloops.scrub">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">scrub</span><span class="p">(</span>
+    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">aliases</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">where</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Rewrite paths and raise on credentials. The only way text leaves openloops.</span>
+
+<span class="sd">    ``where`` is a caller-supplied label (a session id, a file name) carried into the</span>
+<span class="sd">    exception so a failed run can say *which* input tripped, without quoting it.</span>
+
+<span class="sd">    The path check runs on the **output**, not the input, because ``aliases`` is</span>
+<span class="sd">    caller-supplied: a rewrite can in principle produce a home path as easily as remove</span>
+<span class="sd">    one, and a postcondition that is only true of benign inputs is not a postcondition.</span>
+
+<span class="sd">    &gt;&gt;&gt; scrub("built /nowhere/proj/x", aliases={"/nowhere/proj": "$PROJ"})</span>
+<span class="sd">    'built $PROJ/x'</span>
+<span class="sd">    """</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">rewrite_paths</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">aliases</span><span class="p">)</span>
+    <span class="n">hits</span> <span class="o">=</span> <span class="n">find_credentials</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">hits</span><span class="p">:</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">hits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">raise</span> <span class="n">CredentialFound</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="n">where</span><span class="p">)</span>
+    <span class="n">leftover</span> <span class="o">=</span> <span class="p">[(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">())</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">_ABS_PATH_RE</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">text</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">leftover</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"egress postcondition failed: a home path survived rewriting at offset "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">leftover</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}{</span><span class="sa">f</span><span class="s1">' in </span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s1">'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">where</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">''</span><span class="si">}</span><span class="s2">. This is a bug in "</span>
+            <span class="s2">"openloops.egress, or an alias whose replacement contains one."</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">text</span></div>
+
+
+
+<div class="viewcode-block" id="scan">
+<a class="viewcode-back" href="../../module_docs/openloops/egress.html#openloops.scan">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">scan</span><span class="p">(</span>
+    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">aliases</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">where</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Report egress violations instead of raising — for auditing many files at once.</span>
+
+<span class="sd">    Returns a list of human-readable problem descriptions, empty when the text is clean.</span>
+<span class="sd">    :func:`scrub` is what production code calls; this is what the repository's own egress</span>
+<span class="sd">    test calls, because a test that stopped at the first violation would take one run per</span>
+<span class="sd">    problem to converge.</span>
+
+<span class="sd">    &gt;&gt;&gt; scan("all clear")</span>
+<span class="sd">    []</span>
+<span class="sd">    """</span>
+    <span class="n">problems</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">offset</span> <span class="ow">in</span> <span class="n">find_credentials</span><span class="p">(</span><span class="n">apply_aliases</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">aliases</span><span class="p">)):</span>
+        <span class="n">problems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">where</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'&lt;text&gt;'</span><span class="si">}</span><span class="s2">: credential-shaped (</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">) at </span><span class="si">{</span><span class="n">offset</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">offset</span> <span class="ow">in</span> <span class="n">find_absolute_paths</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">aliases</span><span class="p">):</span>
+        <span class="n">problems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">where</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'&lt;text&gt;'</span><span class="si">}</span><span class="s2">: absolute home path </span><span class="si">{</span><span class="n">path</span><span class="si">!r}</span><span class="s2"> at </span><span class="si">{</span><span class="n">offset</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">problems</span></div>
+
+
+
+<div class="viewcode-block" id="scan_files">
+<a class="viewcode-back" href="../../module_docs/openloops/egress.html#openloops.scan_files">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">scan_files</span><span class="p">(</span>
+    <span class="n">paths</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">aliases</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Run :func:`scan` over each readable text file, accumulating every problem."""</span>
+    <span class="n">problems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">UnicodeDecodeError</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="n">problems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">scan</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">aliases</span><span class="o">=</span><span class="n">aliases</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">problems</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

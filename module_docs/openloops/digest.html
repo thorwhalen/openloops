@@ -1,0 +1,182 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openloops.digest &mdash; openloops 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="openloops.egress" href="egress.html" />
+    <link rel="prev" title="openloops.base" href="base.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            openloops
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../openloops.html">openloops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="__main__.html">openloops.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_classify.html">openloops._classify</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_sync.html">openloops._sync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html">openloops.base</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">openloops.digest</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.digest.SECTION_LIMITS"><code class="docutils literal notranslate"><span class="pre">SECTION_LIMITS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.digest.make_digest"><code class="docutils literal notranslate"><span class="pre">make_digest()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.digest.render"><code class="docutils literal notranslate"><span class="pre">render()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="egress.html">openloops.egress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="store.html">openloops.store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">openloops.tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transcripts.html">openloops.transcripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">openloops</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">openloops.digest</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/openloops/digest.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-openloops.digest">
+<span id="openloops-digest"></span><h1>openloops.digest<a class="headerlink" href="#module-openloops.digest" title="Link to this heading"></a></h1>
+<p>Rendering one session into one dated markdown digest. No model, no network.</p>
+<p>The whole of the release’s honesty rule lives in this module:</p>
+<p>&gt; <strong>A digest states what the session said, dated — never what is currently true.</strong></p>
+<p>So every heading here carries the timestamp of the thing under it, the loop state is
+phrased as a reading of the transcript rather than a claim about the world, and the
+front matter says <code class="docutils literal notranslate"><span class="pre">verified:</span> <span class="pre">false</span></code> because nothing has been checked against
+anything. ADR-015’s failure mode — a snapshot of local state that was already wrong on
+two of four fields, published and handed to a consumer that acted on it — is what these
+rules exist to prevent, and the way to prevent it is to never make the claim.</p>
+<p><a class="reference internal" href="#openloops.digest.render" title="openloops.digest.render"><code class="xref py py-func docutils literal notranslate"><span class="pre">render()</span></code></a> is a pure function of its <a class="reference internal" href="base.html#openloops.base.Session" title="openloops.base.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a> and
+<a class="reference internal" href="base.html#openloops.base.Verdict" title="openloops.base.Verdict"><code class="xref py py-class docutils literal notranslate"><span class="pre">Verdict</span></code></a>. It stamps no generation time, which is what allows
+<code class="docutils literal notranslate"><span class="pre">tests/test_sync.py</span></code> to delete the entire store, regenerate, and compare bytes.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="openloops.digest.SECTION_LIMITS">
+<span class="sig-prename descclassname"><span class="pre">openloops.digest.</span></span><span class="sig-name descname"><span class="pre">SECTION_LIMITS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'compaction':</span> <span class="pre">3000,</span> <span class="pre">'last_assistant_text':</span> <span class="pre">4000,</span> <span class="pre">'last_user_prompt':</span> <span class="pre">1200,</span> <span class="pre">'recap':</span> <span class="pre">1500}</span></span><a class="headerlink" href="#openloops.digest.SECTION_LIMITS" title="Link to this definition"></a></dt>
+<dd><p>How much of each section is kept. Bounds are deterministic so regeneration is
+byte-stable; they exist because a digest is meant to be read, not archived whole.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.digest.make_digest">
+<span class="sig-prename descclassname"><span class="pre">openloops.digest.</span></span><span class="sig-name descname"><span class="pre">make_digest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base.html#openloops.base.Session" title="openloops.base.Session"><span class="pre">Session</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">verdict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base.html#openloops.base.Verdict" title="openloops.base.Verdict"><span class="pre">Verdict</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="base.html#openloops.base.Digest" title="openloops.base.Digest"><span class="pre">Digest</span></a></span></span><a class="reference internal" href="../../_modules/openloops/digest.html#make_digest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.digest.make_digest" title="Link to this definition"></a></dt>
+<dd><p>Render, scrub, and key one digest.</p>
+<p>Raises <a class="reference internal" href="egress.html#openloops.egress.CredentialFound" title="openloops.egress.CredentialFound"><code class="xref py py-class docutils literal notranslate"><span class="pre">CredentialFound</span></code></a> when the rendered text matches a
+credential pattern — deliberately, so the caller skips that session loudly rather
+than writing a secret into a store that may be synced.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">openloops.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Session</span><span class="p">,</span> <span class="n">Verdict</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">make_digest</span><span class="p">(</span><span class="n">Session</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">'s1'</span><span class="p">),</span> <span class="n">Verdict</span><span class="p">(</span><span class="s1">'open'</span><span class="p">,</span> <span class="s1">'why'</span><span class="p">),</span> <span class="n">source</span><span class="o">=</span><span class="s1">'demo'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">key</span>
+<span class="go">'demo/open/s1.md'</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.digest.render">
+<span class="sig-prename descclassname"><span class="pre">openloops.digest.</span></span><span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base.html#openloops.base.Session" title="openloops.base.Session"><span class="pre">Session</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">verdict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base.html#openloops.base.Verdict" title="openloops.base.Verdict"><span class="pre">Verdict</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/openloops/digest.html#render"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.digest.render" title="Link to this definition"></a></dt>
+<dd><p>The markdown for one digest. Pure, dated, and bounded.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">openloops.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Session</span><span class="p">,</span> <span class="n">Verdict</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">'s1'</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="s1">'proj'</span><span class="p">,</span> <span class="n">started_at</span><span class="o">=</span><span class="s1">'T0'</span><span class="p">,</span> <span class="n">last_turn_at</span><span class="o">=</span><span class="s1">'T1'</span><span class="p">,</span>
+<span class="gp">... </span>            <span class="n">last_assistant_text</span><span class="o">=</span><span class="s1">'Shipped it.'</span><span class="p">,</span> <span class="n">turn_count</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">verdict</span> <span class="o">=</span> <span class="n">Verdict</span><span class="p">(</span><span class="s1">'archive'</span><span class="p">,</span> <span class="s1">'its closing lines declare it finished'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="n">render</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">verdict</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s1">'demo'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">'---'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">'state: archive'</span> <span class="ow">in</span> <span class="n">text</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">render</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">verdict</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s1">'demo'</span><span class="p">)</span> <span class="o">==</span> <span class="n">text</span>     <span class="c1"># pure: same in, same out</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="base.html" class="btn btn-neutral float-left" title="openloops.base" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="egress.html" class="btn btn-neutral float-right" title="openloops.egress" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

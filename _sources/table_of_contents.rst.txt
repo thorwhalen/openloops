@@ -1,0 +1,15 @@
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   module_docs/openloops
+   module_docs/openloops/__main__
+   module_docs/openloops/_classify
+   module_docs/openloops/_sync
+   module_docs/openloops/base
+   module_docs/openloops/digest
+   module_docs/openloops/egress
+   module_docs/openloops/job
+   module_docs/openloops/store
+   module_docs/openloops/tools
+   module_docs/openloops/transcripts

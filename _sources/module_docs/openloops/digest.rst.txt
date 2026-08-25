@@ -1,0 +1,4 @@
+openloops.digest
+================
+.. automodule:: openloops.digest
+   :members:

@@ -1,0 +1,554 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openloops._classify &mdash; openloops 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            openloops
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops.html">openloops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/__main__.html">openloops.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_classify.html">openloops._classify</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_sync.html">openloops._sync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/digest.html">openloops.digest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/egress.html">openloops.egress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/store.html">openloops.store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/tools.html">openloops.tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/transcripts.html">openloops.transcripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">openloops</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">openloops._classify</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openloops._classify</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Reading a session's own last word: did it say it was finished, or not?</span>
+
+<span class="sd">This is the only judgement openloops makes. It is made from the transcript alone — no</span>
+<span class="sd">model, no network, and emphatically **not from whether a process is running**. A folder</span>
+<span class="sd">split by process liveness would be a session dashboard; a folder split by what the</span>
+<span class="sd">session *said* is a record of open loops, which is a different and more durable thing.</span>
+
+<span class="sd">**It is a closed-detector, not a two-way classifier, and the asymmetry is deliberate.**</span>
+<span class="sd">``open`` is the default, and a session reaches ``archive`` only by positively saying it</span>
+<span class="sd">finished. Measured against hand-labelled sessions, the cue rules below never produced a</span>
+<span class="sd">false ``archive`` but caught only about half the genuinely finished ones. That is the</span>
+<span class="sd">right direction to be wrong in: a false ``archive`` buries a loop the tool exists to</span>
+<span class="sd">surface, while a false ``open`` only lengthens a list that is sorted by recency anyway.</span>
+<span class="sd">Absence of evidence that a session finished is not evidence that it did.</span>
+
+<span class="sd">When the closing turn says nothing either way — about a quarter of sessions — the</span>
+<span class="sd">session's own recap gets the last word, but only when it was written *after* that turn.</span>
+<span class="sd">Claude Code writes one per turn and most sessions have one; ignoring evidence that is</span>
+<span class="sd">already on disk in favour of a shrug would be a strange kind of rigour.</span>
+
+<span class="sd">Three things the corpus taught, each of which changed a rule:</span>
+
+<span class="sd">- **Sessions really do mostly end unresolved.** Roughly four in five end with something</span>
+<span class="sd">  put to the human. A split that came out balanced would be a split that was lying.</span>
+<span class="sd">- **Both kinds of cue appear in the same closing paragraph** — "say the word and I'll</span>
+<span class="sd">  remove it. Nothing is blocking; safe to close" is finished, and "you're safe to exit …</span>
+<span class="sd">  the two threads waiting for you are" is not. Rule precedence gets one of those wrong</span>
+<span class="sd">  whichever order you choose, so **the latest cue in the text wins** instead.</span>
+<span class="sd">- **A dangling structured question is not a signal.** Claude Code records a tool result</span>
+<span class="sd">  for its question tool even when the question is dismissed, so "ended waiting for an</span>
+<span class="sd">  answer" is simply not observable that way, and no rule here pretends otherwise.</span>
+
+<span class="sd">&gt;&gt;&gt; from openloops.base import Session</span>
+<span class="sd">&gt;&gt;&gt; classify(Session(key='s', last_assistant_text='All merged. Nothing pending.')).state</span>
+<span class="sd">'archive'</span>
+<span class="sd">&gt;&gt;&gt; classify(Session(key='s', last_assistant_text='Done. Want me to land it too?')).state</span>
+<span class="sd">'open'</span>
+<span class="sd">&gt;&gt;&gt; classify(Session(key='s', last_assistant_text='I refactored the parser.')).confidence</span>
+<span class="sd">'low'</span>
+<span class="sd">&gt;&gt;&gt; classify(Session(key='s', last_assistant_text='I refactored the parser.',</span>
+<span class="sd">...                  recap='All merged; nothing is pending.', recap_at='T2')).state</span>
+<span class="sd">'archive'</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ARCHIVE</span><span class="p">,</span> <span class="n">OPEN</span><span class="p">,</span> <span class="n">Session</span><span class="p">,</span> <span class="n">Verdict</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"ASK_CUES"</span><span class="p">,</span>
+    <span class="s2">"CLOSE_CUES"</span><span class="p">,</span>
+    <span class="s2">"CLOSING_CHARS"</span><span class="p">,</span>
+    <span class="s2">"DEFER_CUES"</span><span class="p">,</span>
+    <span class="s2">"asks_the_human"</span><span class="p">,</span>
+    <span class="s2">"classify"</span><span class="p">,</span>
+    <span class="s2">"ends_with_a_question"</span><span class="p">,</span>
+    <span class="s2">"find_cues"</span><span class="p">,</span>
+    <span class="s2">"latest_cue"</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1">#: How much of the tail of the last assistant turn counts as "the closing". Final turns</span>
+<span class="c1">#: run to a couple of thousand characters; at four hundred, two sessions in five carry</span>
+<span class="c1">#: no cue at all, and at twelve hundred that falls to about one in five.</span>
+<span class="n">CLOSING_CHARS</span> <span class="o">=</span> <span class="mi">1200</span>
+
+<span class="c1">#: Phrases that put a decision to the human.</span>
+<span class="n">ASK_CUES</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"want me to"</span><span class="p">,</span>
+    <span class="s2">"do you want"</span><span class="p">,</span>
+    <span class="s2">"would you like"</span><span class="p">,</span>
+    <span class="s2">"shall i"</span><span class="p">,</span>
+    <span class="s2">"should i"</span><span class="p">,</span>
+    <span class="s2">"let me know"</span><span class="p">,</span>
+    <span class="s2">"say the word"</span><span class="p">,</span>
+    <span class="s2">"your call"</span><span class="p">,</span>
+    <span class="s2">"up to you"</span><span class="p">,</span>
+    <span class="s2">"over to you"</span><span class="p">,</span>
+    <span class="s2">"which would you"</span><span class="p">,</span>
+    <span class="s2">"tell me which"</span><span class="p">,</span>
+    <span class="s2">"if you'd prefer"</span><span class="p">,</span>
+    <span class="s2">"if you would prefer"</span><span class="p">,</span>
+    <span class="s2">"needs your input"</span><span class="p">,</span>
+    <span class="s2">"needs your review"</span><span class="p">,</span>
+    <span class="s2">"needs your decision"</span><span class="p">,</span>
+    <span class="s2">"needs your go-ahead"</span><span class="p">,</span>
+    <span class="s2">"needs your call"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1">#: Phrases that defer something — name work not done, or hand it back.</span>
+<span class="n">DEFER_CUES</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"still open"</span><span class="p">,</span>
+    <span class="s2">"still owed"</span><span class="p">,</span>
+    <span class="s2">"still outstanding"</span><span class="p">,</span>
+    <span class="s2">"still pending"</span><span class="p">,</span>
+    <span class="s2">"next step"</span><span class="p">,</span>
+    <span class="s2">"next session"</span><span class="p">,</span>
+    <span class="s2">"left off"</span><span class="p">,</span>
+    <span class="s2">"waiting for you"</span><span class="p">,</span>
+    <span class="s2">"waiting on"</span><span class="p">,</span>
+    <span class="s2">"blocked on"</span><span class="p">,</span>
+    <span class="s2">"blocked by"</span><span class="p">,</span>
+    <span class="s2">"handoff"</span><span class="p">,</span>
+    <span class="s2">"hand-off"</span><span class="p">,</span>
+    <span class="s2">"pick it up"</span><span class="p">,</span>
+    <span class="s2">"pick this up"</span><span class="p">,</span>
+    <span class="s2">"pick that up"</span><span class="p">,</span>
+    <span class="s2">"i left it"</span><span class="p">,</span>
+    <span class="s2">"not yet done"</span><span class="p">,</span>
+    <span class="s2">"not yet merged"</span><span class="p">,</span>
+    <span class="s2">"not yet posted"</span><span class="p">,</span>
+    <span class="s2">"open question"</span><span class="p">,</span>
+    <span class="s2">"unresolved"</span><span class="p">,</span>
+    <span class="s2">"i could not"</span><span class="p">,</span>
+    <span class="s2">"i couldn't"</span><span class="p">,</span>
+    <span class="s2">"was unable to"</span><span class="p">,</span>
+    <span class="s2">"were unable to"</span><span class="p">,</span>
+    <span class="s2">"did not finish"</span><span class="p">,</span>
+    <span class="s2">"didn't finish"</span><span class="p">,</span>
+    <span class="s2">"needs a human"</span><span class="p">,</span>
+    <span class="c1"># Bare "needs you", not just "needs you to". A real session closed with</span>
+    <span class="c1"># "Nothing further is running. The one thing that still needs you is #55" — the</span>
+    <span class="c1"># narrower phrasing missed it and the close cue won, which is the false `archive`</span>
+    <span class="c1"># this whole rule set is arranged to avoid.</span>
+    <span class="s2">"needs you"</span><span class="p">,</span>
+    <span class="s2">"still needs"</span><span class="p">,</span>
+    <span class="s2">"you'll need to"</span><span class="p">,</span>
+    <span class="s2">"you will need to"</span><span class="p">,</span>
+    <span class="s2">"requires you to"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1">#: Phrases that positively declare the session finished. These are the only ones that</span>
+<span class="c1">#: can produce ``archive``, so they are phrases rather than words: "done" on its own</span>
+<span class="c1">#: appears in every second sentence an agent writes.</span>
+<span class="n">CLOSE_CUES</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"nothing half-finished"</span><span class="p">,</span>
+    <span class="s2">"nothing pending"</span><span class="p">,</span>
+    <span class="s2">"nothing is pending"</span><span class="p">,</span>
+    <span class="s2">"nothing left"</span><span class="p">,</span>
+    <span class="s2">"nothing is blocking"</span><span class="p">,</span>
+    <span class="s2">"nothing blocking"</span><span class="p">,</span>
+    <span class="s2">"nothing to clean"</span><span class="p">,</span>
+    <span class="s2">"nothing else outstanding"</span><span class="p">,</span>
+    <span class="s2">"nothing outstanding"</span><span class="p">,</span>
+    <span class="s2">"nothing further"</span><span class="p">,</span>
+    <span class="s2">"no next action"</span><span class="p">,</span>
+    <span class="s2">"no further action"</span><span class="p">,</span>
+    <span class="s2">"no action needed"</span><span class="p">,</span>
+    <span class="s2">"safe to close"</span><span class="p">,</span>
+    <span class="s2">"safe to exit"</span><span class="p">,</span>
+    <span class="s2">"you're all set"</span><span class="p">,</span>
+    <span class="s2">"you are all set"</span><span class="p">,</span>
+    <span class="s2">"all done"</span><span class="p">,</span>
+    <span class="s2">"everything is done"</span><span class="p">,</span>
+    <span class="s2">"everything is green"</span><span class="p">,</span>
+    <span class="s2">"everything is verified"</span><span class="p">,</span>
+    <span class="s2">"not unfinished business"</span><span class="p">,</span>
+    <span class="s2">"ready to close"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1">#: Text that marks the last turn as a usage-limit or connection failure rather than the</span>
+<span class="c1">#: assistant's own closing words. Matched against the start of the closing text.</span>
+<span class="n">ERROR_BANNERS</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"api error"</span><span class="p">,</span>
+    <span class="s2">"you've hit your"</span><span class="p">,</span>
+    <span class="s2">"you have hit your"</span><span class="p">,</span>
+    <span class="s2">"you've reached your"</span><span class="p">,</span>
+    <span class="s2">"you have reached your"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1">#: Trailing markup and punctuation stripped before asking whether a line ends in a</span>
+<span class="c1">#: question mark — a closing question is often bolded or parenthesised.</span>
+<span class="n">_TRAILING</span> <span class="o">=</span> <span class="s2">" </span><span class="se">\t</span><span class="s2">*_`</span><span class="se">\"</span><span class="s2">')]}.,;:"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">closing_of</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">chars</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">CLOSING_CHARS</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The tail of an assistant turn, where a closing cue would live.</span>
+
+<span class="sd">    &gt;&gt;&gt; closing_of('a' * 20, chars=5)</span>
+<span class="sd">    'aaaaa'</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">text</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)[</span><span class="o">-</span><span class="n">chars</span><span class="p">:]</span>
+
+
+<div class="viewcode-block" id="ends_with_a_question">
+<a class="viewcode-back" href="../../module_docs/openloops/_classify.html#openloops.ends_with_a_question">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">ends_with_a_question</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether the final non-empty line is a question put to the reader.</span>
+
+<span class="sd">    &gt;&gt;&gt; ends_with_a_question('I fixed it.\\n\\n**Want me to land it?**')</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; ends_with_a_question('Was it broken? Yes. Fixed and merged.')</span>
+<span class="sd">    False</span>
+<span class="sd">    """</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="p">(</span><span class="n">text</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="n">_TRAILING</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"?"</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="find_cues">
+<a class="viewcode-back" href="../../module_docs/openloops/_classify.html#openloops.find_cues">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_cues</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cues</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Which of *cues* appear in *text*, case-insensitively, in cue order.</span>
+
+<span class="sd">    &gt;&gt;&gt; find_cues('Shall I land it?', ASK_CUES)</span>
+<span class="sd">    ('shall i',)</span>
+<span class="sd">    &gt;&gt;&gt; find_cues('nothing here', ASK_CUES)</span>
+<span class="sd">    ()</span>
+<span class="sd">    """</span>
+    <span class="n">low</span> <span class="o">=</span> <span class="p">(</span><span class="n">text</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cues</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">low</span><span class="p">)</span></div>
+
+
+
+<span class="c1">#: Sentence boundaries, roughly: terminal punctuation followed by space, or a line break.</span>
+<span class="c1">#: Markdown makes this approximate, and approximate is enough — the unit only has to be</span>
+<span class="c1">#: small enough that two clauses of the same thought stay together.</span>
+<span class="n">_SENTENCE_SPLIT</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(?&lt;=[.!?])\s+|\n+"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_cues_in</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">families</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The first cue each family contributes to *text*, keyed by family."""</span>
+    <span class="n">low</span> <span class="o">=</span> <span class="p">(</span><span class="n">text</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">family</span><span class="p">,</span> <span class="n">cues</span> <span class="ow">in</span> <span class="n">families</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">cue</span> <span class="ow">in</span> <span class="n">cues</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cue</span> <span class="ow">in</span> <span class="n">low</span><span class="p">:</span>
+                <span class="n">found</span><span class="p">[</span><span class="n">family</span><span class="p">]</span> <span class="o">=</span> <span class="n">cue</span>
+                <span class="k">break</span>
+    <span class="k">return</span> <span class="n">found</span>
+
+
+<div class="viewcode-block" id="latest_cue">
+<a class="viewcode-back" href="../../module_docs/openloops/_classify.html#openloops.latest_cue">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">latest_cue</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">families</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The decisive cue, resolved at sentence granularity, and its family.</span>
+
+<span class="sd">    Two corrections the corpus forced, in order.</span>
+
+<span class="sd">    A closing paragraph routinely contains both an offer and a declaration of</span>
+<span class="sd">    completeness, and which came **last** is what the writer meant — no fixed precedence</span>
+<span class="sd">    between the families gets both real examples right. So the last sentence carrying any</span>
+<span class="sd">    cue is the one that decides.</span>
+
+<span class="sd">    But *within* that sentence, position means nothing, and a raw character offset gets</span>
+<span class="sd">    it backwards: a real session closed with "**Needs you** (nothing blocking, all</span>
+<span class="sd">    tracked): …", where the close cue sits inside a parenthetical of the very sentence</span>
+<span class="sd">    that hands work back. So inside the deciding sentence, **any open cue beats a close</span>
+<span class="sd">    cue**, which is the same asymmetry the rest of the module argues for.</span>
+
+<span class="sd">    &gt;&gt;&gt; latest_cue('say the word. Nothing is blocking; safe to close.',</span>
+<span class="sd">    ...            {'ask': ASK_CUES, 'close': CLOSE_CUES})</span>
+<span class="sd">    ('close', 'nothing is blocking')</span>
+<span class="sd">    &gt;&gt;&gt; latest_cue("you're all set — but the threads waiting for you are these",</span>
+<span class="sd">    ...            {'defer': DEFER_CUES, 'close': CLOSE_CUES})</span>
+<span class="sd">    ('defer', 'waiting for you')</span>
+<span class="sd">    &gt;&gt;&gt; latest_cue('Needs you (nothing blocking, all tracked): the #146 decision.',</span>
+<span class="sd">    ...            {'defer': DEFER_CUES, 'close': CLOSE_CUES})</span>
+<span class="sd">    ('defer', 'needs you')</span>
+<span class="sd">    &gt;&gt;&gt; latest_cue('nothing matches', {'ask': ASK_CUES}) is None</span>
+<span class="sd">    True</span>
+<span class="sd">    """</span>
+    <span class="k">for</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">_SENTENCE_SPLIT</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">text</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)):</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="n">_cues_in</span><span class="p">(</span><span class="n">sentence</span><span class="p">,</span> <span class="n">families</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">for</span> <span class="n">family</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"defer"</span><span class="p">,</span> <span class="s2">"ask"</span><span class="p">,</span> <span class="s2">"close"</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">family</span> <span class="ow">in</span> <span class="n">found</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">family</span><span class="p">,</span> <span class="n">found</span><span class="p">[</span><span class="n">family</span><span class="p">]</span>
+        <span class="n">family</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">found</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">family</span><span class="p">,</span> <span class="n">found</span><span class="p">[</span><span class="n">family</span><span class="p">]</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="asks_the_human">
+<a class="viewcode-back" href="../../module_docs/openloops/_classify.html#openloops.asks_the_human">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">asks_the_human</span><span class="p">(</span>
+    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ask_cues</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">ASK_CUES</span><span class="p">,</span> <span class="n">chars</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">CLOSING_CHARS</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The ask cues in the closing lines, if those lines put a question to the reader.</span>
+
+<span class="sd">    The primitive a retrospective measurement uses to ask "did this session end with a</span>
+<span class="sd">    question directed at the human" — defined once, here, rather than twice.</span>
+
+<span class="sd">    &gt;&gt;&gt; asks_the_human('I fixed it. Want me to open the PR?')</span>
+<span class="sd">    ('want me to',)</span>
+<span class="sd">    &gt;&gt;&gt; asks_the_human('Was it broken? Yes, and I fixed it.')</span>
+<span class="sd">    ()</span>
+<span class="sd">    &gt;&gt;&gt; asks_the_human('All done.')</span>
+<span class="sd">    ()</span>
+<span class="sd">    """</span>
+    <span class="n">tail</span> <span class="o">=</span> <span class="n">closing_of</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">chars</span><span class="o">=</span><span class="n">chars</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ends_with_a_question</span><span class="p">(</span><span class="n">tail</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"?"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tail</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">()</span>
+    <span class="k">return</span> <span class="n">find_cues</span><span class="p">(</span><span class="n">tail</span><span class="p">,</span> <span class="n">ask_cues</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_error_banner</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The closing text is Claude Code's own limit or connection-failure notice."""</span>
+    <span class="n">head</span> <span class="o">=</span> <span class="p">(</span><span class="n">text</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()[:</span><span class="mi">200</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">head</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">ERROR_BANNERS</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_recap_cue</span><span class="p">(</span>
+    <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">,</span> <span class="n">families</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A cue from the session's own recap — read only when the closing turn is mute.</span>
+
+<span class="sd">    Claude Code writes a one-to-three-sentence recap after each turn, and about seven</span>
+<span class="sd">    sessions in ten carry one. Reading it costs nothing and is retention rather than</span>
+<span class="sd">    duplication: it was generated and billed once already, and it disappears with the</span>
+<span class="sd">    transcript. It is worth reading precisely where the rules above did no work, which</span>
+<span class="sd">    on real sessions is roughly a quarter of them.</span>
+
+<span class="sd">    Two guards make it safe. It is consulted **last**, so it can never override a verdict</span>
+<span class="sd">    the closing turn actually supported. And it is ignored when it predates that turn: a</span>
+<span class="sd">    recap goes stale relative to work done after it, and a stale "nothing pending" is</span>
+<span class="sd">    exactly the false ``archive`` this rule set is arranged to avoid.</span>
+
+<span class="sd">    &gt;&gt;&gt; from openloops.base import Session</span>
+<span class="sd">    &gt;&gt;&gt; fresh = Session(key='s', last_turn_at='T1', recap='All done.', recap_at='T2')</span>
+<span class="sd">    &gt;&gt;&gt; _recap_cue(fresh, {'close': CLOSE_CUES})</span>
+<span class="sd">    ('close', 'all done')</span>
+<span class="sd">    &gt;&gt;&gt; stale = Session(key='s', last_turn_at='T3', recap='All done.', recap_at='T2')</span>
+<span class="sd">    &gt;&gt;&gt; _recap_cue(stale, {'close': CLOSE_CUES}) is None</span>
+<span class="sd">    True</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">session</span><span class="o">.</span><span class="n">recap</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">last_turn_at</span>
+        <span class="ow">and</span> <span class="n">session</span><span class="o">.</span><span class="n">recap_at</span>
+        <span class="ow">and</span> <span class="n">session</span><span class="o">.</span><span class="n">recap_at</span> <span class="o">&lt;</span> <span class="n">session</span><span class="o">.</span><span class="n">last_turn_at</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">latest_cue</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">recap</span><span class="p">,</span> <span class="n">families</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_verdict_from</span><span class="p">(</span>
+    <span class="n">hit</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">where</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span> <span class="n">plural</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Verdict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Turn a cue hit into a verdict naming where the cue was found, and when.</span>
+
+<span class="sd">    ``plural`` only picks the verb form: "its closing lines declare" against "its own</span>
+<span class="sd">    recap declares". A reason a reader has to squint at is a reason they will not read.</span>
+<span class="sd">    """</span>
+    <span class="n">family</span><span class="p">,</span> <span class="n">cue</span> <span class="o">=</span> <span class="n">hit</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="s2">""</span> <span class="k">if</span> <span class="n">plural</span> <span class="k">else</span> <span class="s2">"s"</span>
+    <span class="k">if</span> <span class="n">family</span> <span class="o">==</span> <span class="s2">"close"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Verdict</span><span class="p">(</span><span class="n">ARCHIVE</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s2"> declare</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2"> it finished"</span><span class="p">,</span> <span class="p">(</span><span class="n">cue</span><span class="p">,),</span> <span class="n">at</span><span class="o">=</span><span class="n">at</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">family</span> <span class="o">==</span> <span class="s2">"ask"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Verdict</span><span class="p">(</span><span class="n">OPEN</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s2"> put</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2"> something to you"</span><span class="p">,</span> <span class="p">(</span><span class="n">cue</span><span class="p">,),</span> <span class="n">at</span><span class="o">=</span><span class="n">at</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Verdict</span><span class="p">(</span><span class="n">OPEN</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s2"> defer</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2"> something"</span><span class="p">,</span> <span class="p">(</span><span class="n">cue</span><span class="p">,),</span> <span class="n">at</span><span class="o">=</span><span class="n">at</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="classify">
+<a class="viewcode-back" href="../../module_docs/openloops/_classify.html#openloops.classify">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">classify</span><span class="p">(</span>
+    <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">ask_cues</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">ASK_CUES</span><span class="p">,</span>
+    <span class="n">defer_cues</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFER_CUES</span><span class="p">,</span>
+    <span class="n">close_cues</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">CLOSE_CUES</span><span class="p">,</span>
+    <span class="n">chars</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">CLOSING_CHARS</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Verdict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read a session's loop state from its own last turn.</span>
+
+<span class="sd">    &gt;&gt;&gt; from openloops.base import Session</span>
+<span class="sd">    &gt;&gt;&gt; classify(Session(key='s', ended_with_error=True)).state</span>
+<span class="sd">    'open'</span>
+<span class="sd">    &gt;&gt;&gt; v = classify(Session(key='s', last_assistant_text='Blocked on your deploy key.'))</span>
+<span class="sd">    &gt;&gt;&gt; v.state, v.cues, v.confidence</span>
+<span class="sd">    ('open', ('blocked on',), 'high')</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">ended_with_error</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Verdict</span><span class="p">(</span>
+            <span class="n">OPEN</span><span class="p">,</span>
+            <span class="s2">"its last turn is a usage-limit or API-error notice, so the session was cut "</span>
+            <span class="s2">"off rather than finished"</span><span class="p">,</span>
+            <span class="n">at</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">last_turn_at</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">ended_mid_turn</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Verdict</span><span class="p">(</span>
+            <span class="n">OPEN</span><span class="p">,</span>
+            <span class="s2">"the transcript's last record is a turn nobody has answered — the session "</span>
+            <span class="s2">"is either still going or it stopped there"</span><span class="p">,</span>
+            <span class="n">at</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">ended_at</span> <span class="ow">or</span> <span class="n">session</span><span class="o">.</span><span class="n">last_turn_at</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">text</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">last_assistant_text</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Verdict</span><span class="p">(</span>
+            <span class="n">OPEN</span><span class="p">,</span>
+            <span class="s2">"the transcript records no closing text, so there is nothing saying it "</span>
+            <span class="s2">"finished"</span><span class="p">,</span>
+            <span class="n">at</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">ended_at</span><span class="p">,</span>
+            <span class="n">confidence</span><span class="o">=</span><span class="s2">"low"</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">_is_error_banner</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Verdict</span><span class="p">(</span>
+            <span class="n">OPEN</span><span class="p">,</span>
+            <span class="s2">"its last turn is a usage-limit or API-error notice, so the session was cut "</span>
+            <span class="s2">"off rather than finished"</span><span class="p">,</span>
+            <span class="n">at</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">last_turn_at</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">families</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"ask"</span><span class="p">:</span> <span class="n">ask_cues</span><span class="p">,</span> <span class="s2">"defer"</span><span class="p">:</span> <span class="n">defer_cues</span><span class="p">,</span> <span class="s2">"close"</span><span class="p">:</span> <span class="n">close_cues</span><span class="p">}</span>
+    <span class="n">tail</span> <span class="o">=</span> <span class="n">closing_of</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">chars</span><span class="o">=</span><span class="n">chars</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ends_with_a_question</span><span class="p">(</span><span class="n">tail</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Verdict</span><span class="p">(</span><span class="n">OPEN</span><span class="p">,</span> <span class="s2">"its closing line is a question put to you"</span><span class="p">)</span>
+
+    <span class="n">hit</span> <span class="o">=</span> <span class="n">latest_cue</span><span class="p">(</span><span class="n">tail</span><span class="p">,</span> <span class="n">families</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">hit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_verdict_from</span><span class="p">(</span><span class="n">hit</span><span class="p">,</span> <span class="s2">"its closing lines"</span><span class="p">,</span> <span class="n">at</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">last_turn_at</span><span class="p">)</span>
+
+    <span class="n">recap_hit</span> <span class="o">=</span> <span class="n">_recap_cue</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">families</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">recap_hit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_verdict_from</span><span class="p">(</span>
+            <span class="n">recap_hit</span><span class="p">,</span>
+            <span class="s2">"its own recap, written after the closing turn,"</span><span class="p">,</span>
+            <span class="n">at</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">recap_at</span><span class="p">,</span>
+            <span class="n">plural</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Verdict</span><span class="p">(</span>
+        <span class="n">OPEN</span><span class="p">,</span>
+        <span class="s2">"nothing in its closing lines says it finished, and openloops does not "</span>
+        <span class="s2">"assume it did"</span><span class="p">,</span>
+        <span class="n">at</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">last_turn_at</span><span class="p">,</span>
+        <span class="n">confidence</span><span class="o">=</span><span class="s2">"low"</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

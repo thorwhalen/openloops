@@ -1,0 +1,366 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openloops.job &mdash; openloops 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            openloops
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops.html">openloops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/__main__.html">openloops.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_classify.html">openloops._classify</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_sync.html">openloops._sync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/digest.html">openloops.digest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/egress.html">openloops.egress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/store.html">openloops.store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/tools.html">openloops.tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/transcripts.html">openloops.transcripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">openloops</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">openloops.job</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openloops.job</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""The periodic job: launchd runs ``ol sync``, writes, and exits. No daemon.</span>
+
+<span class="sd">ADR-003's decision, applied to digests. A resident process would have to be kept alive,</span>
+<span class="sd">and when it dies its output latches at whatever it last wrote — a confident, months-old</span>
+<span class="sd">answer with nothing scheduled to correct it. A ``StartInterval`` job is self-healing by</span>
+<span class="sd">construction: a tick that crashes is repaired by the next one, and the only thing to</span>
+<span class="sd">supervise is launchd itself.</span>
+
+<span class="sd">The environment is captured at install time and pinned into the plist, because launchd</span>
+<span class="sd">hands a job a nearly empty environment. The interpreter is invoked directly rather than</span>
+<span class="sd">by console-script name, for the same reason: a name resolved against a minimal ``PATH``</span>
+<span class="sd">is a lottery whose losing ticket is a job that dies instantly, every tick, silently.</span>
+
+<span class="sd">macOS only. On Linux the equivalent is a systemd user timer or a crontab line running</span>
+<span class="sd">the same command, and :func:`install` says so rather than pretending.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">state_dir</span><span class="p">,</span> <span class="n">sync_state_path</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"DFLT_LABEL"</span><span class="p">,</span>
+    <span class="s2">"DFLT_INTERVAL"</span><span class="p">,</span>
+    <span class="s2">"install"</span><span class="p">,</span>
+    <span class="s2">"uninstall"</span><span class="p">,</span>
+    <span class="s2">"job_status"</span><span class="p">,</span>
+    <span class="s2">"plist_xml"</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1">#: launchd job label. Also the plist filename and the log filename.</span>
+<span class="n">DFLT_LABEL</span> <span class="o">=</span> <span class="s2">"openloops.sync"</span>
+
+<span class="c1">#: Seconds between ticks. A digest is a record of what a session said, so being a</span>
+<span class="c1">#: quarter of an hour behind costs nothing; running every few seconds would cost a</span>
+<span class="c1">#: full scan of the transcript directory for no gain.</span>
+<span class="n">DFLT_INTERVAL</span> <span class="o">=</span> <span class="mi">900</span>
+
+<span class="c1">#: Environment variables that configure openloops and must survive into the job — a</span>
+<span class="c1">#: shell that overrode where digests go would otherwise find the job writing elsewhere.</span>
+<span class="n">PASSED_THROUGH</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"OPENLOOPS_DATA_DIR"</span><span class="p">,</span>
+    <span class="s2">"OPENLOOPS_STATE_DIR"</span><span class="p">,</span>
+    <span class="s2">"OPENLOOPS_SOURCE"</span><span class="p">,</span>
+    <span class="s2">"CLAUDE_PROJECTS_DIR"</span><span class="p">,</span>
+    <span class="s2">"XDG_DATA_HOME"</span><span class="p">,</span>
+    <span class="s2">"XDG_STATE_HOME"</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_esc</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"&amp;"</span><span class="p">,</span> <span class="s2">"&amp;amp;"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"&lt;"</span><span class="p">,</span> <span class="s2">"&amp;lt;"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"&gt;"</span><span class="p">,</span> <span class="s2">"&amp;gt;"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="plist_xml">
+<a class="viewcode-back" href="../../module_docs/openloops/job.html#openloops.job.plist_xml">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plist_xml</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">program_args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">env</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">interval</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">log_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The launchd property list, as text. Pure, so it can be tested on any platform.</span>
+
+<span class="sd">    &gt;&gt;&gt; xml = plist_xml(label='x', program_args=['a'], env={'HOME': '/h'},</span>
+<span class="sd">    ...                 interval=60, log_path=Path('/tmp/x.log'))</span>
+<span class="sd">    &gt;&gt;&gt; '&lt;key&gt;StartInterval&lt;/key&gt;' in xml and '&lt;integer&gt;60&lt;/integer&gt;' in xml</span>
+<span class="sd">    True</span>
+<span class="sd">    """</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"        &lt;string&gt;</span><span class="si">{</span><span class="n">_esc</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/string&gt;"</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">program_args</span><span class="p">)</span>
+    <span class="n">env_items</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"        &lt;key&gt;</span><span class="si">{</span><span class="n">_esc</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/key&gt;</span><span class="se">\n</span><span class="s2">        &lt;string&gt;</span><span class="si">{</span><span class="n">_esc</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/string&gt;"</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"""&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="s2">&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"</span>
+<span class="s2">  "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;</span>
+<span class="s2">&lt;plist version="1.0"&gt;</span>
+<span class="s2">&lt;dict&gt;</span>
+<span class="s2">    &lt;key&gt;Label&lt;/key&gt;</span>
+<span class="s2">    &lt;string&gt;</span><span class="si">{</span><span class="n">_esc</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/string&gt;</span>
+<span class="s2">    &lt;key&gt;ProgramArguments&lt;/key&gt;</span>
+<span class="s2">    &lt;array&gt;</span>
+<span class="si">{</span><span class="n">args</span><span class="si">}</span>
+<span class="s2">    &lt;/array&gt;</span>
+<span class="s2">    &lt;key&gt;EnvironmentVariables&lt;/key&gt;</span>
+<span class="s2">    &lt;dict&gt;</span>
+<span class="si">{</span><span class="n">env_items</span><span class="si">}</span>
+<span class="s2">    &lt;/dict&gt;</span>
+<span class="s2">    &lt;key&gt;StartInterval&lt;/key&gt;</span>
+<span class="s2">    &lt;integer&gt;</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/integer&gt;</span>
+<span class="s2">    &lt;key&gt;RunAtLoad&lt;/key&gt;</span>
+<span class="s2">    &lt;true/&gt;</span>
+<span class="s2">    &lt;key&gt;StandardOutPath&lt;/key&gt;</span>
+<span class="s2">    &lt;string&gt;</span><span class="si">{</span><span class="n">_esc</span><span class="p">(</span><span class="n">log_path</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/string&gt;</span>
+<span class="s2">    &lt;key&gt;StandardErrorPath&lt;/key&gt;</span>
+<span class="s2">    &lt;string&gt;</span><span class="si">{</span><span class="n">_esc</span><span class="p">(</span><span class="n">log_path</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/string&gt;</span>
+<span class="s2">&lt;/dict&gt;</span>
+<span class="s2">&lt;/plist&gt;</span>
+<span class="s2">"""</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">job_environment</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The environment pinned into the plist: a usable PATH, HOME, and our own vars."""</span>
+    <span class="n">path_parts</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">),</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".local"</span> <span class="o">/</span> <span class="s2">"bin"</span><span class="p">),</span>
+        <span class="s2">"/opt/homebrew/bin"</span><span class="p">,</span>
+        <span class="s2">"/usr/local/bin"</span><span class="p">,</span>
+        <span class="s2">"/usr/bin"</span><span class="p">,</span>
+        <span class="s2">"/bin"</span><span class="p">,</span>
+        <span class="s2">"/usr/sbin"</span><span class="p">,</span>
+        <span class="s2">"/sbin"</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"PATH"</span><span class="p">:</span> <span class="s2">":"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">path_parts</span><span class="p">)),</span> <span class="s2">"HOME"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">())}</span>
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">PASSED_THROUGH</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">env</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">env</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_plist_path</span><span class="p">(</span><span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">"Library"</span> <span class="o">/</span> <span class="s2">"LaunchAgents"</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">.plist"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_log_path</span><span class="p">(</span><span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">"Library"</span> <span class="o">/</span> <span class="s2">"Logs"</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">.log"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_require_macos</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">!=</span> <span class="s2">"darwin"</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">"the supervised job is a macOS launchd agent. On Linux, run the same "</span>
+            <span class="s2">"command from a systemd user timer or crontab:</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"    */15 * * * * </span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="si">}</span><span class="s2"> -m openloops sync</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="s2">"openloops itself is cross-platform; only this installer is not."</span>
+        <span class="p">)</span>
+
+
+<div class="viewcode-block" id="install">
+<a class="viewcode-back" href="../../module_docs/openloops/job.html#openloops.job.install">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">install</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DFLT_LABEL</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_INTERVAL</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Install (or replace) the periodic sync job. Returns the paths it wrote.</span>
+
+<span class="sd">    A smoke run follows the bootstrap, because a job that cannot start produces exactly</span>
+<span class="sd">    the same silence as a job with nothing to do.</span>
+<span class="sd">    """</span>
+    <span class="n">_require_macos</span><span class="p">()</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-m"</span><span class="p">,</span> <span class="s2">"openloops"</span><span class="p">,</span> <span class="s2">"sync"</span><span class="p">]</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">job_environment</span><span class="p">()</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">label</span> <span class="ow">or</span> <span class="n">DFLT_LABEL</span>
+    <span class="n">plist_path</span><span class="p">,</span> <span class="n">log_path</span> <span class="o">=</span> <span class="n">_plist_path</span><span class="p">(</span><span class="n">label</span><span class="p">),</span> <span class="n">_log_path</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+    <span class="n">xml</span> <span class="o">=</span> <span class="n">plist_xml</span><span class="p">(</span>
+        <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+        <span class="n">program_args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
+        <span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span>
+        <span class="n">log_path</span><span class="o">=</span><span class="n">log_path</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"plist"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">plist_path</span><span class="p">),</span> <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">log_path</span><span class="p">),</span> <span class="s2">"xml"</span><span class="p">:</span> <span class="n">xml</span><span class="p">}</span>
+
+    <span class="n">plist_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">log_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">plist_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">xml</span><span class="p">)</span>
+
+    <span class="n">uid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getuid</span><span class="p">()</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">"launchctl"</span><span class="p">,</span> <span class="s2">"bootout"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"gui/</span><span class="si">{</span><span class="n">uid</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">"</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">loaded</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">"launchctl"</span><span class="p">,</span> <span class="s2">"bootstrap"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"gui/</span><span class="si">{</span><span class="n">uid</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">plist_path</span><span class="p">)],</span>
+        <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">loaded</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"wrote </span><span class="si">{</span><span class="n">plist_path</span><span class="si">}</span><span class="s2"> but launchctl bootstrap failed: "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">stderr</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">loaded</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span>
+    <span class="n">smoke</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+        <span class="p">[</span><span class="o">*</span><span class="n">args</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="s2">"openloops"</span><span class="p">,</span> <span class="s2">"--help"</span><span class="p">],</span>
+        <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
+        <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">smoke</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"installed </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">, but the command cannot run under the pinned "</span>
+            <span class="sa">f</span><span class="s2">"environment — it would fail silently every tick:</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="p">(</span><span class="n">smoke</span><span class="o">.</span><span class="n">stderr</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">smoke</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()[:</span><span class="mi">400</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"plist"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">plist_path</span><span class="p">),</span> <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">log_path</span><span class="p">),</span> <span class="s2">"interval"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">interval</span><span class="p">)}</span></div>
+
+
+
+<div class="viewcode-block" id="uninstall">
+<a class="viewcode-back" href="../../module_docs/openloops/job.html#openloops.job.uninstall">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">uninstall</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DFLT_LABEL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Unload the job and remove its plist. Idempotent."""</span>
+    <span class="n">_require_macos</span><span class="p">()</span>
+    <span class="n">plist_path</span> <span class="o">=</span> <span class="n">_plist_path</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">"launchctl"</span><span class="p">,</span> <span class="s2">"bootout"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"gui/</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">getuid</span><span class="p">()</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">"</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="n">existed</span> <span class="o">=</span> <span class="n">plist_path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">existed</span><span class="p">:</span>
+        <span class="n">plist_path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"plist"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">plist_path</span><span class="p">),</span> <span class="s2">"removed"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">existed</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()}</span></div>
+
+
+
+<div class="viewcode-block" id="job_status">
+<a class="viewcode-back" href="../../module_docs/openloops/job.html#openloops.job.job_status">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">job_status</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DFLT_LABEL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Installed? loaded? and — the question that matters — when did it last write?</span>
+
+<span class="sd">    ``launchctl list`` says the job is registered, which is not the same as the job</span>
+<span class="sd">    doing anything. The cache's modification time is the only evidence that a tick</span>
+<span class="sd">    completed, so it is reported alongside.</span>
+<span class="sd">    """</span>
+    <span class="n">plist_path</span> <span class="o">=</span> <span class="n">_plist_path</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+    <span class="n">loaded</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">"darwin"</span><span class="p">:</span>
+        <span class="n">listed</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">"launchctl"</span><span class="p">,</span> <span class="s2">"list"</span><span class="p">,</span> <span class="n">label</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="n">loaded</span> <span class="o">=</span> <span class="n">listed</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="n">cache</span> <span class="o">=</span> <span class="n">sync_state_path</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"label"</span><span class="p">:</span> <span class="n">label</span><span class="p">,</span>
+        <span class="s2">"platform_supported"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">"darwin"</span><span class="p">,</span>
+        <span class="s2">"plist"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">plist_path</span><span class="p">),</span>
+        <span class="s2">"installed"</span><span class="p">:</span> <span class="n">plist_path</span><span class="o">.</span><span class="n">exists</span><span class="p">(),</span>
+        <span class="s2">"loaded"</span><span class="p">:</span> <span class="n">loaded</span><span class="p">,</span>
+        <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">_log_path</span><span class="p">(</span><span class="n">label</span><span class="p">)),</span>
+        <span class="s2">"last_write"</span><span class="p">:</span> <span class="n">cache</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span> <span class="k">if</span> <span class="n">cache</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">"state_dir"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">state_dir</span><span class="p">()),</span>
+    <span class="p">}</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,445 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openloops.store &mdash; openloops 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            openloops
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops.html">openloops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/__main__.html">openloops.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_classify.html">openloops._classify</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_sync.html">openloops._sync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/digest.html">openloops.digest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/egress.html">openloops.egress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/store.html">openloops.store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/tools.html">openloops.tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/transcripts.html">openloops.transcripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">openloops</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">openloops.store</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openloops.store</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Where digests live, and where the change-detection cache lives — two different things.</span>
+
+<span class="sd">The digest store is **data**: a local directory of markdown files under</span>
+<span class="sd">``~/.local/share/openloops/digests/``, addressed as a ``MutableMapping[str, str]`` so</span>
+<span class="sd">that swapping it for a git-synced directory or an S3-backed store is one keyword</span>
+<span class="sd">argument rather than a rewrite. Nothing in openloops opens a file by path.</span>
+
+<span class="sd">The sync cache is **not data**: it is a per-machine record of which transcript</span>
+<span class="sd">revisions have already been read, and deleting it is a distinct operation from deleting</span>
+<span class="sd">digests. That separation is ADR-010's rule — a cache purge must not be able to reach</span>
+<span class="sd">the thing being cached — and it is what makes the regeneration test meaningful: wipe</span>
+<span class="sd">both, sync again, and every digest comes back byte-identical.</span>
+
+<span class="sd">Keys are ``{source}/{state}/{session}.md``. The source segment is the machine (or</span>
+<span class="sd">person) that wrote the digest, so two machines syncing into one git repository never</span>
+<span class="sd">write the same path and there is nothing to reconcile. The state segment is ``open`` or</span>
+<span class="sd">``archive`` — **loop state, not process state**. If it ever came to mean "a process is</span>
+<span class="sd">running", this would be a session dashboard rather than a record of what sessions said.</span>
+
+<span class="sd">&gt;&gt;&gt; digest_key('laptop', 'open', 'abc-123')</span>
+<span class="sd">'laptop/open/abc-123.md'</span>
+<span class="sd">&gt;&gt;&gt; parse_digest_key('laptop/open/abc-123.md')</span>
+<span class="sd">('laptop', 'open', 'abc-123')</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">MutableMapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ARCHIVE</span><span class="p">,</span> <span class="n">OPEN</span><span class="p">,</span> <span class="n">STATES</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"DigestFiles"</span><span class="p">,</span>
+    <span class="s2">"data_dir"</span><span class="p">,</span>
+    <span class="s2">"state_dir"</span><span class="p">,</span>
+    <span class="s2">"default_source"</span><span class="p">,</span>
+    <span class="s2">"digests_store"</span><span class="p">,</span>
+    <span class="s2">"digest_key"</span><span class="p">,</span>
+    <span class="s2">"parse_digest_key"</span><span class="p">,</span>
+    <span class="s2">"load_sync_state"</span><span class="p">,</span>
+    <span class="s2">"save_sync_state"</span><span class="p">,</span>
+    <span class="s2">"sync_state_path"</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="DigestFiles">
+<a class="viewcode-back" href="../../module_docs/openloops/store.html#openloops.DigestFiles">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DigestFiles</span><span class="p">(</span><span class="n">MutableMapping</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The default digest store: markdown files under a root, keyed ``a/b/c.md``.</span>
+
+<span class="sd">    Deliberately small and owned. The seam is the ``MutableMapping`` interface, not any</span>
+<span class="sd">    particular library — a ``dol`` store, an ``s3dol`` bucket or a plain ``dict`` all</span>
+<span class="sd">    substitute for this without anything else changing. What a general file store gave</span>
+<span class="sd">    for free it also gave wrongly for this use: text opened in the *locale* encoding, so</span>
+<span class="sd">    a cron job with ``LANG`` unset dies on the em dash in every digest; and a delete that</span>
+<span class="sd">    sends the file to the desktop Trash, which for session digests is an undeclared</span>
+<span class="sd">    second copy of every superseded one, outside the store, indefinitely.</span>
+
+<span class="sd">    Keys are POSIX-style regardless of platform, because they are identifiers that get</span>
+<span class="sd">    written into a git-synced directory two machines may share — not paths.</span>
+
+<span class="sd">    &gt;&gt;&gt; import tempfile</span>
+<span class="sd">    &gt;&gt;&gt; store = DigestFiles(tempfile.mkdtemp())</span>
+<span class="sd">    &gt;&gt;&gt; store['mac/open/s1.md'] = 'hello'</span>
+<span class="sd">    &gt;&gt;&gt; store['mac/open/s1.md'], list(store), 'mac/open/s1.md' in store</span>
+<span class="sd">    ('hello', ['mac/open/s1.md'], True)</span>
+<span class="sd">    &gt;&gt;&gt; del store['mac/open/s1.md']</span>
+<span class="sd">    &gt;&gt;&gt; list(store)</span>
+<span class="sd">    []</span>
+<span class="sd">    """</span>
+
+    <span class="c1">#: What counts as a digest. Anything else under the root is somebody else's.</span>
+    <span class="n">suffix</span> <span class="o">=</span> <span class="s2">".md"</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootdir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">rootdir</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[</span><span class="se">\\</span><span class="s2">/]"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span> <span class="k">if</span> <span class="n">p</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parts</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="s2">".."</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"not a usable digest key: </span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootdir</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="o">*</span><span class="n">parts</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootdir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">return</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootdir</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="sa">f</span><span class="s2">"*</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">"</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+                <span class="k">yield</span> <span class="n">path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootdir</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<span class="n">_UNSAFE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[^A-Za-z0-9._-]+"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_xdg</span><span class="p">(</span><span class="n">env_var</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fallback</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">env_var</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">base</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span> <span class="k">if</span> <span class="n">base</span> <span class="k">else</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="n">fallback</span>
+
+
+<div class="viewcode-block" id="data_dir">
+<a class="viewcode-back" href="../../module_docs/openloops/store.html#openloops.data_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">data_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The project's data root. Override with ``OPENLOOPS_DATA_DIR``.</span>
+
+<span class="sd">    Per-kind subdirectories hang off this; nothing is written directly into it, so a</span>
+<span class="sd">    later kind of data needs no second migration.</span>
+<span class="sd">    """</span>
+    <span class="n">override</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"OPENLOOPS_DATA_DIR"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">override</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">override</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">_xdg</span><span class="p">(</span><span class="s2">"XDG_DATA_HOME"</span><span class="p">,</span> <span class="s2">".local/share"</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"openloops"</span></div>
+
+
+
+<div class="viewcode-block" id="state_dir">
+<a class="viewcode-back" href="../../module_docs/openloops/store.html#openloops.state_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">state_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Where per-machine caches and job logs go. Override with ``OPENLOOPS_STATE_DIR``.</span>
+
+<span class="sd">    Deliberately not under :func:`data_dir`: everything here is disposable, and keeping</span>
+<span class="sd">    it elsewhere means "clear the cache" can never be mistyped into "delete the digests".</span>
+<span class="sd">    """</span>
+    <span class="n">override</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"OPENLOOPS_STATE_DIR"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">override</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">override</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">_xdg</span><span class="p">(</span><span class="s2">"XDG_STATE_HOME"</span><span class="p">,</span> <span class="s2">".local/state"</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"openloops"</span></div>
+
+
+
+<div class="viewcode-block" id="default_source">
+<a class="viewcode-back" href="../../module_docs/openloops/store.html#openloops.default_source">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">default_source</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""This machine's label for its digest folder. Override with ``OPENLOOPS_SOURCE``.</span>
+
+<span class="sd">    A short, filename-safe name. It exists so several machines can sync digests into one</span>
+<span class="sd">    place without colliding — not to identify anybody, though on a machine whose</span>
+<span class="sd">    hostname was never changed it may well do; every ``ol sync`` prints it, and</span>
+<span class="sd">    ``OPENLOOPS_SOURCE`` overrides it.</span>
+
+<span class="sd">    **It is sticky.** The hostname is a *seed*, written once to a file under the state</span>
+<span class="sd">    directory and read thereafter. macOS rewrites the hostname when it joins a network</span>
+<span class="sd">    where the name collides — appending ``-2``, ``-3`` — and a label that moved would</span>
+<span class="sd">    fork the store into two complete copies with no dedup and no warning.</span>
+<span class="sd">    """</span>
+    <span class="n">override</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"OPENLOOPS_SOURCE"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">override</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_safe_source</span><span class="p">(</span><span class="n">override</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span> <span class="k">if</span> <span class="n">directory</span> <span class="k">else</span> <span class="n">state_dir</span><span class="p">()</span>
+    <span class="n">remembered</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="s2">"source"</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_safe_source</span><span class="p">(</span><span class="n">remembered</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">_safe_source</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">remembered</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">label</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_safe_source</span><span class="p">(</span><span class="n">raw</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A filename-safe source label, or ``local`` when nothing usable is left.</span>
+
+<span class="sd">    &gt;&gt;&gt; _safe_source('Some Host.local'), _safe_source('///')</span>
+<span class="sd">    ('some-host.local', 'local')</span>
+<span class="sd">    """</span>
+    <span class="n">cleaned</span> <span class="o">=</span> <span class="n">_UNSAFE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">"-"</span><span class="p">,</span> <span class="n">raw</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"-"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cleaned</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">"local"</span>
+
+
+<div class="viewcode-block" id="digests_store">
+<a class="viewcode-back" href="../../module_docs/openloops/store.html#openloops.digests_store">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">digests_store</span><span class="p">(</span><span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The default ``digests_store``: markdown files under the data root.</span>
+
+<span class="sd">    Any ``MutableMapping[str, str]`` works in its place — a plain ``dict`` for tests,</span>
+<span class="sd">    a git-synced directory, an S3-backed store. The keys are what carry the layout, so</span>
+<span class="sd">    a different backend gets the same ``{source}/{state}/{session}.md`` structure for</span>
+<span class="sd">    free.</span>
+
+<span class="sd">    &gt;&gt;&gt; store = digests_store(rootdir='/tmp/openloops-doctest-store')</span>
+<span class="sd">    &gt;&gt;&gt; store['demo/open/s1.md'] = '# hi'</span>
+<span class="sd">    &gt;&gt;&gt; sorted(store)</span>
+<span class="sd">    ['demo/open/s1.md']</span>
+<span class="sd">    &gt;&gt;&gt; del store['demo/open/s1.md']</span>
+<span class="sd">    """</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">rootdir</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span> <span class="k">if</span> <span class="n">rootdir</span> <span class="k">else</span> <span class="n">data_dir</span><span class="p">()</span> <span class="o">/</span> <span class="s2">"digests"</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># Delete means delete. The default sends the file to the desktop Trash, which for a</span>
+    <span class="c1"># store of session digests is an undeclared second copy of every superseded one,</span>
+    <span class="c1"># outside the store, indefinitely — and reclassification alone produces those daily.</span>
+    <span class="k">return</span> <span class="n">DigestFiles</span><span class="p">(</span><span class="n">root</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="digest_key">
+<a class="viewcode-back" href="../../module_docs/openloops/store.html#openloops.digest_key">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">digest_key</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">session_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The store key for one session's digest.</span>
+
+<span class="sd">    Both segments are validated, not just the state. ``transcript_source=`` is a seam</span>
+<span class="sd">    whose documented purpose is "another machine's synced transcripts", so a session id</span>
+<span class="sd">    can come from a listing this process did not produce — and a key containing ``..``</span>
+<span class="sd">    would make a file-backed store write outside its own root while ``sync`` reported</span>
+<span class="sd">    success. Validating here means every backend inherits the check.</span>
+
+<span class="sd">    &gt;&gt;&gt; digest_key('mac', 'archive', 's1')</span>
+<span class="sd">    'mac/archive/s1.md'</span>
+<span class="sd">    &gt;&gt;&gt; digest_key('mac', 'open', '../../etc/passwd')</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">        ...</span>
+<span class="sd">    ValueError: session key must be a single safe path segment, got '../../etc/passwd'</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">state</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">STATES</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"state must be one of </span><span class="si">{</span><span class="n">STATES</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">state</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">_check_segment</span><span class="p">(</span><span class="n">session_key</span><span class="p">,</span> <span class="s2">"session key"</span><span class="p">)</span>
+    <span class="n">_check_segment</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">"source"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">state</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">session_key</span><span class="si">}</span><span class="s2">.md"</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_segment</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">what</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Refuse anything that is not one ordinary filename component."""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span> <span class="ow">or</span> <span class="n">_UNSAFE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">or</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="s2">".."</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"/"</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2"> must be a single safe path segment, got </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="parse_digest_key">
+<a class="viewcode-back" href="../../module_docs/openloops/store.html#openloops.parse_digest_key">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_digest_key</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Split a store key back into ``(source, state, session_key)``.</span>
+
+<span class="sd">    Both separators are accepted. A file-backed store hands keys back joined with the</span>
+<span class="sd">    platform's separator, so on Windows every key would fail to parse and every read</span>
+<span class="sd">    path would quietly return nothing while ``sync`` reported digests written.</span>
+
+<span class="sd">    &gt;&gt;&gt; parse_digest_key('mac/archive/s1.md')</span>
+<span class="sd">    ('mac', 'archive', 's1')</span>
+<span class="sd">    &gt;&gt;&gt; parse_digest_key('mac' + chr(92) + 'archive' + chr(92) + 's1.md')</span>
+<span class="sd">    ('mac', 'archive', 's1')</span>
+<span class="sd">    """</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[</span><span class="se">\\</span><span class="s2">/]"</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">parts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">".md"</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"not a digest key: </span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">parts</span><span class="p">[</span><span class="mi">2</span><span class="p">][:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">".md"</span><span class="p">)]</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">other_state</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The loop state a digest is not in.</span>
+
+<span class="sd">    &gt;&gt;&gt; other_state('open'), other_state('archive')</span>
+<span class="sd">    ('archive', 'open')</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">ARCHIVE</span> <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="n">OPEN</span> <span class="k">else</span> <span class="n">OPEN</span>
+
+
+<div class="viewcode-block" id="sync_state_path">
+<a class="viewcode-back" href="../../module_docs/openloops/store.html#openloops.sync_state_path">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sync_state_path</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Where the mtime cache lives. Deleting this file forces a full re-read."""</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span> <span class="k">if</span> <span class="n">directory</span> <span class="k">else</span> <span class="n">state_dir</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">base</span> <span class="o">/</span> <span class="s2">"sync-state.json"</span></div>
+
+
+
+<div class="viewcode-block" id="load_sync_state">
+<a class="viewcode-back" href="../../module_docs/openloops/store.html#openloops.load_sync_state">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_sync_state</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Session id → the transcript revision last read. Missing or corrupt reads empty.</span>
+
+<span class="sd">    A corrupt cache is treated as an absent one on purpose: the only cost of being</span>
+<span class="sd">    wrong here is re-deriving digests that were already correct.</span>
+<span class="sd">    """</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">sync_state_path</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">loaded</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">))</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">):</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">loaded</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loaded</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="save_sync_state">
+<a class="viewcode-back" href="../../module_docs/openloops/store.html#openloops.save_sync_state">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_sync_state</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Write the mtime cache, creating its directory. Returns the path written."""</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">sync_state_path</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
