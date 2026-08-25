@@ -111,3 +111,25 @@ def test_store_keys_round_trip_through_the_backend(tmp_path):
     assert list(store) == ["m/archive/s1.md"]
     assert "m/archive/s1.md" in store
     assert len(store) == 1
+
+
+def test_keys_are_posix_whatever_the_platform_separator_is(tmp_path, monkeypatch):
+    """A store key is an identifier shared between machines, not a path.
+
+    Simulated by swapping `os.sep`, because the divergence only appears on Windows and
+    the consequence there is severe: `sync` reports digests written and every read path
+    then returns nothing at all.
+    """
+    import os as os_module
+
+    from openloops.store import _posix_keys
+
+    inner = {}
+    monkeypatch.setattr(os_module, "sep", "\\")
+    store = _posix_keys(inner)
+    store["m/open/s1.md"] = "body"
+    assert list(inner) == ["m\\open\\s1.md"], "the backend keeps its own spelling"
+    assert list(store) == ["m/open/s1.md"], "callers only ever see POSIX"
+    assert store["m/open/s1.md"] == "body"
+    del store["m/open/s1.md"]
+    assert inner == {}

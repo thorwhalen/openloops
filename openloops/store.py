@@ -32,6 +32,7 @@ import socket
 from collections.abc import Iterator, MutableMapping
 from pathlib import Path
 
+from dol import wrap_kvs
 from dol.filesys import FileStringPersister, mk_dirs_if_missing, with_relative_paths
 
 from openloops.base import ARCHIVE, OPEN, STATES
@@ -67,6 +68,23 @@ class Utf8TextFiles(FileStringPersister):
 
 #: Digests live two levels deep, so the store makes the directories it needs.
 _DigestFiles = mk_dirs_if_missing(Utf8TextFiles)
+
+
+def _posix_keys(store):
+    """Pin store keys to ``a/b/c.md`` on every platform.
+
+    A file-backed store hands keys back joined with the platform's separator, so on
+    Windows a key written as ``mac/open/s1.md`` iterates with backslashes instead. That
+    is not a cosmetic difference: a store key is an *identifier* that gets written into
+    a directory two machines may share through git, and it has to mean the same thing on
+    both. Translating at the boundary keeps every caller — and every future backend —
+    speaking one spelling.
+    """
+    return wrap_kvs(
+        store,
+        key_of_id=lambda k: k.replace(os.sep, "/"),
+        id_of_key=lambda k: k.replace("/", os.sep),
+    )
 
 
 _UNSAFE = re.compile(r"[^A-Za-z0-9._-]+")
@@ -162,7 +180,7 @@ def digests_store(rootdir: str | Path | None = None) -> MutableMapping[str, str]
     # For a store of session digests that is an undeclared second copy of every
     # superseded one, outside the store, indefinitely — and reclassifying a session from
     # `open` to `archive` produces those daily.
-    return _DigestFiles(str(root), delete_func=os.remove)
+    return _posix_keys(_DigestFiles(str(root), delete_func=os.remove))
 
 
 def digest_key(source: str, state: str, session_key: str) -> str:
