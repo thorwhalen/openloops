@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openloops.store &mdash; openloops 0.1.2 documentation</title>
+  <title>openloops.store &mdash; openloops 0.1.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=92734c54"></script>
+      <script src="../../_static/documentation_options.js?v=360bc84d"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -118,6 +118,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">MutableMapping</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">dol</span><span class="w"> </span><span class="kn">import</span> <span class="n">wrap_kvs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dol.filesys</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileStringPersister</span><span class="p">,</span> <span class="n">mk_dirs_if_missing</span><span class="p">,</span> <span class="n">with_relative_paths</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ARCHIVE</span><span class="p">,</span> <span class="n">OPEN</span><span class="p">,</span> <span class="n">STATES</span>
@@ -156,6 +157,23 @@
 
 <span class="c1">#: Digests live two levels deep, so the store makes the directories it needs.</span>
 <span class="n">_DigestFiles</span> <span class="o">=</span> <span class="n">mk_dirs_if_missing</span><span class="p">(</span><span class="n">Utf8TextFiles</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_posix_keys</span><span class="p">(</span><span class="n">store</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Pin store keys to ``a/b/c.md`` on every platform.</span>
+
+<span class="sd">    A file-backed store hands keys back joined with the platform's separator, so on</span>
+<span class="sd">    Windows a key written as ``mac/open/s1.md`` iterates with backslashes instead. That</span>
+<span class="sd">    is not a cosmetic difference: a store key is an *identifier* that gets written into</span>
+<span class="sd">    a directory two machines may share through git, and it has to mean the same thing on</span>
+<span class="sd">    both. Translating at the boundary keeps every caller — and every future backend —</span>
+<span class="sd">    speaking one spelling.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">wrap_kvs</span><span class="p">(</span>
+        <span class="n">store</span><span class="p">,</span>
+        <span class="n">key_of_id</span><span class="o">=</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="s2">"/"</span><span class="p">),</span>
+        <span class="n">id_of_key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">),</span>
+    <span class="p">)</span>
 
 
 <span class="n">_UNSAFE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[^A-Za-z0-9._-]+"</span><span class="p">)</span>
@@ -262,7 +280,7 @@
     <span class="c1"># For a store of session digests that is an undeclared second copy of every</span>
     <span class="c1"># superseded one, outside the store, indefinitely — and reclassifying a session from</span>
     <span class="c1"># `open` to `archive` produces those daily.</span>
-    <span class="k">return</span> <span class="n">_DigestFiles</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span> <span class="n">delete_func</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">_posix_keys</span><span class="p">(</span><span class="n">_DigestFiles</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span> <span class="n">delete_func</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">))</span></div>
 
 
 
