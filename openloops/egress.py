@@ -195,8 +195,22 @@ def default_aliases() -> dict[str, str]:
 
 
 def _anchored(src: str) -> re.Pattern:
-    """Match *src* only at a path boundary, so a longer sibling name is left alone."""
-    return re.compile(re.escape(src) + r"(?![\w.\-])")
+    """Match *src* only at a boundary, so a longer sibling name is left alone.
+
+    Which characters count as a boundary depends on the spelling. In a path, ``-`` is an
+    ordinary name character, so ``…/bob`` must not match inside ``…/bobby``. In the
+    dash-encoded form ``-`` is the *separator*, so the same rule would stop the alias
+    matching at all — an encoded home is always followed by more of the path.
+
+    >>> bool(_anchored("/a/bob").search("/a/bobby"))
+    False
+    >>> bool(_anchored("-a-bob").search("-a-bob-proj"))
+    True
+    >>> bool(_anchored("-a-bob").search("-a-bobby"))
+    False
+    """
+    trailing = r"(?![\w.\-])" if ("/" in src or "\\" in src) else r"(?![\w.])"
+    return re.compile(re.escape(src) + trailing)
 
 
 def apply_aliases(text: str, aliases: Mapping[str, str] | None = None) -> str:

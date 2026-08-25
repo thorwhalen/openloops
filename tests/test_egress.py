@@ -134,7 +134,10 @@ def test_this_machines_encoded_home_becomes_a_tilde():
     from pathlib import Path
 
     encoded = _encoded(str(Path.home()))
-    assert scrub(encoded + "-proj-x").startswith("~")
+    out = scrub(encoded + "-proj-x")
+    # `~`, not `~other`: this is *this* machine's home, and the assertion has to be able
+    # to tell the difference — `~other` starts with `~` too.
+    assert out.startswith("~") and not out.startswith(FOREIGN_HOME)
 
 
 def test_an_alias_cannot_synthesise_a_home_path_that_survives():

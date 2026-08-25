@@ -1,5 +1,9 @@
 """The sync loop, and the design tests ADR-018 requires of it."""
 
+import sys
+
+import pytest
+
 from fixtures import (
     asking_session,
     assistant,
@@ -168,6 +172,9 @@ def test_an_emptied_transcript_never_destroys_the_digest_it_already_produced(pro
     assert result["written"] == 0
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="chmod does not make a file unreadable on Windows"
+)
 def test_an_unreadable_transcript_is_reported_not_swallowed(projects_dir):
     write_transcripts(projects_dir, {"s1": closed_session("s1")})
     source = ClaudeCodeTranscripts()
