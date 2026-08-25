@@ -122,6 +122,17 @@ def sync(
             updated.pop(key, None)
             continue
 
+        if _is_empty(session) and _has_digest(store, source, key):
+            # A transcript that read as nothing — truncated, mid-rewrite, or unreadable —
+            # yields a content-free digest, and writing it over a good one destroys the
+            # only surviving record of that session. For a retention device that is the
+            # worst available failure, so the existing digest stands and the run says so.
+            errors.append(
+                {"session": key, "problem": "read as empty; kept the existing digest"}
+            )
+            updated.pop(key, None)
+            continue
+
         stale = digest_key(source, other_state(verdict.state), key)
         if stale in store:
             del store[stale]
@@ -141,6 +152,24 @@ def sync(
         "errors": errors,
         "digests": sum(1 for _ in store),
     }
+
+
+def _is_empty(session: Session) -> bool:
+    """Whether a session carried nothing worth keeping.
+
+    Not the same as "a short session": a real one has at least a turn, a closing text,
+    or a recap. Zero of all three means the read produced nothing, whatever the reason.
+
+    >>> from openloops.base import Session
+    >>> _is_empty(Session(key='s')), _is_empty(Session(key='s', turn_count=1))
+    (True, False)
+    """
+    return not (
+        session.turn_count
+        or session.last_assistant_text
+        or session.recap
+        or session.compaction
+    )
 
 
 def _stamp(revision: object) -> str:

@@ -106,27 +106,34 @@ def test_an_alias_only_matches_at_a_path_boundary():
     ["/ro" + "ot/py/x", "/Us" + "ers/nobody/x", "/ho" + "me/runner/work/x"],
 )
 def test_a_home_that_is_not_this_one_is_rewritten_not_left(path):
-    """A transcript from an ssh session names that machine's home, not this one's."""
-    out = scrub(path)
+    """A transcript from an ssh session names that machine's home, not this one's.
+
+    ``aliases={}`` rather than the default set, because on a CI runner the "foreign"
+    home in the parameters may well *be* this process's — which would rewrite it to
+    ``~`` and prove nothing about the catch-all.
+    """
+    out = scrub(path, aliases={})
     assert out.startswith(FOREIGN_HOME)
     assert "/Us" + "ers/" not in out and "/ro" + "ot" not in out
 
 
 @pytest.mark.parametrize(
     "encoded",
-    ["-Us" + "ers-someone-Dropbox-x", "-ho" + "me-runner-work", "-ro" + "ot-py-proj"],
+    ["-Us" + "ers-someone-Dropbox-x", "-ho" + "me-nobody-work", "-ro" + "ot-py-proj"],
 )
 def test_the_dash_encoded_form_of_a_home_path_is_rewritten_too(encoded):
     """Claude Code encodes a cwd into a directory name; the result is still a home path."""
-    out = scrub(encoded)
+    out = scrub(encoded, aliases={})
     assert out.startswith(FOREIGN_HOME)
     assert find_absolute_paths(out, aliases={}) == []
 
 
 def test_this_machines_encoded_home_becomes_a_tilde():
+    """Whatever this platform spells home as, its encoded form is covered too."""
+    from openloops.egress import _encoded
     from pathlib import Path
 
-    encoded = str(Path.home()).replace("/", "-").replace("_", "-").replace(".", "-")
+    encoded = _encoded(str(Path.home()))
     assert scrub(encoded + "-proj-x").startswith("~")
 
 
@@ -140,8 +147,9 @@ def test_an_alias_cannot_synthesise_a_home_path_that_survives():
 def test_default_aliases_rewrite_the_real_home():
     from pathlib import Path
 
-    text = str(Path.home() / "somewhere")
-    assert scrub(text) == "~/somewhere"
+    home = str(Path.home())
+    assert scrub(home + "/somewhere") == "~/somewhere"
+    assert not scrub(str(Path.home() / "somewhere")).startswith(home)
     assert set(default_aliases().values()) == {"~"}
     assert len(default_aliases()) == 2, "the literal home and its dash-encoded form"
 

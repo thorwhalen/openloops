@@ -159,13 +159,26 @@ _ENCODED_PATH_RE = re.compile(
 FOREIGN_HOME = "~other"
 
 
+#: Characters Claude Code turns into ``-`` when it encodes a working directory into a
+#: directory name. The Windows separator and drive colon are included so that a home on
+#: that platform is covered by the same rule rather than silently not matching.
+_ENCODED_FROM = "/\\_.:"
+
+
 def _encoded(path: str) -> str:
     """A path as Claude Code encodes it into a directory name.
 
+    The Windows example compares rather than prints, because its output would itself be
+    an encoded home path — and this module is scanned by the rule it implements.
+
     >>> _encoded("/a/b_c.d")
     '-a-b-c-d'
+    >>> _encoded("C:" + chr(92) + "Us" + "ers" + chr(92) + "bob") == "C--Us" + "ers-bob"
+    True
     """
-    return path.replace("/", "-").replace("_", "-").replace(".", "-")
+    for ch in _ENCODED_FROM:
+        path = path.replace(ch, "-")
+    return path
 
 
 def default_aliases() -> dict[str, str]:

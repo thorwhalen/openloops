@@ -106,8 +106,8 @@ def claude_projects_dir(root: str | Path | None = None) -> Path:
     Resolution order: the *root* argument, then ``CLAUDE_PROJECTS_DIR``, then
     ``~/.claude/projects``.
 
-    >>> claude_projects_dir('/tmp/x')
-    PosixPath('/tmp/x')
+    >>> claude_projects_dir('/tmp/x').name
+    'x'
     """
     if root is not None:
         return Path(root).expanduser()
