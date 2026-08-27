@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openloops.__main__ &mdash; openloops 0.1.5 documentation</title>
+  <title>openloops.__main__ &mdash; openloops 0.1.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=59fadc99"></script>
+      <script src="../../_static/documentation_options.js?v=6e0256f3"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -52,10 +52,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_sync.html">openloops._sync</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/base.html">openloops.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/blockers.html">openloops.blockers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/dashboard.html">openloops.dashboard</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/digest.html">openloops.digest</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/egress.html">openloops.egress</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/job.html">openloops.job</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/obligations.html">openloops.obligations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/skills.html">openloops.skills</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/store.html">openloops.store</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/tools.html">openloops.tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/transcripts.html">openloops.transcripts</a></li>
@@ -106,6 +108,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops</span><span class="w"> </span><span class="kn">import</span> <span class="n">job</span> <span class="k">as</span> <span class="n">_job</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops</span><span class="w"> </span><span class="kn">import</span> <span class="n">skills</span> <span class="k">as</span> <span class="n">_skills</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops</span><span class="w"> </span><span class="kn">import</span> <span class="n">tools</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops.blockers</span><span class="w"> </span><span class="kn">import</span> <span class="n">DFLT_CANDIDATE_LIMIT</span><span class="p">,</span> <span class="n">UNBLOCKED</span><span class="p">,</span> <span class="n">UNKNOWN</span>
 
@@ -377,6 +380,106 @@
     <span class="p">)</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_install_report</span><span class="p">(</span><span class="n">plan</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Render :func:`openloops.skills.install_skills`. Every row prints its own reason.</span>
+
+<span class="sd">    The reason is never dropped: ``conflict`` without it is a refusal with no way to act</span>
+<span class="sd">    on it, and ``ok`` without it looks like nothing happened.</span>
+<span class="sd">    """</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'would install into'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">plan</span><span class="p">[</span><span class="s1">'dry_run'</span><span class="p">]</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'installed into'</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">plan</span><span class="p">[</span><span class="s1">'target'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"  method: </span><span class="si">{</span><span class="n">plan</span><span class="p">[</span><span class="s1">'method'</span><span class="p">]</span><span class="si">}</span><span class="s2">   "</span>
+        <span class="o">+</span> <span class="s2">"   "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">state</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">state</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">plan</span><span class="p">[</span><span class="s2">"counts"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()),</span>
+        <span class="s2">""</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">plan</span><span class="p">[</span><span class="s2">"actions"</span><span class="p">]:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">'action'</span><span class="p">]</span><span class="si">:</span><span class="s2">&lt;9</span><span class="si">}{</span><span class="n">row</span><span class="p">[</span><span class="s1">'kind'</span><span class="p">]</span><span class="si">:</span><span class="s2">&lt;7</span><span class="si">}{</span><span class="n">row</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">:</span><span class="s2">&lt;26</span><span class="si">}{</span><span class="n">row</span><span class="p">[</span><span class="s1">'reason'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"                  -&gt; </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">'destination'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">plan</span><span class="p">[</span><span class="s2">"counts"</span><span class="p">][</span><span class="s2">"conflict"</span><span class="p">]:</span>
+        <span class="c1"># Nothing was touched at those destinations, and saying so is the whole point:</span>
+        <span class="c1"># a skill someone wrote by hand is theirs, and eating it silently would be a</span>
+        <span class="c1"># worse failure than not installing at all.</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">"conflict means nothing was written there. Look at the file, then re-run "</span>
+            <span class="s2">"with --force to replace it."</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">dashboard</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">out</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_CANDIDATE_LIMIT</span><span class="p">,</span>
+    <span class="n">sessions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span>
+    <span class="n">no_verify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">no_resolve</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">fragment</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">owners</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Render all three answers as one self-contained HTML page you can look at.</span>
+
+<span class="sd">    Writes the page to `--out FILE`, or to stdout so you can pipe it: `ol dashboard &gt;</span>
+<span class="sd">    board.html`. It carries no stylesheet, no script and no request to anywhere, which</span>
+<span class="sd">    is also why it is a *snapshot* — a page cannot re-check anything, so it stamps the</span>
+<span class="sd">    moment it was made and says so in its largest type.</span>
+
+<span class="sd">    `--fragment` drops the document scaffold for a host that supplies its own `&lt;head&gt;`,</span>
+<span class="sd">    which is what publishing it somewhere usually wants. `--sessions` bounds the</span>
+<span class="sd">    in-flight register; the true total is printed either way.</span>
+<span class="sd">    """</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">tools</span><span class="o">.</span><span class="n">dashboard</span><span class="p">(</span>
+        <span class="n">verify</span><span class="o">=</span><span class="ow">not</span> <span class="n">no_verify</span><span class="p">,</span>
+        <span class="n">resolve</span><span class="o">=</span><span class="ow">not</span> <span class="n">no_resolve</span><span class="p">,</span>
+        <span class="n">candidate_limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+        <span class="n">max_sessions</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span>
+        <span class="n">standalone</span><span class="o">=</span><span class="ow">not</span> <span class="n">fragment</span><span class="p">,</span>
+        <span class="n">path</span><span class="o">=</span><span class="n">out</span><span class="p">,</span>
+        <span class="n">owners</span><span class="o">=</span><span class="p">[</span><span class="n">o</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="p">(</span><span class="n">owners</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">","</span><span class="p">,</span> <span class="s2">" "</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">out</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s2">"html"</span><span class="p">]</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">"counts"</span><span class="p">]</span>
+    <span class="n">figures</span> <span class="o">=</span> <span class="s2">"  "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="s1">'?'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="kc">None</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">value</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">counts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"wrote </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">'bytes'</span><span class="p">]</span><span class="si">}</span><span class="s2"> bytes to </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">'path'</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">  </span><span class="si">{</span><span class="n">figures</span><span class="si">}</span><span class="s2">"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">install_skills</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">only</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+    <span class="n">copy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Make the bundled skills and the sweep subagent visible to your coding agent.</span>
+
+<span class="sd">    Links `openloops` (the read skill), `openloops-needs-human` (the capture skill) and</span>
+<span class="sd">    the `openloops-sweep` subagent into `~/.claude`, or into `--target`. Linking rather</span>
+<span class="sd">    than copying means `pip install -U openloops` upgrades them too; `--copy` takes a</span>
+<span class="sd">    copy, which is also what happens by itself where symlinks are unavailable.</span>
+
+<span class="sd">    Re-running changes nothing. A destination that already holds something else reads</span>
+<span class="sd">    `conflict` and is left alone until `--force`. `--dry-run` prints the plan and</span>
+<span class="sd">    touches nothing.</span>
+
+<span class="sd">    `--only openloops,openloops-sweep` installs a subset. Use it when you already have</span>
+<span class="sd">    your own capture skill: two skills competing for the same triggers and answering</span>
+<span class="sd">    differently is worse than either one alone.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">_install_report</span><span class="p">(</span>
+        <span class="n">_skills</span><span class="o">.</span><span class="n">install_skills</span><span class="p">(</span>
+            <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
+            <span class="n">only</span><span class="o">=</span><span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">only</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">","</span><span class="p">,</span> <span class="s2">" "</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">if</span> <span class="n">n</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">,</span>
+            <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
+            <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">install_job</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">_job</span><span class="o">.</span><span class="n">DFLT_INTERVAL</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Install the periodic sync job (macOS launchd). Re-run to change the interval."""</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">_job</span><span class="o">.</span><span class="n">install</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">)</span>
@@ -412,10 +515,12 @@
     <span class="n">brief</span><span class="p">,</span>
     <span class="n">owed</span><span class="p">,</span>
     <span class="n">blocked</span><span class="p">,</span>
+    <span class="n">dashboard</span><span class="p">,</span>
     <span class="n">sync</span><span class="p">,</span>
     <span class="n">ls</span><span class="p">,</span>
     <span class="n">show</span><span class="p">,</span>
     <span class="n">status</span><span class="p">,</span>
+    <span class="n">install_skills</span><span class="p">,</span>
     <span class="n">install_job</span><span class="p">,</span>
     <span class="n">uninstall_job</span><span class="p">,</span>
     <span class="n">job_status</span><span class="p">,</span>

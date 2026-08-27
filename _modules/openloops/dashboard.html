@@ -1,0 +1,1366 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openloops.dashboard &mdash; openloops 0.1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=6e0256f3"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            openloops
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops.html">openloops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/__main__.html">openloops.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_classify.html">openloops._classify</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_sync.html">openloops._sync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/blockers.html">openloops.blockers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/dashboard.html">openloops.dashboard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/digest.html">openloops.digest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/egress.html">openloops.egress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/obligations.html">openloops.obligations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/skills.html">openloops.skills</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/store.html">openloops.store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/tools.html">openloops.tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/transcripts.html">openloops.transcripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">openloops</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">openloops.dashboard</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openloops.dashboard</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""One page you can look at instead of reading three command outputs.</span>
+
+<span class="sd">:func:`render_dashboard` takes what :func:`openloops.owed`, :func:`openloops.blocked`</span>
+<span class="sd">and :func:`openloops.ls` returned and renders a single self-contained HTML document —</span>
+<span class="sd">no stylesheet, no script, no font and no request to anywhere. That is not decoration:</span>
+<span class="sd">the page is meant to be published, and a published page runs no ``gh``, shells out to</span>
+<span class="sd">nothing and reaches no network.</span>
+
+<span class="sd">So **the page is a snapshot, and it says so in its largest type.** This module inverts</span>
+<span class="sd">the one rule :mod:`openloops.digest` holds to — a digest deliberately stamps no</span>
+<span class="sd">generation time so that regenerating it is byte-stable — because here the generation</span>
+<span class="sd">time is the whole claim. ``made_at`` is a required-in-practice argument rather than a</span>
+<span class="sd">hidden ``now()``, which is also what lets a test compare bytes.</span>
+
+<span class="sd">The four registers are ordered the way a person needs them, and the fourth is the one</span>
+<span class="sd">the package exists for:</span>
+
+<span class="sd">1. **Needs you now** — obligations still open, each printing the predicate that decided</span>
+<span class="sd">   it, unabbreviated, so a reader can disagree with the verdict rather than absorb it.</span>
+<span class="sd">2. **Free to proceed** — blocker edges that have all closed, led by how many days the</span>
+<span class="sd">   work has been free while nothing anywhere said so.</span>
+<span class="sd">3. **In flight** — what the sessions left open, newest last turn first.</span>
+<span class="sd">4. **Unknown** — every ``?``, with why. It carries the envelope-level failures too: an</span>
+<span class="sd">   ``owed`` that could not list is not "nothing owed", and rendering it as ``0`` would</span>
+<span class="sd">   make this page worse than no page. When the count really is zero the section says</span>
+<span class="sd">   which checks earned that, because a clean board with no provenance is the same lie</span>
+<span class="sd">   told quietly.</span>
+
+<span class="sd">Everything printed goes through :class:`_Sanitizer`, which is :func:`openloops.egress</span>
+<span class="sd">.scrub` plus HTML escaping plus a scheme allowlist on every link. A page that carries a</span>
+<span class="sd">repository name and an issue title is fine; one that carries a home path or a token is</span>
+<span class="sd">the failure ``openloops.egress`` exists to prevent, and this renderer scrubs its input</span>
+<span class="sd">rather than trusting it. A credential-shaped field is *withheld and counted*, never</span>
+<span class="sd">silently dropped — the count is printed in the footer.</span>
+
+<span class="sd">    &gt;&gt;&gt; html = render_dashboard({}, {}, [], made_at='2026-01-01T00:00:00Z')</span>
+<span class="sd">    &gt;&gt;&gt; '&lt;title&gt;' in html and 'snapshot' in html</span>
+<span class="sd">    True</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">html</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_html</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">OPEN</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.blockers</span><span class="w"> </span><span class="kn">import</span> <span class="n">BLOCKED</span><span class="p">,</span> <span class="n">UNBLOCKED</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.egress</span><span class="w"> </span><span class="kn">import</span> <span class="n">CredentialFound</span><span class="p">,</span> <span class="n">scrub</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.obligations</span><span class="w"> </span><span class="kn">import</span> <span class="n">DISCHARGED</span><span class="p">,</span> <span class="n">UNKNOWN</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"DFLT_MAX_SESSIONS"</span><span class="p">,</span>
+    <span class="s2">"DFLT_TITLE"</span><span class="p">,</span>
+    <span class="s2">"GAUGE_FULL_DAYS"</span><span class="p">,</span>
+    <span class="s2">"headline_counts"</span><span class="p">,</span>
+    <span class="s2">"render_dashboard"</span><span class="p">,</span>
+    <span class="s2">"unchecked_count"</span><span class="p">,</span>
+    <span class="s2">"unknown_count"</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1">#: What the page is called — in the tab, in a gallery, and in its own masthead.</span>
+<span class="n">DFLT_TITLE</span> <span class="o">=</span> <span class="s2">"Open Loops Board"</span>
+
+<span class="c1">#: How many session rows are printed. The register states the true total either way; a</span>
+<span class="c1">#: page that showed all 150-odd would bury the two registers above it.</span>
+<span class="n">DFLT_MAX_SESSIONS</span> <span class="o">=</span> <span class="mi">40</span>
+
+<span class="c1">#: How many low-confidence sessions the unknown register names one by one before it</span>
+<span class="c1">#: switches to counting them. Every one of them is still counted.</span>
+<span class="n">MAX_NAMED_SESSIONS</span> <span class="o">=</span> <span class="mi">8</span>
+
+<span class="c1">#: Where the age gauge tops out. Ninety days is the point past which the length of the</span>
+<span class="c1">#: bar stops being informative and the number beside it is doing all the work.</span>
+<span class="n">GAUGE_FULL_DAYS</span> <span class="o">=</span> <span class="mi">90</span>
+
+<span class="c1">#: How much of a predicate's output is printed. The predicate itself is never clipped —</span>
+<span class="c1">#: it is the reason to believe the verdict — but its output can be a pytest run.</span>
+<span class="n">MAX_EVIDENCE</span> <span class="o">=</span> <span class="mi">260</span>
+
+<span class="c1">#: Only these schemes become links. Every URL on this page comes out of a GitHub API</span>
+<span class="c1">#: payload, and a payload is input.</span>
+<span class="n">_LINK_SCHEMES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"https://"</span><span class="p">,</span> <span class="s2">"http://"</span><span class="p">)</span>
+
+<span class="n">_SECONDS_PER_DAY</span> <span class="o">=</span> <span class="mf">86400.0</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># The egress choke point. Nothing reaches the page except through here.</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_Sanitizer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Scrub, then escape. The single path from an envelope to the document.</span>
+
+<span class="sd">    Two failures are possible and they are treated differently, exactly as</span>
+<span class="sd">    :mod:`openloops.egress` prescribes. A home path is *rewritten* — it is an identifier</span>
+<span class="sd">    and the tail is the part a reader needs. A credential is *withheld and counted*: the</span>
+<span class="sd">    field is replaced by a visible notice naming the pattern class, never the text, and</span>
+<span class="sd">    :attr:`withheld` is printed in the footer so the run reports it rather than quietly</span>
+<span class="sd">    losing a field.</span>
+
+<span class="sd">    &gt;&gt;&gt; s = _Sanitizer()</span>
+<span class="sd">    &gt;&gt;&gt; s.text('a &lt; b')</span>
+<span class="sd">    'a &amp;lt; b'</span>
+<span class="sd">    &gt;&gt;&gt; s.text('token=' + 'ghp_' + 'A' * 36)</span>
+<span class="sd">    '[withheld: credential-shaped text (github_token)]'</span>
+<span class="sd">    &gt;&gt;&gt; s.withheld</span>
+<span class="sd">    ['github_token']</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aliases</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aliases</span> <span class="o">=</span> <span class="n">aliases</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">withheld</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""One field, safe to place in the document."""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">clean</span> <span class="o">=</span> <span class="n">scrub</span><span class="p">(</span><span class="s2">""</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">aliases</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">aliases</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">CredentialFound</span> <span class="k">as</span> <span class="n">found</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">withheld</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">pattern_name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">"[withheld: credential-shaped text (</span><span class="si">{</span><span class="n">found</span><span class="o">.</span><span class="n">pattern_name</span><span class="si">}</span><span class="s2">)]"</span>
+        <span class="k">return</span> <span class="n">_html</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">clean</span><span class="p">,</span> <span class="n">quote</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""A link target, or ``''`` when it is not one this page will follow."""</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="s2">""</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">raw</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">_LINK_SCHEMES</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s2">""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># Small readings of the data. None of them guess; all of them can answer "?".</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_moment</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""An ISO timestamp as a UTC datetime, or ``None`` when it will not parse.</span>
+
+<span class="sd">    Claude Code writes a trailing ``Z`` that ``fromisoformat`` refused until 3.11, and</span>
+<span class="sd">    every date on this page comes from a payload rather than from us.</span>
+
+<span class="sd">    &gt;&gt;&gt; _moment('2026-01-01T00:00:00Z').year</span>
+<span class="sd">    2026</span>
+<span class="sd">    &gt;&gt;&gt; _moment('sometime') is None</span>
+<span class="sd">    True</span>
+<span class="sd">    """</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">"Z"</span><span class="p">,</span> <span class="s2">"z"</span><span class="p">)):</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">"+00:00"</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">parsed</span> <span class="k">if</span> <span class="n">parsed</span><span class="o">.</span><span class="n">tzinfo</span> <span class="k">else</span> <span class="n">parsed</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_days_between</span><span class="p">(</span><span class="n">then</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whole days from *then* to *now*, or ``None`` when either cannot be read.</span>
+
+<span class="sd">    &gt;&gt;&gt; _days_between('2026-01-01T00:00:00Z', _moment('2026-01-04T06:00:00Z'))</span>
+<span class="sd">    3</span>
+<span class="sd">    """</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">_moment</span><span class="p">(</span><span class="n">then</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">now</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">((</span><span class="n">now</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">//</span> <span class="n">_SECONDS_PER_DAY</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_figure</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""How a count prints. ``None`` is ``?`` and is never rounded to a number."""</span>
+    <span class="k">return</span> <span class="s2">"?"</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_plural</span><span class="p">(</span><span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">noun</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plural</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``3 issues`` / ``1 issue``. A count that reads ``1 issues`` reads as generated.</span>
+
+<span class="sd">    &gt;&gt;&gt; _plural(1, 'issue'), _plural(2, 'issue')</span>
+<span class="sd">    ('1 issue', '2 issues')</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">noun</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">(</span><span class="n">plural</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">noun</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">'s'</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_clip</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">MAX_EVIDENCE</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Bound a field, saying so when it bites — the idiom :mod:`openloops.digest` uses.</span>
+
+<span class="sd">    &gt;&gt;&gt; _clip('abcdef', 3)</span>
+<span class="sd">    'abc … clipped at 3 characters'</span>
+<span class="sd">    """</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="n">text</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">limit</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">text</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">text</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="si">}</span><span class="s2"> … clipped at </span><span class="si">{</span><span class="n">limit</span><span class="si">}</span><span class="s2"> characters"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_counts</span><span class="p">(</span><span class="n">envelope</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One count from an envelope, or ``None`` when the envelope never got to read.</span>
+
+<span class="sd">    ``listed: False`` means the counts are zeros that mean nothing — ADR-013's rule, and</span>
+<span class="sd">    the single most important line in this module.</span>
+
+<span class="sd">    &gt;&gt;&gt; _counts({'listed': False, 'counts': {'open': 0}}, 'open') is None</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; _counts({'listed': True, 'counts': {'open': 4}}, 'open')</span>
+<span class="sd">    4</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">envelope</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">envelope</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"counts"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_rows</span><span class="p">(</span><span class="n">envelope</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="n">states</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""The rows of an envelope in the given states, in the order the envelope sorted."""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">envelope</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">row</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">envelope</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"rows"</span><span class="p">,</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">)</span> <span class="ow">in</span> <span class="n">states</span><span class="p">]</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># Fragments. Each returns a string; none of them touch the outside world.</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_gauge</span><span class="p">(</span><span class="n">days</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">tone</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A hairline bar whose length is how long this has been sitting.</span>
+
+<span class="sd">    The number beside it is the fact; the bar is what makes a register scannable, which</span>
+<span class="sd">    is the difference between a page you read and a page you glance at.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">days</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">'&lt;p class="gauge gauge--unsure"&gt;&lt;span style="width:100%"&gt;&lt;/span&gt;&lt;/p&gt;'</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">days</span> <span class="o">/</span> <span class="n">GAUGE_FULL_DAYS</span><span class="p">))</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'&lt;p class="gauge gauge--</span><span class="si">{</span><span class="n">tone</span><span class="si">}</span><span class="s1">"&gt;&lt;span style="width:</span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">)</span><span class="si">}</span><span class="s1">%"&gt;&lt;/span&gt;&lt;/p&gt;'</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_rail</span><span class="p">(</span><span class="n">chip</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tone</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">days</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"d"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The fixed left column of every row: what state it is in, and for how long."""</span>
+    <span class="n">figure</span> <span class="o">=</span> <span class="s2">"?"</span> <span class="k">if</span> <span class="n">days</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">days</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">'&lt;div class="rail"&gt;'</span>
+        <span class="sa">f</span><span class="s1">'&lt;span class="chip chip--</span><span class="si">{</span><span class="n">tone</span><span class="si">}</span><span class="s1">"&gt;</span><span class="si">{</span><span class="n">chip</span><span class="si">}</span><span class="s1">&lt;/span&gt;'</span>
+        <span class="sa">f</span><span class="s1">'&lt;span class="age"&gt;&lt;b&gt;</span><span class="si">{</span><span class="n">figure</span><span class="si">}</span><span class="s1">&lt;/b&gt;&lt;i&gt;</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s1">&lt;/i&gt;&lt;/span&gt;'</span>
+        <span class="sa">f</span><span class="s2">"&lt;/div&gt;"</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_ref</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``owner/name#number``, linked when the payload gave a URL this page will follow."""</span>
+    <span class="n">ref</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'repo'</span><span class="p">))</span><span class="si">}</span><span class="s2">#</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'number'</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">safe</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"url"</span><span class="p">))</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'&lt;a class="ref" href="</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s1">"&gt;</span><span class="si">{</span><span class="n">ref</span><span class="si">}</span><span class="s1">&lt;/a&gt;'</span> <span class="k">if</span> <span class="n">url</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">'&lt;span class="ref"&gt;</span><span class="si">{</span><span class="n">ref</span><span class="si">}</span><span class="s1">&lt;/span&gt;'</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_obligation_row</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">tone</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chip</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">days</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"age_days"</span><span class="p">)</span>
+    <span class="n">days</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">days</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">days</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">predicate</span> <span class="o">=</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"predicate"</span><span class="p">))</span> <span class="ow">or</span> <span class="s2">"(none — nothing to re-check)"</span>
+    <span class="n">evidence</span> <span class="o">=</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">_clip</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"evidence"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)))</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s1">'&lt;li class="row row--</span><span class="si">{</span><span class="n">tone</span><span class="si">}</span><span class="s1">"&gt;'</span><span class="p">,</span>
+        <span class="n">_rail</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">tone</span><span class="p">,</span> <span class="n">days</span><span class="p">),</span>
+        <span class="s1">'&lt;div class="body"&gt;'</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s1">'&lt;p class="ask"&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">))</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s1">'&lt;p class="where"&gt;</span><span class="si">{</span><span class="n">_ref</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span><span class="w"> </span><span class="n">row</span><span class="p">)</span><span class="si">}</span><span class="s1"> &lt;span class="sep"&gt;·&lt;/span&gt; opened '</span>
+        <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"created"</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">""</span><span class="p">)[:</span><span class="mi">10</span><span class="p">])</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">"?"</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span><span class="p">,</span>
+        <span class="c1"># Never abbreviated. It is the reason to believe the verdict, and a predicate</span>
+        <span class="c1"># you cannot read is a verdict you cannot disagree with.</span>
+        <span class="sa">f</span><span class="s1">'&lt;p class="line"&gt;&lt;span class="tag"&gt;verify&lt;/span&gt;&lt;code&gt;</span><span class="si">{</span><span class="n">predicate</span><span class="si">}</span><span class="s1">&lt;/code&gt;&lt;/p&gt;'</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">evidence</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'&lt;p class="line"&gt;&lt;span class="tag"&gt;said&lt;/span&gt;&lt;code&gt;</span><span class="si">{</span><span class="n">evidence</span><span class="si">}</span><span class="s1">&lt;/code&gt;&lt;/p&gt;'</span><span class="p">)</span>
+    <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"&lt;/div&gt;"</span><span class="p">,</span> <span class="n">_gauge</span><span class="p">(</span><span class="n">days</span><span class="p">,</span> <span class="n">tone</span><span class="p">),</span> <span class="s2">"&lt;/li&gt;"</span><span class="p">]</span>
+    <span class="k">return</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_unblocked_row</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">free</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"unblocked_days"</span><span class="p">)</span>
+    <span class="n">free</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">free</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">free</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">refs</span> <span class="o">=</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ref"</span><span class="p">))</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"blockers"</span><span class="p">,</span> <span class="p">()))</span>
+    <span class="n">age</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"age_days"</span><span class="p">)</span>
+    <span class="n">age</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">age</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">age</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="s1">'&lt;li class="row row--free"&gt;'</span><span class="p">,</span>
+            <span class="n">_rail</span><span class="p">(</span><span class="s2">"free"</span><span class="p">,</span> <span class="s2">"free"</span><span class="p">,</span> <span class="n">free</span><span class="p">),</span>
+            <span class="s1">'&lt;div class="body"&gt;'</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">'&lt;p class="ask"&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">))</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">'&lt;p class="where"&gt;</span><span class="si">{</span><span class="n">_ref</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span><span class="w"> </span><span class="n">row</span><span class="p">)</span><span class="si">}</span><span class="s1"> &lt;span class="sep"&gt;·&lt;/span&gt; open '</span>
+            <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">_figure</span><span class="p">(</span><span class="n">age</span><span class="p">)</span><span class="si">}</span><span class="s1">d&lt;/p&gt;'</span><span class="p">,</span>
+            <span class="c1"># The number nobody currently has, and the reason this register leads.</span>
+            <span class="sa">f</span><span class="s1">'&lt;p class="verdict"&gt;Free to proceed for </span><span class="si">{</span><span class="n">_figure</span><span class="p">(</span><span class="n">free</span><span class="p">)</span><span class="si">}</span><span class="s1"> days, and nothing '</span>
+            <span class="s2">"anywhere has said so.&lt;/p&gt;"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">'&lt;p class="line"&gt;&lt;span class="tag"&gt;was on&lt;/span&gt;&lt;code&gt;</span><span class="si">{</span><span class="n">refs</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">"(unresolved)"</span><span class="si">}</span><span class="s1">'</span>
+            <span class="s2">"&lt;/code&gt;&lt;/p&gt;"</span><span class="p">,</span>
+            <span class="s2">"&lt;/div&gt;"</span><span class="p">,</span>
+            <span class="n">_gauge</span><span class="p">(</span><span class="n">free</span><span class="p">,</span> <span class="s2">"free"</span><span class="p">),</span>
+            <span class="s2">"&lt;/li&gt;"</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_waiting_row</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A still-blocked edge, one dense line. The foreign repo is the whole content."""</span>
+    <span class="n">open_refs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ref"</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"blockers"</span><span class="p">,</span> <span class="p">())</span>
+        <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"closed"</span>
+    <span class="p">]</span>
+    <span class="n">days</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"age_days"</span><span class="p">)</span>
+    <span class="n">days</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">days</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">days</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="s1">'&lt;li class="thin"&gt;'</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">'&lt;span class="thin-age"&gt;</span><span class="si">{</span><span class="n">_figure</span><span class="p">(</span><span class="n">days</span><span class="p">)</span><span class="si">}</span><span class="s1">d&lt;/span&gt;'</span><span class="p">,</span>
+            <span class="c1"># Ref and title share one flowing line rather than two fixed columns: a</span>
+            <span class="c1"># `owner/name#number` is as long as the repository is, and a column sized</span>
+            <span class="c1"># for the short ones silently overlaps the title on the long ones.</span>
+            <span class="sa">f</span><span class="s1">'&lt;p class="thin-ask"&gt;</span><span class="si">{</span><span class="n">_ref</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span><span class="w"> </span><span class="n">row</span><span class="p">)</span><span class="si">}</span><span class="s1"> &lt;span class="sep"&gt;·&lt;/span&gt; '</span>
+            <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">))</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">'&lt;code class="thin-on"&gt;</span><span class="si">{</span><span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">open_refs</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">"(unresolved)"</span><span class="si">}</span><span class="s1">&lt;/code&gt;'</span><span class="p">,</span>
+            <span class="s2">"&lt;/li&gt;"</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_session_row</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">days</span> <span class="o">=</span> <span class="n">_days_between</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"last_turn"</span><span class="p">),</span> <span class="n">now</span><span class="p">)</span>
+    <span class="n">low</span> <span class="o">=</span> <span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"confidence"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"high"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"high"</span>
+    <span class="n">tone</span> <span class="o">=</span> <span class="s2">"unsure"</span> <span class="k">if</span> <span class="n">low</span> <span class="k">else</span> <span class="s2">"flight"</span>
+    <span class="n">heading</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ai_title"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"project"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"(untitled)"</span>
+    <span class="n">where</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"project"</span><span class="p">),</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"branches"</span><span class="p">),</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'turns'</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'?'</span><span class="si">}</span><span class="s2"> turns"</span><span class="p">]</span>
+    <span class="n">session</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"session"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="sa">f</span><span class="s1">'&lt;li class="row row--</span><span class="si">{</span><span class="n">tone</span><span class="si">}</span><span class="s1">"&gt;'</span><span class="p">,</span>
+            <span class="n">_rail</span><span class="p">(</span><span class="s2">"open"</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">low</span> <span class="k">else</span> <span class="s2">"open ?"</span><span class="p">,</span> <span class="n">tone</span><span class="p">,</span> <span class="n">days</span><span class="p">),</span>
+            <span class="s1">'&lt;div class="body"&gt;'</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">'&lt;p class="ask"&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">heading</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span><span class="p">,</span>
+            <span class="s1">'&lt;p class="where"&gt;'</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s1">' &lt;span class="sep"&gt;·&lt;/span&gt; '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">where</span> <span class="k">if</span> <span class="n">part</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">"&lt;/p&gt;"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">'&lt;p class="line"&gt;&lt;span class="tag"&gt;read it&lt;/span&gt;&lt;code&gt;ol show '</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">session</span><span class="p">[:</span><span class="mi">8</span><span class="p">])</span><span class="si">}</span><span class="s2">&lt;/code&gt;&lt;/p&gt;"</span><span class="p">,</span>
+            <span class="p">(</span>
+                <span class="s1">'&lt;p class="caveat"&gt;Open only because nothing in it said otherwise — the '</span>
+                <span class="s2">"classifier did not read a closing line.&lt;/p&gt;"</span>
+                <span class="k">if</span> <span class="n">low</span>
+                <span class="k">else</span> <span class="s2">""</span>
+            <span class="p">),</span>
+            <span class="s2">"&lt;/div&gt;"</span><span class="p">,</span>
+            <span class="n">_gauge</span><span class="p">(</span><span class="n">days</span><span class="p">,</span> <span class="n">tone</span><span class="p">),</span>
+            <span class="s2">"&lt;/li&gt;"</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_register</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">ident</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">figure</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tone</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rule</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One band: a heading, the count in the largest figure on the page, and its rule."""</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">'&lt;section class="register register--</span><span class="si">{</span><span class="n">tone</span><span class="si">}</span><span class="s1">" id="</span><span class="si">{</span><span class="n">ident</span><span class="si">}</span><span class="s1">"&gt;'</span>
+        <span class="sa">f</span><span class="s1">'&lt;div class="register-head"&gt;'</span>
+        <span class="sa">f</span><span class="s1">'&lt;p class="figure"&gt;</span><span class="si">{</span><span class="n">figure</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span>
+        <span class="sa">f</span><span class="s2">"&lt;div&gt;&lt;h2&gt;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&lt;/h2&gt;&lt;p class=</span><span class="se">\"</span><span class="s2">rule</span><span class="se">\"</span><span class="s2">&gt;</span><span class="si">{</span><span class="n">rule</span><span class="si">}</span><span class="s2">&lt;/p&gt;&lt;/div&gt;"</span>
+        <span class="sa">f</span><span class="s2">"&lt;/div&gt;</span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="s2">&lt;/section&gt;"</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_empty</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'&lt;p class="empty"&gt;</span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># The unknown register: assembled first, because the masthead reports its size.</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_unknowns</span><span class="p">(</span>
+    <span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span>
+    <span class="n">owed</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">blocked</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">sessions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Everything on this page that reads ``?``, each with why it does.</span>
+
+<span class="sd">    Ordered by how badly it damages the page above it: an envelope that never listed</span>
+<span class="sd">    invalidates a whole register, a caveat merely bounds one.</span>
+<span class="sd">    """</span>
+    <span class="n">items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">envelope</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">headline</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="p">(</span>
+            <span class="n">owed</span><span class="p">,</span>
+            <span class="s2">"ol owed"</span><span class="p">,</span>
+            <span class="s2">"The obligation listing itself failed"</span><span class="p">,</span>
+            <span class="s2">"Every obligation count on this page is ? — not zero."</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="p">(</span>
+            <span class="n">blocked</span><span class="p">,</span>
+            <span class="s2">"ol blocked"</span><span class="p">,</span>
+            <span class="s2">"Cross-repo discovery itself failed"</span><span class="p">,</span>
+            <span class="s2">"Every cross-repo count on this page is ? — not zero."</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">envelope</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">"kind"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                    <span class="s2">"title"</span><span class="p">:</span> <span class="n">headline</span><span class="p">,</span>
+                    <span class="s2">"why"</span><span class="p">:</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">envelope</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"error"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"no reason was reported"</span><span class="p">),</span>
+                    <span class="s2">"note"</span><span class="p">:</span> <span class="n">note</span><span class="p">,</span>
+                    <span class="s2">"weight"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"checked"</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"kind"</span><span class="p">:</span> <span class="s2">"ol owed"</span><span class="p">,</span>
+                <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Predicates were not evaluated"</span><span class="p">,</span>
+                <span class="s2">"why"</span><span class="p">:</span> <span class="s2">"Run with verification off, so every row carrying a predicate reads ?."</span><span class="p">,</span>
+                <span class="s2">"note"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+                <span class="c1"># Those rows already read `unknown` and are already counted below;</span>
+                <span class="c1"># weighting this line too would count each of them twice.</span>
+                <span class="s2">"weight"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"resolved"</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"kind"</span><span class="p">:</span> <span class="s2">"ol blocked"</span><span class="p">,</span>
+                <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Blocker edges were not resolved"</span><span class="p">,</span>
+                <span class="s2">"why"</span><span class="p">:</span> <span class="s2">"Run with resolution off, so every row reads ?."</span><span class="p">,</span>
+                <span class="s2">"note"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+                <span class="s2">"weight"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">envelope</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">what</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">owed</span><span class="p">,</span> <span class="s2">"ol owed"</span><span class="p">,</span> <span class="s2">"result set"</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">blocked</span><span class="p">,</span> <span class="s2">"ol blocked"</span><span class="p">,</span> <span class="s2">"candidate list"</span><span class="p">),</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">envelope</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">envelope</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"truncated"</span><span class="p">):</span>
+            <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">"kind"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                    <span class="s2">"title"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"The </span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2"> hit its cap"</span><span class="p">,</span>
+                    <span class="s2">"why"</span><span class="p">:</span> <span class="s2">"There is more than this page shows; the counts are a floor."</span><span class="p">,</span>
+                    <span class="s2">"note"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+                    <span class="s2">"weight"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">_rows</span><span class="p">(</span><span class="n">owed</span><span class="p">,</span> <span class="n">UNKNOWN</span><span class="p">):</span>
+        <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"kind"</span><span class="p">:</span> <span class="s2">"obligation"</span><span class="p">,</span>
+                <span class="s2">"title"</span><span class="p">:</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">)),</span>
+                <span class="s2">"why"</span><span class="p">:</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">_clip</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"evidence"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"nothing could be checked"</span><span class="p">))),</span>
+                <span class="s2">"note"</span><span class="p">:</span> <span class="n">_ref</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">row</span><span class="p">),</span>
+                <span class="s2">"weight"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">_rows</span><span class="p">(</span><span class="n">blocked</span><span class="p">,</span> <span class="n">UNKNOWN</span><span class="p">):</span>
+        <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"kind"</span><span class="p">:</span> <span class="s2">"cross-repo"</span><span class="p">,</span>
+                <span class="s2">"title"</span><span class="p">:</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">)),</span>
+                <span class="s2">"why"</span><span class="p">:</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">_clip</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"evidence"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"the edges could not be read"</span><span class="p">))),</span>
+                <span class="s2">"note"</span><span class="p">:</span> <span class="n">_ref</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">row</span><span class="p">),</span>
+                <span class="s2">"weight"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sessions</span><span class="p">:</span>
+        <span class="c1"># `ls` is the one of the three that returns a bare list rather than an envelope,</span>
+        <span class="c1"># so an empty store cannot be told apart from a store nothing has written to.</span>
+        <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"kind"</span><span class="p">:</span> <span class="s2">"ol ls"</span><span class="p">,</span>
+                <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"No digests in the store"</span><span class="p">,</span>
+                <span class="s2">"why"</span><span class="p">:</span> <span class="s2">"Either nothing is open or `ol sync` has never run on this machine. "</span>
+                <span class="s2">"A list, unlike an envelope, cannot tell the two apart."</span><span class="p">,</span>
+                <span class="s2">"note"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+                <span class="s2">"weight"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+    <span class="n">low</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">sessions</span> <span class="k">if</span> <span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"confidence"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"high"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"high"</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">low</span><span class="p">:</span>
+        <span class="n">named</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ai_title"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"session"</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">low</span><span class="p">[:</span><span class="n">MAX_NAMED_SESSIONS</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">more</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">", and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">low</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">MAX_NAMED_SESSIONS</span><span class="si">}</span><span class="s2"> more"</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">low</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MAX_NAMED_SESSIONS</span> <span class="k">else</span> <span class="s2">""</span>
+        <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"kind"</span><span class="p">:</span> <span class="s2">"ol ls"</span><span class="p">,</span>
+                <span class="s2">"title"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">low</span><span class="p">)</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">)</span><span class="si">}</span><span class="s2"> open sessions are open by default"</span><span class="p">,</span>
+                <span class="s2">"why"</span><span class="p">:</span> <span class="s2">"Nothing in the closing turn said the work was finished, so the "</span>
+                <span class="s2">"classifier left them open rather than claiming either way."</span><span class="p">,</span>
+                <span class="s2">"note"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">named</span><span class="si">}{</span><span class="n">more</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="c1"># Not 1. This one item stands for forty rows, and a headline that</span>
+                <span class="c1"># counted list entries instead of `?` rows would report `1` for them --</span>
+                <span class="c1"># tidier, smaller, and exactly the failure this register exists to name.</span>
+                <span class="s2">"weight"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">low</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">items</span>
+
+
+<div class="viewcode-block" id="unknown_count">
+<a class="viewcode-back" href="../../module_docs/openloops/dashboard.html#openloops.unknown_count">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">unknown_count</span><span class="p">(</span>
+    <span class="n">owed</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">blocked</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">sessions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""How many things read ``?``, or ``None`` when even that cannot be counted.</span>
+
+<span class="sd">    A register that never listed could be hiding any number of unknown rows, so the</span>
+<span class="sd">    headline figure for unknowns is itself unknown. Reporting ``2`` there — the two</span>
+<span class="sd">    failures we happen to know about — is the exact shape of the lie this page is</span>
+<span class="sd">    against, and it is a lie a reader has no way to spot.</span>
+
+<span class="sd">    It counts the rows that read ``?``, not the entries in the list below: one entry</span>
+<span class="sd">    can stand for forty sessions, and reporting ``1`` for those would be the tidier</span>
+<span class="sd">    number rather than the true one.</span>
+
+<span class="sd">    &gt;&gt;&gt; unknown_count({'listed': True, 'rows': []}, {'listed': True, 'rows': []}, [{}])</span>
+<span class="sd">    0</span>
+<span class="sd">    &gt;&gt;&gt; lows = [{'confidence': 'low'}] * 5</span>
+<span class="sd">    &gt;&gt;&gt; unknown_count({'listed': True, 'rows': []}, {'listed': True, 'rows': []}, lows)</span>
+<span class="sd">    5</span>
+<span class="sd">    &gt;&gt;&gt; unknown_count({'listed': False}, {'listed': True, 'rows': []}, [{}]) is None</span>
+<span class="sd">    True</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">_unknowns</span><span class="p">(</span><span class="n">_Sanitizer</span><span class="p">(),</span> <span class="nb">dict</span><span class="p">(</span><span class="n">owed</span><span class="p">),</span> <span class="nb">dict</span><span class="p">(</span><span class="n">blocked</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="n">sessions</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"weight"</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="unchecked_count">
+<a class="viewcode-back" href="../../module_docs/openloops/dashboard.html#openloops.unchecked_count">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">unchecked_count</span><span class="p">(</span>
+    <span class="n">owed</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">blocked</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""How many OBLIGATIONS could not be checked against the world. ``None`` if unknowable.</span>
+
+<span class="sd">    Deliberately narrower than :func:`unknown_count`, and the two must not be merged in</span>
+<span class="sd">    the masthead. A `?` on an obligation means *the world could not be reached* — a</span>
+<span class="sd">    timeout, a missing ``gh``, an untrusted owner. A low-confidence session digest means</span>
+<span class="sd">    something else entirely: the digest half checks nothing against the world by design,</span>
+<span class="sd">    so it has nothing it was unable to check. Rolling forty of the second into the first</span>
+<span class="sd">    reports a crisis of forty when the real number is one, and in the alarming direction.</span>
+
+<span class="sd">    &gt;&gt;&gt; unchecked_count({'listed': True, 'rows': [{'state': 'unknown'}]},</span>
+<span class="sd">    ...                 {'listed': True, 'rows': []})</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; unchecked_count({'listed': False}, {'listed': True, 'rows': []}) is None</span>
+<span class="sd">    True</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span>
+        <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">envelope</span> <span class="ow">in</span> <span class="p">(</span><span class="n">owed</span><span class="p">,</span> <span class="n">blocked</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">envelope</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"rows"</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"unknown"</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="headline_counts">
+<a class="viewcode-back" href="../../module_docs/openloops/dashboard.html#openloops.headline_counts">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">headline_counts</span><span class="p">(</span>
+    <span class="n">owed</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">blocked</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">sessions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The four figures across the top of the page. ``None`` is ``?``, never a zero.</span>
+
+<span class="sd">    Shared by the masthead and by :func:`openloops.tools.dashboard`, so the number a</span>
+<span class="sd">    caller reads back is the number the page printed.</span>
+
+<span class="sd">    &gt;&gt;&gt; headline_counts({'listed': True, 'counts': {'open': 2}, 'rows': []},</span>
+<span class="sd">    ...                 {'listed': False}, [])['free_to_proceed'] is None</span>
+<span class="sd">    True</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"needs_you"</span><span class="p">:</span> <span class="n">_counts</span><span class="p">(</span><span class="n">owed</span><span class="p">,</span> <span class="n">OPEN</span><span class="p">),</span>
+        <span class="s2">"free_to_proceed"</span><span class="p">:</span> <span class="n">_counts</span><span class="p">(</span><span class="n">blocked</span><span class="p">,</span> <span class="n">UNBLOCKED</span><span class="p">),</span>
+        <span class="s2">"in_flight"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">),</span>
+        <span class="c1"># Two figures, not one. `unchecked` is the alarming number -- obligations the</span>
+        <span class="c1"># world would not answer for. `low_confidence` is the calm one: sessions the</span>
+        <span class="c1"># classifier left open because nothing said otherwise, which is its documented</span>
+        <span class="c1"># default and not a failure to check anything. Merging them reported 42 on a</span>
+        <span class="c1"># fleet whose real unchecked count was 1.</span>
+        <span class="s2">"unchecked"</span><span class="p">:</span> <span class="n">unchecked_count</span><span class="p">(</span><span class="n">owed</span><span class="p">,</span> <span class="n">blocked</span><span class="p">),</span>
+        <span class="s2">"low_confidence"</span><span class="p">:</span> <span class="n">_low_confidence_count</span><span class="p">(</span><span class="n">sessions</span><span class="p">),</span>
+        <span class="s2">"unknown"</span><span class="p">:</span> <span class="n">unknown_count</span><span class="p">(</span><span class="n">owed</span><span class="p">,</span> <span class="n">blocked</span><span class="p">,</span> <span class="n">sessions</span><span class="p">),</span>
+    <span class="p">}</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_low_confidence_count</span><span class="p">(</span><span class="n">sessions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Sessions open only because nothing in them said they were finished."""</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">sessions</span> <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"confidence"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"low"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_earned</span><span class="p">(</span><span class="n">owed</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">blocked</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">sessions</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""What was actually checked. Printed when nothing reads ``?``.</span>
+
+<span class="sd">    A clean board with no provenance is the same false claim as a hidden ``?``, told</span>
+<span class="sd">    more quietly — so an empty unknown register has to show what earned it.</span>
+<span class="sd">    """</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"checked"</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"counts"</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">"`ol owed` read "</span> <span class="o">+</span> <span class="n">_plural</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"total"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">"obligation"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" and ran "</span>
+            <span class="o">+</span> <span class="n">_plural</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"with_predicate"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">"predicate"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"."</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"resolved"</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"counts"</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">"`ol blocked` resolved every edge on "</span> <span class="o">+</span> <span class="n">_plural</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"total"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">"issue"</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">" from "</span> <span class="o">+</span> <span class="n">_plural</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"candidates"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">"candidate"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"."</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">sessions</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">"`ol ls` read "</span> <span class="o">+</span> <span class="n">_plural</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">),</span> <span class="s2">"open digest"</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">", all with a stated reason."</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">lines</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># The document.</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="render_dashboard">
+<a class="viewcode-back" href="../../module_docs/openloops/dashboard.html#openloops.render_dashboard">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">render_dashboard</span><span class="p">(</span>
+    <span class="n">owed</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">blocked</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">sessions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">made_at</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>  <span class="c1"># "" omits it; a hostname on a published page is a needless leak</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DFLT_TITLE</span><span class="p">,</span>
+    <span class="n">max_sessions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_MAX_SESSIONS</span><span class="p">,</span>
+    <span class="n">standalone</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">aliases</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The three envelopes as one self-contained HTML page. No network, no script.</span>
+
+<span class="sd">    ``owed`` and ``blocked`` are the envelopes :func:`openloops.owed` and</span>
+<span class="sd">    :func:`openloops.blocked` return; ``sessions`` is the list :func:`openloops.ls`</span>
+<span class="sd">    returns. All three may be empty mappings, and an envelope whose ``listed`` is</span>
+<span class="sd">    ``False`` renders as ``?`` throughout rather than as zero.</span>
+
+<span class="sd">    ``made_at`` is the moment the snapshot was taken and is printed in the largest type</span>
+<span class="sd">    on the page. It defaults to now, but a caller that wants a byte-stable page passes</span>
+<span class="sd">    it — this is the one module in openloops that stamps a generation time, and it does</span>
+<span class="sd">    so because the whole claim of the page is *when*.</span>
+
+<span class="sd">    ``standalone`` wraps the output in a document scaffold for a file you open yourself.</span>
+<span class="sd">    Pass ``False`` for a host that supplies its own ``&lt;head&gt;`` — a published artifact</span>
+<span class="sd">    does — and the same page comes back as title, styles and content only.</span>
+
+<span class="sd">    ``max_sessions`` bounds the in-flight register; the true total is stated either way.</span>
+
+<span class="sd">    &gt;&gt;&gt; page = render_dashboard(</span>
+<span class="sd">    ...     {'listed': False, 'error': 'gh: not logged in', 'counts': {}},</span>
+<span class="sd">    ...     {'listed': True, 'counts': {'unblocked': 0, 'total': 0}, 'rows': []},</span>
+<span class="sd">    ...     [], made_at='2026-01-01T00:00:00Z')</span>
+<span class="sd">    &gt;&gt;&gt; 'gh: not logged in' in page and 'could not' in page</span>
+<span class="sd">    True</span>
+<span class="sd">    """</span>
+    <span class="n">safe</span> <span class="o">=</span> <span class="n">_Sanitizer</span><span class="p">(</span><span class="n">aliases</span><span class="p">)</span>
+    <span class="n">owed</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">owed</span> <span class="ow">or</span> <span class="p">{})</span>
+    <span class="n">blocked</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">blocked</span> <span class="ow">or</span> <span class="p">{})</span>
+    <span class="n">sessions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sessions</span> <span class="ow">or</span> <span class="p">[])</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">_moment</span><span class="p">(</span><span class="n">made_at</span><span class="p">)</span> <span class="k">if</span> <span class="n">made_at</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+    <span class="n">stamp</span> <span class="o">=</span> <span class="p">(</span><span class="n">now</span> <span class="ow">or</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">"%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M UTC"</span><span class="p">)</span>
+
+    <span class="n">unknowns</span> <span class="o">=</span> <span class="n">_unknowns</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">owed</span><span class="p">,</span> <span class="n">blocked</span><span class="p">,</span> <span class="n">sessions</span><span class="p">)</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="n">headline_counts</span><span class="p">(</span><span class="n">owed</span><span class="p">,</span> <span class="n">blocked</span><span class="p">,</span> <span class="n">sessions</span><span class="p">)</span>
+
+    <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">_masthead</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">owed</span><span class="p">,</span> <span class="n">blocked</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">stamp</span><span class="o">=</span><span class="n">stamp</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+                  <span class="n">counts</span><span class="o">=</span><span class="n">counts</span><span class="p">),</span>
+        <span class="n">_needs_register</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">owed</span><span class="p">),</span>
+        <span class="n">_free_register</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">blocked</span><span class="p">),</span>
+        <span class="n">_flight_register</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span> <span class="n">now</span><span class="p">,</span> <span class="n">max_sessions</span><span class="o">=</span><span class="n">max_sessions</span><span class="p">),</span>
+        <span class="n">_unknown_register</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">unknowns</span><span class="p">,</span> <span class="n">counts</span><span class="p">[</span><span class="s2">"unknown"</span><span class="p">],</span> <span class="n">owed</span><span class="p">,</span> <span class="n">blocked</span><span class="p">,</span> <span class="n">sessions</span><span class="p">),</span>
+        <span class="n">_footer</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">stamp</span><span class="p">),</span>
+    <span class="p">]</span>
+    <span class="n">head</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"&lt;title&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">title</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/title&gt;"</span>
+        <span class="s1">'&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;'</span>
+        <span class="sa">f</span><span class="s2">"&lt;style&gt;</span><span class="si">{</span><span class="n">_CSS</span><span class="si">}</span><span class="s2">&lt;/style&gt;"</span>
+    <span class="p">)</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'&lt;main class="sheet"&gt;</span><span class="si">{</span><span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/main&gt;'</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">standalone</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">head</span> <span class="o">+</span> <span class="n">body</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="s1">'&lt;!doctype html&gt;</span><span class="se">\n</span><span class="s1">&lt;html lang="en"&gt;</span><span class="se">\n</span><span class="s1">'</span>
+        <span class="sa">f</span><span class="s1">'&lt;head&gt;</span><span class="se">\n</span><span class="s1">&lt;meta charset="utf-8"&gt;</span><span class="se">\n</span><span class="si">{</span><span class="n">head</span><span class="si">}</span><span class="se">\n</span><span class="s1">&lt;/head&gt;</span><span class="se">\n</span><span class="s1">'</span>
+        <span class="sa">f</span><span class="s2">"&lt;body&gt;</span><span class="se">\n</span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="se">\n</span><span class="s2">&lt;/body&gt;</span><span class="se">\n</span><span class="s2">&lt;/html&gt;</span><span class="se">\n</span><span class="s2">"</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_masthead</span><span class="p">(</span>
+    <span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span>
+    <span class="n">owed</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">blocked</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">sessions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">stamp</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">counts</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">tally</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s2">"Needs you"</span><span class="p">,</span> <span class="n">_figure</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="s2">"needs_you"</span><span class="p">]),</span> <span class="s2">"needs"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"Free to proceed"</span><span class="p">,</span> <span class="n">_figure</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="s2">"free_to_proceed"</span><span class="p">]),</span> <span class="s2">"free"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"In flight"</span><span class="p">,</span> <span class="n">_figure</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="s2">"in_flight"</span><span class="p">]),</span> <span class="s2">"flight"</span><span class="p">),</span>
+        <span class="c1"># The narrow figure, on purpose. See `unchecked_count`: this counts obligations</span>
+        <span class="c1"># the world would not answer for, and NOT sessions the classifier left open by</span>
+        <span class="c1"># default -- those are named in the register below, where the distinction can be</span>
+        <span class="c1"># explained rather than collapsed into one alarming number.</span>
+        <span class="p">(</span><span class="s2">"Couldn't check"</span><span class="p">,</span> <span class="n">_figure</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="s2">"unchecked"</span><span class="p">]),</span> <span class="s2">"unsure"</span><span class="p">),</span>
+    <span class="p">]</span>
+    <span class="n">cells</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s1">'&lt;div class="tally-cell tally--</span><span class="si">{</span><span class="n">tone</span><span class="si">}</span><span class="s1">"&gt;&lt;p class="tally-figure"&gt;</span><span class="si">{</span><span class="n">figure</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span>
+        <span class="sa">f</span><span class="s1">'&lt;p class="tally-name"&gt;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&lt;/p&gt;&lt;/div&gt;'</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">figure</span><span class="p">,</span> <span class="n">tone</span> <span class="ow">in</span> <span class="n">tally</span>
+    <span class="p">)</span>
+    <span class="n">scope</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"owners"</span><span class="p">,</span> <span class="p">()))</span> <span class="ow">or</span> <span class="s2">"(none resolved)"</span>
+    <span class="n">blocked_scope</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"repos"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"owners"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">())</span>
+    <span class="p">)</span> <span class="ow">or</span> <span class="s2">"(none resolved)"</span>
+    <span class="n">bcounts</span> <span class="o">=</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"counts"</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">ocounts</span> <span class="o">=</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"counts"</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">owed_detail</span> <span class="o">=</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"error"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"no reason was reported"</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"checked"</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">owed_detail</span> <span class="o">=</span> <span class="s2">"listed but NOT evaluated — every row carrying a predicate reads ?"</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">owed_detail</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ocounts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'with_predicate'</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">ocounts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'total'</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> rows carried a "</span>
+            <span class="s2">"predicate, and every one of them was re-run"</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">blocked_detail</span> <span class="o">=</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"error"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"no reason was reported"</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"resolved"</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">blocked_detail</span> <span class="o">=</span> <span class="s2">"listed but NOT resolved — every row reads ?"</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">blocked_detail</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">_plural</span><span class="p">(</span><span class="n">bcounts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"candidates"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">"candidate"</span><span class="p">)</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s2">", </span><span class="si">{</span><span class="n">bcounts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'without_edges'</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> of which carried no dependency edge at all"</span>
+        <span class="p">)</span>
+    <span class="n">instruments</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span>
+            <span class="s2">"ol owed"</span><span class="p">,</span>
+            <span class="s2">"read"</span> <span class="k">if</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"could not read"</span><span class="p">,</span>
+            <span class="nb">bool</span><span class="p">(</span><span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">)),</span>
+            <span class="n">owed_detail</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"owners: </span><span class="si">{</span><span class="n">scope</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="p">(</span>
+            <span class="s2">"ol blocked"</span><span class="p">,</span>
+            <span class="s2">"read"</span> <span class="k">if</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"could not read"</span><span class="p">,</span>
+            <span class="nb">bool</span><span class="p">(</span><span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">)),</span>
+            <span class="n">blocked_detail</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"scope: </span><span class="si">{</span><span class="n">blocked_scope</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="p">(</span>
+            <span class="s2">"ol ls"</span><span class="p">,</span>
+            <span class="s2">"read"</span><span class="p">,</span>
+            <span class="kc">True</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">_plural</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">),</span><span class="w"> </span><span class="s2">"open digest"</span><span class="p">)</span><span class="si">}</span><span class="s1">, from a local store rather than from GitHub'</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"source: </span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'this machine'</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">]</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s1">'&lt;li class="instrument</span><span class="si">{</span><span class="s2">""</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">ok</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s2">" instrument--bad"</span><span class="si">}</span><span class="s1">"&gt;'</span>
+        <span class="sa">f</span><span class="s2">"&lt;code&gt;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&lt;/code&gt;&lt;b&gt;</span><span class="si">{</span><span class="n">state</span><span class="si">}</span><span class="s2">&lt;/b&gt;"</span>
+        <span class="sa">f</span><span class="s2">"&lt;span&gt;</span><span class="si">{</span><span class="n">detail</span><span class="si">}</span><span class="s2">&lt;/span&gt;&lt;em&gt;</span><span class="si">{</span><span class="n">note</span><span class="si">}</span><span class="s2">&lt;/em&gt;&lt;/li&gt;"</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">ok</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="n">instruments</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="s1">'&lt;header class="masthead"&gt;'</span>
+        <span class="s1">'&lt;p class="eyebrow"&gt;openloops &lt;span class="sep"&gt;·&lt;/span&gt; snapshot, not a status page&lt;/p&gt;'</span>
+        <span class="sa">f</span><span class="s2">"&lt;h1&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">title</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/h1&gt;"</span>
+        <span class="sa">f</span><span class="s1">'&lt;p class="stamp"&gt;as of &lt;time&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">stamp</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/time&gt;&lt;/p&gt;'</span>
+        <span class="s1">'&lt;p class="claim"&gt;Everything below is what three commands returned at that moment '</span>
+        <span class="s2">"and nothing since. This page cannot check anything: it runs no commands and "</span>
+        <span class="s2">"reaches nowhere. Treat every row as a lead to re-run, never as the state of the "</span>
+        <span class="s2">"world right now.&lt;/p&gt;"</span>
+        <span class="sa">f</span><span class="s1">'&lt;div class="tally"&gt;</span><span class="si">{</span><span class="n">cells</span><span class="si">}</span><span class="s1">&lt;/div&gt;'</span>
+        <span class="sa">f</span><span class="s1">'&lt;ul class="instruments"&gt;</span><span class="si">{</span><span class="n">rows</span><span class="si">}</span><span class="s1">&lt;/ul&gt;'</span>
+        <span class="s2">"&lt;/header&gt;"</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_needs_register</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">owed</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">_cannot</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="s2">"ol owed"</span><span class="p">,</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"error"</span><span class="p">),</span> <span class="s2">"nothing is owed"</span><span class="p">)</span>
+        <span class="n">figure</span> <span class="o">=</span> <span class="s2">"?"</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">open_rows</span> <span class="o">=</span> <span class="n">_rows</span><span class="p">(</span><span class="n">owed</span><span class="p">,</span> <span class="n">OPEN</span><span class="p">)</span>
+        <span class="n">done_rows</span> <span class="o">=</span> <span class="n">_rows</span><span class="p">(</span><span class="n">owed</span><span class="p">,</span> <span class="n">DISCHARGED</span><span class="p">)</span>
+        <span class="n">figure</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">open_rows</span><span class="p">))</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s1">'&lt;ol class="ledger"&gt;'</span>
+            <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_obligation_row</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">tone</span><span class="o">=</span><span class="s2">"needs"</span><span class="p">,</span> <span class="n">chip</span><span class="o">=</span><span class="s2">"open"</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">open_rows</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">"&lt;/ol&gt;"</span>
+            <span class="k">if</span> <span class="n">open_rows</span>
+            <span class="k">else</span> <span class="n">_empty</span><span class="p">(</span><span class="s2">"No open obligation is waiting on you in the repositories that were read."</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">done_rows</span><span class="p">:</span>
+            <span class="n">done</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">_obligation_row</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">tone</span><span class="o">=</span><span class="s2">"done"</span><span class="p">,</span> <span class="n">chip</span><span class="o">=</span><span class="s2">"done"</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">done_rows</span>
+            <span class="p">)</span>
+            <span class="n">body</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="s1">'&lt;p class="subhead"&gt;Discharged — the predicate passes, so there is nothing '</span>
+                <span class="s2">"to do but close the issue. openloops will not close it for you.&lt;/p&gt;"</span>
+                <span class="sa">f</span><span class="s1">'&lt;ol class="ledger ledger--quiet"&gt;</span><span class="si">{</span><span class="n">done</span><span class="si">}</span><span class="s1">&lt;/ol&gt;'</span>
+            <span class="p">)</span>
+    <span class="k">return</span> <span class="n">_register</span><span class="p">(</span>
+        <span class="n">ident</span><span class="o">=</span><span class="s2">"needs"</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"Needs you now"</span><span class="p">,</span>
+        <span class="n">figure</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span>
+        <span class="n">tone</span><span class="o">=</span><span class="s2">"needs"</span><span class="p">,</span>
+        <span class="n">rule</span><span class="o">=</span><span class="s2">"Open &lt;code&gt;manual-task&lt;/code&gt; issues your agents filed when they got blocked "</span>
+        <span class="s2">"on you. Each one was re-checked by running the predicate printed under it — "</span>
+        <span class="s2">"disagree with the verdict by reading the command, not by trusting the chip."</span><span class="p">,</span>
+        <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_free_register</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">blocked</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">_cannot</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="s2">"ol blocked"</span><span class="p">,</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"error"</span><span class="p">),</span> <span class="s2">"nothing is waiting"</span><span class="p">)</span>
+        <span class="n">figure</span> <span class="o">=</span> <span class="s2">"?"</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">free_rows</span> <span class="o">=</span> <span class="n">_rows</span><span class="p">(</span><span class="n">blocked</span><span class="p">,</span> <span class="n">UNBLOCKED</span><span class="p">)</span>
+        <span class="n">waiting</span> <span class="o">=</span> <span class="n">_rows</span><span class="p">(</span><span class="n">blocked</span><span class="p">,</span> <span class="n">BLOCKED</span><span class="p">)</span>
+        <span class="n">figure</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">free_rows</span><span class="p">))</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">'&lt;ol class="ledger"&gt;</span><span class="si">{</span><span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_unblocked_row</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">free_rows</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/ol&gt;'</span>
+            <span class="k">if</span> <span class="n">free_rows</span>
+            <span class="k">else</span> <span class="n">_empty</span><span class="p">(</span><span class="s2">"Nothing has become free since it was last looked at."</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">waiting</span><span class="p">:</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_waiting_row</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">waiting</span><span class="p">)</span>
+            <span class="n">body</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'&lt;p class="subhead"&gt;Still waiting — </span><span class="si">{</span><span class="n">_plural</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">waiting</span><span class="p">),</span><span class="w"> </span><span class="s2">"issue"</span><span class="p">)</span><span class="si">}</span><span class="s1">, each naming the '</span>
+                <span class="s2">"foreign repository it is blocked on.&lt;/p&gt;"</span>
+                <span class="sa">f</span><span class="s1">'&lt;ul class="thins"&gt;</span><span class="si">{</span><span class="n">rows</span><span class="si">}</span><span class="s1">&lt;/ul&gt;'</span>
+            <span class="p">)</span>
+    <span class="k">return</span> <span class="n">_register</span><span class="p">(</span>
+        <span class="n">ident</span><span class="o">=</span><span class="s2">"free"</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"Free to proceed"</span><span class="p">,</span>
+        <span class="n">figure</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span>
+        <span class="n">tone</span><span class="o">=</span><span class="s2">"free"</span><span class="p">,</span>
+        <span class="n">rule</span><span class="o">=</span><span class="s2">"Issues whose every &lt;code&gt;blocked_by&lt;/code&gt; edge has closed. The days figure is "</span>
+        <span class="s2">"how long the work has been free while nothing anywhere said so — that number is "</span>
+        <span class="s2">"the reason this register exists."</span><span class="p">,</span>
+        <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_flight_register</span><span class="p">(</span>
+    <span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span>
+    <span class="n">sessions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+    <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">max_sessions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">shown</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sessions</span><span class="p">)[:</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_sessions</span><span class="p">)]</span>
+    <span class="n">tally</span> <span class="o">=</span> <span class="n">_project_tally</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">sessions</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sessions</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">_empty</span><span class="p">(</span>
+            <span class="s2">"The digest store is empty. That is not the same as nothing being open — see "</span>
+            <span class="s2">"the unknown register."</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_session_row</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">shown</span><span class="p">)</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">tally</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">'&lt;ol class="ledger"&gt;</span><span class="si">{</span><span class="n">rows</span><span class="si">}</span><span class="s1">&lt;/ol&gt;'</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shown</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">):</span>
+            <span class="n">body</span> <span class="o">+=</span> <span class="n">_empty</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"Showing the </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">shown</span><span class="p">)</span><span class="si">}</span><span class="s2"> most recent of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">)</span><span class="si">}</span><span class="s2">. "</span>
+                <span class="s2">"Run &lt;code&gt;ol ls --limit 0&lt;/code&gt; for all of them."</span>
+            <span class="p">)</span>
+    <span class="k">return</span> <span class="n">_register</span><span class="p">(</span>
+        <span class="n">ident</span><span class="o">=</span><span class="s2">"flight"</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"In flight"</span><span class="p">,</span>
+        <span class="n">figure</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">)),</span>
+        <span class="n">tone</span><span class="o">=</span><span class="s2">"flight"</span><span class="p">,</span>
+        <span class="n">rule</span><span class="o">=</span><span class="s2">"What your sessions left open, newest last turn first. A digest says what a "</span>
+        <span class="s2">"session &lt;em&gt;said&lt;/em&gt;, dated — never what is true now, which is why none of these "</span>
+        <span class="s2">"rows has been verified against anything."</span><span class="p">,</span>
+        <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_project_tally</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">sessions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Where the open sessions actually are. A hundred rows do not answer that; this does."""</span>
+    <span class="n">counts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
+        <span class="n">counts</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"project"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"(no project)"</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"project"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"(no project)"</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="p">)</span>
+    <span class="n">ranked</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">kv</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="n">kv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">kv</span><span class="p">[</span><span class="mi">0</span><span class="p">]))[:</span><span class="mi">10</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ranked</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">""</span>
+    <span class="n">cells</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s1">'&lt;li&gt;&lt;b&gt;</span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s1">&lt;/b&gt;&lt;span&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">project</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/span&gt;&lt;/li&gt;'</span> <span class="k">for</span> <span class="n">project</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">ranked</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'&lt;ul class="tallystrip"&gt;</span><span class="si">{</span><span class="n">cells</span><span class="si">}</span><span class="s1">&lt;/ul&gt;'</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_unknown_register</span><span class="p">(</span>
+    <span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span>
+    <span class="n">unknowns</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+    <span class="n">unknown_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">owed</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">blocked</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">sessions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">unknowns</span><span class="p">:</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">'&lt;li class="unsure-item"&gt;&lt;p class="kind"&gt;&lt;code&gt;</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s2">"kind"</span><span class="p">]</span><span class="si">}</span><span class="s1">&lt;/code&gt;&lt;/p&gt;'</span>
+            <span class="sa">f</span><span class="s1">'&lt;div&gt;&lt;p class="ask"&gt;</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s2">"title"</span><span class="p">]</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span>
+            <span class="sa">f</span><span class="s1">'&lt;p class="why"&gt;</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s2">"why"</span><span class="p">]</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span>
+            <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'&lt;p class="note"&gt;</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s2">"note"</span><span class="p">]</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span> <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"note"</span><span class="p">)</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">"&lt;/div&gt;&lt;/li&gt;"</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">unknowns</span>
+        <span class="p">)</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'&lt;ul class="unsures"&gt;</span><span class="si">{</span><span class="n">items</span><span class="si">}</span><span class="s1">&lt;/ul&gt;'</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">earned</span> <span class="o">=</span> <span class="n">_earned</span><span class="p">(</span><span class="n">owed</span><span class="p">,</span> <span class="n">blocked</span><span class="p">,</span> <span class="n">sessions</span><span class="p">)</span>
+        <span class="n">proof</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"&lt;li&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">line</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/li&gt;"</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">earned</span><span class="p">)</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s1">'&lt;p class="empty empty--earned"&gt;Nothing on this page reads &lt;b&gt;?&lt;/b&gt;. '</span>
+            <span class="s2">"That is a claim, so here is what earned it:&lt;/p&gt;"</span>
+            <span class="sa">f</span><span class="s1">'&lt;ul class="proof"&gt;</span><span class="si">{</span><span class="n">proof</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">"&lt;li&gt;Nothing was checked at all.&lt;/li&gt;"</span><span class="si">}</span><span class="s1">&lt;/ul&gt;'</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">_register</span><span class="p">(</span>
+        <span class="n">ident</span><span class="o">=</span><span class="s2">"unknown"</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"Unknown"</span><span class="p">,</span>
+        <span class="n">figure</span><span class="o">=</span><span class="n">_figure</span><span class="p">(</span><span class="n">unknown_count</span><span class="p">),</span>
+        <span class="n">tone</span><span class="o">=</span><span class="s2">"unsure"</span><span class="p">,</span>
+        <span class="n">rule</span><span class="o">=</span><span class="s2">"Everything that could not be established, and why. A &lt;b&gt;?&lt;/b&gt; is never rounded "</span>
+        <span class="s2">"into a yes or a no, and it is never left off this page to make the board look "</span>
+        <span class="s2">"tidier — a surface that reports a clean answer because it failed to check is "</span>
+        <span class="s2">"worse than no surface."</span><span class="p">,</span>
+        <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_cannot</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">mistaken_for</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""What a register prints when its envelope never listed. Never a zero."""</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">'&lt;div class="cannot"&gt;&lt;p class="cannot-mark"&gt;?&lt;/p&gt;&lt;div&gt;'</span>
+        <span class="sa">f</span><span class="s2">"&lt;p class=</span><span class="se">\"</span><span class="s2">ask</span><span class="se">\"</span><span class="s2">&gt;&lt;code&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">command</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/code&gt; could not read the world, so "</span>
+        <span class="sa">f</span><span class="s2">"this register is unknown — not empty.&lt;/p&gt;"</span>
+        <span class="sa">f</span><span class="s1">'&lt;p class="why"&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">error</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">"no reason was reported"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span>
+        <span class="sa">f</span><span class="s1">'&lt;p class="note"&gt;Do not read this as “</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">mistaken_for</span><span class="p">)</span><span class="si">}</span><span class="s1">”. '</span>
+        <span class="s2">"The counts above are ? for the same reason.&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;"</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_footer</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">stamp</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">withheld</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="k">if</span> <span class="n">safe</span><span class="o">.</span><span class="n">withheld</span><span class="p">:</span>
+        <span class="n">kinds</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">withheld</span><span class="p">)))</span>
+        <span class="n">withheld</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">'&lt;p class="withheld"&gt;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">withheld</span><span class="p">)</span><span class="si">}</span><span class="s1"> field(s) were withheld from this page '</span>
+            <span class="sa">f</span><span class="s2">"because they matched a credential pattern (</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">kinds</span><span class="p">)</span><span class="si">}</span><span class="s2">). The matched "</span>
+            <span class="s2">"text is not printed anywhere, including here.&lt;/p&gt;"</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="s1">'&lt;footer class="colophon"&gt;'</span>
+        <span class="sa">f</span><span class="s1">'&lt;p&gt;Rendered by &lt;code&gt;ol dashboard&lt;/code&gt; at </span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">stamp</span><span class="p">)</span><span class="si">}</span><span class="s1"> from '</span>
+        <span class="s2">"&lt;code&gt;ol owed&lt;/code&gt;, &lt;code&gt;ol blocked&lt;/code&gt; and &lt;code&gt;ol ls&lt;/code&gt;. "</span>
+        <span class="s2">"Re-run it to get a newer one; there is no other way for this page to change.&lt;/p&gt;"</span>
+        <span class="s2">"&lt;p&gt;openloops never writes to GitHub. Nothing here closed, reopened, relabelled or "</span>
+        <span class="s2">"commented on anything — it read, and it reported.&lt;/p&gt;"</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">withheld</span><span class="si">}</span><span class="s2">"</span>
+        <span class="s2">"&lt;/footer&gt;"</span>
+    <span class="p">)</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># The stylesheet. Inlined because a published page may load nothing from anywhere.</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<span class="c1">#: The dark palette, written once and injected into both blocks that can select it —</span>
+<span class="c1">#: the `prefers-color-scheme` one for the un-stamped default and the `data-theme` one</span>
+<span class="c1">#: for an explicit toggle. Two copies of a palette drift; one copy cannot.</span>
+<span class="n">_DARK_TOKENS</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">  --ground:#0e1211; --surface:#151b19; --sunk:#111615;</span>
+<span class="s2">  --ink:#e4e8e3; --ink-soft:#94a29d; --rule:#29312e; --rule-soft:#1e2523;</span>
+<span class="s2">  --accent:#74c6bc;</span>
+<span class="s2">  --needs:#e0a44a; --needs-wash:#2c2317;</span>
+<span class="s2">  --free:#74c282; --free-wash:#182619;</span>
+<span class="s2">  --waits:#8b9994; --waits-wash:#1c2321;</span>
+<span class="s2">  --unsure:#f17fa5; --unsure-wash:#2c161f;</span>
+<span class="s2">  --done:#7f8f8a; --done-wash:#1a201e;</span>
+<span class="s2">"""</span>
+
+<span class="n">_CSS</span> <span class="o">=</span> <span class="p">(</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">:root{</span>
+<span class="sd">  --ground:#eff0ec; --surface:#f8f9f5; --sunk:#e7e9e3;</span>
+<span class="sd">  --ink:#151c1a; --ink-soft:#56635f; --rule:#d2d7d0; --rule-soft:#e3e6e0;</span>
+<span class="sd">  --accent:#17514f;</span>
+<span class="sd">  --needs:#94510a; --needs-wash:#f2e6d4;</span>
+<span class="sd">  --free:#1e6b3c; --free-wash:#dfeade;</span>
+<span class="sd">  --waits:#6c7975; --waits-wash:#e6e9e4;</span>
+<span class="sd">  --unsure:#96234f; --unsure-wash:#f2dee4;</span>
+<span class="sd">  --done:#69766f; --done-wash:#e8ebe6;</span>
+<span class="sd">  --serif:ui-serif,Georgia,"Iowan Old Style","Palatino Linotype","Book Antiqua",serif;</span>
+<span class="sd">  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;</span>
+<span class="sd">  --step:clamp(0.5rem,1.2vw,0.9rem);</span>
+<span class="sd">}</span>
+<span class="sd">@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){"""</span>
+    <span class="o">+</span> <span class="n">_DARK_TOKENS</span>
+    <span class="o">+</span> <span class="s2">"""} }</span>
+<span class="s2">:root[data-theme="dark"]{"""</span>
+    <span class="o">+</span> <span class="n">_DARK_TOKENS</span>
+    <span class="o">+</span> <span class="s2">"""}</span>
+
+<span class="s2">*{box-sizing:border-box}</span>
+<span class="s2">body{</span>
+<span class="s2">  margin:0; background:var(--ground); color:var(--ink);</span>
+<span class="s2">  font-family:var(--serif); font-size:17px; line-height:1.55;</span>
+<span class="s2">  -webkit-font-smoothing:antialiased;</span>
+<span class="s2">}</span>
+<span class="s2">.sheet{max-width:64rem; margin:0 auto; padding:clamp(1.25rem,4vw,3.5rem) clamp(1rem,4vw,2.5rem) 4rem}</span>
+<span class="s2">h1,h2{text-wrap:balance; margin:0; font-weight:600; letter-spacing:-0.012em}</span>
+<span class="s2">p</span><span class="si">{margin:0}</span>
+<span class="s2">a{color:var(--accent); text-underline-offset:0.18em; text-decoration-thickness:from-font}</span>
+<span class="s2">a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:1px}</span>
+<span class="s2">code{font-family:var(--mono); font-size:0.82em}</span>
+<span class="s2">b,strong{font-weight:600}</span>
+<span class="s2">.sep{color:var(--rule); padding:0 0.15em}</span>
+
+<span class="s2">/* ---- masthead: the timestamp is the thesis, so it gets the type ---- */</span>
+<span class="s2">.masthead{display:grid; gap:1.1rem; padding-bottom:1.6rem; border-bottom:2px solid var(--ink)}</span>
+<span class="s2">.eyebrow{</span>
+<span class="s2">  font-family:var(--mono); font-size:0.7rem; letter-spacing:0.16em;</span>
+<span class="s2">  text-transform:uppercase; color:var(--ink-soft);</span>
+<span class="s2">}</span>
+<span class="s2">.masthead h1{font-size:clamp(2rem,5.2vw,3.1rem); line-height:1.05}</span>
+<span class="s2">.stamp{</span>
+<span class="s2">  font-family:var(--mono); font-size:clamp(1.05rem,2.6vw,1.5rem);</span>
+<span class="s2">  color:var(--accent); font-variant-numeric:tabular-nums; letter-spacing:-0.01em;</span>
+<span class="s2">}</span>
+<span class="s2">.stamp time{border-bottom:2px solid var(--accent); padding-bottom:0.08em}</span>
+<span class="s2">.claim{max-width:38rem; color:var(--ink-soft); font-size:0.98rem}</span>
+
+<span class="s2">.tally{</span>
+<span class="s2">  display:grid; grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));</span>
+<span class="s2">  gap:1px; background:var(--rule); border:1px solid var(--rule); margin-top:0.4rem;</span>
+<span class="s2">}</span>
+<span class="s2">.tally-cell{background:var(--surface); padding:0.9rem 1rem 0.8rem}</span>
+<span class="s2">.tally-figure{</span>
+<span class="s2">  font-family:var(--mono); font-size:2.4rem; line-height:1;</span>
+<span class="s2">  font-variant-numeric:tabular-nums; letter-spacing:-0.03em;</span>
+<span class="s2">}</span>
+<span class="s2">.tally-name{</span>
+<span class="s2">  font-family:var(--mono); font-size:0.68rem; letter-spacing:0.13em;</span>
+<span class="s2">  text-transform:uppercase; color:var(--ink-soft); margin-top:0.45rem;</span>
+<span class="s2">}</span>
+<span class="s2">.tally--needs .tally-figure{color:var(--needs)}</span>
+<span class="s2">.tally--free .tally-figure{color:var(--free)}</span>
+<span class="s2">.tally--flight .tally-figure{color:var(--ink)}</span>
+<span class="s2">.tally--unsure .tally-figure{color:var(--unsure)}</span>
+
+<span class="s2">.instruments{list-style:none; margin:0; padding:0; display:grid; gap:1px; background:var(--rule)}</span>
+<span class="s2">.instrument{</span>
+<span class="s2">  background:var(--surface); display:grid; gap:0.15rem 0.9rem; padding:0.55rem 1rem;</span>
+<span class="s2">  grid-template-columns:7.5rem 5.5rem 1fr; align-items:baseline;</span>
+<span class="s2">  font-size:0.83rem; color:var(--ink-soft);</span>
+<span class="s2">}</span>
+<span class="s2">.instrument code{color:var(--ink); font-size:0.78rem}</span>
+<span class="s2">.instrument b{</span>
+<span class="s2">  font-family:var(--mono); font-size:0.66rem; letter-spacing:0.12em;</span>
+<span class="s2">  text-transform:uppercase; color:var(--free);</span>
+<span class="s2">}</span>
+<span class="s2">.instrument em{grid-column:3; font-style:normal; font-family:var(--mono); font-size:0.72rem; color:var(--ink-soft); opacity:0.8}</span>
+<span class="s2">.instrument--bad b{color:var(--unsure)}</span>
+<span class="s2">.instrument--bad{background:var(--unsure-wash)}</span>
+
+<span class="s2">/* ---- registers ---- */</span>
+<span class="s2">.register{margin-top:clamp(2.2rem,5vw,3.4rem)}</span>
+<span class="s2">.register-head{</span>
+<span class="s2">  display:grid; grid-template-columns:auto 1fr; gap:0 1.25rem; align-items:start;</span>
+<span class="s2">  padding-bottom:0.85rem; border-bottom:1px solid var(--ink);</span>
+<span class="s2">}</span>
+<span class="s2">.figure{</span>
+<span class="s2">  font-family:var(--mono); font-size:clamp(2.6rem,7vw,3.6rem); line-height:0.85;</span>
+<span class="s2">  font-variant-numeric:tabular-nums; letter-spacing:-0.045em; min-width:2ch;</span>
+<span class="s2">}</span>
+<span class="s2">.register--needs .figure{color:var(--needs)}</span>
+<span class="s2">.register--free .figure{color:var(--free)}</span>
+<span class="s2">.register--flight .figure{color:var(--ink)}</span>
+<span class="s2">.register--unsure .figure{color:var(--unsure)}</span>
+<span class="s2">.register h2{font-size:clamp(1.35rem,3vw,1.75rem)}</span>
+<span class="s2">.rule{color:var(--ink-soft); font-size:0.92rem; max-width:44rem; margin-top:0.3rem}</span>
+<span class="s2">.subhead{</span>
+<span class="s2">  font-family:var(--mono); font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase;</span>
+<span class="s2">  color:var(--ink-soft); margin-top:2rem; padding-bottom:0.5rem; border-bottom:1px solid var(--rule);</span>
+<span class="s2">}</span>
+
+<span class="s2">/* ---- ledger rows: hairlines, not cards ---- */</span>
+<span class="s2">.ledger{list-style:none; margin:0; padding:0}</span>
+<span class="s2">.row{</span>
+<span class="s2">  display:grid; grid-template-columns:5.75rem 1fr; gap:0 1.25rem;</span>
+<span class="s2">  padding:1.15rem 0 0.85rem; border-bottom:1px solid var(--rule-soft); position:relative;</span>
+<span class="s2">}</span>
+<span class="s2">.ledger--quiet .row</span><span class="si">{opacity:0.72}</span>
+<span class="s2">.rail{display:flex; flex-direction:column; gap:0.4rem; align-items:flex-start}</span>
+<span class="s2">.chip{</span>
+<span class="s2">  font-family:var(--mono); font-size:0.62rem; letter-spacing:0.1em; text-transform:uppercase;</span>
+<span class="s2">  padding:0.2rem 0.42rem; border:1px solid currentColor; white-space:nowrap;</span>
+<span class="s2">}</span>
+<span class="s2">.chip--needs{color:var(--needs); background:var(--needs-wash)}</span>
+<span class="s2">.chip--free{color:var(--free); background:var(--free-wash)}</span>
+<span class="s2">.chip--flight{color:var(--waits); background:var(--waits-wash)}</span>
+<span class="s2">.chip--unsure{color:var(--unsure); background:var(--unsure-wash)}</span>
+<span class="s2">.chip--done{color:var(--done); background:var(--done-wash)}</span>
+<span class="s2">.age{font-family:var(--mono); font-variant-numeric:tabular-nums; display:flex; align-items:baseline; gap:0.08em}</span>
+<span class="s2">.age b{font-size:1.7rem; line-height:1; letter-spacing:-0.03em; font-weight:500}</span>
+<span class="s2">.age i{font-style:normal; font-size:0.78rem; color:var(--ink-soft)}</span>
+<span class="s2">.body{display:grid; gap:0.35rem; min-width:0}</span>
+<span class="s2">.ask{font-size:1.04rem; line-height:1.35; text-wrap:pretty}</span>
+<span class="s2">.where{font-family:var(--mono); font-size:0.74rem; color:var(--ink-soft)}</span>
+<span class="s2">.ref{font-family:var(--mono); color:var(--accent)}</span>
+<span class="s2">.verdict{color:var(--free); font-size:0.95rem; font-style:italic}</span>
+<span class="s2">.caveat{color:var(--unsure); font-size:0.88rem; font-style:italic}</span>
+<span class="s2">.line{</span>
+<span class="s2">  display:grid; grid-template-columns:5.2rem 1fr; gap:0.6rem; align-items:baseline;</span>
+<span class="s2">  margin-top:0.15rem; min-width:0;</span>
+<span class="s2">}</span>
+<span class="s2">.line .tag{</span>
+<span class="s2">  font-family:var(--mono); font-size:0.62rem; letter-spacing:0.11em; text-transform:uppercase;</span>
+<span class="s2">  color:var(--ink-soft); padding-top:0.15em;</span>
+<span class="s2">}</span>
+<span class="s2">.line code{</span>
+<span class="s2">  display:block; background:var(--sunk); padding:0.42rem 0.55rem;</span>
+<span class="s2">  white-space:pre-wrap; overflow-wrap:anywhere; color:var(--ink); line-height:1.45;</span>
+<span class="s2">  border-left:2px solid var(--rule);</span>
+<span class="s2">}</span>
+<span class="s2">.gauge{grid-column:1/-1; height:3px; background:var(--rule-soft); margin-top:0.9rem}</span>
+<span class="s2">.gauge span{display:block; height:100%}</span>
+<span class="s2">.gauge--needs span{background:var(--needs)}</span>
+<span class="s2">.gauge--free span{background:var(--free)}</span>
+<span class="s2">.gauge--flight span{background:var(--waits)}</span>
+<span class="s2">.gauge--unsure span{background:var(--unsure)}</span>
+<span class="s2">.gauge--done span{background:var(--done)}</span>
+
+<span class="s2">/* ---- the dense "still waiting" list ---- */</span>
+<span class="s2">.thins{list-style:none; margin:0; padding:0}</span>
+<span class="s2">.thin{</span>
+<span class="s2">  display:grid; grid-template-columns:3.2rem 1fr; gap:0.2rem 0.9rem; align-items:baseline;</span>
+<span class="s2">  padding:0.6rem 0; border-bottom:1px solid var(--rule-soft); font-size:0.92rem;</span>
+<span class="s2">}</span>
+<span class="s2">.thin-age{font-family:var(--mono); font-variant-numeric:tabular-nums; color:var(--ink-soft); font-size:0.8rem}</span>
+<span class="s2">.thin-ask{min-width:0; overflow-wrap:anywhere}</span>
+<span class="s2">.thin-on{grid-column:2; color:var(--waits); font-size:0.72rem; overflow-wrap:anywhere}</span>
+
+<span class="s2">/* Borders rather than a 1px gap over a coloured ground: a wrapping flex row leaves</span>
+<span class="s2">   the ground showing as a stray block wherever the last cell stops short. */</span>
+<span class="s2">.tallystrip{</span>
+<span class="s2">  list-style:none; margin:1.1rem 0 0.4rem; padding:0; display:flex; flex-wrap:wrap;</span>
+<span class="s2">  background:var(--surface); border:1px solid var(--rule);</span>
+<span class="s2">}</span>
+<span class="s2">.tallystrip li{</span>
+<span class="s2">  padding:0.5rem 0.75rem; display:flex; gap:0.4rem; align-items:baseline;</span>
+<span class="s2">  border-right:1px solid var(--rule);</span>
+<span class="s2">}</span>
+<span class="s2">.tallystrip li:last-child{border-right:0}</span>
+<span class="s2">.tallystrip b{font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:1rem}</span>
+<span class="s2">.tallystrip span{font-family:var(--mono); font-size:0.72rem; color:var(--ink-soft)}</span>
+
+<span class="s2">/* ---- unknown ---- */</span>
+<span class="s2">.unsures{list-style:none; margin:0; padding:0}</span>
+<span class="s2">.unsure-item{</span>
+<span class="s2">  display:grid; grid-template-columns:7.5rem 1fr; gap:0.3rem 1.25rem;</span>
+<span class="s2">  padding:1rem 0; border-bottom:1px solid var(--rule-soft);</span>
+<span class="s2">}</span>
+<span class="s2">.unsure-item .kind code{</span>
+<span class="s2">  color:var(--unsure); font-size:0.68rem; letter-spacing:0.09em; text-transform:uppercase;</span>
+<span class="s2">}</span>
+<span class="s2">.why{color:var(--ink-soft); font-size:0.92rem}</span>
+<span class="s2">.note{font-family:var(--mono); font-size:0.74rem; color:var(--ink-soft); opacity:0.85; overflow-wrap:anywhere}</span>
+<span class="s2">.proof{margin:0.6rem 0 0; padding-left:1.1rem; color:var(--ink-soft); font-size:0.93rem}</span>
+<span class="s2">.proof li{margin-top:0.2rem}</span>
+<span class="s2">.empty{color:var(--ink-soft); font-size:0.95rem; padding:1.1rem 0; font-style:italic}</span>
+<span class="s2">.empty--earned{font-style:normal; color:var(--ink)}</span>
+
+<span class="s2">.cannot{</span>
+<span class="s2">  display:grid; grid-template-columns:3.5rem 1fr; gap:1rem; align-items:start;</span>
+<span class="s2">  background:var(--unsure-wash); border-left:3px solid var(--unsure); padding:1.1rem 1.2rem; margin-top:1.2rem;</span>
+<span class="s2">}</span>
+<span class="s2">.cannot-mark{font-family:var(--mono); font-size:2.6rem; line-height:0.8; color:var(--unsure)}</span>
+<span class="s2">.cannot .ask{font-size:1rem}</span>
+
+<span class="s2">.colophon{</span>
+<span class="s2">  margin-top:3.5rem; padding-top:1.2rem; border-top:2px solid var(--ink);</span>
+<span class="s2">  display:grid; gap:0.55rem; color:var(--ink-soft); font-size:0.88rem;</span>
+<span class="s2">}</span>
+<span class="s2">/* The rule spans the sheet; only the prose is held to a readable measure. */</span>
+<span class="s2">.colophon p{max-width:44rem}</span>
+<span class="s2">.withheld{color:var(--unsure)}</span>
+
+<span class="s2">@media (max-width:34rem){</span>
+<span class="s2">  body{font-size:16px}</span>
+<span class="s2">  .row,.unsure-item{grid-template-columns:1fr}</span>
+<span class="s2">  .rail{flex-direction:row; align-items:baseline; gap:0.7rem}</span>
+<span class="s2">  .age b{font-size:1.25rem}</span>
+<span class="s2">  .line{grid-template-columns:1fr; gap:0.2rem}</span>
+<span class="s2">  .thin{grid-template-columns:1fr}</span>
+<span class="s2">  .thin-on{grid-column:1}</span>
+<span class="s2">  .instrument{grid-template-columns:1fr auto}</span>
+<span class="s2">  .instrument span,.instrument em{grid-column:1/-1}</span>
+<span class="s2">  .cannot{grid-template-columns:1fr}</span>
+<span class="s2">}</span>
+<span class="s2">@media (prefers-reduced-motion:reduce){ *{transition:none !important; animation:none !important} }</span>
+<span class="s2">"""</span>
+<span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

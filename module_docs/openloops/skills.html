@@ -1,0 +1,275 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openloops.skills &mdash; openloops 0.1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=6e0256f3"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="openloops.store" href="store.html" />
+    <link rel="prev" title="openloops.obligations" href="obligations.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            openloops
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../openloops.html">openloops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="__main__.html">openloops.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_classify.html">openloops._classify</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_sync.html">openloops._sync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="blockers.html">openloops.blockers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dashboard.html">openloops.dashboard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="digest.html">openloops.digest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="egress.html">openloops.egress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="obligations.html">openloops.obligations</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">openloops.skills</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.skills.Asset"><code class="docutils literal notranslate"><span class="pre">Asset</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.skills.Asset.destination"><code class="docutils literal notranslate"><span class="pre">Asset.destination()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.skills.HOST_ENV_VAR"><code class="docutils literal notranslate"><span class="pre">HOST_ENV_VAR</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.skills.agents_dir"><code class="docutils literal notranslate"><span class="pre">agents_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.skills.bundled"><code class="docutils literal notranslate"><span class="pre">bundled()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.skills.host_dir"><code class="docutils literal notranslate"><span class="pre">host_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.skills.install_skills"><code class="docutils literal notranslate"><span class="pre">install_skills()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.skills.skills_dir"><code class="docutils literal notranslate"><span class="pre">skills_dir()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="store.html">openloops.store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">openloops.tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transcripts.html">openloops.transcripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">openloops</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">openloops.skills</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/openloops/skills.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-openloops.skills">
+<span id="openloops-skills"></span><h1>openloops.skills<a class="headerlink" href="#module-openloops.skills" title="Link to this heading"></a></h1>
+<p>The agent-facing surface: two skills, one subagent, and the command that installs them.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">ol</span></code> command is plumbing. What most people actually want is an agent that knows
+how to use the plumbing and tells them what matters – “what is being done, and what
+needs my attention?” – without their ever typing <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code>. That agent is a file:
+a <code class="docutils literal notranslate"><span class="pre">SKILL.md</span></code> an agent host loads when the question comes up. So openloops ships three
+of them, inside the package, and this module is how they get from the wheel to the host.</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">openloops</span></code></p></td>
+<td><p>the <strong>read</strong> skill. Runs the three commands, and
+synthesises rather than pastes. The one to load.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">openloops-needs-human</span></code></p></td>
+<td><p>the <strong>capture</strong> skill. Without something filing
+<code class="docutils literal notranslate"><span class="pre">manual-task</span></code> issues, <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code> reads an empty
+list forever – which is the state a stranger
+installs into.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">openloops-sweep</span></code></p></td>
+<td><p>a subagent: the same sweep in a fresh context,
+returning a page instead of three screens of output.</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Nothing here is openloops-specific machinery.</strong> A skill is a markdown file in a
+directory an agent host reads; installing one is a symlink. The whole module is a
+hundred lines because that is genuinely all it is, and the alternative – a copy of
+each skill pasted into every user’s config – is a copy that goes stale the first time
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-U</span> <span class="pre">openloops</span></code> lands.</p>
+<p>Two decisions worth stating, because both are the kind that get quietly reversed:</p>
+<p><strong>A symlink, not a copy.</strong> The point is that upgrading the package upgrades the skill.
+Copying is the <em>fallback</em>, taken only where symlinks are unavailable (Windows without
+Developer Mode, where creating one needs a privilege an ordinary process lacks), and
+the plan says which happened rather than pretending they are the same thing.</p>
+<p><strong>Nothing already there is ever overwritten.</strong> A destination holding something that is
+not ours reads <code class="docutils literal notranslate"><span class="pre">conflict</span></code>: it is reported, not replaced, and <code class="docutils literal notranslate"><span class="pre">force=True</span></code> is the
+only way past. Someone’s hand-written skill of the same name is theirs, and silently
+eating it would be a worse failure than not installing at all.</p>
+<p>This is deliberately <em>not</em> in <a class="reference internal" href="tools.html#module-openloops.tools" title="openloops.tools"><code class="xref py py-mod docutils literal notranslate"><span class="pre">openloops.tools</span></code></a>. That module is the list every
+surface dispatches from – an MCP server, an HTTP endpoint – and “symlink files into
+this machine’s agent config” is not an operation a remote surface could honestly offer.
+It belongs beside <a class="reference internal" href="job.html#module-openloops.job" title="openloops.job"><code class="xref py py-mod docutils literal notranslate"><span class="pre">openloops.job</span></code></a>, the other installer, which the CLI also wraps
+directly.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">skills_dir</span><span class="p">()</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">agents_dir</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
+<span class="go">('skills', 'agents')</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">sorted</span><span class="p">(</span><span class="n">asset</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">asset</span> <span class="ow">in</span> <span class="n">bundled</span><span class="p">())</span>
+<span class="go">['openloops', 'openloops-needs-human', 'openloops-sweep']</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="openloops.skills.Asset">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.skills.</span></span><span class="sig-name descname"><span class="pre">Asset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/openloops/skills.html#Asset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.skills.Asset" title="Link to this definition"></a></dt>
+<dd><p>One installable thing: a skill directory or a subagent file.</p>
+<p><code class="docutils literal notranslate"><span class="pre">name</span></code> is what the host will call it, and it is the file or folder name too –
+the agent-skill spec requires the folder name to equal the skill’s <code class="docutils literal notranslate"><span class="pre">name:</span></code>, so
+deriving one from the other cannot drift.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="openloops.skills.Asset.destination">
+<span class="sig-name descname"><span class="pre">destination</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="../../_modules/openloops/skills.html#Asset.destination"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.skills.Asset.destination" title="Link to this definition"></a></dt>
+<dd><p>Where this asset goes under <em>host</em>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="openloops.skills.HOST_ENV_VAR">
+<span class="sig-prename descclassname"><span class="pre">openloops.skills.</span></span><span class="sig-name descname"><span class="pre">HOST_ENV_VAR</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CLAUDE_CONFIG_DIR'</span></span><a class="headerlink" href="#openloops.skills.HOST_ENV_VAR" title="Link to this definition"></a></dt>
+<dd><p>Where Claude Code keeps skills and subagents, and the variable that relocates it.
+Honoured rather than reimplemented: a user who has moved their config has done so
+for a reason, and an installer that ignores it writes to a directory nobody reads.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.skills.agents_dir">
+<span class="sig-prename descclassname"><span class="pre">openloops.skills.</span></span><span class="sig-name descname"><span class="pre">agents_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="../../_modules/openloops/skills.html#agents_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.skills.agents_dir" title="Link to this definition"></a></dt>
+<dd><p>The bundled subagent definitions, inside the installed package.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.skills.bundled">
+<span class="sig-prename descclassname"><span class="pre">openloops.skills.</span></span><span class="sig-name descname"><span class="pre">bundled</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#openloops.skills.Asset" title="openloops.skills.Asset"><span class="pre">Asset</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/openloops/skills.html#bundled"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.skills.bundled" title="Link to this definition"></a></dt>
+<dd><p>Every skill and subagent this package ships, sorted by name.</p>
+<p>Discovered from the directories rather than listed here: a list would be a second
+place to update, and the one that gets forgotten.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.skills.host_dir">
+<span class="sig-prename descclassname"><span class="pre">openloops.skills.</span></span><span class="sig-name descname"><span class="pre">host_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="../../_modules/openloops/skills.html#host_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.skills.host_dir" title="Link to this definition"></a></dt>
+<dd><p>The agent host’s config directory: <code class="docutils literal notranslate"><span class="pre">target</span></code>, <code class="docutils literal notranslate"><span class="pre">CLAUDE_CONFIG_DIR</span></code>, or <code class="docutils literal notranslate"><span class="pre">~/.claude</span></code>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">host_dir</span><span class="p">(</span><span class="s1">'/somewhere/else'</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+<span class="go">'else'</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.skills.install_skills">
+<span class="sig-prename descclassname"><span class="pre">openloops.skills.</span></span><span class="sig-name descname"><span class="pre">install_skills</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/openloops/skills.html#install_skills"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.skills.install_skills" title="Link to this definition"></a></dt>
+<dd><p>Make the bundled skills and subagent visible to an agent host. Idempotent.</p>
+<p>Links each one into <code class="docutils literal notranslate"><span class="pre">target</span></code> (default: <code class="docutils literal notranslate"><span class="pre">CLAUDE_CONFIG_DIR</span></code> or <code class="docutils literal notranslate"><span class="pre">~/.claude</span></code>) so
+that upgrading the package upgrades the skill. <code class="docutils literal notranslate"><span class="pre">copy=True</span></code> takes a copy instead,
+which is also what happens by itself where symlinks are unavailable.</p>
+<p>Returns the plan it carried out – one row per asset, each carrying its verdict and
+the reason for it. <code class="docutils literal notranslate"><span class="pre">dry_run=True</span></code> returns the same plan having touched nothing,
+which is the only way to see what a run would do <em>before</em> it does it.</p>
+<p>Nothing that is already there is overwritten: an occupied destination reads
+<code class="docutils literal notranslate"><span class="pre">conflict</span></code> and is left exactly as it was until <code class="docutils literal notranslate"><span class="pre">force=True</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">only=</span></code> installs a subset by name. The case it exists for: you already have your
+own capture skill, adapted to your own fleet, and a second one competing for the same
+triggers is worse than either alone – so take the reader and the subagent and leave
+the capture skill out.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plan</span> <span class="o">=</span> <span class="n">install_skills</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="s1">'/nonexistent/host'</span><span class="p">,</span> <span class="n">only</span><span class="o">=</span><span class="p">[</span><span class="s1">'openloops'</span><span class="p">],</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">plan</span><span class="p">[</span><span class="s1">'actions'</span><span class="p">]]</span>
+<span class="go">['openloops']</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plan</span> <span class="o">=</span> <span class="n">install_skills</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="s1">'/nonexistent/host'</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plan</span><span class="p">[</span><span class="s1">'counts'</span><span class="p">][</span><span class="s1">'install'</span><span class="p">],</span> <span class="n">plan</span><span class="p">[</span><span class="s1">'dry_run'</span><span class="p">]</span>
+<span class="go">(3, True)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">sorted</span><span class="p">({</span><span class="n">row</span><span class="p">[</span><span class="s1">'action'</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">plan</span><span class="p">[</span><span class="s1">'actions'</span><span class="p">]})</span>
+<span class="go">['install']</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.skills.skills_dir">
+<span class="sig-prename descclassname"><span class="pre">openloops.skills.</span></span><span class="sig-name descname"><span class="pre">skills_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="../../_modules/openloops/skills.html#skills_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.skills.skills_dir" title="Link to this definition"></a></dt>
+<dd><p>The bundled skills directory, inside the installed package.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Path(__file__).parent</span></code> rather than a configured root, so this answers correctly
+from a wheel, an editable install, a zip and a virtualenv without being told which.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="obligations.html" class="btn btn-neutral float-left" title="openloops.obligations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="store.html" class="btn btn-neutral float-right" title="openloops.store" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

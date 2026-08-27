@@ -1,0 +1,4 @@
+openloops.dashboard
+===================
+.. automodule:: openloops.dashboard
+   :members:

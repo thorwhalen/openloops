@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openloops.tools &mdash; openloops 0.1.5 documentation</title>
+  <title>openloops.tools &mdash; openloops 0.1.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=59fadc99"></script>
+      <script src="../../_static/documentation_options.js?v=6e0256f3"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -52,10 +52,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_sync.html">openloops._sync</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/base.html">openloops.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/blockers.html">openloops.blockers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/dashboard.html">openloops.dashboard</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/digest.html">openloops.digest</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/egress.html">openloops.egress</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/job.html">openloops.job</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/obligations.html">openloops.obligations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/skills.html">openloops.skills</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/store.html">openloops.store</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/tools.html">openloops.tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/transcripts.html">openloops.transcripts</a></li>
@@ -101,9 +103,17 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">MutableMapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">OPEN</span><span class="p">,</span> <span class="n">STATES</span><span class="p">,</span> <span class="n">Session</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.dashboard</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DFLT_MAX_SESSIONS</span><span class="p">,</span>
+    <span class="n">DFLT_TITLE</span><span class="p">,</span>
+    <span class="n">headline_counts</span><span class="p">,</span>
+    <span class="n">render_dashboard</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops.blockers</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DFLT_CANDIDATE_LIMIT</span><span class="p">,</span>
     <span class="n">DFLT_QUERY</span><span class="p">,</span>
@@ -128,7 +138,16 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops._sync</span><span class="w"> </span><span class="kn">import</span> <span class="n">retained</span><span class="p">,</span> <span class="n">sync</span> <span class="k">as</span> <span class="n">_sync</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops.transcripts</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClaudeCodeTranscripts</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"ROW_FIELDS"</span><span class="p">,</span> <span class="s2">"sync"</span><span class="p">,</span> <span class="s2">"ls"</span><span class="p">,</span> <span class="s2">"show"</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">,</span> <span class="s2">"owed"</span><span class="p">,</span> <span class="s2">"blocked"</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"ROW_FIELDS"</span><span class="p">,</span>
+    <span class="s2">"sync"</span><span class="p">,</span>
+    <span class="s2">"ls"</span><span class="p">,</span>
+    <span class="s2">"show"</span><span class="p">,</span>
+    <span class="s2">"status"</span><span class="p">,</span>
+    <span class="s2">"owed"</span><span class="p">,</span>
+    <span class="s2">"blocked"</span><span class="p">,</span>
+    <span class="s2">"dashboard"</span><span class="p">,</span>
+<span class="p">]</span>
 
 <span class="c1">#: The keys every :func:`ls` row carries, whatever the digest happens to record.</span>
 <span class="n">ROW_FIELDS</span> <span class="o">=</span> <span class="p">(</span>
@@ -454,9 +473,111 @@
 
 
 
+<div class="viewcode-block" id="dashboard">
+<a class="viewcode-back" href="../../module_docs/openloops/tools.html#openloops.dashboard">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">dashboard</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">verify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">resolve</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">owners</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">repos</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_LIMIT</span><span class="p">,</span>
+    <span class="n">candidate_limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_CANDIDATE_LIMIT</span><span class="p">,</span>
+    <span class="n">max_sessions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_MAX_SESSIONS</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DFLT_TITLE</span><span class="p">,</span>
+    <span class="n">standalone</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">made_at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">owed_report</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">blocked_report</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sessions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">digests_store</span><span class="p">:</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""All three answers as one self-contained HTML page, for looking at rather than reading.</span>
+
+<span class="sd">    Runs :func:`owed`, :func:`blocked` and :func:`ls`, then renders</span>
+<span class="sd">    :func:`openloops.dashboard.render_dashboard` over what they returned. The page is a</span>
+<span class="sd">    **snapshot**: it stamps the moment it was made and states, in its largest type, that</span>
+<span class="sd">    it has checked nothing since — because a published page cannot. Nothing is written</span>
+<span class="sd">    to GitHub, here or anywhere in openloops.</span>
+
+<span class="sd">    ``path`` also writes the page there, scrubbed, and reports where it went.</span>
+<span class="sd">    ``standalone=False`` returns the same page without the document scaffold, for a host</span>
+<span class="sd">    that supplies its own ``&lt;head&gt;``.</span>
+
+<span class="sd">    Each of the three reads is a seam: pass ``owed_report=``, ``blocked_report=`` or</span>
+<span class="sd">    ``sessions=`` and that one is not performed. With all three passed this reaches no</span>
+<span class="sd">    network and needs no ``gh``, which is how the tests run.</span>
+
+<span class="sd">    ``counts`` comes back alongside the page and carries ``null`` — not ``0`` — for any</span>
+<span class="sd">    figure that could not be established, so a caller reading the JSON is held to the</span>
+<span class="sd">    same three-state rule as a reader looking at the page.</span>
+
+<span class="sd">    &gt;&gt;&gt; result = dashboard(owed_report={'listed': True, 'counts': {'open': 0}, 'rows': []},</span>
+<span class="sd">    ...                    blocked_report={'listed': False, 'error': 'no gh'},</span>
+<span class="sd">    ...                    sessions=[], made_at='2026-01-01T00:00:00Z')</span>
+<span class="sd">    &gt;&gt;&gt; result['counts']['free_to_proceed'] is None, result['counts']['unknown'] is None</span>
+<span class="sd">    (True, True)</span>
+<span class="sd">    """</span>
+    <span class="n">owed_report</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">_owed</span><span class="p">(</span>
+            <span class="n">verify</span><span class="o">=</span><span class="n">verify</span><span class="p">,</span>
+            <span class="n">owners</span><span class="o">=</span><span class="n">owners</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">DFLT_LABEL</span><span class="p">,</span>
+            <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">DFLT_LIST_TIMEOUT</span><span class="p">,</span>
+            <span class="n">predicate_timeout</span><span class="o">=</span><span class="n">DFLT_PREDICATE_TIMEOUT</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">owed_report</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">owed_report</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">blocked_report</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">_blocked</span><span class="p">(</span>
+            <span class="n">resolve</span><span class="o">=</span><span class="n">resolve</span><span class="p">,</span>
+            <span class="n">owners</span><span class="o">=</span><span class="n">owners</span><span class="p">,</span>
+            <span class="n">repos</span><span class="o">=</span><span class="n">repos</span> <span class="ow">or</span> <span class="p">(),</span>
+            <span class="n">query</span><span class="o">=</span><span class="n">DFLT_QUERY</span><span class="p">,</span>
+            <span class="n">limit</span><span class="o">=</span><span class="n">candidate_limit</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">DFLT_LIST_TIMEOUT</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">blocked_report</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">blocked_report</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">sessions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># `limit=0` is "all of them". The renderer needs the true total to be able to</span>
+        <span class="c1"># say "40 of 154"; a pre-clipped list would let the page state a smaller number</span>
+        <span class="c1"># than is really open, which is the same family of error as reporting a `?` as 0.</span>
+        <span class="n">sessions</span> <span class="o">=</span> <span class="n">ls</span><span class="p">(</span><span class="n">state</span><span class="o">=</span><span class="n">OPEN</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">digests_store</span><span class="o">=</span><span class="n">digests_store</span><span class="p">)</span>
+    <span class="n">made_at</span> <span class="o">=</span> <span class="n">made_at</span> <span class="ow">or</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">render_dashboard</span><span class="p">(</span>
+        <span class="n">owed_report</span><span class="p">,</span>
+        <span class="n">blocked_report</span><span class="p">,</span>
+        <span class="n">sessions</span><span class="p">,</span>
+        <span class="n">made_at</span><span class="o">=</span><span class="n">made_at</span><span class="p">,</span>
+        <span class="n">source</span><span class="o">=</span><span class="n">default_source</span><span class="p">(),</span>
+        <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+        <span class="n">max_sessions</span><span class="o">=</span><span class="n">max_sessions</span><span class="p">,</span>
+        <span class="n">standalone</span><span class="o">=</span><span class="n">standalone</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">written</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+        <span class="n">target</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">target</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+        <span class="n">written</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"html"</span><span class="p">:</span> <span class="n">html</span><span class="p">,</span>
+        <span class="s2">"path"</span><span class="p">:</span> <span class="n">written</span><span class="p">,</span>
+        <span class="s2">"bytes"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">html</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">)),</span>
+        <span class="s2">"made_at"</span><span class="p">:</span> <span class="n">made_at</span><span class="p">,</span>
+        <span class="s2">"counts"</span><span class="p">:</span> <span class="n">headline_counts</span><span class="p">(</span><span class="n">owed_report</span><span class="p">,</span> <span class="n">blocked_report</span><span class="p">,</span> <span class="n">sessions</span><span class="p">),</span>
+    <span class="p">}</span></div>
+
+
+
 <span class="c1">#: Single source of truth for what every surface exposes. The CLI dispatches this list;</span>
 <span class="c1">#: an MCP or HTTP adapter would reference the same names as strings.</span>
-<span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">sync</span><span class="p">,</span> <span class="n">ls</span><span class="p">,</span> <span class="n">show</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">owed</span><span class="p">,</span> <span class="n">blocked</span><span class="p">]</span>
+<span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">sync</span><span class="p">,</span> <span class="n">ls</span><span class="p">,</span> <span class="n">show</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">owed</span><span class="p">,</span> <span class="n">blocked</span><span class="p">,</span> <span class="n">dashboard</span><span class="p">]</span>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>

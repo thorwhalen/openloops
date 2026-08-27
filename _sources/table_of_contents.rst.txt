@@ -8,10 +8,12 @@
    module_docs/openloops/_sync
    module_docs/openloops/base
    module_docs/openloops/blockers
+   module_docs/openloops/dashboard
    module_docs/openloops/digest
    module_docs/openloops/egress
    module_docs/openloops/job
    module_docs/openloops/obligations
+   module_docs/openloops/skills
    module_docs/openloops/store
    module_docs/openloops/tools
    module_docs/openloops/transcripts

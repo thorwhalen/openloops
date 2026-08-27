@@ -1,0 +1,466 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openloops.skills &mdash; openloops 0.1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=6e0256f3"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            openloops
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops.html">openloops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/__main__.html">openloops.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_classify.html">openloops._classify</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_sync.html">openloops._sync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/blockers.html">openloops.blockers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/dashboard.html">openloops.dashboard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/digest.html">openloops.digest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/egress.html">openloops.egress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/obligations.html">openloops.obligations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/skills.html">openloops.skills</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/store.html">openloops.store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/tools.html">openloops.tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/transcripts.html">openloops.transcripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">openloops</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">openloops.skills</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openloops.skills</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""The agent-facing surface: two skills, one subagent, and the command that installs them.</span>
+
+<span class="sd">The ``ol`` command is plumbing. What most people actually want is an agent that knows</span>
+<span class="sd">how to use the plumbing and tells them what matters -- "what is being done, and what</span>
+<span class="sd">needs my attention?" -- without their ever typing ``ol owed``. That agent is a file:</span>
+<span class="sd">a ``SKILL.md`` an agent host loads when the question comes up. So openloops ships three</span>
+<span class="sd">of them, inside the package, and this module is how they get from the wheel to the host.</span>
+
+<span class="sd">===========================  ==================================================</span>
+<span class="sd">``openloops``                the **read** skill. Runs the three commands, and</span>
+<span class="sd">                             synthesises rather than pastes. The one to load.</span>
+<span class="sd">``openloops-needs-human``    the **capture** skill. Without something filing</span>
+<span class="sd">                             ``manual-task`` issues, ``ol owed`` reads an empty</span>
+<span class="sd">                             list forever -- which is the state a stranger</span>
+<span class="sd">                             installs into.</span>
+<span class="sd">``openloops-sweep``          a subagent: the same sweep in a fresh context,</span>
+<span class="sd">                             returning a page instead of three screens of output.</span>
+<span class="sd">===========================  ==================================================</span>
+
+<span class="sd">**Nothing here is openloops-specific machinery.** A skill is a markdown file in a</span>
+<span class="sd">directory an agent host reads; installing one is a symlink. The whole module is a</span>
+<span class="sd">hundred lines because that is genuinely all it is, and the alternative -- a copy of</span>
+<span class="sd">each skill pasted into every user's config -- is a copy that goes stale the first time</span>
+<span class="sd">``pip install -U openloops`` lands.</span>
+
+<span class="sd">Two decisions worth stating, because both are the kind that get quietly reversed:</span>
+
+<span class="sd">**A symlink, not a copy.** The point is that upgrading the package upgrades the skill.</span>
+<span class="sd">Copying is the *fallback*, taken only where symlinks are unavailable (Windows without</span>
+<span class="sd">Developer Mode, where creating one needs a privilege an ordinary process lacks), and</span>
+<span class="sd">the plan says which happened rather than pretending they are the same thing.</span>
+
+<span class="sd">**Nothing already there is ever overwritten.** A destination holding something that is</span>
+<span class="sd">not ours reads ``conflict``: it is reported, not replaced, and ``force=True`` is the</span>
+<span class="sd">only way past. Someone's hand-written skill of the same name is theirs, and silently</span>
+<span class="sd">eating it would be a worse failure than not installing at all.</span>
+
+<span class="sd">This is deliberately *not* in :mod:`openloops.tools`. That module is the list every</span>
+<span class="sd">surface dispatches from -- an MCP server, an HTTP endpoint -- and "symlink files into</span>
+<span class="sd">this machine's agent config" is not an operation a remote surface could honestly offer.</span>
+<span class="sd">It belongs beside :mod:`openloops.job`, the other installer, which the CLI also wraps</span>
+<span class="sd">directly.</span>
+
+<span class="sd">    &gt;&gt;&gt; skills_dir().name, agents_dir().name</span>
+<span class="sd">    ('skills', 'agents')</span>
+<span class="sd">    &gt;&gt;&gt; sorted(asset.name for asset in bundled())</span>
+<span class="sd">    ['openloops', 'openloops-needs-human', 'openloops-sweep']</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"HOST_ENV_VAR"</span><span class="p">,</span>
+    <span class="s2">"Asset"</span><span class="p">,</span>
+    <span class="s2">"agents_dir"</span><span class="p">,</span>
+    <span class="s2">"bundled"</span><span class="p">,</span>
+    <span class="s2">"host_dir"</span><span class="p">,</span>
+    <span class="s2">"install_skills"</span><span class="p">,</span>
+    <span class="s2">"skills_dir"</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1">#: Where Claude Code keeps skills and subagents, and the variable that relocates it.</span>
+<span class="c1">#: Honoured rather than reimplemented: a user who has moved their config has done so</span>
+<span class="c1">#: for a reason, and an installer that ignores it writes to a directory nobody reads.</span>
+<span class="n">HOST_ENV_VAR</span> <span class="o">=</span> <span class="s2">"CLAUDE_CONFIG_DIR"</span>
+<span class="n">DFLT_HOST</span> <span class="o">=</span> <span class="s2">"~/.claude"</span>
+
+<span class="c1">#: Where each kind of asset lands under the host directory. A skill is a *directory*</span>
+<span class="c1">#: (it may carry ``references/``); a subagent is a single markdown file.</span>
+<span class="n">_HOST_SUBDIR</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"skill"</span><span class="p">:</span> <span class="s2">"skills"</span><span class="p">,</span> <span class="s2">"agent"</span><span class="p">:</span> <span class="s2">"agents"</span><span class="p">}</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SkillsNotBundled</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""This installation has no bundled skills, which means the wheel lost its data."""</span>
+
+
+<div class="viewcode-block" id="skills_dir">
+<a class="viewcode-back" href="../../module_docs/openloops/skills.html#openloops.skills_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">skills_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The bundled skills directory, inside the installed package.</span>
+
+<span class="sd">    ``Path(__file__).parent`` rather than a configured root, so this answers correctly</span>
+<span class="sd">    from a wheel, an editable install, a zip and a virtualenv without being told which.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"data"</span> <span class="o">/</span> <span class="s2">"skills"</span></div>
+
+
+
+<div class="viewcode-block" id="agents_dir">
+<a class="viewcode-back" href="../../module_docs/openloops/skills.html#openloops.agents_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">agents_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The bundled subagent definitions, inside the installed package."""</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"data"</span> <span class="o">/</span> <span class="s2">"agents"</span></div>
+
+
+
+<div class="viewcode-block" id="host_dir">
+<a class="viewcode-back" href="../../module_docs/openloops/skills.html#openloops.host_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">host_dir</span><span class="p">(</span><span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The agent host's config directory: ``target``, ``CLAUDE_CONFIG_DIR``, or ``~/.claude``.</span>
+
+<span class="sd">    &gt;&gt;&gt; import os</span>
+<span class="sd">    &gt;&gt;&gt; host_dir('/somewhere/else').name</span>
+<span class="sd">    'else'</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">target</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+    <span class="n">override</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">HOST_ENV_VAR</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">override</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span> <span class="k">if</span> <span class="n">override</span> <span class="k">else</span> <span class="n">Path</span><span class="p">(</span><span class="n">DFLT_HOST</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="Asset">
+<a class="viewcode-back" href="../../module_docs/openloops/skills.html#openloops.Asset">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Asset</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One installable thing: a skill directory or a subagent file.</span>
+
+<span class="sd">    ``name`` is what the host will call it, and it is the file or folder name too --</span>
+<span class="sd">    the agent-skill spec requires the folder name to equal the skill's ``name:``, so</span>
+<span class="sd">    deriving one from the other cannot drift.</span>
+<span class="sd">    """</span>
+
+    <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">source</span><span class="p">:</span> <span class="n">Path</span>
+
+<div class="viewcode-block" id="Asset.destination">
+<a class="viewcode-back" href="../../module_docs/openloops/skills.html#openloops.Asset.destination">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">destination</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Where this asset goes under *host*."""</span>
+        <span class="n">directory</span> <span class="o">=</span> <span class="n">host</span> <span class="o">/</span> <span class="n">_HOST_SUBDIR</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">directory</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"skill"</span> <span class="k">else</span> <span class="n">directory</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.md"</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_existing</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">what</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""`path`, or a readable failure naming what to do about it.</span>
+
+<span class="sd">    A wheel built without the package data is the one failure mode of shipping skills</span>
+<span class="sd">    this way, and it turns the first command a new user types into a traceback. Say what</span>
+<span class="sd">    happened instead.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">path</span>
+    <span class="k">raise</span> <span class="n">SkillsNotBundled</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"this openloops installation carries no bundled </span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> does not exist. "</span>
+        <span class="s2">"That means the wheel was built without its package data -- reinstall from PyPI "</span>
+        <span class="s2">"(`pip install --force-reinstall openloops`), or from a source checkout with "</span>
+        <span class="s2">"`pip install -e .`."</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="bundled">
+<a class="viewcode-back" href="../../module_docs/openloops/skills.html#openloops.bundled">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">bundled</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Asset</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Every skill and subagent this package ships, sorted by name.</span>
+
+<span class="sd">    Discovered from the directories rather than listed here: a list would be a second</span>
+<span class="sd">    place to update, and the one that gets forgotten.</span>
+<span class="sd">    """</span>
+    <span class="n">assets</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">Asset</span><span class="p">(</span><span class="s2">"skill"</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">_existing</span><span class="p">(</span><span class="n">skills_dir</span><span class="p">(),</span> <span class="s2">"skills"</span><span class="p">)</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">"SKILL.md"</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
+    <span class="p">]</span>
+    <span class="n">assets</span> <span class="o">+=</span> <span class="p">[</span>
+        <span class="n">Asset</span><span class="p">(</span><span class="s2">"agent"</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">stem</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">agents_dir</span><span class="p">()</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.md"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">assets</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">asset</span><span class="p">:</span> <span class="n">asset</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_identical</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Is *destination* a byte-for-byte copy of *source*?</span>
+
+<span class="sd">    This is what makes copy-mode idempotent. Without it, every re-run on a platform</span>
+<span class="sd">    where symlinks are unavailable would report a conflict against its own last run.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">destination</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">source</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">"*"</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_file</span><span class="p">()}</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">destination</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">"*"</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_file</span><span class="p">()}</span>
+        <span class="k">return</span> <span class="n">left</span> <span class="o">==</span> <span class="n">right</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">source</span> <span class="o">/</span> <span class="n">rel</span><span class="p">)</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span> <span class="o">==</span> <span class="p">(</span><span class="n">destination</span> <span class="o">/</span> <span class="n">rel</span><span class="p">)</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span> <span class="k">for</span> <span class="n">rel</span> <span class="ow">in</span> <span class="n">left</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">destination</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="n">source</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span> <span class="o">==</span> <span class="n">destination</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_symlinks_work</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Can this process create a symlink at all?</span>
+
+<span class="sd">    On Windows it usually cannot: ``os.symlink`` needs Developer Mode or an elevated</span>
+<span class="sd">    process, and the failure is a ``OSError`` at call time rather than anything you can</span>
+<span class="sd">    read off the platform name. Probing in a temporary directory answers it without</span>
+<span class="sd">    touching the host's config, so a dry run predicts the same thing the real run does.</span>
+<span class="sd">    """</span>
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"probe"</span><span class="p">,</span> <span class="n">target_is_directory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">NotImplementedError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_verdict</span><span class="p">(</span><span class="n">asset</span><span class="p">:</span> <span class="n">Asset</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""What to do about one destination, and why. Never destructive on its own."""</span>
+    <span class="n">exists</span> <span class="o">=</span> <span class="n">destination</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="n">destination</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"install"</span><span class="p">,</span> <span class="s2">"not present"</span>
+    <span class="k">if</span> <span class="n">destination</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">resolved</span> <span class="o">=</span> <span class="n">destination</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>  <span class="c1"># a symlink loop, or a broken one on a platform that raises</span>
+            <span class="n">resolved</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">resolved</span> <span class="o">==</span> <span class="n">asset</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">resolve</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s2">"ok"</span><span class="p">,</span> <span class="s2">"already linked to this package"</span>
+        <span class="k">if</span> <span class="n">force</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">"install"</span><span class="p">,</span> <span class="s2">"replacing a link that pointed elsewhere"</span>
+        <span class="k">return</span> <span class="s2">"conflict"</span><span class="p">,</span> <span class="s2">"a link pointing somewhere else is already there"</span>
+    <span class="k">if</span> <span class="n">_identical</span><span class="p">(</span><span class="n">asset</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">"ok"</span><span class="p">,</span> <span class="s2">"an identical copy is already there"</span>
+    <span class="k">if</span> <span class="n">force</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"install"</span><span class="p">,</span> <span class="s2">"replacing different content"</span>
+    <span class="k">return</span> <span class="s2">"conflict"</span><span class="p">,</span> <span class="s2">"something else with this name is already there"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_remove</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span> <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="install_skills">
+<a class="viewcode-back" href="../../module_docs/openloops/skills.html#openloops.install_skills">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">install_skills</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">only</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">copy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Make the bundled skills and subagent visible to an agent host. Idempotent.</span>
+
+<span class="sd">    Links each one into ``target`` (default: ``CLAUDE_CONFIG_DIR`` or ``~/.claude``) so</span>
+<span class="sd">    that upgrading the package upgrades the skill. ``copy=True`` takes a copy instead,</span>
+<span class="sd">    which is also what happens by itself where symlinks are unavailable.</span>
+
+<span class="sd">    Returns the plan it carried out -- one row per asset, each carrying its verdict and</span>
+<span class="sd">    the reason for it. ``dry_run=True`` returns the same plan having touched nothing,</span>
+<span class="sd">    which is the only way to see what a run would do *before* it does it.</span>
+
+<span class="sd">    Nothing that is already there is overwritten: an occupied destination reads</span>
+<span class="sd">    ``conflict`` and is left exactly as it was until ``force=True``.</span>
+
+<span class="sd">    ``only=`` installs a subset by name. The case it exists for: you already have your</span>
+<span class="sd">    own capture skill, adapted to your own fleet, and a second one competing for the same</span>
+<span class="sd">    triggers is worse than either alone -- so take the reader and the subagent and leave</span>
+<span class="sd">    the capture skill out.</span>
+
+<span class="sd">    &gt;&gt;&gt; plan = install_skills(target='/nonexistent/host', only=['openloops'], dry_run=True)</span>
+<span class="sd">    &gt;&gt;&gt; [row['name'] for row in plan['actions']]</span>
+<span class="sd">    ['openloops']</span>
+
+<span class="sd">    &gt;&gt;&gt; plan = install_skills(target='/nonexistent/host', dry_run=True)</span>
+<span class="sd">    &gt;&gt;&gt; plan['counts']['install'], plan['dry_run']</span>
+<span class="sd">    (3, True)</span>
+<span class="sd">    &gt;&gt;&gt; sorted({row['action'] for row in plan['actions']})</span>
+<span class="sd">    ['install']</span>
+<span class="sd">    """</span>
+    <span class="n">host</span> <span class="o">=</span> <span class="n">host_dir</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="n">linking</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">copy</span> <span class="ow">and</span> <span class="n">_symlinks_work</span><span class="p">()</span>
+    <span class="n">rows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">assets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bundled</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">only</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">wanted</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">only</span> <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()}</span>
+        <span class="n">known</span> <span class="o">=</span> <span class="p">{</span><span class="n">asset</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">asset</span> <span class="ow">in</span> <span class="n">assets</span><span class="p">}</span>
+        <span class="n">unknown</span> <span class="o">=</span> <span class="n">wanted</span> <span class="o">-</span> <span class="n">known</span>
+        <span class="k">if</span> <span class="n">unknown</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"no bundled asset named </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">unknown</span><span class="p">))</span><span class="si">}</span><span class="s2">; "</span>
+                <span class="sa">f</span><span class="s2">"available: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">known</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span>
+            <span class="p">)</span>
+        <span class="n">assets</span> <span class="o">=</span> <span class="p">[</span><span class="n">asset</span> <span class="k">for</span> <span class="n">asset</span> <span class="ow">in</span> <span class="n">assets</span> <span class="k">if</span> <span class="n">asset</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">wanted</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">asset</span> <span class="ow">in</span> <span class="n">assets</span><span class="p">:</span>
+        <span class="n">destination</span> <span class="o">=</span> <span class="n">asset</span><span class="o">.</span><span class="n">destination</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+        <span class="n">action</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="n">_verdict</span><span class="p">(</span><span class="n">asset</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"symlink"</span> <span class="k">if</span> <span class="n">linking</span> <span class="k">else</span> <span class="s2">"copy"</span><span class="p">)</span> <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">"install"</span> <span class="k">else</span> <span class="s2">""</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">"install"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
+            <span class="n">destination</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">_remove</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">linking</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span>
+                        <span class="n">asset</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">target_is_directory</span><span class="o">=</span><span class="n">asset</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
+                    <span class="p">)</span>
+                <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                    <span class="c1"># The probe said yes and this said no -- a network share, a</span>
+                    <span class="c1"># different filesystem. Copying still gets the skill installed; the</span>
+                    <span class="c1"># row says which happened, because a silent copy is a skill that</span>
+                    <span class="c1"># stops tracking the package.</span>
+                    <span class="n">method</span> <span class="o">=</span> <span class="s2">"copy"</span>
+                    <span class="n">linking</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">_copy</span><span class="p">(</span><span class="n">asset</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_copy</span><span class="p">(</span><span class="n">asset</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"kind"</span><span class="p">:</span> <span class="n">asset</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span>
+                <span class="s2">"name"</span><span class="p">:</span> <span class="n">asset</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s2">"source"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">asset</span><span class="o">.</span><span class="n">source</span><span class="p">),</span>
+                <span class="s2">"destination"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">destination</span><span class="p">),</span>
+                <span class="s2">"action"</span><span class="p">:</span> <span class="n">action</span><span class="p">,</span>
+                <span class="s2">"method"</span><span class="p">:</span> <span class="n">method</span><span class="p">,</span>
+                <span class="s2">"reason"</span><span class="p">:</span> <span class="n">reason</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="n">state</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">"action"</span><span class="p">]</span> <span class="o">==</span> <span class="n">state</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">)</span> <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"install"</span><span class="p">,</span> <span class="s2">"ok"</span><span class="p">,</span> <span class="s2">"conflict"</span><span class="p">)}</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"target"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">host</span><span class="p">),</span>
+        <span class="s2">"method"</span><span class="p">:</span> <span class="s2">"symlink"</span> <span class="k">if</span> <span class="n">linking</span> <span class="k">else</span> <span class="s2">"copy"</span><span class="p">,</span>
+        <span class="s2">"dry_run"</span><span class="p">:</span> <span class="n">dry_run</span><span class="p">,</span>
+        <span class="s2">"actions"</span><span class="p">:</span> <span class="n">rows</span><span class="p">,</span>
+        <span class="s2">"counts"</span><span class="p">:</span> <span class="n">counts</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_copy</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
