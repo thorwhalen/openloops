@@ -16,6 +16,11 @@ from collections.abc import Mapping, MutableMapping
 from typing import Any
 
 from openloops.base import OPEN, STATES, Session
+from openloops.blockers import (
+    DFLT_CANDIDATE_LIMIT,
+    DFLT_QUERY,
+    blocked as _blocked,
+)
 from openloops.obligations import (
     DFLT_LABEL,
     DFLT_LIMIT,
@@ -35,7 +40,7 @@ from openloops.store import (
 from openloops._sync import retained, sync as _sync
 from openloops.transcripts import ClaudeCodeTranscripts
 
-__all__ = ["ROW_FIELDS", "sync", "ls", "show", "status", "owed"]
+__all__ = ["ROW_FIELDS", "sync", "ls", "show", "status", "owed", "blocked"]
 
 #: The keys every :func:`ls` row carries, whatever the digest happens to record.
 ROW_FIELDS = (
@@ -302,9 +307,50 @@ def owed(
     )
 
 
+def blocked(
+    *,
+    resolve: bool = True,
+    owners: list[str] | None = None,
+    repos: list[str] | None = None,
+    query: str = DFLT_QUERY,
+    limit: int = DFLT_CANDIDATE_LIMIT,
+    timeout: float = DFLT_LIST_TIMEOUT,
+    issues_source: Any = None,
+    blockers_source: Any = None,
+) -> dict[str, Any]:
+    """What your repositories are waiting on — and what is no longer waiting.
+
+    The sibling of :func:`owed`: an obligation points at a person, a blocker edge
+    points at another repository, and both are commitments nothing is watching. Lists
+    the open issues carrying a ``blocked_by`` dependency across ``owners`` (or exactly
+    the ``repos`` you name), resolves every edge, and reports three states:
+    ``unblocked`` (every blocker closed — the work is free and nobody has been told),
+    ``blocked`` (naming the foreign repository it waits on) and ``unknown`` (nothing
+    could be resolved). Nothing is ever closed, relabelled or written; see
+    :mod:`openloops.blockers` for what discovery costs and what it is measured to miss.
+
+    The result is an envelope rather than a list, because ``listed=False`` — discovery
+    itself failed — must not be readable as "nothing is waiting".
+
+    >>> report = blocked(issues_source=[], blockers_source={})
+    >>> report['listed'], report['counts']['total']
+    (True, 0)
+    """
+    return _blocked(
+        resolve=resolve,
+        owners=owners,
+        repos=repos or (),
+        query=query,
+        limit=limit,
+        timeout=timeout,
+        issues_source=issues_source,
+        blockers_source=blockers_source,
+    )
+
+
 #: Single source of truth for what every surface exposes. The CLI dispatches this list;
 #: an MCP or HTTP adapter would reference the same names as strings.
-_dispatch_funcs = [sync, ls, show, status, owed]
+_dispatch_funcs = [sync, ls, show, status, owed, blocked]
 
 
 if __name__ == "__main__":
