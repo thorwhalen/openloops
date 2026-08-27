@@ -100,7 +100,7 @@ def test_status_counts_retained_digests_separately(projects_dir):
 
 def test_the_dispatch_list_is_the_public_surface():
     names = {f.__name__ for f in tools._dispatch_funcs}
-    assert names == {"sync", "ls", "show", "status", "owed", "blocked"}
+    assert names == {"sync", "ls", "show", "status", "owed", "blocked", "dashboard"}
     for func in tools._dispatch_funcs:
         assert func.__doc__, f"{func.__name__} needs a docstring — it is the CLI help"
 

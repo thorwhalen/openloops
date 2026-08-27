@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "openloops"
 version = "0.1.6"
-description = "Tells you what your Claude Code sessions were doing, after the transcripts are gone"
+description = "Track the open loops between you and your coding agents: what they left open, what they need from you, and what is no longer blocked"
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"
@@ -50,6 +50,44 @@ Changelog = "https://github.com/thorwhalen/openloops/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0", "pytest-cov>=4.0", "ruff>=0.1.0"]
+
+# The agent-facing surface ships *inside* the package: `openloops/data/skills/` and
+# `openloops/data/agents/` are markdown, not code, and a wheel is the only channel that
+# reliably carries non-code data. Hatchling includes everything under `openloops/`
+# implicitly today, so this section changes nothing about the current build — it states
+# the fact, so that a later build target added here cannot silently drop the skills. A
+# skill that is not in the wheel is not shipped, and nothing at runtime would say so;
+# `tests/test_skills.py` builds a wheel and looks, which is the check that actually holds.
+[tool.hatch.build.targets.wheel]
+packages = ["openloops"]
+
+# `only-include` is load-bearing, and the reason is not obvious enough to leave implicit.
+#
+# `.claude/skills/<name>` are DIRECTORY symlinks into `openloops/data/skills/` -- the
+# bridge that makes the skills load for anyone working in this repo. Hatchling's
+# `safe_walk` dedupes directories by (st_dev, st_ino) while following links, and
+# `.claude` sorts before `openloops`: it reaches the real skill directories through the
+# bridge first, records their inodes, and then PRUNES them when the walk arrives at them
+# for real. The result is an sdist with no skills in it -- and since `uv build` (what CI
+# runs) builds the wheel FROM the sdist, the published wheel has none either.
+#
+# `exclude` does not fix it: the sdist builder still descends `.claude` to filter it at
+# yield time, so the inodes are still recorded. `only-include` routes through
+# `recurse_explicit_files`, which never enters `.claude` at all.
+#
+# Measured 2026-08-27: without this, `unzip -l` on the release wheel shows the agent
+# (a FILE symlink -- safe_walk only dedupes directories) and neither skill.
+[tool.hatch.build.targets.sdist]
+only-include = [
+    "openloops",
+    "tests",
+    "packaging",
+    ".github",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "pyproject.toml",
+]
 
 [tool.ruff]
 line-length = 88
