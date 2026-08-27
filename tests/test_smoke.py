@@ -78,40 +78,49 @@ def test_the_console_script_entry_point_resolves():
     assert scripts.get("ol") == "openloops.__main__:main"
 
 
-def test_no_module_command_or_field_represents_an_obligation():
-    """ADR-002's line between what ships and what stays withheld, made mechanical.
+def test_no_surface_exposes_a_mutating_operation():
+    """Enforcement by omission (ADR-012 `no-mutating-tools`), made mechanical.
 
-    Checked over **identifiers**, not prose. The package must say plainly that the
-    ledger is absent — the module docstring does — and a naive grep would forbid the
-    very sentence that documents the absence. What must not exist is a module, a
-    command, a class, a function, an argument or a field that *represents* one.
+    This replaces an earlier guard that forbade obligation vocabulary anywhere in the
+    package. That guard encoded the first release's decision to withhold the read path
+    pending a measurement; the measurement was cancelled and the read path shipped, so
+    the guard now forbids the module it was waiting for. What has *not* changed — and
+    is what this checks instead — is that openloops only ever reads.
+
+    Two halves, both over the source rather than over prose. No operation any surface
+    exposes is named for a write, and nowhere in the package is `gh` handed a
+    subcommand or an HTTP method that would change something on GitHub. An obligation
+    is discharged by a human, never by this package's judgement of a predicate.
     """
     import ast
     import re
     from pathlib import Path
 
-    forbidden = re.compile(r"obligation|manual_task|manualtask|\bowe[ds]?\b|ledger")
+    from openloops import tools
+    from openloops.__main__ import _commands
+
+    mutating_name = re.compile(
+        r"close|reopen|relabel|assign|comment|create_issue|delete|patch|post"
+    )
+    exposed = {f.__name__ for f in tools._dispatch_funcs} | {
+        f.__name__ for f in _commands
+    }
+    named = sorted(n for n in exposed if mutating_name.search(n))
+    assert not named, f"a read-only tool exposes a mutating verb: {named}"
+
+    mutating_call = re.compile(
+        r"issue\s+(close|create|edit|comment|reopen|delete|lock|transfer)"
+        r"|label\s+(create|edit|delete|clone)"
+        r"|(--method|-X)\s*[\"\']?\s*(POST|PATCH|PUT|DELETE)"
+    )
     package = Path(__file__).resolve().parent.parent / "openloops"
     offenders = []
     for path in sorted(package.rglob("*.py")):
-        if forbidden.search(path.stem):
-            offenders.append(f"module name: {path.name}")
         tree = ast.parse(path.read_text(encoding="utf-8"))
-        names = set()
         for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                names.add(node.name)
-                names.update(a.arg for a in node.args.args + node.args.kwonlyargs)
-            elif isinstance(node, ast.ClassDef):
-                names.add(node.name)
-            elif isinstance(node, ast.Name):
-                names.add(node.id)
-            elif isinstance(node, ast.Attribute):
-                names.add(node.attr)
-        for name in sorted(names):
-            if forbidden.search(name.lower()):
-                offenders.append(f"{path.name}: identifier {name!r}")
-
-    assert not offenders, "a release with no ledger names one anyway:\n" + "\n".join(
+            if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                if mutating_call.search(node.value):
+                    offenders.append(f"{path.name}:{node.lineno}: {node.value[:60]!r}")
+    assert not offenders, "a read-only package builds a write call:\n" + "\n".join(
         offenders
     )
