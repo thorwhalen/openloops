@@ -51,7 +51,9 @@ for row in openloops.ls(state="open"):  # what your sessions left open
 
 print(openloops.show("2b1f")["text"])  # one digest, in full
 
-report = openloops.owed()  # open `manual-task` issues, each re-checked against the world
+report = (
+    openloops.owed()
+)  # open `manual-task` issues, each re-checked against the world
 print(report["counts"])  # {'open': 8, 'discharged': 1, 'unknown': 0, ...}
 ```
 

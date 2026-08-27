@@ -417,8 +417,10 @@ _VERIFY_FIELD = re.compile(
 _CODE_SPAN = re.compile(r"(?P<ticks>`+)(?P<code>.+?)(?P=ticks)", re.DOTALL)
 
 #: A fenced block, ``` or ~~~, however many fence characters it opened with.
-_FENCED_BLOCK = re.compile(r"^[ \t]*(?P<fence>```+|~~~+).*?^[ \t]*(?P=fence)[ \t]*$",
-                           re.DOTALL | re.MULTILINE)
+_FENCED_BLOCK = re.compile(
+    r"^[ \t]*(?P<fence>```+|~~~+).*?^[ \t]*(?P=fence)[ \t]*$", re.DOTALL | re.MULTILINE
+)
+
 
 #: Text the capture skill's own documentation of the field is quoted in. An agent that
 #: pastes the spec into its `<details>What I found</details>` must not have the spec's
@@ -450,7 +452,13 @@ def _without_quoted_code(body: str) -> str:
 #: and prose containing a code span (`gh`, `true`) must never be executed -- `gh` with no
 #: arguments exits 0, which would mark a live obligation DONE. That is the phantom
 #: discharge this whole module exists to prevent, so it is checked first and by prefix.
-_NO_PREDICATE_PREFIXES = ("none possible", "none", "n/a", "no predicate", "not possible")
+_NO_PREDICATE_PREFIXES = (
+    "none possible",
+    "none",
+    "n/a",
+    "no predicate",
+    "not possible",
+)
 
 
 def parse_verify(body: str) -> tuple[str, str]:
