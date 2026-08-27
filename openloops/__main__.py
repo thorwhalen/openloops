@@ -149,6 +149,65 @@ def brief(*, limit: int = 20):
     return "\n".join([_rows_table(rows), "", *lines])
 
 
+#: How the three states print. ASCII on purpose: this goes to a Windows console too,
+#: and a surface that raises `UnicodeEncodeError` instead of answering is no surface.
+_STATE_MARKS = {"open": "open", "discharged": "done", "unknown": "?"}
+
+
+def _owed_report(report: dict) -> str:
+    """Render :func:`openloops.tools.owed`. Every verdict prints its own predicate."""
+    if not report["listed"]:
+        # ADR-013's rule, and the only line in this file that really matters: a surface
+        # that says `0` because it could not check is worse than no surface at all.
+        return f"owed ?  could not check - {report['error']}"
+
+    counts = report["counts"]
+    headline = (
+        f"{counts['open']} open, {counts['discharged']} discharged, "
+        f"{counts['unknown']} unknown"
+    )
+    notes = [f"owners: {', '.join(report['owners']) or '(none)'}"]
+    notes.append(f"predicates: {counts['with_predicate']} of {counts['total']}")
+    if not report["checked"]:
+        notes.append("NOT evaluated (--no-verify): every predicate row reads ?")
+    if report["truncated"]:
+        notes.append("TRUNCATED: the result set hit its cap, so this count is a floor")
+    lines = [headline, "  " + "  |  ".join(notes), ""]
+
+    for row in report["rows"]:
+        mark = _STATE_MARKS.get(row["state"], row["state"])
+        where = f"{row['repo']}#{row['number']}"
+        lines.append(f"{mark:<5}{row['age_days']:>4}d  {where:<26} {row['title']}")
+        # The predicate is never abbreviated. It is the reason to believe the verdict,
+        # and a truncated one is something you cannot check for yourself.
+        lines.append(f"          verify: {row['predicate'] or '(none)'}")
+        if row["evidence"]:
+            lines.append(f"                  -> {row['evidence']}")
+    if not report["rows"]:
+        lines.append("(nothing owed)")
+    return "\n".join(lines)
+
+
+def owed(*, limit: int = 50, no_verify: bool = False, owners: str = None):
+    """What you still owe your agents, re-checked before it is shown.
+
+    Lists the open `manual-task` issues and runs the `**Verify:**` predicate each one
+    carries. `done` means the predicate returned 0 — the ask is finished and the issue
+    is merely still open; nothing here ever closes it for you. `?` means nothing could
+    be checked, which is never the same as nothing being owed.
+
+    Running a predicate executes a command out of an issue body, so it happens only for
+    the owners you configured. `--no-verify` lists without executing anything.
+    """
+    return _owed_report(
+        tools.owed(
+            verify=not no_verify,
+            limit=limit,
+            owners=[o for o in (owners or "").replace(",", " ").split()] or None,
+        )
+    )
+
+
 def install_job(*, interval: int = _job.DFLT_INTERVAL, dry_run: bool = False):
     """Install the periodic sync job (macOS launchd). Re-run to change the interval."""
     result = _job.install(interval=interval, dry_run=dry_run)
@@ -182,6 +241,7 @@ def job_status():
 #: Every verb the CLI exposes, in the order `ol --help` lists them.
 _commands = [
     brief,
+    owed,
     sync,
     ls,
     show,

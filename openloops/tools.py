@@ -16,6 +16,13 @@ from collections.abc import Mapping, MutableMapping
 from typing import Any
 
 from openloops.base import OPEN, STATES, Session
+from openloops.obligations import (
+    DFLT_LABEL,
+    DFLT_LIMIT,
+    DFLT_LIST_TIMEOUT,
+    DFLT_PREDICATE_TIMEOUT,
+    owed as _owed,
+)
 from openloops.store import (
     data_dir,
     default_source,
@@ -28,7 +35,7 @@ from openloops.store import (
 from openloops._sync import retained, sync as _sync
 from openloops.transcripts import ClaudeCodeTranscripts
 
-__all__ = ["ROW_FIELDS", "sync", "ls", "show", "status"]
+__all__ = ["ROW_FIELDS", "sync", "ls", "show", "status", "owed"]
 
 #: The keys every :func:`ls` row carries, whatever the digest happens to record.
 ROW_FIELDS = (
@@ -254,9 +261,50 @@ def status(
     }
 
 
+def owed(
+    *,
+    verify: bool = True,
+    owners: list[str] | None = None,
+    trusted_owners: list[str] | None = None,
+    label: str = DFLT_LABEL,
+    limit: int = DFLT_LIMIT,
+    timeout: float = DFLT_LIST_TIMEOUT,
+    predicate_timeout: float = DFLT_PREDICATE_TIMEOUT,
+    issues_source: Any = None,
+    run_predicate: Any = None,
+) -> dict[str, Any]:
+    """What you still owe your agents, with each obligation re-checked against the world.
+
+    Lists the open `manual-task` issues across ``owners`` and evaluates the
+    ``**Verify:**`` predicate each one carries, reporting three states: ``open``,
+    ``discharged`` (the predicate returned 0 — done, but the issue is still open) and
+    ``unknown`` (nothing could be checked). Nothing is ever closed, relabelled or
+    written; see :mod:`openloops.obligations` for the trust boundary that evaluating a
+    predicate crosses, and ``verify=False`` for the way to read without executing.
+
+    The result is an envelope rather than a list, because ``listed=False`` — the query
+    itself failed — must not be readable as "nothing owed".
+
+    >>> report = owed(issues_source=[], run_predicate=lambda command: 0)
+    >>> report['listed'], report['counts']['total']
+    (True, 0)
+    """
+    return _owed(
+        verify=verify,
+        owners=owners,
+        trusted_owners=trusted_owners,
+        label=label,
+        limit=limit,
+        timeout=timeout,
+        predicate_timeout=predicate_timeout,
+        issues_source=issues_source,
+        run_predicate=run_predicate,
+    )
+
+
 #: Single source of truth for what every surface exposes. The CLI dispatches this list;
 #: an MCP or HTTP adapter would reference the same names as strings.
-_dispatch_funcs = [sync, ls, show, status]
+_dispatch_funcs = [sync, ls, show, status, owed]
 
 
 if __name__ == "__main__":

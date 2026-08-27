@@ -12,6 +12,12 @@ and keeps the digests. It is a **retention** device, not a dashboard.
 No model is called. No network request is made. No account, no credentials, no
 configuration: it reads files you already have and writes files you already own.
 
+There is a second, smaller thing in the box: `ol owed` lists the `manual-task` issues
+your agents filed when they got blocked on *you*, and re-runs the verify predicate each
+one carries before showing it — so an ask you discharged out of band reads as done
+instead of haunting the list for months. That half does need `gh`, and it is the only
+part that does. See [what you owe your agents](#what-you-owe-your-agents--and-why-the-count-has-to-be-re-checked).
+
 ## Install
 
 ```bash
@@ -26,6 +32,7 @@ That puts an `ol` command on your PATH. Python 3.10+.
 
 ```bash
 ol                          # sync, then show what your sessions left open
+ol owed                     # what you still owe your agents, re-checked before it prints
 ol ls --state all           # every digest, newest first
 ol ls --confidence high     # drop the ones open only because nothing said otherwise
 ol show 2b1f                # one digest, by session id or a unique prefix
@@ -43,6 +50,9 @@ for row in openloops.ls(state="open"):  # what your sessions left open
     print(row["session"], row["title"])
 
 print(openloops.show("2b1f")["text"])  # one digest, in full
+
+report = openloops.owed()  # open `manual-task` issues, each re-checked against the world
+print(report["counts"])  # {'open': 8, 'discharged': 1, 'unknown': 0, ...}
 ```
 
 ## What a digest says — and what it never says
@@ -131,6 +141,11 @@ openloops.sync(
 )
 ```
 
+These two are the digest path's. The obligation reader has its own pair on the same
+pattern — `issues_source=` (defaults to a `gh` search) and `run_predicate=` (defaults to
+a time-bounded subshell) — and with both injected it needs no network and no `gh`, which
+is how the whole of it is tested.
+
 `transcript_source=` defaults to a direct reader of Claude Code's on-disk layout.
 `digests_store=` defaults to a `dol` store over a directory of markdown files, with its
 encoding pinned to UTF-8 and its delete made a real delete. Point it at an S3-backed
@@ -181,18 +196,75 @@ There is one caveat worth knowing before you read a digest as a diary: a Claude 
 *session* is not a sitting. Sessions get resumed, so a single session can span days,
 and a digest keyed on one is a digest of a thread of work rather than of an afternoon.
 
-## What openloops is NOT (yet)
+## What you owe your agents — and why the count has to be re-checked
 
-It does not track what you owe your agents, or what they owe you. That is the
-project's headline claim, and it is **withheld pending a measurement** rather than
-unfinished: whether an obligation ledger is worth building depends on whether agents
-actually file the asks they raise, and that number had not been measured. Publishing a
-ledger before measuring would be construction in search of a justification.
+When an agent gets blocked on something only you can do — a secret it cannot write, a
+permission it does not have, a decision that is yours — the ask usually dies in a final
+message nobody re-reads. The fix is not a new database: it is a `manual-task` label on
+an issue in the affected repo, which outlives the session and is queryable from a
+terminal or a phone with every session stopped.
 
-So this release contains no obligation, no ledger, no GitHub write, no MCP server, no
-model call and no notification surface. What it does contain is the instrument the
-measurement needs — the same extractor that writes digests answers "did this session
-end with a question directed at the human?" — which is why it ships first.
+`ol owed` lists those issues. What it adds over one `gh` query is the part that decides
+whether the count is worth anything:
+
+```bash
+ol owed                     # list them, and re-check each one against the world
+ol owed --no-verify         # list them, executing nothing
+ol owed --owners acme,widgets
+```
+
+Obligations get discharged **out of band.** Somebody adds a deploy key in a web UI, pays
+an invoice, answers in chat. None of that emits an event anyone is listening to, so the
+issue sits open for months describing something that was done in five minutes. A stale
+row annoys; a phantom row destroys the count, and the count is the whole product.
+
+So each obligation carries its own answer, in its body, as a shell command whose exit
+status *is* the question:
+
+```markdown
+**Verify:** `gh secret list --repo OWNER/REPO --json name -q '.[].name' | grep -qx PYPI_PASSWORD`
+```
+
+and `ol owed` runs it before showing you the row. Three states come back, never two:
+
+| state | means |
+|---|---|
+| `open` | no predicate at all, or the predicate ran and returned non-zero |
+| `done` | the predicate returned `0` — the ask is finished, the issue is merely still open |
+| `?` | nothing could be checked: no `gh`, no network, a timeout, a malformed predicate |
+
+**`?` is the important one.** A tool that reports "nothing owed" because it failed to
+check is worse than no tool, so `unknown` never collapses into either of the others —
+not into `open`, and not into `done`. If the query itself fails you get `owed ?` and the
+reason, never a count.
+
+**Nothing is ever written.** A passing predicate is evidence, not authority: `ol owed`
+does not close, reopen, relabel or comment on anything, and it never will. It shows you
+the command, its exit status and what it printed, and you decide. There is also no local
+copy of any of it — no store, no schema, no history, no event log. The label *is* the
+record, and openloops is a query over it.
+
+### The part you should know before you run it
+
+Evaluating a predicate means **executing text out of a GitHub issue body**. That is a
+real capability, and it is bounded in five ways, all of them visible:
+
+- a predicate runs only for owners you configured (`--owners`, or `OPENLOOPS_OWNERS`;
+  `trusted_owners=` in Python, which defaults to the owners you searched — so widening
+  the search never quietly widens what runs);
+- the command is printed next to its verdict, in full and never abbreviated, so nothing
+  executes invisibly and you can disagree with the answer;
+- `ol owed --no-verify` lists without executing anything — every row that has a
+  predicate then reads `?`, because that is what is true about it;
+- every evaluation is time-bounded, and a timeout is `?` rather than an answer;
+- `run_predicate=` replaces the evaluator entirely, and `issues_source=` the reader.
+
+The default is to check, and that is a deliberate choice rather than an oversight: not
+checking has a silent failure mode (a count quietly full of things you finished weeks
+ago) and checking has a loud one (a command you can see on screen). One honest limit —
+predicates are POSIX shell, so on a shell that cannot parse one the row reads `open`.
+That is the safe direction to be wrong in, and it is why the exit status is always
+shown.
 
 ## The name
 
@@ -221,6 +293,12 @@ These are tests in the suite, not aspirations:
   how it is called.
 - **Nothing in this repository carries an absolute home path or credential-shaped
   text** — checked mechanically, by the same code that scrubs your digests.
+- **No surface exposes an operation that writes.** Enforcement is by omission: there is
+  no `close`, no `comment`, no `POST`. A test walks the source and fails the build if
+  one appears.
+- **`unknown` never becomes `open` and never becomes `discharged`**, and a listing that
+  failed prints `?` rather than a count. Both are tested directly, because they are the
+  two ways a tool like this becomes a liar.
 
 ## License
 

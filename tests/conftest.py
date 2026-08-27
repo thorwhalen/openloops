@@ -23,6 +23,10 @@ def isolated_dirs(tmp_path, monkeypatch):
     monkeypatch.setenv("OPENLOOPS_STATE_DIR", str(tmp_path / "state"))
     monkeypatch.setenv("OPENLOOPS_SOURCE", "testhost")
     monkeypatch.setenv("CLAUDE_PROJECTS_DIR", str(tmp_path / "projects"))
+    # The obligation reader resolves its owner list from the environment first. A
+    # developer who has one set would otherwise get a different answer from CI, and
+    # the failure would be an owner list nobody wrote down in the test.
+    monkeypatch.delenv("OPENLOOPS_OWNERS", raising=False)
     return tmp_path
 
 
