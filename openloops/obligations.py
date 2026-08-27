@@ -634,8 +634,16 @@ NOT_AN_ANSWER_STATUSES = frozenset({126, 127})
 #: A predicate that cannot authenticate has not observed the world at all, and reading
 #: it as "still open" is a false positive on the one number this module publishes.
 NOT_AN_ANSWER_STDERR = (
+    # POSIX shells
     "command not found",
     "not found",
+    # cmd.exe and PowerShell say the same thing in three other ways, and `cmd` reports
+    # a missing command as exit 1 rather than 127 -- so without these a Windows machine
+    # with no `gh` reads every row as `open` and prints a count it never checked.
+    "is not recognized as an internal or external command",
+    "is not recognized as the name of a cmdlet",
+    "the system cannot find the file specified",
+    "the system cannot find the path specified",
     "bad credentials",
     "authentication failed",
     "gh auth login",

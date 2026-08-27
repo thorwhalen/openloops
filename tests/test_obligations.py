@@ -619,3 +619,23 @@ def test_an_auth_failure_is_unknown_not_open():
     assert not_an_answer(1, "no such secret in this repo") == "", (
         "a genuine not-done answer must survive"
     )
+
+
+@pytest.mark.parametrize(
+    "status, stderr",
+    [
+        (127, "/bin/sh: nope: command not found"),
+        (1, "'nope' is not recognized as an internal or external command,"),
+        (1, "nope : The term 'nope' is not recognized as the name of a cmdlet"),
+        (1, "The system cannot find the file specified"),
+        (1, "HTTP 401: Bad credentials"),
+    ],
+)
+def test_every_shell_s_way_of_saying_it_could_not_run_reads_unknown(status, stderr):
+    """cmd.exe reports a missing command as exit 1, and words it three other ways.
+
+    Without this the same false positive the POSIX path fixes comes back on Windows: no
+    `gh` on the machine, every predicate exits non-zero, every row reads `open`, and the
+    tool prints a confident count it never earned.
+    """
+    assert not_an_answer(status, stderr) != ""
