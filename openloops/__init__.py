@@ -60,6 +60,29 @@ bounds its one-call-per-issue resolution, and its kill criterion are all in
     ...  for r in report['rows'] if r['state'] == 'unblocked']
     ['acme/widget#109']
 
+All three of those are plumbing, and the surface most people actually want is an agent
+that knows how to use the plumbing and tells them what matters. So the package also
+ships that agent, as files: a ``openloops`` skill that answers "what is being done, and
+what needs my attention?", a ``openloops-needs-human`` skill that files the
+``manual-task`` issues ``owed()`` later reads back, and an ``openloops-sweep`` subagent
+that runs the whole sweep in a fresh context. ``install_skills()`` links them into an
+agent host; see :mod:`openloops.skills` for why it links rather than copies and why it
+never overwrites.
+
+    >>> plan = openloops.install_skills(dry_run=True)    # doctest: +SKIP
+    >>> [row['name'] for row in plan['actions']]         # doctest: +SKIP
+    ['openloops', 'openloops-needs-human', 'openloops-sweep']
+
+And a page to look at instead of reading three command outputs:
+``openloops.render_dashboard()`` turns those same three answers into one self-contained
+HTML document — no stylesheet, no script, no font, nothing fetched from anywhere.
+Because it fetches nothing it also *checks* nothing, so it is a **snapshot**: it stamps
+the moment it was made and says so in its largest type, and any figure it could not
+establish reads ``?`` rather than ``0``. ``ol dashboard`` writes one.
+
+    >>> page = openloops.render_dashboard(                # doctest: +SKIP
+    ...     openloops.owed(), openloops.blocked(), openloops.ls(limit=0))
+
 **Still not here, and deliberately:** a ledger. No store, no schema, no history, no
 event log, no cross-repo links, no session model, and no write path of any kind.
 """
@@ -91,6 +114,7 @@ from openloops.blockers import (
     gh_blocked_by,
     gh_blocked_candidates,
 )
+from openloops.dashboard import headline_counts, render_dashboard
 from openloops.digest import make_digest, render
 from openloops.egress import CredentialFound, scrub
 from openloops.obligations import (
@@ -106,6 +130,7 @@ from openloops.obligations import (
     parse_verify,
     shell_predicate,
 )
+from openloops.skills import agents_dir, install_skills, skills_dir
 from openloops.store import (
     data_dir,
     default_source,
@@ -143,6 +168,7 @@ __all__ = [
     "PredicateOutcome",
     "Session",
     "Verdict",
+    "agents_dir",
     "asks_the_human",
     "blocked",
     "classify",
@@ -153,16 +179,20 @@ __all__ = [
     "gh_blocked_by",
     "gh_blocked_candidates",
     "gh_issues",
+    "headline_counts",
+    "install_skills",
     "ls",
     "make_digest",
     "owed",
     "parse_session",
     "parse_verify",
     "render",
+    "render_dashboard",
     "retained",
     "scrub",
     "shell_predicate",
     "show",
+    "skills_dir",
     "state_dir",
     "status",
     "sync",

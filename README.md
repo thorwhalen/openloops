@@ -11,39 +11,226 @@ else. It never writes: it does not close, reopen, relabel or comment on anything
 anywhere, and there is no local database — the transcript, the label and the
 dependency edge *are* the records.
 
-## Install
+**The surface most people want is not a command.** If you delegate development to
+agents, what you want is an agent that runs the commands and tells you what matters.
+That is what to install first; the `ol` command underneath it is plumbing, and it is
+documented further down for when you want it directly.
+
+## Start here: install the skills, then ask your agent
 
 ```bash
-pip install openloops
+pip install openloops        # Python 3.10+. Puts an `ol` command on your PATH.
+ol install-skills            # link the skills and the subagent into ~/.claude
+                             # --only openloops,openloops-sweep to skip the capture skill
 ```
 
-That puts an `ol` command on your PATH. Python 3.10+.
+```
+installed into ~/.claude
+  method: symlink   install: 3   ok: 0   conflict: 0
 
-Two of the three commands need the GitHub CLI (`gh`) on your PATH and logged in. The
-session-digest half needs nothing at all — no model, no network, no account, no
-configuration.
+install  skill  openloops                 not present
+                  -> ~/.claude/skills/openloops
+install  skill  openloops-needs-human     not present
+                  -> ~/.claude/skills/openloops-needs-human
+install  agent  openloops-sweep           not present
+                  -> ~/.claude/agents/openloops-sweep.md
+```
 
-## Which command answers which question
+Then open a coding session and ask, in whatever words you would have used anyway:
 
-| You want to know | Run | Needs `gh`? |
+> **what needs my attention?**
+
+```
+## Needs you now
+- CI secrets are not provisioned on acme/widget — acme/widget#1, 23 days old. One
+  `gh secret set PYPI_PASSWORD --repo acme/widget` and the publish job stops
+  failing on merge.
+- Decide whether the parser ships in 2.0 or waits — acme/parser#4, 2 days old.
+  A judgement call, so no check can ever discharge it; it sits here until you answer.
+- Unchecked: acme/widget#9. Its predicate runs the doctests against a live
+  third-party fetch and timed out at 20s. Not open, not done — nothing observed it.
+
+## Free to proceed
+- acme/widget#109 — every blocker closed. acme/engine#15 has been closed for 5 days
+  and nothing has said so. The rename workaround in widget can come out.
+- acme/engine#7 — the deploy key is there and the check now passes. The issue is
+  merely still open. I have not closed it.
+
+## In flight
+- widget: two sessions, the 2.0 parser and an egress scrubbing pass.
+- parser, infra, engine: one session each, none of them waiting on you.
+- Two widget issues wait on acme/engine and widgets/aix. Nothing for you there.
+
+2 need you, 2 are free to start, 1 could not be checked.
+```
+
+That answer is a **synthesis, not a paste** — the skill asks for exactly that, and an
+agent that hands you three screens of command output has failed to use it. Every row
+behind it is one the `ol` commands printed; you can see the same rows raw, in the
+plumbing sections below.
+
+Ask again tomorrow and it is a different answer, because `ol owed` and `ol blocked`
+re-run each obligation's check and re-resolve each blocker edge before answering. That
+re-check is the whole product; everything else is a list you could have got from `gh`.
+
+### Two things to set up once
+
+**The GitHub CLI, logged in.** Two of the three questions are answered out of GitHub, so
+they need `gh` on your PATH and authenticated. The session-digest half needs nothing at
+all — no model, no network, no account, no configuration.
+
+**Which repositories you mean.** Left alone, the fleet is whatever login `gh` is
+authenticated as. If you work across an organisation, that is a count that looks clean
+and is wrong, so say so once:
+
+```bash
+export OPENLOOPS_OWNERS="your-login some-org another-org"
+```
+
+Every result prints the owners it used, and the read skill is told to check that line
+and tell you when it looks too narrow. More on the resolution order below.
+
+### What got installed
+
+| Name | Kind | What it is for |
 |---|---|---|
-| What did my sessions leave open? | `ol` | no |
-| What do I still owe my agents? | `ol owed` | yes |
-| What is waiting on another repo — and what is not any more? | `ol blocked` | yes |
+| `openloops` | skill | **the read side.** Teaches an agent which of the three commands answers which question, how to synthesise the three into one page, and — most of all — never to round a `?` into a clean answer. |
+| `openloops-needs-human` | skill | **the capture side.** Teaches an agent to file a `manual-task` issue, with a re-checkable predicate, at the moment it gets blocked on you. Without it, `ol owed` has nothing to read. |
+| `openloops-sweep` | subagent | the same sweep, run in a fresh context, returning a page instead of three screens. For the session you keep open all day. |
 
-Everything else is a variation on those:
+`~/.claude` is Claude Code's config directory, and `CLAUDE_CONFIG_DIR` is honoured if
+you have moved it. Any other agent host: `ol install-skills --target DIR`. They are
+plain markdown files with YAML front matter; nothing about them is Claude-specific
+except where they get installed.
 
-```bash
-ol ls --state all           # every digest, newest first
-ol ls --confidence high     # drop the ones open only because nothing said otherwise
-ol show 2b1f                # one digest, by session id or a unique prefix
-ol status                   # where the digests are, how many, how stale the cache is
-ol install-job              # run the digest sync every 15 minutes (macOS launchd)
+**Re-running it changes nothing.** Each asset is a symlink into the installed package,
+so `pip install -U openloops` upgrades the skills too, and a second `ol install-skills`
+reads `ok: 3`. Where symlinks are unavailable — Windows without Developer Mode — it
+copies instead, and the report says which happened rather than pretending they are the
+same thing.
+
+**Nothing already there is ever overwritten.** A destination holding something that is
+not ours is reported and left exactly as it was:
+
+```
+installed into ~/.claude
+  method: symlink   install: 2   ok: 0   conflict: 1
+
+conflict skill  openloops                 something else with this name is already there
+                  -> ~/.claude/skills/openloops
+install  skill  openloops-needs-human     not present
+                  -> ~/.claude/skills/openloops-needs-human
+install  agent  openloops-sweep           not present
+                  -> ~/.claude/agents/openloops-sweep.md
+
+conflict means nothing was written there. Look at the file, then re-run with --force to replace it.
 ```
 
-Every sample below was produced by the shipped renderers from the commands' own renderers. Repository,
-project and machine names have been replaced with generic ones; nothing else has been
-touched.
+```bash
+ol install-skills --dry-run     # print the plan, touch nothing
+ol install-skills --copy        # copy instead of link (stops tracking upgrades)
+ol install-skills --force       # replace what is there — after you have looked at it
+ol install-skills --target DIR  # some other agent host's config directory
+```
+
+## The sweep subagent, for the session you keep open all day
+
+The session you want to have this conversation in is a long one: the master session you
+leave open and come back to. Running the sweep inline fills that session's context with
+command output that is stale ten minutes later, and does it again every time you ask.
+
+`openloops-sweep` is the fix, and it is one file. It runs the three commands in its own
+fresh context and returns only the synthesis, so the tenth "what needs my attention?" of
+the day costs the main session the same as the first — about a page — no matter how long
+the conversation has run.
+
+The read skill dispatches to it when it is installed. Inline is still right for a one-off
+question, or when you are about to drill into one row.
+
+## The capture skill, and why `ol owed` has anything to read
+
+`ol owed` reads open issues labelled `manual-task`. On a fresh machine there are none,
+and there is no amount of reading that will produce any: **something has to file them.**
+
+That something is `openloops-needs-human`, installed above. It fires at the moment an
+agent gets blocked on you — a secret it cannot write, a permission it does not have, a
+decision that is yours, a recorded decision that now looks wrong — and files the blocker
+as a labelled issue in the affected repository *before* writing the hand-back message
+you were never going to re-read.
+
+> **Did openloops file this issue?** No. **openloops never writes to GitHub.** The
+> `manual-task` issues it reads are filed by whatever you have told your coding agents to
+> do when they get blocked on you, running under your own `gh` credentials; the capture
+> skill is one such thing and you can point yours at anything else. If an issue appeared
+> that you did not write, an agent wrote it, and that is the system working. openloops
+> only reads them back.
+
+The label is the whole storage design. It outlives the session, it is queryable from a
+terminal or a phone with every session stopped, and it needs no database to disagree
+with:
+
+```bash
+gh search issues --owner acme --label manual-task --state open
+```
+
+What `openloops` adds to that one-liner is the re-check — and the re-check only works if
+the issue carries something to run.
+
+### The field that decides whether an obligation can ever be closed
+
+**An obligation without a predicate can never be re-checked.** It will sit at `open`
+forever, correctly, because nothing openloops can run would ever observe it as done. The
+capture skill writes these; it is worth two minutes to know what a good one looks like,
+because you are the one who will read the count.
+
+Obligations get discharged **out of band.** Somebody adds a deploy key in a web UI,
+pays an invoice, answers in chat. None of that emits an event anyone is listening to,
+so the issue sits open for months describing something that was done in five minutes.
+A stale row annoys; a phantom row destroys the count, and the count is the whole
+product.
+
+So each obligation carries its own answer, in its body, as a shell command whose **exit
+status is the question**:
+
+```markdown
+**Verify:** `gh secret list --repo OWNER/REPO --json name -q '.[].name' | grep -qx PYPI_PASSWORD`
+```
+
+The rules the parser actually applies, in the order they bite:
+
+- The field is `Verify:` at the start of a line. The `**` bold markers are optional —
+  the field is the contract, not its markup.
+- **The predicate is the first backtick code span in the field.** Everything outside it
+  is prose.
+- **Fenced and indented code blocks are ignored** when looking for the field, so an
+  issue that quotes this format in a `<details>` block does not get the example run
+  instead of its own predicate.
+- **A field that begins `none possible`, `none`, `n/a`, `no predicate` or `not
+  possible` yields no command, even if the prose that follows contains a code span.**
+  This matters: the natural way to write that sentence mentions `` `gh` `` or
+  `` `true` ``, and both exit `0`, which would report a live obligation as done. Use it
+  for genuine judgement calls.
+- A field with a backtick but no closed code span is *malformed*, and reads `?` rather
+  than `open` — a typo should not look like an answer.
+
+What makes a good one:
+
+- **It observes the world, not the issue.** `gh secret list …`, `curl -fsS https://…`,
+  `gh api repos/…`. Never something that reads the issue itself: closing an issue is not
+  doing the thing.
+- **`0` means done and nothing else.** Non-zero for anything short of done.
+- **It fails loudly when it cannot check.** openloops already catches the common
+  shapes — exit `126`/`127`, death by signal, and stderr saying `command not found`,
+  `bad credentials`, `HTTP 401`, `could not resolve host` and friends — and turns them
+  into `?` rather than `open`, because a check that never reached the world has not
+  observed anything. Write yours so it lands in one of those rather than silently
+  exiting `1`.
+- **It finishes fast.** Every evaluation is time-bounded (20s by default) and a timeout
+  is `?`, not an answer.
+
+One honest limit: predicates are POSIX shell. On a shell that cannot parse one, the
+command exits non-zero and the row reads `open`. That is the safe direction to be wrong
+in, and it is why the exit status is always on screen.
 
 ## `?` means nothing was checked — read this once
 
@@ -64,14 +251,73 @@ and refuses to print a count:
 owed ?  could not check - gh: not logged in
 ```
 
-That refusal is the single most important design decision in the package.
+That refusal is the single most important design decision in the package, and the read
+skill spends more words on it than on anything else: an agent that answers "nothing
+owed" when rows read `?` has told the exact lie this package exists to prevent.
 
 One disambiguation, because the character appears in two places: the `?` in the second
 column of `ol`'s own output is **not** this. It means low confidence — the session
 never said it was finished — and it is explained under `ol` below. The digest half
 checks nothing against the world by design, so it has nothing to be unable to check.
 
+## Before you run it: this executes text from an issue body
+
+Evaluating a predicate means **running a command that came out of a GitHub issue** —
+whether you typed `ol owed` or an agent did. That is a real capability, and it is
+bounded in five ways, all of them visible:
+
+- **Only owners you configured.** A predicate runs only when the issue's repository
+  owner is trusted, which defaults to exactly the owners you searched — so widening the
+  search never quietly widens what runs. A row outside that set reads `?`: never
+  `open`, because nothing checked it, and never `done`, because nothing ran. In Python
+  it is `trusted_owners=`; on the CLI it follows `--owners`.
+- **The command is always printed next to its verdict**, in full and never abbreviated,
+  so nothing executes invisibly and you can disagree with the answer.
+- **`ol owed --no-verify` lists without executing anything.** Every row that has a
+  predicate then reads `?`, because that is what is true about it. The read skill is
+  told to reach for it on a machine that is not yours, or after you have just added an
+  owner whose issues neither of you has read.
+- **Every evaluation is time-bounded**, and a timeout is `?` rather than an answer. On
+  POSIX the predicate runs in its own process group and the timeout kills the group, so
+  anything it started dies with it. On Windows only the shell itself is killed — a
+  predicate that backgrounds work can outlive its timeout there. That is a platform
+  limit worth knowing rather than a promise broken quietly.
+- **`run_predicate=` replaces the evaluator entirely**, and `issues_source=` the reader.
+
+The default is to check, and that is deliberate rather than an oversight: not checking
+has a silent failure mode (a count quietly full of things you finished weeks ago) and
+checking has a loud one (a command you can see on screen).
+
 ---
+
+## The plumbing: the `ol` command
+
+This is what the skills call. It is a perfectly good thing to type yourself — it is how
+the author uses it half the time — but if you came here wanting an overview of what your
+agents are doing, the section at the top is the one you want.
+
+### Which command answers which question
+
+| You want to know | Run | Needs `gh`? |
+|---|---|---|
+| What did my sessions leave open? | `ol` | no |
+| What do I still owe my agents? | `ol owed` | yes |
+| What is waiting on another repo — and what is not any more? | `ol blocked` | yes |
+
+Everything else is a variation on those:
+
+```bash
+ol ls --state all           # every digest, newest first
+ol ls --confidence high     # drop the ones open only because nothing said otherwise
+ol show 2b1f                # one digest, by session id or a unique prefix
+ol status                   # where the digests are, how many, how stale the cache is
+ol dashboard --out b.html   # all three answers as one self-contained HTML page
+ol install-job              # run the digest sync every 15 minutes (macOS launchd)
+```
+
+Every block of command output below came out of the shipped renderers. Repository,
+project and machine names have been replaced with generic ones; nothing else has been
+touched.
 
 ## `ol` — what your sessions left open
 
@@ -129,7 +375,8 @@ sentence the asymmetry decides instead of position.
 
 Expect most sessions to land in `open/`. That is what agentic sessions do, and a split
 that came out balanced would be a split that was lying. `ol ls --confidence high` drops
-the ones that are open only because nothing said otherwise.
+the ones that are open only because nothing said otherwise — which is also why the read
+skill is told to prefer those rows when it summarises what is in flight.
 
 If `open` ever came to mean "a process is running", this would be a session dashboard.
 It is not one, and `claude` already has that view.
@@ -194,19 +441,10 @@ crontab line — `openloops` itself is cross-platform.
 
 ## `ol owed` — what you still owe your agents
 
-> **Did openloops file this issue?** No. **openloops never writes to GitHub.** The
-> `manual-task` issues it reads are filed by whatever you have told your coding agents to
-> do when they get blocked on you — for the author, that is a
-> [`needs-human` skill](https://github.com/thorwhalen/openloops-lab) that files one and
-> marks it with an HTML comment. If an issue appeared that you did not write, an agent
-> wrote it, and that is the system working. openloops only reads them back.
-
-
 When an agent gets blocked on something only you can do — a secret it cannot write, a
 permission it does not have, a decision that is yours — the ask usually dies in a final
 message nobody re-reads. The fix is not a new database: it is a `manual-task` label on
-an issue in the affected repo, which outlives the session and is queryable from a
-terminal or a phone with every session stopped.
+an issue in the affected repo, filed by the capture skill above.
 
 `ol owed` lists those issues, and runs each one's check before printing it:
 
@@ -235,7 +473,9 @@ done   30d  acme/engine#7              Add a deploy key so CI can clone the fixt
 | `?` | `unknown` | nothing could be checked: no `gh`, no network, a timeout, an untrusted owner, a malformed predicate |
 
 `done` rows are reported, never acted on. A passing predicate is evidence, not
-authority; you close the issue, or you don't.
+authority; you close the issue, or you don't. The read skill is told the same thing in
+the same words, because a model that closes an issue on a shell exit status has written
+a record nobody can audit back.
 
 ```bash
 ol owed                     # list them, and re-check each one against the world
@@ -244,84 +484,8 @@ ol owed --owners acme,widgets
 ol owed --limit 100
 ```
 
-### The gotcha: the verify predicate, and how to write one
-
-**An obligation without a predicate can never be re-checked.** It will sit at `open`
-forever, correctly, because nothing openloops can run would ever observe it as done.
-You are the person who will be writing these, so it is worth two minutes.
-
-Obligations get discharged **out of band.** Somebody adds a deploy key in a web UI,
-pays an invoice, answers in chat. None of that emits an event anyone is listening to,
-so the issue sits open for months describing something that was done in five minutes.
-A stale row annoys; a phantom row destroys the count, and the count is the whole
-product.
-
-So each obligation carries its own answer, in its body, as a shell command whose **exit
-status is the question**:
-
-```markdown
-**Verify:** `gh secret list --repo OWNER/REPO --json name -q '.[].name' | grep -qx PYPI_PASSWORD`
-```
-
-The rules the parser actually applies, in the order they bite:
-
-- The field is `Verify:` at the start of a line. The `**` bold markers are optional —
-  the field is the contract, not its markup.
-- **The predicate is the first backtick code span in the field.** Everything outside it
-  is prose.
-- **Fenced and indented code blocks are ignored** when looking for the field, so an
-  issue that quotes this format in a `<details>` block does not get the example run
-  instead of its own predicate.
-- **A field that begins `none possible`, `none`, `n/a`, `no predicate` or `not
-  possible` yields no command, even if the prose that follows contains a code span.**
-  This matters: the natural way to write that sentence mentions `` `gh` `` or
-  `` `true` ``, and both exit `0`, which would report a live obligation as done. Use it
-  for genuine judgement calls.
-- A field with a backtick but no closed code span is *malformed*, and reads `?` rather
-  than `open` — a typo should not look like an answer.
-
-What makes a good one:
-
-- **It observes the world, not the issue.** `gh secret list …`, `curl -fsS https://…`,
-  `gh api repos/…`. Never something that reads the issue itself.
-- **`0` means done and nothing else.** Non-zero for anything short of done.
-- **It fails loudly when it cannot check.** openloops already catches the common
-  shapes — exit `126`/`127`, death by signal, and stderr saying `command not found`,
-  `bad credentials`, `HTTP 401`, `could not resolve host` and friends — and turns them
-  into `?` rather than `open`, because a check that never reached the world has not
-  observed anything. Write yours so it lands in one of those rather than silently
-  exiting `1`.
-- **It finishes fast.** Every evaluation is time-bounded (20s by default) and a timeout
-  is `?`, not an answer — as the `acme/widget#9` row above shows.
-
-One honest limit: predicates are POSIX shell. On a shell that cannot parse one, the
-command exits non-zero and the row reads `open`. That is the safe direction to be wrong
-in, and it is why the exit status is always on screen.
-
-### Before you run it: this executes text from an issue body
-
-Evaluating a predicate means **running a command that came out of a GitHub issue**.
-That is a real capability, and it is bounded in five ways, all of them visible:
-
-- **Only owners you configured.** A predicate runs only when the issue's repository
-  owner is trusted, which defaults to exactly the owners you searched — so widening the
-  search never quietly widens what runs. A row outside that set reads `?`: never
-  `open`, because nothing checked it, and never `done`, because nothing ran. In Python
-  it is `trusted_owners=`; on the CLI it follows `--owners`.
-- **The command is always printed next to its verdict**, in full and never abbreviated,
-  so nothing executes invisibly and you can disagree with the answer.
-- **`ol owed --no-verify` lists without executing anything.** Every row that has a
-  predicate then reads `?`, because that is what is true about it.
-- **Every evaluation is time-bounded**, and a timeout is `?` rather than an answer. On
-  POSIX the predicate runs in its own process group and the timeout kills the group, so
-  anything it started dies with it. On Windows only the shell itself is killed — a
-  predicate that backgrounds work can outlive its timeout there. That is a platform
-  limit worth knowing rather than a promise broken quietly.
-- **`run_predicate=` replaces the evaluator entirely**, and `issues_source=` the reader.
-
-The default is to check, and that is deliberate rather than an oversight: not checking
-has a silent failure mode (a count quietly full of things you finished weeks ago) and
-checking has a loud one (a command you can see on screen).
+Writing the `**Verify:**` predicate is covered above, under the capture skill; so is
+what it means that running one executes text out of an issue body.
 
 ---
 
@@ -411,21 +575,46 @@ that saturates its own cap comes back marked `TRUNCATED` and the counts are then
 
 ---
 
+## `ol dashboard` — the same four registers as one page
+
+```bash
+ol dashboard --out board.html
+```
+
+All three answers rendered as one self-contained HTML document: no stylesheet, no
+script, no font, no request to anywhere. It is the page you leave open on a second
+monitor, or publish somewhere your phone can reach.
+
+Being self-contained is what makes it publishable, and it is also its one limit: **a
+page cannot re-check anything.** So it stamps the moment it was made and says
+"snapshot" in its largest type, and its fourth register is `Unknown` — every `?`, with
+why, including the envelope-level failures. An `owed` that could not list is not
+"nothing owed", and rendering that as a `0` would make the page worse than no page.
+When the count really is zero the section names which checks earned it.
+
+Everything printed goes through the same scrubber that guards the digests, plus HTML
+escaping and a scheme allowlist on every link. `--fragment` drops the document scaffold
+for a host that supplies its own `<head>`.
+
+---
+
 ## Turning it off
 
-Nothing here runs unless you type it. There is one exception, and it is opt-in:
-`ol install-job` puts the digest sync on a timer. Check with `ol job-status`; if it says
-the plist is absent, nothing of openloops is running in the background at all.
+Nothing here runs unless you type it, or an agent you installed a skill for does. There
+is one exception, and it is opt-in: `ol install-job` puts the digest sync on a timer.
+Check with `ol job-status`; if it says the plist is absent, nothing of openloops is
+running in the background at all.
 
 ```bash
 ol uninstall-job            # stop the timer, if you ever installed it
+rm -rf ~/.claude/skills/openloops ~/.claude/skills/openloops-needs-human \
+       ~/.claude/agents/openloops-sweep.md      # the skills are three symlinks
 pip uninstall openloops     # remove the package
 ```
 
-That is the whole of it. `pip uninstall` leaves your digests where they are —
-`~/.local/share/openloops/` by default, or wherever `OPENLOOPS_DATA_DIR` points — because
-deleting a record is not part of removing a tool. Delete that directory yourself if you
-want the data gone too.
+`pip uninstall` leaves your digests where they are — `~/.local/share/openloops/` by
+default, or wherever `OPENLOOPS_DATA_DIR` points — because deleting a record is not part
+of removing a tool. Delete that directory yourself if you want the data gone too.
 
 Nothing needs undoing on GitHub. openloops never wrote anything there: no issue was
 created, closed, relabelled or commented on, and the `**Verify:**` lines in your issue
@@ -443,7 +632,10 @@ wins:
    you actually type is how a count goes quietly wrong.
 3. The login `gh` is authenticated as.
 
-Whichever it was is printed on every result, so a partial answer is a visible one.
+Whichever it was is printed on every result, so a partial answer is a visible one. It is
+worth setting explicitly: the fallback is your personal login, and if you work across an
+organisation, a count that only ever saw your own repositories looks clean and is wrong.
+The read skill is told to check that line and say so.
 
 ## Python API
 
@@ -460,13 +652,10 @@ report = openloops.owed()  # open `manual-task` issues, each re-checked
 print(report["counts"])  # {'open': 2, 'discharged': 1, 'unknown': 1, ...}
 
 report = openloops.blocked()  # cross-repo blocker edges, every one resolved
-print(
-    [
-        r["repo"] + "#" + str(r["number"])
-        for r in report["rows"]
-        if r["state"] == "unblocked"
-    ]
-)
+print([r["repo"] + "#" + str(r["number"])
+       for r in report["rows"] if r["state"] == "unblocked"])
+
+openloops.install_skills(dry_run=True)  # the plan, having touched nothing
 ```
 
 `owed()` and `blocked()` return an **envelope, never a bare list** — because a caller
@@ -489,6 +678,8 @@ Check `listed` before you read `counts`. That is the whole contract.
 `openloops.tools` is the single dispatch list every surface goes through — the `ol`
 command today, an MCP server or an HTTP endpoint later. Operations go there, never
 straight into the CLI, which is what stops two surfaces from drifting apart.
+`install_skills` is deliberately *not* in it: "symlink files into this machine's agent
+config" is not an operation a remote surface could honestly offer.
 
 ## The seams
 
@@ -539,6 +730,11 @@ belongs before the first byte is written rather than before the first push.
   says so and exits non-zero, and the error names the pattern class and offset without
   ever quoting the match.
 
+The same two rules are what the capture skill applies to an issue title and body before
+it files anything, through the same `openloops.egress` functions — so an agent that
+gets blocked while holding a token in its context cannot publish it by accident, and
+cannot mask it and file anyway either.
+
 ## Why not just read the transcripts, or use `gh` directly?
 
 For the digests: `claude` shows you your live sessions, which is a different question —
@@ -581,10 +777,14 @@ These are tests in the suite, not aspirations:
 - **`import openloops` does not import the CLI library**, and opens no socket. The core
   has no opinion about how it is called, and a job on a plane still has to run.
 - **Nothing in this repository carries an absolute home path or credential-shaped
-  text** — checked mechanically, by the same code that scrubs your digests.
+  text** — checked mechanically, by the same code that scrubs your digests. The shipped
+  skills are in the repository, so they are checked by it too.
 - **No surface exposes an operation that writes.** Enforcement is by omission: there is
   no `close`, no `comment`, no `POST`. A test walks the source and fails the build if a
   mutating verb or a mutating `gh` argument appears anywhere in the package.
+- **`ol install-skills` never overwrites anything.** An occupied destination reads
+  `conflict` and is left exactly as it was; a second run of a clean install reads `ok`
+  and writes nothing.
 - **`unknown` never becomes `open`, `discharged`, `blocked` or `unblocked`**, and a
   listing that failed prints `?` rather than a count. Both are tested directly, because
   they are the two ways a tool like this becomes a liar.

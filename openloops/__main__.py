@@ -18,6 +18,7 @@ import sys
 from datetime import datetime, timezone
 
 from openloops import job as _job
+from openloops import skills as _skills
 from openloops import tools
 from openloops.blockers import DFLT_CANDIDATE_LIMIT, UNBLOCKED, UNKNOWN
 
@@ -289,6 +290,106 @@ def blocked(
     )
 
 
+def _install_report(plan: dict) -> str:
+    """Render :func:`openloops.skills.install_skills`. Every row prints its own reason.
+
+    The reason is never dropped: ``conflict`` without it is a refusal with no way to act
+    on it, and ``ok`` without it looks like nothing happened.
+    """
+    lines = [
+        f"{'would install into' if plan['dry_run'] else 'installed into'} {plan['target']}",
+        f"  method: {plan['method']}   "
+        + "   ".join(f"{state}: {count}" for state, count in plan["counts"].items()),
+        "",
+    ]
+    for row in plan["actions"]:
+        lines.append(f"{row['action']:<9}{row['kind']:<7}{row['name']:<26}{row['reason']}")
+        lines.append(f"                  -> {row['destination']}")
+    if plan["counts"]["conflict"]:
+        # Nothing was touched at those destinations, and saying so is the whole point:
+        # a skill someone wrote by hand is theirs, and eating it silently would be a
+        # worse failure than not installing at all.
+        lines.append("")
+        lines.append(
+            "conflict means nothing was written there. Look at the file, then re-run "
+            "with --force to replace it."
+        )
+    return "\n".join(lines)
+
+
+def dashboard(
+    *,
+    out: str = None,
+    limit: int = DFLT_CANDIDATE_LIMIT,
+    sessions: int = 40,
+    no_verify: bool = False,
+    no_resolve: bool = False,
+    fragment: bool = False,
+    owners: str = None,
+):
+    """Render all three answers as one self-contained HTML page you can look at.
+
+    Writes the page to `--out FILE`, or to stdout so you can pipe it: `ol dashboard >
+    board.html`. It carries no stylesheet, no script and no request to anywhere, which
+    is also why it is a *snapshot* — a page cannot re-check anything, so it stamps the
+    moment it was made and says so in its largest type.
+
+    `--fragment` drops the document scaffold for a host that supplies its own `<head>`,
+    which is what publishing it somewhere usually wants. `--sessions` bounds the
+    in-flight register; the true total is printed either way.
+    """
+    result = tools.dashboard(
+        verify=not no_verify,
+        resolve=not no_resolve,
+        candidate_limit=limit,
+        max_sessions=sessions,
+        standalone=not fragment,
+        path=out,
+        owners=[o for o in (owners or "").replace(",", " ").split()] or None,
+    )
+    if not out:
+        return result["html"]
+    counts = result["counts"]
+    figures = "  ".join(
+        f"{name}: {'?' if value is None else value}" for name, value in counts.items()
+    )
+    return f"wrote {result['bytes']} bytes to {result['path']}\n  {figures}"
+
+
+def install_skills(
+    *,
+    target: str = None,
+    only: str = "",
+    copy: bool = False,
+    force: bool = False,
+    dry_run: bool = False,
+):
+    """Make the bundled skills and the sweep subagent visible to your coding agent.
+
+    Links `openloops` (the read skill), `openloops-needs-human` (the capture skill) and
+    the `openloops-sweep` subagent into `~/.claude`, or into `--target`. Linking rather
+    than copying means `pip install -U openloops` upgrades them too; `--copy` takes a
+    copy, which is also what happens by itself where symlinks are unavailable.
+
+    Re-running changes nothing. A destination that already holds something else reads
+    `conflict` and is left alone until `--force`. `--dry-run` prints the plan and
+    touches nothing.
+
+    `--only openloops,openloops-sweep` installs a subset. Use it when you already have
+    your own capture skill: two skills competing for the same triggers and answering
+    differently is worse than either one alone.
+    """
+    return _install_report(
+        _skills.install_skills(
+            target=target,
+            only=[n for n in only.replace(",", " ").split() if n] or None,
+            copy=copy,
+            force=force,
+            dry_run=dry_run,
+        )
+    )
+
+
 def install_job(*, interval: int = _job.DFLT_INTERVAL, dry_run: bool = False):
     """Install the periodic sync job (macOS launchd). Re-run to change the interval."""
     result = _job.install(interval=interval, dry_run=dry_run)
@@ -324,10 +425,12 @@ _commands = [
     brief,
     owed,
     blocked,
+    dashboard,
     sync,
     ls,
     show,
     status,
+    install_skills,
     install_job,
     uninstall_job,
     job_status,
