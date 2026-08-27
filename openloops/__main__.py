@@ -19,6 +19,7 @@ from datetime import datetime, timezone
 
 from openloops import job as _job
 from openloops import tools
+from openloops.blockers import DFLT_CANDIDATE_LIMIT, UNBLOCKED, UNKNOWN
 
 __all__ = ["main"]
 
@@ -208,6 +209,86 @@ def owed(*, limit: int = 50, no_verify: bool = False, owners: str = None):
     )
 
 
+#: How the cross-repo states print. ASCII again, and the words are the actions: a
+#: `ready` row is work you can start now, a `waits` row is work you cannot.
+_BLOCKED_MARKS = {"unblocked": "ready", "blocked": "waits", "unknown": "?"}
+
+
+def _blocked_report(report: dict) -> str:
+    """Render :func:`openloops.tools.blocked`. Every verdict prints its own edges."""
+    if not report["listed"]:
+        # Same rule as `owed`, for the same reason: a clean board that was never read
+        # is worse than no board at all.
+        return f"blocked ?  could not check - {report['error']}"
+
+    counts = report["counts"]
+    headline = (
+        f"{counts['unblocked']} unblocked, {counts['blocked']} blocked, "
+        f"{counts['unknown']} unknown"
+    )
+    scope = ", ".join(report["repos"] or report["owners"]) or "(none)"
+    notes = [f"scope: {scope}", f"candidates: {counts['candidates']}"]
+    if counts["without_edges"]:
+        # Search over-reports; saying by how much is what keeps discovery honest.
+        notes.append(f"{counts['without_edges']} had no dependency edge at all")
+    if not report["resolved"]:
+        notes.append("NOT resolved (--no-resolve): every row reads ?")
+    if report["truncated"]:
+        notes.append("TRUNCATED: the candidate list hit its cap, so this is a floor")
+    lines = [headline, "  " + "  |  ".join(notes), ""]
+
+    for row in report["rows"]:
+        mark = _BLOCKED_MARKS.get(row["state"], row["state"])
+        where = f"{row['repo']}#{row['number']}"
+        lines.append(f"{mark:<6}{row['age_days']:>4}d  {where:<28} {row['title']}")
+        # The edges are never abbreviated. They are the reason to believe the verdict,
+        # and the foreign repository they name is the answer to "waiting on whom".
+        refs = " ".join(blocker["ref"] for blocker in row["blockers"])
+        lines.append(f"        blocked by: {refs or '(unresolved)'}")
+        if row["state"] == UNBLOCKED:
+            # The number nobody currently has: how long the work has been free.
+            lines.append(
+                f"                    -> free for {row['unblocked_days']}d, "
+                "and nothing has said so"
+            )
+        elif row["state"] == UNKNOWN and row["evidence"]:
+            # Why it could not be read. For a `waits` row the line above already
+            # carries every blocker and its state, and repeating it is noise.
+            lines.append(f"                    -> {row['evidence']}")
+    if not report["rows"]:
+        lines.append("(nothing is waiting on another repo)")
+    return "\n".join(lines)
+
+
+def blocked(
+    *,
+    limit: int = DFLT_CANDIDATE_LIMIT,
+    no_resolve: bool = False,
+    owners: str = None,
+    repos: str = None,
+):
+    """What your repos are waiting on, and what stopped waiting without telling anyone.
+
+    The sibling of `ol owed`: that one points at you, this one points at another repo.
+    Lists the open issues carrying a `blocked_by` dependency and resolves every edge.
+    `ready` means every blocker is closed — the work is free and nobody was told, which
+    is the row worth reading. `waits` names the foreign repo it is still waiting on.
+    `?` means nothing could be resolved, which is never the same as nothing waiting.
+
+    Resolving costs one API call per candidate, so `--limit` bounds it and a saturated
+    list says so. `--repos owner/name,owner/other` enumerates those repos exactly
+    instead of trusting the search index. `--no-resolve` spends nothing and reads `?`.
+    """
+    return _blocked_report(
+        tools.blocked(
+            resolve=not no_resolve,
+            limit=limit,
+            owners=[o for o in (owners or "").replace(",", " ").split()] or None,
+            repos=[r for r in (repos or "").replace(",", " ").split()],
+        )
+    )
+
+
 def install_job(*, interval: int = _job.DFLT_INTERVAL, dry_run: bool = False):
     """Install the periodic sync job (macOS launchd). Re-run to change the interval."""
     result = _job.install(interval=interval, dry_run=dry_run)
@@ -242,6 +323,7 @@ def job_status():
 _commands = [
     brief,
     owed,
+    blocked,
     sync,
     ls,
     show,

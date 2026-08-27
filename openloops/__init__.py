@@ -43,6 +43,23 @@ and its kill criterion are both written out in :mod:`openloops.obligations`.
     >>> report['counts']                                # doctest: +SKIP
     {'open': 6, 'discharged': 1, 'unknown': 2, 'with_predicate': 7, 'total': 9}
 
+And a third thing, which is the same thing pointed at a repository instead of at a
+person: ``openloops.blocked()``. When an agent working in repo X finds the real fix
+belongs in repo Y, it files in Y and moves on — and X is never told when Y is fixed, so
+the workaround in X quietly becomes architecture. GitHub's issue dependencies already
+record that edge across repositories; what nothing does is notice when the blocker
+closes, because the edge is queryable rather than eventful. ``blocked()`` resolves every
+edge and reports ``unblocked`` (every blocker resolved: the work is free and nobody has
+been told), ``blocked`` (naming the foreign repository) and ``unknown``. It reads and
+reports; it writes nothing. What its discovery step is measured to over-report, what
+bounds its one-call-per-issue resolution, and its kill criterion are all in
+:mod:`openloops.blockers`.
+
+    >>> report = openloops.blocked()                    # doctest: +SKIP
+    >>> [r['repo'] + '#' + str(r['number'])             # doctest: +SKIP
+    ...  for r in report['rows'] if r['state'] == 'unblocked']
+    ['acme/widget#109']
+
 **Still not here, and deliberately:** a ledger. No store, no schema, no history, no
 event log, no cross-repo links, no session model, and no write path of any kind.
 """
@@ -62,6 +79,17 @@ from openloops._classify import (
     DEFER_CUES,
     asks_the_human,
     classify,
+)
+from openloops.blockers import (
+    BLOCKED,
+    BLOCKED_FIELDS,
+    BLOCKER_STATES,
+    UNBLOCKED,
+    BlockedIssue,
+    Blocker,
+    blocked,
+    gh_blocked_by,
+    gh_blocked_candidates,
 )
 from openloops.digest import make_digest, render
 from openloops.egress import CredentialFound, scrub
@@ -92,6 +120,9 @@ from openloops.transcripts import ClaudeCodeTranscripts, parse_session
 __all__ = [
     "ARCHIVE",
     "ASK_CUES",
+    "BLOCKED",
+    "BLOCKED_FIELDS",
+    "BLOCKER_STATES",
     "CLOSE_CUES",
     "DEFER_CUES",
     "DISCHARGED",
@@ -99,7 +130,10 @@ __all__ = [
     "OBLIGATION_STATES",
     "OPEN",
     "STATES",
+    "UNBLOCKED",
     "UNKNOWN",
+    "BlockedIssue",
+    "Blocker",
     "ClaudeCodeTranscripts",
     "CredentialFound",
     "Digest",
@@ -110,11 +144,14 @@ __all__ = [
     "Session",
     "Verdict",
     "asks_the_human",
+    "blocked",
     "classify",
     "data_dir",
     "default_source",
     "digest_key",
     "digests_store",
+    "gh_blocked_by",
+    "gh_blocked_candidates",
     "gh_issues",
     "ls",
     "make_digest",
