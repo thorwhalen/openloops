@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>&lt;no title&gt; &mdash; openloops 0.1.3 documentation</title>
+  <title>&lt;no title&gt; &mdash; openloops 0.1.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=360bc84d"></script>
+      <script src="_static/documentation_options.js?v=fd825880"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -55,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/digest.html">openloops.digest</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/egress.html">openloops.egress</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/obligations.html">openloops.obligations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/store.html">openloops.store</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/tools.html">openloops.tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/transcripts.html">openloops.transcripts</a></li>
@@ -91,7 +92,10 @@
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.ClaudeCodeTranscripts"><code class="docutils literal notranslate"><span class="pre">ClaudeCodeTranscripts</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.CredentialFound"><code class="docutils literal notranslate"><span class="pre">CredentialFound</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.Digest"><code class="docutils literal notranslate"><span class="pre">Digest</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.GhUnavailable"><code class="docutils literal notranslate"><span class="pre">GhUnavailable</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.Locator"><code class="docutils literal notranslate"><span class="pre">Locator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.Obligation"><code class="docutils literal notranslate"><span class="pre">Obligation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.PredicateOutcome"><code class="docutils literal notranslate"><span class="pre">PredicateOutcome</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.Session"><code class="docutils literal notranslate"><span class="pre">Session</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.Verdict"><code class="docutils literal notranslate"><span class="pre">Verdict</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.asks_the_human"><code class="docutils literal notranslate"><span class="pre">asks_the_human()</span></code></a></li>
@@ -100,12 +104,16 @@
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.default_source"><code class="docutils literal notranslate"><span class="pre">default_source()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.digest_key"><code class="docutils literal notranslate"><span class="pre">digest_key()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.digests_store"><code class="docutils literal notranslate"><span class="pre">digests_store()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.gh_issues"><code class="docutils literal notranslate"><span class="pre">gh_issues()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.ls"><code class="docutils literal notranslate"><span class="pre">ls()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.make_digest"><code class="docutils literal notranslate"><span class="pre">make_digest()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.owed"><code class="docutils literal notranslate"><span class="pre">owed()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.parse_session"><code class="docutils literal notranslate"><span class="pre">parse_session()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.parse_verify"><code class="docutils literal notranslate"><span class="pre">parse_verify()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.render"><code class="docutils literal notranslate"><span class="pre">render()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.retained"><code class="docutils literal notranslate"><span class="pre">retained()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.scrub"><code class="docutils literal notranslate"><span class="pre">scrub()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.shell_predicate"><code class="docutils literal notranslate"><span class="pre">shell_predicate()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.state_dir"><code class="docutils literal notranslate"><span class="pre">state_dir()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.status"><code class="docutils literal notranslate"><span class="pre">status()</span></code></a></li>
@@ -172,6 +180,22 @@
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/job.html#openloops.job.uninstall"><code class="docutils literal notranslate"><span class="pre">uninstall()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/obligations.html">openloops.obligations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#trust-boundary-stated-here-because-it-should-be-read-not-discovered">Trust boundary — stated here because it should be read, not discovered</a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.DISCHARGED"><code class="docutils literal notranslate"><span class="pre">DISCHARGED</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.GhUnavailable"><code class="docutils literal notranslate"><span class="pre">GhUnavailable</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.OBLIGATION_FIELDS"><code class="docutils literal notranslate"><span class="pre">OBLIGATION_FIELDS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.OBLIGATION_STATES"><code class="docutils literal notranslate"><span class="pre">OBLIGATION_STATES</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.Obligation"><code class="docutils literal notranslate"><span class="pre">Obligation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.PredicateOutcome"><code class="docutils literal notranslate"><span class="pre">PredicateOutcome</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.UNKNOWN"><code class="docutils literal notranslate"><span class="pre">UNKNOWN</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.configured_owners"><code class="docutils literal notranslate"><span class="pre">configured_owners()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.gh_issues"><code class="docutils literal notranslate"><span class="pre">gh_issues()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.owed"><code class="docutils literal notranslate"><span class="pre">owed()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.parse_verify"><code class="docutils literal notranslate"><span class="pre">parse_verify()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.shell_predicate"><code class="docutils literal notranslate"><span class="pre">shell_predicate()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/store.html">openloops.store</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/store.html#openloops.store.Utf8TextFiles"><code class="docutils literal notranslate"><span class="pre">Utf8TextFiles</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/store.html#openloops.store.data_dir"><code class="docutils literal notranslate"><span class="pre">data_dir()</span></code></a></li>
@@ -188,6 +212,7 @@
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/tools.html">openloops.tools</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.ROW_FIELDS"><code class="docutils literal notranslate"><span class="pre">ROW_FIELDS</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.ls"><code class="docutils literal notranslate"><span class="pre">ls()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.owed"><code class="docutils literal notranslate"><span class="pre">owed()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.status"><code class="docutils literal notranslate"><span class="pre">status()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.sync"><code class="docutils literal notranslate"><span class="pre">sync()</span></code></a></li>

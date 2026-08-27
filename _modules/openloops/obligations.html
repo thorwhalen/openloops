@@ -1,0 +1,1062 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openloops.obligations &mdash; openloops 0.1.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=fd825880"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            openloops
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops.html">openloops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/__main__.html">openloops.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_classify.html">openloops._classify</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_sync.html">openloops._sync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/digest.html">openloops.digest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/egress.html">openloops.egress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/obligations.html">openloops.obligations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/store.html">openloops.store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/tools.html">openloops.tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/transcripts.html">openloops.transcripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">openloops</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">openloops.obligations</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openloops.obligations</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""What you still owe your agents — re-checked against the world before it is shown.</span>
+
+<span class="sd">When an agent gets blocked on something only you can do — a secret it cannot write, a</span>
+<span class="sd">permission it does not have, a decision that is yours — it files a `manual-task` issue</span>
+<span class="sd">in the affected repo and says so in its closing message. The closing message dies with</span>
+<span class="sd">the session. The issue does not, and one query lists every one of them across a fleet.</span>
+
+<span class="sd">That query has one failure mode, and it is the one that matters: **obligations get</span>
+<span class="sd">discharged out of band.** Someone adds a deploy key in a web UI, pays an invoice,</span>
+<span class="sd">answers in chat. None of that emits an event anyone is listening to, so the issue sits</span>
+<span class="sd">open for months describing something that was done in five minutes. A stale increment</span>
+<span class="sd">annoys; a phantom row destroys the count, and the count is the product.</span>
+
+<span class="sd">So each obligation carries its own answer, in its body, as a shell command whose **exit</span>
+<span class="sd">status is the question**::</span>
+
+<span class="sd">    **Verify:** `gh secret list --repo OWNER/REPO --json name -q '.[].name' | grep -qx NAME`</span>
+
+<span class="sd">:func:`owed` lists the open ones, runs each predicate, and reports **three** states —</span>
+<span class="sd">never two:</span>
+
+<span class="sd">===============  ==============================================================</span>
+<span class="sd">``open``         no predicate at all, or the predicate ran and returned non-zero</span>
+<span class="sd">``discharged``   the predicate ran and returned ``0``: the ask is done, the issue</span>
+<span class="sd">                 is merely still open</span>
+<span class="sd">``unknown``      the predicate could *not* be run, or errored in a way that is not</span>
+<span class="sd">                 an answer. Displayed as ``?``</span>
+<span class="sd">===============  ==============================================================</span>
+
+<span class="sd">``?`` is not a rounding error, it is the whole point. A surface that says "nothing</span>
+<span class="sd">owed" because it failed to check is worse than no surface at all, so nothing here is</span>
+<span class="sd">ever allowed to collapse ``unknown`` into ``open`` or into ``discharged``.</span>
+
+<span class="sd">**Nothing here mutates anything.** A passing predicate is evidence, not authority: it</span>
+<span class="sd">never closes, reopens or relabels an issue, and it never will — the standing rule is</span>
+<span class="sd">that a human obligation is not closed on a model's judgement. You are shown the</span>
+<span class="sd">command, its exit status and what it printed, and you decide.</span>
+
+<span class="sd">Trust boundary — stated here because it should be read, not discovered</span>
+<span class="sd">---------------------------------------------------------------------</span>
+
+<span class="sd">Evaluating a predicate means **executing text that came from a GitHub issue body**.</span>
+<span class="sd">That is a real capability and it is bounded here in five ways, each of them visible:</span>
+
+<span class="sd">1. **Only owners you named.** A predicate is run only when the issue's repository owner</span>
+<span class="sd">   is in ``trusted_owners=``, which defaults to the same ``owners=`` the search was</span>
+<span class="sd">   scoped to. A row outside that set reads ``?`` — never ``open``, because nothing</span>
+<span class="sd">   checked it, and never ``discharged``, because nothing ran.</span>
+<span class="sd">2. **The command is always shown next to its verdict.** Every row carries the predicate</span>
+<span class="sd">   verbatim, so nothing executes invisibly and you can disagree with the answer.</span>
+<span class="sd">3. **An explicit way not to execute at all.** ``owed(verify=False)`` (``ol owed</span>
+<span class="sd">   --no-verify``) lists without running anything; every row that has a predicate then</span>
+<span class="sd">   reads ``?``, because that is the truth about it.</span>
+<span class="sd">4. **Every evaluation is time-bounded**, by ``predicate_timeout=``. A timeout is</span>
+<span class="sd">   ``unknown``, never an answer. On POSIX the predicate runs in its own process group</span>
+<span class="sd">   and the timeout kills the group, so anything it started dies with it. On Windows only</span>
+<span class="sd">   the shell itself is killed — a predicate that backgrounds work can outlive its</span>
+<span class="sd">   timeout there, which is a platform limit worth knowing rather than a promise broken</span>
+<span class="sd">   quietly.</span>
+<span class="sd">5. **The whole thing is one keyword argument away from being someone else's code.**</span>
+<span class="sd">   ``run_predicate=`` replaces the evaluator; ``issues_source=`` replaces the reader.</span>
+
+<span class="sd">One honest limit: predicates are POSIX shell. On a shell that cannot parse one, the</span>
+<span class="sd">command exits non-zero and the row reads ``open``. That is the safe direction to be</span>
+<span class="sd">wrong in — a stale increment annoys, a wrong decrement destroys the count — and it is</span>
+<span class="sd">why the exit status and the command text are always on screen.</span>
+
+<span class="sd">**Kill criterion** (this module ships on an argument, so it names in advance what would</span>
+<span class="sd">retire it): if, ninety days after this ships, ``counts['with_predicate']`` is below half</span>
+<span class="sd">of ``counts['total']`` on a normal run, or nobody has run ``ol owed`` in a fortnight,</span>
+<span class="sd">delete it. Its entire reason to exist over a one-line ``gh search issues`` alias is the</span>
+<span class="sd">predicate; with no predicates to run it is a slower alias that draws a table. Removal is</span>
+<span class="sd">one command — delete this module and ``tests/test_obligations.py``, and drop ``owed``</span>
+<span class="sd">from ``openloops.tools._dispatch_funcs`` and ``openloops.__main__._commands``. Nothing</span>
+<span class="sd">imports it, nothing persists, and no other module changes.</span>
+
+<span class="sd">**What this is not.** It is a *reader*. There is no store, no schema, no history, no</span>
+<span class="sd">event log, no cross-repo linking, no session model and no local copy of anything: the</span>
+<span class="sd">`manual-task` label **is** the record, and a second writable home for the same record</span>
+<span class="sd">type is the drift this deliberately does not build. State lives in first-class GitHub</span>
+<span class="sd">fields that a plain ``gh`` command can query, so deleting this module loses no data.</span>
+
+<span class="sd">    &gt;&gt;&gt; from datetime import datetime, timezone</span>
+<span class="sd">    &gt;&gt;&gt; issues = [</span>
+<span class="sd">    ...     {'number': 7, 'title': 'Add a deploy key so CI can clone',</span>
+<span class="sd">    ...      'url': 'https://github.com/acme/widget/issues/7',</span>
+<span class="sd">    ...      'createdAt': '2026-08-01T00:00:00Z',</span>
+<span class="sd">    ...      'repository': {'nameWithOwner': 'acme/widget'},</span>
+<span class="sd">    ...      'body': '**Verify:** `[ "$(gh api repos/acme/widget/keys --jq length)" -gt 0 ]`'},</span>
+<span class="sd">    ...     {'number': 8, 'title': 'Decide whether to publish this at all',</span>
+<span class="sd">    ...      'url': 'https://github.com/acme/widget/issues/8',</span>
+<span class="sd">    ...      'createdAt': '2026-08-10T00:00:00Z',</span>
+<span class="sd">    ...      'repository': {'nameWithOwner': 'acme/widget'},</span>
+<span class="sd">    ...      'body': '**Verify:** none possible - a judgement call.'},</span>
+<span class="sd">    ... ]</span>
+<span class="sd">    &gt;&gt;&gt; report = owed(</span>
+<span class="sd">    ...     issues_source=issues,               # a list of dicts: no gh, no network</span>
+<span class="sd">    ...     run_predicate=lambda command: 0,    # canned: the ask turns out to be done</span>
+<span class="sd">    ...     trusted_owners=('acme',),</span>
+<span class="sd">    ...     now=datetime(2026, 8, 20, tzinfo=timezone.utc),</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; report['counts']['discharged'], report['counts']['open']</span>
+<span class="sd">    (1, 1)</span>
+<span class="sd">    &gt;&gt;&gt; for row in report['rows']:</span>
+<span class="sd">    ...     print(row['state'], row['age_days'], f"{row['repo']}#{row['number']}")</span>
+<span class="sd">    open 10 acme/widget#8</span>
+<span class="sd">    discharged 19 acme/widget#7</span>
+
+<span class="sd">The discharged row is reported, not closed:</span>
+
+<span class="sd">    &gt;&gt;&gt; report['rows'][1]['predicate']</span>
+<span class="sd">    '[ "$(gh api repos/acme/widget/keys --jq length)" -gt 0 ]'</span>
+
+<span class="sd">An owner you did not name is never executed, and never silently believed:</span>
+
+<span class="sd">    &gt;&gt;&gt; quiet = owed(issues_source=issues, run_predicate=lambda command: 0,</span>
+<span class="sd">    ...              trusted_owners=(), now=datetime(2026, 8, 20, tzinfo=timezone.utc))</span>
+<span class="sd">    &gt;&gt;&gt; [(row['number'], row['state']) for row in quiet['rows']]</span>
+<span class="sd">    [(8, 'open'), (7, 'unknown')]</span>
+<span class="sd">    &gt;&gt;&gt; next(r['evidence'] for r in quiet['rows'] if r['number'] == 7)</span>
+<span class="sd">    "not evaluated: owner 'acme' is not in trusted_owners"</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">signal</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">asdict</span><span class="p">,</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">fields</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">OPEN</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"DISCHARGED"</span><span class="p">,</span>
+    <span class="s2">"OBLIGATION_FIELDS"</span><span class="p">,</span>
+    <span class="s2">"OBLIGATION_STATES"</span><span class="p">,</span>
+    <span class="s2">"UNKNOWN"</span><span class="p">,</span>
+    <span class="s2">"GhUnavailable"</span><span class="p">,</span>
+    <span class="s2">"Obligation"</span><span class="p">,</span>
+    <span class="s2">"PredicateOutcome"</span><span class="p">,</span>
+    <span class="s2">"configured_owners"</span><span class="p">,</span>
+    <span class="s2">"gh_issues"</span><span class="p">,</span>
+    <span class="s2">"owed"</span><span class="p">,</span>
+    <span class="s2">"parse_verify"</span><span class="p">,</span>
+    <span class="s2">"shell_predicate"</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1">#: The predicate ran and returned 0. The ask is done; the issue is just still open.</span>
+<span class="n">DISCHARGED</span> <span class="o">=</span> <span class="s2">"discharged"</span>
+<span class="c1">#: Nothing could be checked. Rendered ``?``. Never collapsed into either other state.</span>
+<span class="n">UNKNOWN</span> <span class="o">=</span> <span class="s2">"unknown"</span>
+<span class="c1">#: The three states, in the order a reader cares about them. ``open`` is</span>
+<span class="c1">#: :data:`openloops.base.OPEN`: a loop that is still open is the same idea either way.</span>
+<span class="n">OBLIGATION_STATES</span> <span class="o">=</span> <span class="p">(</span><span class="n">OPEN</span><span class="p">,</span> <span class="n">DISCHARGED</span><span class="p">,</span> <span class="n">UNKNOWN</span><span class="p">)</span>
+
+<span class="c1">#: The fleet-wide label whose meaning is "an agent cannot proceed without the human".</span>
+<span class="c1">#: The label *is* the record — there is no second copy of it anywhere in openloops.</span>
+<span class="n">DFLT_LABEL</span> <span class="o">=</span> <span class="s2">"manual-task"</span>
+<span class="c1">#: How many rows to ask for. One more than this is actually requested, so that a result</span>
+<span class="c1">#: set which saturates its own cap is *reported* rather than silently truncated.</span>
+<span class="n">DFLT_LIMIT</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="c1">#: Seconds allowed for the listing call.</span>
+<span class="n">DFLT_LIST_TIMEOUT</span> <span class="o">=</span> <span class="mf">30.0</span>
+<span class="c1">#: Seconds allowed for one predicate. A predicate is a `gh` call or a `curl`; anything</span>
+<span class="c1">#: slower than this is a hung network, and a hung network is ``unknown``, not an answer.</span>
+<span class="n">DFLT_PREDICATE_TIMEOUT</span> <span class="o">=</span> <span class="mf">20.0</span>
+<span class="c1">#: How much of a predicate's own output is kept as evidence. Enough to see what it saw.</span>
+<span class="n">DFLT_EVIDENCE_CHARS</span> <span class="o">=</span> <span class="mi">400</span>
+<span class="c1">#: Environment override for the owners to search, comma- or space-separated.</span>
+<span class="n">OWNERS_ENV_VAR</span> <span class="o">=</span> <span class="s2">"OPENLOOPS_OWNERS"</span>
+
+<span class="c1">#: The issue fields the listing asks for. ``body`` is here because the predicate lives</span>
+<span class="c1">#: in it; everything else is what a reader needs to act on the row.</span>
+<span class="n">_ISSUE_FIELDS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"createdAt"</span><span class="p">,</span> <span class="s2">"number"</span><span class="p">,</span> <span class="s2">"repository"</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">,</span> <span class="s2">"url"</span><span class="p">,</span> <span class="s2">"body"</span><span class="p">)</span>
+
+<span class="n">_SECONDS_PER_DAY</span> <span class="o">=</span> <span class="mf">86400.0</span>
+
+
+<div class="viewcode-block" id="GhUnavailable">
+<a class="viewcode-back" href="../../module_docs/openloops/obligations.html#openloops.GhUnavailable">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GhUnavailable</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The world could not be read: no ``gh``, no credentials, no network, a timeout.</span>
+
+<span class="sd">    Raised only by the listing path, and never propagated to a caller of :func:`owed` —</span>
+<span class="sd">    it becomes ``listed: False`` plus an ``error``, which every surface must render as</span>
+<span class="sd">    ``?``. Turning it into an empty list would be the one unrecoverable bug here.</span>
+<span class="sd">    """</span></div>
+
+
+
+<div class="viewcode-block" id="PredicateOutcome">
+<a class="viewcode-back" href="../../module_docs/openloops/obligations.html#openloops.PredicateOutcome">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PredicateOutcome</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""What evaluating one predicate produced.</span>
+
+<span class="sd">    ``status`` is the shell exit status, or ``None`` for "could not be run" — the</span>
+<span class="sd">    difference between an answer and the absence of one.</span>
+
+<span class="sd">    &gt;&gt;&gt; PredicateOutcome(0).status, PredicateOutcome(None, 'timed out').output</span>
+<span class="sd">    (0, 'timed out')</span>
+<span class="sd">    """</span>
+
+    <span class="n">status</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">output</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span></div>
+
+
+
+<div class="viewcode-block" id="Obligation">
+<a class="viewcode-back" href="../../module_docs/openloops/obligations.html#openloops.Obligation">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Obligation</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One open `manual-task` issue, with the verdict its own predicate returned.</span>
+
+<span class="sd">    ``verify`` is the ``**Verify:**`` field exactly as the issue wrote it and</span>
+<span class="sd">    ``predicate`` is the runnable command extracted from it — both are carried so a</span>
+<span class="sd">    reader can disagree with ``state`` rather than absorb it.</span>
+
+<span class="sd">    &gt;&gt;&gt; Obligation('acme/widget', 7, 't', 'u', '2026-01-01T00:00:00Z', 3).state</span>
+<span class="sd">    'open'</span>
+<span class="sd">    """</span>
+
+    <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">number</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">created</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">age_days</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">state</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">OPEN</span>
+    <span class="n">verify</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">predicate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">evidence</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+<div class="viewcode-block" id="Obligation.as_dict">
+<a class="viewcode-back" href="../../module_docs/openloops/obligations.html#openloops.Obligation.as_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""JSON-ready form."""</span>
+        <span class="k">return</span> <span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="c1">#: Every key on every row, whatever the issue happened to say. A row shape that varies</span>
+<span class="c1">#: by issue makes ``row["predicate"]`` a coin flip and makes a JSON schema a lie.</span>
+<span class="n">OBLIGATION_FIELDS</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="n">Obligation</span><span class="p">))</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># Reading the world: the one place openloops invokes `gh`.</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_gh</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Run one ``gh`` command and return its stdout. The only shell-out in the package.</span>
+
+<span class="sd">    openloops owns no GitHub client state — no token handling, no HTTP client, no cache</span>
+<span class="sd">    of its own — and a subprocess call to a CLI the user already authenticated is what</span>
+<span class="sd">    satisfies that. Keeping it to one function is what makes the claim checkable.</span>
+
+<span class="sd">    Every way this can fail is one failure: :class:`GhUnavailable`, which upstream turns</span>
+<span class="sd">    into ``?``.</span>
+<span class="sd">    """</span>
+    <span class="n">executable</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">"gh"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">executable</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">GhUnavailable</span><span class="p">(</span>
+            <span class="s2">"the `gh` CLI is not on PATH — install it and run `gh auth login`"</span>
+        <span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">done</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">executable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">],</span>
+            <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">,</span>
+            <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">GhUnavailable</span><span class="p">(</span><span class="sa">f</span><span class="s2">"`gh </span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">` timed out after </span><span class="si">{</span><span class="n">timeout</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">s"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">GhUnavailable</span><span class="p">(</span><span class="sa">f</span><span class="s2">"could not run `gh`: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+    <span class="k">if</span> <span class="n">done</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="n">_first_line</span><span class="p">(</span><span class="n">done</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">"`gh` exited </span><span class="si">{</span><span class="n">done</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">raise</span> <span class="n">GhUnavailable</span><span class="p">(</span><span class="n">detail</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">done</span><span class="o">.</span><span class="n">stdout</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_first_line</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="p">(</span><span class="n">text</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">return</span> <span class="s2">""</span>
+
+
+<div class="viewcode-block" id="configured_owners">
+<a class="viewcode-back" href="../../module_docs/openloops/obligations.html#openloops.configured_owners">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">configured_owners</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DFLT_LIST_TIMEOUT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Whose repositories to search, resolved once.</span>
+
+<span class="sd">    Three sources, in order, first one wins: ``OPENLOOPS_OWNERS`` (comma- or</span>
+<span class="sd">    space-separated); the owners named by the ``gh owe`` alias if one is installed,</span>
+<span class="sd">    because a fleet is usually already written down there and disagreeing with it is</span>
+<span class="sd">    how a count goes quietly wrong; and failing both, the login ``gh`` is authenticated</span>
+<span class="sd">    as. The resolved list is reported back on every result, so a partial answer is a</span>
+<span class="sd">    visible one rather than a silent one.</span>
+
+<span class="sd">    &gt;&gt;&gt; import os</span>
+<span class="sd">    &gt;&gt;&gt; os.environ['OPENLOOPS_OWNERS'] = 'acme, widgets co'</span>
+<span class="sd">    &gt;&gt;&gt; configured_owners()</span>
+<span class="sd">    ('acme', 'widgets', 'co')</span>
+<span class="sd">    &gt;&gt;&gt; del os.environ['OPENLOOPS_OWNERS']</span>
+<span class="sd">    """</span>
+    <span class="n">raw</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">OWNERS_ENV_VAR</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="n">named</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">part</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[,\s]+"</span><span class="p">,</span> <span class="n">raw</span><span class="p">)</span> <span class="k">if</span> <span class="n">part</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">named</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">named</span>
+    <span class="n">from_alias</span> <span class="o">=</span> <span class="n">owners_in_gh_alias</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">from_alias</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">from_alias</span>
+    <span class="n">login</span> <span class="o">=</span> <span class="n">_gh</span><span class="p">([</span><span class="s2">"api"</span><span class="p">,</span> <span class="s2">"user"</span><span class="p">,</span> <span class="s2">"--jq"</span><span class="p">,</span> <span class="s2">".login"</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">login</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">GhUnavailable</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"no owners to search: set </span><span class="si">{</span><span class="n">OWNERS_ENV_VAR</span><span class="si">}</span><span class="s2"> or run `gh auth login`"</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">login</span><span class="p">,)</span></div>
+
+
+
+<span class="c1">#: Where a fleet's owners are already written down, if the read-path alias is installed.</span>
+<span class="n">DFLT_OWE_ALIAS</span> <span class="o">=</span> <span class="s2">"owe"</span>
+
+<span class="c1">#: `--owner X` as `gh` itself spells it, in either the flag or the `flag=value` form.</span>
+<span class="n">_ALIAS_OWNER</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"--owner[= ]+(?P&lt;owner&gt;[A-Za-z0-9][A-Za-z0-9-]*)"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">owners_in_gh_alias</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span> <span class="n">alias</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DFLT_OWE_ALIAS</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DFLT_LIST_TIMEOUT</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The owners named by a `gh` alias, or ``()`` when there is no such alias.</span>
+
+<span class="sd">    A fleet of several organisations is usually already written down once, in the alias</span>
+<span class="sd">    that reads it. Deriving from that rather than from the authenticated login is what</span>
+<span class="sd">    stops this command from quietly answering about one owner when the alias -- the</span>
+<span class="sd">    thing the human actually types -- answers about three. A silently partial count is</span>
+<span class="sd">    the failure this module exists to prevent, so the partial default is the wrong one.</span>
+
+<span class="sd">    &gt;&gt;&gt; owners_in_gh_alias(alias='no-such-alias-here')</span>
+<span class="sd">    ()</span>
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">listing</span> <span class="o">=</span> <span class="n">_gh</span><span class="p">([</span><span class="s2">"alias"</span><span class="p">,</span> <span class="s2">"list"</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">GhUnavailable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">()</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">listing</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">expansion</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">expansion</span><span class="p">:</span>
+            <span class="n">name</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">expansion</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="n">alias</span><span class="p">:</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="n">_ALIAS_OWNER</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">expansion</span><span class="p">)</span>
+            <span class="c1"># dict.fromkeys keeps the alias's own order, which is the order the human</span>
+            <span class="c1"># reads them in, and drops a repeat rather than searching it twice.</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">found</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">()</span>
+
+
+<div class="viewcode-block" id="gh_issues">
+<a class="viewcode-back" href="../../module_docs/openloops/obligations.html#openloops.gh_issues">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">gh_issues</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">owners</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DFLT_LABEL</span><span class="p">,</span>
+    <span class="n">state</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"open"</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_LIMIT</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DFLT_LIST_TIMEOUT</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""The default ``issues_source``: the open `manual-task` issues, from ``gh``.</span>
+
+<span class="sd">    This is a *filtered* search, not an enumeration — the label is applied server-side</span>
+<span class="sd">    and the result is capped — which is the only form of search this package is allowed</span>
+<span class="sd">    to use. Walking a whole fleet's issues through the search API silently returns wrong</span>
+<span class="sd">    answers past its first thousand results; that job belongs to per-repo listing.</span>
+
+<span class="sd">    Returns whatever ``gh`` returned, unparsed and unjudged: a list of dicts with</span>
+<span class="sd">    ``createdAt``, ``number``, ``repository``, ``title``, ``url`` and ``body``.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">owners</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">GhUnavailable</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no owners to search: set </span><span class="si">{</span><span class="n">OWNERS_ENV_VAR</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"search"</span><span class="p">,</span> <span class="s2">"issues"</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">owner</span> <span class="ow">in</span> <span class="n">owners</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"--owner"</span><span class="p">,</span> <span class="n">owner</span><span class="p">]</span>
+    <span class="n">args</span> <span class="o">+=</span> <span class="p">[</span>
+        <span class="s2">"--label"</span><span class="p">,</span>
+        <span class="n">label</span><span class="p">,</span>
+        <span class="s2">"--state"</span><span class="p">,</span>
+        <span class="n">state</span><span class="p">,</span>
+        <span class="s2">"--limit"</span><span class="p">,</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">limit</span><span class="p">),</span>
+        <span class="s2">"--json"</span><span class="p">,</span>
+        <span class="s2">","</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_ISSUE_FIELDS</span><span class="p">),</span>
+    <span class="p">]</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="n">_gh</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">payload</span> <span class="ow">or</span> <span class="s2">"[]"</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">GhUnavailable</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"`gh search issues` returned no usable JSON: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">GhUnavailable</span><span class="p">(</span><span class="s2">"`gh search issues` returned something other than a list"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rows</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># Reading the predicate out of an issue body.</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<span class="c1">#: How long to wait for a killed predicate's process group to be reaped.</span>
+<span class="n">DFLT_REAP_TIMEOUT</span> <span class="o">=</span> <span class="mf">2.0</span>
+
+<span class="c1">#: The capture skill's field: ``**Verify:** &lt;text&gt;``. The bold markers are optional so</span>
+<span class="c1">#: that a hand-written issue is read too — the field is the contract, not its markup.</span>
+<span class="n">_VERIFY_FIELD</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s2">"^[ \t&gt;]*(?:\*\*)?Verify(?:\*\*)?\s*:(?:\*\*)?[ \t]*(?P&lt;text&gt;.*?)[ \t]*$"</span><span class="p">,</span>
+    <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1">#: A markdown code span, with however many backticks it opened with.</span>
+<span class="n">_CODE_SPAN</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(?P&lt;ticks&gt;`+)(?P&lt;code&gt;.+?)(?P=ticks)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+
+<span class="c1">#: A fenced block, ``` or ~~~, however many fence characters it opened with.</span>
+<span class="n">_FENCED_BLOCK</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"^[ \t]*(?P&lt;fence&gt;```+|~~~+).*?^[ \t]*(?P=fence)[ \t]*$"</span><span class="p">,</span>
+                           <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+
+<span class="c1">#: Text the capture skill's own documentation of the field is quoted in. An agent that</span>
+<span class="c1">#: pastes the spec into its `&lt;details&gt;What I found&lt;/details&gt;` must not have the spec's</span>
+<span class="c1">#: example run instead of its own predicate — so quoted code is not a contract.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_without_quoted_code</span><span class="p">(</span><span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The body with fenced and indented code blocks blanked out, lines preserved.</span>
+
+<span class="sd">    Blanking rather than deleting keeps every other line where it was, so the field is</span>
+<span class="sd">    still found at the same place in a body that happens to quote the format.</span>
+
+<span class="sd">    &gt;&gt;&gt; body = chr(10).join(["```", "**Verify:** `quoted`", "```", "**Verify:** `real`"])</span>
+<span class="sd">    &gt;&gt;&gt; _without_quoted_code(body).splitlines()</span>
+<span class="sd">    ['', '', '', '**Verify:** `real`']</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">blank</span><span class="p">(</span><span class="n">match</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">Match</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">*</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="n">body</span> <span class="o">=</span> <span class="n">_FENCED_BLOCK</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">blank</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span>
+    <span class="c1"># An indented code block is four spaces or a tab at the start of a line. The field</span>
+    <span class="c1"># itself is never indented that far in the documented format.</span>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="s2">""</span> <span class="k">if</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"    "</span><span class="p">)</span> <span class="ow">or</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">))</span> <span class="k">else</span> <span class="n">line</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">body</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<span class="c1">#: The documented way to say a predicate is impossible. Everything after it is prose,</span>
+<span class="c1">#: and prose containing a code span (`gh`, `true`) must never be executed -- `gh` with no</span>
+<span class="c1">#: arguments exits 0, which would mark a live obligation DONE. That is the phantom</span>
+<span class="c1">#: discharge this whole module exists to prevent, so it is checked first and by prefix.</span>
+<span class="n">_NO_PREDICATE_PREFIXES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"none possible"</span><span class="p">,</span> <span class="s2">"none"</span><span class="p">,</span> <span class="s2">"n/a"</span><span class="p">,</span> <span class="s2">"no predicate"</span><span class="p">,</span> <span class="s2">"not possible"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="parse_verify">
+<a class="viewcode-back" href="../../module_docs/openloops/obligations.html#openloops.parse_verify">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_verify</span><span class="p">(</span><span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""``(predicate, verify_text)`` for an issue body. Both are ``''`` when absent.</span>
+
+<span class="sd">    The predicate is the first code span in the field. Prose with no code span -- the</span>
+<span class="sd">    documented "no predicate is possible here" answer -- yields no command, and the</span>
+<span class="sd">    prose is kept so the row can say *why* rather than merely say nothing.</span>
+
+<span class="sd">    &gt;&gt;&gt; parse_verify('**Verify:** `test -f x`')</span>
+<span class="sd">    ('test -f x', '`test -f x`')</span>
+<span class="sd">    &gt;&gt;&gt; parse_verify('no such field here')</span>
+<span class="sd">    ('', '')</span>
+
+<span class="sd">    A field that says no predicate is possible yields no command **even when its prose</span>
+<span class="sd">    contains a code span** -- the documented wording mentions `gh` and `true` naturally,</span>
+<span class="sd">    and both exit 0, which would report a live obligation as done:</span>
+
+<span class="sd">    &gt;&gt;&gt; parse_verify('**Verify:** none possible - no `gh` query observes a decision.')</span>
+<span class="sd">    ('', 'none possible - no `gh` query observes a decision.')</span>
+
+<span class="sd">    A quoted example of the format is not this issue's own predicate:</span>
+
+<span class="sd">    &gt;&gt;&gt; body = chr(10).join(['```', '**Verify:** `quoted`', '```', '**Verify:** `real`'])</span>
+<span class="sd">    &gt;&gt;&gt; parse_verify(body)[0]</span>
+<span class="sd">    'real'</span>
+
+<span class="sd">    An unterminated code span is not a command -- it is a malformed field, and saying so</span>
+<span class="sd">    is the difference between a row that reads ``?`` and one that silently reads open:</span>
+
+<span class="sd">    &gt;&gt;&gt; parse_verify('**Verify:** `echo one &amp;&amp;' + chr(10) + 'echo two`')</span>
+<span class="sd">    ('', '`echo one &amp;&amp;')</span>
+<span class="sd">    """</span>
+    <span class="n">match</span> <span class="o">=</span> <span class="n">_VERIFY_FIELD</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">_without_quoted_code</span><span class="p">(</span><span class="n">body</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">""</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"text"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">"*_ "</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">_NO_PREDICATE_PREFIXES</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">""</span><span class="p">,</span> <span class="n">text</span>
+    <span class="n">span</span> <span class="o">=</span> <span class="n">_CODE_SPAN</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="n">span</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"code"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="n">span</span> <span class="k">else</span> <span class="s2">""</span>
+    <span class="k">return</span> <span class="n">command</span><span class="p">,</span> <span class="n">text</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># Evaluating it.</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="shell_predicate">
+<a class="viewcode-back" href="../../module_docs/openloops/obligations.html#openloops.shell_predicate">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">shell_predicate</span><span class="p">(</span>
+    <span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DFLT_PREDICATE_TIMEOUT</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PredicateOutcome</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The default ``run_predicate``: run the command in a subshell, bounded in time.</span>
+
+<span class="sd">    The exit status is the answer and nothing else is interpreted. Anything that is not</span>
+<span class="sd">    an exit status — a timeout, a shell that would not start — comes back as</span>
+<span class="sd">    ``status=None``, which is ``unknown``, which is ``?``.</span>
+
+<span class="sd">    &gt;&gt;&gt; shell_predicate('exit 0').status</span>
+<span class="sd">    0</span>
+<span class="sd">    &gt;&gt;&gt; shell_predicate('exit 3').status</span>
+<span class="sd">    3</span>
+<span class="sd">    &gt;&gt;&gt; shell_predicate('   ').status is None</span>
+<span class="sd">    True</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">command</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">PredicateOutcome</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">"no predicate to run"</span><span class="p">)</span>
+    <span class="c1"># A new session puts the shell and everything it spawns in one process group, so the</span>
+    <span class="c1"># timeout can kill the group rather than the shell alone. Without it a backgrounded</span>
+    <span class="c1"># child outlives the timeout, keeps the captured pipe open, and both leaks a process</span>
+    <span class="c1"># and turns an answered predicate into a false `unknown`. Measured, not assumed.</span>
+    <span class="n">popen_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s2">"setsid"</span><span class="p">):</span>
+        <span class="n">popen_kwargs</span><span class="p">[</span><span class="s2">"start_new_session"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">subprocess</span><span class="p">,</span> <span class="s2">"CREATE_NEW_PROCESS_GROUP"</span><span class="p">):</span>  <span class="c1"># pragma: no cover - Windows</span>
+        <span class="n">popen_kwargs</span><span class="p">[</span><span class="s2">"creationflags"</span><span class="p">]</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CREATE_NEW_PROCESS_GROUP</span>
+    <span class="c1"># Output goes to files rather than pipes on purpose. With pipes, waiting means</span>
+    <span class="c1"># waiting for EOF, and a backgrounded child inherits the write end -- so</span>
+    <span class="c1"># `sleep 8 &amp; exit 0` blocks the full timeout and an ANSWERED predicate comes back</span>
+    <span class="c1"># as `unknown`. Files let us wait on the shell itself and read whatever it left.</span>
+    <span class="c1"># `ignore_cleanup_errors` is load-bearing on Windows: a killed child can still</span>
+    <span class="c1"># hold the output file when the block exits, and an un-ignored cleanup raises</span>
+    <span class="c1"># PermissionError out of what is supposed to be a bounded, total evaluation.</span>
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">(</span>
+        <span class="n">prefix</span><span class="o">=</span><span class="s2">"openloops-predicate-"</span><span class="p">,</span> <span class="n">ignore_cleanup_errors</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">scratch</span><span class="p">:</span>
+        <span class="n">out_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">scratch</span><span class="p">,</span> <span class="s2">"out"</span><span class="p">)</span>
+        <span class="n">err_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">scratch</span><span class="p">,</span> <span class="s2">"err"</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_path</span><span class="p">,</span> <span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">out_file</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">err_path</span><span class="p">,</span> <span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">err_file</span><span class="p">:</span>
+                <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>  <span class="c1"># noqa: S602 - running it IS the job</span>
+                    <span class="n">command</span><span class="p">,</span>
+                    <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">stdout</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span>
+                    <span class="n">stderr</span><span class="o">=</span><span class="n">err_file</span><span class="p">,</span>
+                    <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">popen_kwargs</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">PredicateOutcome</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"the predicate could not be run: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">:</span>
+            <span class="n">_kill_group</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">PredicateOutcome</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"the predicate timed out after </span><span class="si">{</span><span class="n">timeout</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">s"</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">_read_text</span><span class="p">(</span><span class="n">out_path</span><span class="p">)</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="n">_read_text</span><span class="p">(</span><span class="n">err_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">PredicateOutcome</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">_evidence</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_text</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whatever a predicate wrote, decoded leniently. Unreadable reads as nothing."""</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>  <span class="c1"># pragma: no cover - the temp dir was ours a moment ago</span>
+        <span class="k">return</span> <span class="s2">""</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_kill_group</span><span class="p">(</span><span class="n">process</span><span class="p">:</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Kill the predicate and everything it started, then reap it."""</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s2">"killpg"</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">killpg</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpgid</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">pid</span><span class="p">),</span> <span class="n">signal</span><span class="o">.</span><span class="n">SIGKILL</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover - Windows</span>
+            <span class="n">process</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">ProcessLookupError</span><span class="p">,</span> <span class="ne">PermissionError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="n">process</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">process</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">DFLT_REAP_TIMEOUT</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - pragma: no cover - best effort reap</span>
+        <span class="k">pass</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_evidence</span><span class="p">(</span><span class="o">*</span><span class="n">chunks</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""What a predicate printed, flattened to one bounded line-ish blob."""</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span> <span class="k">if</span> <span class="p">(</span><span class="n">chunk</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">DFLT_EVIDENCE_CHARS</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="p">[:</span> <span class="n">DFLT_EVIDENCE_CHARS</span> <span class="o">-</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s2">"..."</span>
+    <span class="k">return</span> <span class="n">text</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_as_outcome</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PredicateOutcome</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Normalise whatever a ``run_predicate`` returned.</span>
+
+<span class="sd">    An injected evaluator is allowed to be as small as ``lambda command: 0``, or as</span>
+<span class="sd">    small as ``{'cmd': 0}.get`` — a mapping's ``get`` is already a callable of the right</span>
+<span class="sd">    shape, and an unknown command returning ``None`` already means ``unknown``.</span>
+
+<span class="sd">    &gt;&gt;&gt; _as_outcome(0), _as_outcome(None).status, _as_outcome((2, 'nope')).output</span>
+<span class="sd">    (PredicateOutcome(status=0, output=''), None, 'nope')</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">PredicateOutcome</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">PredicateOutcome</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">"the predicate returned no exit status"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="c1"># `True` reads as "done" to a caller and as exit status 1 -- "not done" -- to a</span>
+        <span class="c1"># shell. There is no safe coercion, so refuse rather than invert the product.</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">"run_predicate returned a bool; an exit status is expected, where 0 means "</span>
+            <span class="s2">"done. Return 0 or 1 explicitly rather than True or False."</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">PredicateOutcome</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">status</span><span class="p">,</span> <span class="n">output</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">PredicateOutcome</span><span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="n">status</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">status</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"run_predicate returned </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">; expected an exit status, "</span>
+        <span class="s2">"None, a (status, output) pair, or a PredicateOutcome"</span>
+    <span class="p">)</span>
+
+
+<span class="c1">#: Exit statuses a POSIX shell reserves for "I could not run that", not for an answer.</span>
+<span class="c1">#: 126 is found-but-not-executable, 127 is not-found, and &gt;128 is death by signal.</span>
+<span class="n">NOT_AN_ANSWER_STATUSES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="mi">126</span><span class="p">,</span> <span class="mi">127</span><span class="p">})</span>
+
+<span class="c1">#: Stderr shapes that mean the check itself failed rather than the ask being undone.</span>
+<span class="c1">#: A predicate that cannot authenticate has not observed the world at all, and reading</span>
+<span class="c1">#: it as "still open" is a false positive on the one number this module publishes.</span>
+<span class="n">NOT_AN_ANSWER_STDERR</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="c1"># POSIX shells</span>
+    <span class="s2">"command not found"</span><span class="p">,</span>
+    <span class="s2">"not found"</span><span class="p">,</span>
+    <span class="c1"># cmd.exe and PowerShell say the same thing in three other ways, and `cmd` reports</span>
+    <span class="c1"># a missing command as exit 1 rather than 127 -- so without these a Windows machine</span>
+    <span class="c1"># with no `gh` reads every row as `open` and prints a count it never checked.</span>
+    <span class="s2">"is not recognized as an internal or external command"</span><span class="p">,</span>
+    <span class="s2">"is not recognized as the name of a cmdlet"</span><span class="p">,</span>
+    <span class="s2">"the system cannot find the file specified"</span><span class="p">,</span>
+    <span class="s2">"the system cannot find the path specified"</span><span class="p">,</span>
+    <span class="s2">"bad credentials"</span><span class="p">,</span>
+    <span class="s2">"authentication failed"</span><span class="p">,</span>
+    <span class="s2">"gh auth login"</span><span class="p">,</span>
+    <span class="s2">"could not resolve host"</span><span class="p">,</span>
+    <span class="s2">"network is unreachable"</span><span class="p">,</span>
+    <span class="s2">"connection refused"</span><span class="p">,</span>
+    <span class="s2">"temporary failure in name resolution"</span><span class="p">,</span>
+    <span class="s2">"syntax error"</span><span class="p">,</span>
+    <span class="s2">"permission denied"</span><span class="p">,</span>
+    <span class="s2">"http 401"</span><span class="p">,</span>
+    <span class="s2">"http 403"</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">not_an_answer</span><span class="p">(</span><span class="n">status</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Why ``status`` is not an answer about the world, or ``''`` when it is one.</span>
+
+<span class="sd">    A predicate exits non-zero for two very different reasons: the ask is not done, or</span>
+<span class="sd">    the check could not run. Only the first is information. Collapsing them means that</span>
+<span class="sd">    on a machine with no ``gh``, or with an expired token, every row reads *open* and</span>
+<span class="sd">    the tool prints a confident count it did not earn.</span>
+
+<span class="sd">    &gt;&gt;&gt; not_an_answer(127, '/bin/sh: nope: command not found')</span>
+<span class="sd">    'exit 127: the predicate could not be run'</span>
+<span class="sd">    &gt;&gt;&gt; not_an_answer(1, 'HTTP 401: Bad credentials')</span>
+<span class="sd">    'exit 1: the check itself failed, so nothing was observed'</span>
+<span class="sd">    &gt;&gt;&gt; not_an_answer(1, 'no such secret')</span>
+<span class="sd">    ''</span>
+<span class="sd">    &gt;&gt;&gt; not_an_answer(0, 'anything')</span>
+<span class="sd">    ''</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">""</span>
+    <span class="k">if</span> <span class="n">status</span> <span class="ow">in</span> <span class="n">NOT_AN_ANSWER_STATUSES</span> <span class="ow">or</span> <span class="n">status</span> <span class="o">&gt;</span> <span class="mi">128</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"exit </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">: the predicate could not be run"</span>
+    <span class="n">lowered</span> <span class="o">=</span> <span class="p">(</span><span class="n">output</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">shape</span> <span class="ow">in</span> <span class="n">lowered</span> <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="n">NOT_AN_ANSWER_STDERR</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"exit </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">: the check itself failed, so nothing was observed"</span>
+    <span class="k">return</span> <span class="s2">""</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_verdict</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">verify_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">owner</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">trusted_owners</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">verify</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">run_predicate</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""``(state, evidence)`` for one obligation. The whole three-state rule lives here.</span>
+
+<span class="sd">    Read it as a sequence of refusals: with no predicate there is nothing to check and</span>
+<span class="sd">    the issue stands as filed; with a predicate we did not run, we say so rather than</span>
+<span class="sd">    guessing; only an exit status decides between ``open`` and ``discharged``.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">command</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">"`"</span> <span class="ow">in</span> <span class="p">(</span><span class="n">verify_text</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">):</span>
+            <span class="c1"># A field with a backtick but no complete code span is a malformed</span>
+            <span class="c1"># predicate, not the documented "none possible" prose. Saying so is the</span>
+            <span class="c1"># difference between a `?` and a row that reads open for a typo.</span>
+            <span class="k">return</span> <span class="n">UNKNOWN</span><span class="p">,</span> <span class="n">_evidence</span><span class="p">(</span><span class="s2">"malformed verify field"</span><span class="p">,</span> <span class="n">verify_text</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">OPEN</span><span class="p">,</span> <span class="n">verify_text</span> <span class="ow">or</span> <span class="s2">"no verify predicate"</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">verify</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">UNKNOWN</span><span class="p">,</span> <span class="s2">"not evaluated (verify=False)"</span>
+    <span class="k">if</span> <span class="n">owner</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">trusted_owners</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">UNKNOWN</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"not evaluated: owner </span><span class="si">{</span><span class="n">owner</span><span class="si">!r}</span><span class="s2"> is not in trusted_owners"</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">outcome</span> <span class="o">=</span> <span class="n">_as_outcome</span><span class="p">(</span><span class="n">run_predicate</span><span class="p">(</span><span class="n">command</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - an evaluator that blew up is not an answer</span>
+        <span class="k">return</span> <span class="n">UNKNOWN</span><span class="p">,</span> <span class="n">_evidence</span><span class="p">(</span><span class="sa">f</span><span class="s2">"the predicate could not be evaluated: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">outcome</span><span class="o">.</span><span class="n">status</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">UNKNOWN</span><span class="p">,</span> <span class="n">outcome</span><span class="o">.</span><span class="n">output</span> <span class="ow">or</span> <span class="s2">"the predicate could not be run"</span>
+    <span class="k">if</span> <span class="n">outcome</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">DISCHARGED</span><span class="p">,</span> <span class="n">_evidence</span><span class="p">(</span><span class="s2">"exit 0"</span><span class="p">,</span> <span class="n">outcome</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+    <span class="n">unusable</span> <span class="o">=</span> <span class="n">not_an_answer</span><span class="p">(</span><span class="n">outcome</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">outcome</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">unusable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">UNKNOWN</span><span class="p">,</span> <span class="n">_evidence</span><span class="p">(</span><span class="n">unusable</span><span class="p">,</span> <span class="n">outcome</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">OPEN</span><span class="p">,</span> <span class="n">_evidence</span><span class="p">(</span><span class="sa">f</span><span class="s2">"exit </span><span class="si">{</span><span class="n">outcome</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">outcome</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># The operation.</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_repo_of</span><span class="p">(</span><span class="n">issue</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">repository</span> <span class="o">=</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"repository"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">repository</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">repository</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"nameWithOwner"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">repository</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">repository</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_age_days</span><span class="p">(</span><span class="n">created</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whole days between an ISO-8601 stamp and ``now``. Unparseable reads as 0."""</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">stamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">((</span><span class="n">created</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"Z"</span><span class="p">,</span> <span class="s2">"+00:00"</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">stamp</span><span class="o">.</span><span class="n">tzinfo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">stamp</span> <span class="o">=</span> <span class="n">stamp</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">((</span><span class="n">now</span> <span class="o">-</span> <span class="n">stamp</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">//</span> <span class="n">_SECONDS_PER_DAY</span><span class="p">))</span>
+
+
+<span class="c1">#: What each state is worth in the ordering: what is owed first, what was never checked</span>
+<span class="c1">#: next, what is already done last.</span>
+<span class="n">_STATE_RANK</span> <span class="o">=</span> <span class="p">{</span><span class="n">OPEN</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UNKNOWN</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">DISCHARGED</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_sort_key</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="n">Obligation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+    <span class="c1"># A row with no predicate sinks below one with a checked verdict, rather than being</span>
+    <span class="c1"># hidden: it is still owed, it is just the one nobody can confirm.</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">_STATE_RANK</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span>
+        <span class="mi">0</span> <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">predicate</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="o">-</span><span class="n">row</span><span class="o">.</span><span class="n">age_days</span><span class="p">,</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">repo</span><span class="p">,</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_issues</span><span class="p">(</span>
+    <span class="n">issues_source</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">query</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Call the source if it is callable; otherwise take it as the rows themselves."""</span>
+    <span class="k">if</span> <span class="n">issues_source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">gh_issues</span><span class="p">(</span><span class="o">**</span><span class="n">query</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">issues_source</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">issues_source</span><span class="p">(</span><span class="o">**</span><span class="n">query</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">issues_source</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="owed">
+<a class="viewcode-back" href="../../module_docs/openloops/obligations.html#openloops.owed">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">owed</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">verify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">owners</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">trusted_owners</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DFLT_LABEL</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_LIMIT</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DFLT_LIST_TIMEOUT</span><span class="p">,</span>
+    <span class="n">predicate_timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DFLT_PREDICATE_TIMEOUT</span><span class="p">,</span>
+    <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">issues_source</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">run_predicate</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The open `manual-task` obligations, each re-checked against the world.</span>
+
+<span class="sd">    ``verify=False`` lists without executing anything; every row that carries a</span>
+<span class="sd">    predicate then reads ``unknown``, because that is what is true about it.</span>
+
+<span class="sd">    ``owners=`` scopes the search (default: :func:`configured_owners`).</span>
+<span class="sd">    ``trusted_owners=`` scopes what may *execute* and defaults to ``owners``, so</span>
+<span class="sd">    widening the search never quietly widens what runs — pass it explicitly to search</span>
+<span class="sd">    wider than you trust.</span>
+
+<span class="sd">    Two seams, each one keyword argument, each defaulting to a real implementation:</span>
+<span class="sd">    ``issues_source=`` (defaults to :func:`gh_issues`; a list of dicts substitutes) and</span>
+<span class="sd">    ``run_predicate=`` (defaults to :func:`shell_predicate`; any callable from command</span>
+<span class="sd">    to exit status substitutes). With both injected this reaches no network and needs no</span>
+<span class="sd">    ``gh``.</span>
+
+<span class="sd">    Returns one envelope, never a bare list, because a reader has to be able to tell</span>
+<span class="sd">    "nothing is owed" from "I could not find out":</span>
+
+<span class="sd">    ``listed``</span>
+<span class="sd">        ``False`` when the *listing itself* failed. Every surface must render that as</span>
+<span class="sd">        ``?``. The counts are zeros and they mean nothing.</span>
+<span class="sd">    ``checked``</span>
+<span class="sd">        whether predicates were evaluated at all.</span>
+<span class="sd">    ``truncated``</span>
+<span class="sd">        the result set saturated its own cap, so the count is a floor.</span>
+<span class="sd">    ``counts``</span>
+<span class="sd">        ``open`` / ``discharged`` / ``unknown`` / ``with_predicate`` / ``total``.</span>
+<span class="sd">    ``rows``</span>
+<span class="sd">        one dict per obligation, with every key in :data:`OBLIGATION_FIELDS`.</span>
+
+<span class="sd">    &gt;&gt;&gt; report = owed(issues_source=[], run_predicate=lambda command: 0)</span>
+<span class="sd">    &gt;&gt;&gt; report['listed'], report['counts']['total'], report['rows']</span>
+<span class="sd">    (True, 0, [])</span>
+
+<span class="sd">    A listing that could not run is not "nothing owed":</span>
+
+<span class="sd">    &gt;&gt;&gt; def broken(**query):</span>
+<span class="sd">    ...     raise GhUnavailable('gh: not logged in')</span>
+<span class="sd">    &gt;&gt;&gt; report = owed(issues_source=broken)</span>
+<span class="sd">    &gt;&gt;&gt; report['listed'], report['error'], report['counts']['total']</span>
+<span class="sd">    (False, 'gh: not logged in', 0)</span>
+<span class="sd">    """</span>
+    <span class="n">run_predicate</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="k">lambda</span> <span class="n">command</span><span class="p">:</span> <span class="n">shell_predicate</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">predicate_timeout</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">run_predicate</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="n">run_predicate</span>
+    <span class="p">)</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span> <span class="k">if</span> <span class="n">now</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">now</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="n">OPEN</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">DISCHARGED</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UNKNOWN</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"with_predicate"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"total"</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">envelope</span><span class="p">(</span><span class="o">**</span><span class="n">overrides</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"listed"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"checked"</span><span class="p">:</span> <span class="n">verify</span><span class="p">,</span>
+            <span class="s2">"error"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+            <span class="s2">"truncated"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"label"</span><span class="p">:</span> <span class="n">label</span><span class="p">,</span>
+            <span class="s2">"owners"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"trusted_owners"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"counts"</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">counts</span><span class="p">),</span>
+            <span class="s2">"rows"</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="n">base</span><span class="p">,</span> <span class="o">**</span><span class="n">overrides</span><span class="p">}</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Resolving owners can itself need `gh`. It is skipped entirely when the caller</span>
+        <span class="c1"># supplied the rows, so an injected source stays offline.</span>
+        <span class="k">if</span> <span class="n">owners</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">resolved</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">owners</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">issues_source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">resolved</span> <span class="o">=</span> <span class="n">configured_owners</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">resolved</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="n">trusted</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">resolved</span> <span class="k">if</span> <span class="n">trusted_owners</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">trusted_owners</span><span class="p">)</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">_issues</span><span class="p">(</span>
+            <span class="n">issues_source</span><span class="p">,</span>
+            <span class="n">owners</span><span class="o">=</span><span class="n">resolved</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="n">limit</span><span class="o">=</span><span class="n">limit</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># one more than we report: saturation must be visible</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="n">GhUnavailable</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">envelope</span><span class="p">(</span><span class="n">listed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span> <span class="n">owners</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">owners</span> <span class="ow">or</span> <span class="p">()))</span>
+
+    <span class="n">truncated</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">limit</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">issue</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">[:</span><span class="n">limit</span><span class="p">]:</span>
+        <span class="n">repo</span> <span class="o">=</span> <span class="n">_repo_of</span><span class="p">(</span><span class="n">issue</span><span class="p">)</span>
+        <span class="n">owner</span> <span class="o">=</span> <span class="n">repo</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">command</span><span class="p">,</span> <span class="n">verify_text</span> <span class="o">=</span> <span class="n">parse_verify</span><span class="p">(</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span>
+        <span class="n">state</span><span class="p">,</span> <span class="n">evidence</span> <span class="o">=</span> <span class="n">_verdict</span><span class="p">(</span>
+            <span class="n">command</span><span class="o">=</span><span class="n">command</span><span class="p">,</span>
+            <span class="n">verify_text</span><span class="o">=</span><span class="n">verify_text</span><span class="p">,</span>
+            <span class="n">owner</span><span class="o">=</span><span class="n">owner</span><span class="p">,</span>
+            <span class="n">trusted_owners</span><span class="o">=</span><span class="n">trusted</span><span class="p">,</span>
+            <span class="n">verify</span><span class="o">=</span><span class="n">verify</span><span class="p">,</span>
+            <span class="n">run_predicate</span><span class="o">=</span><span class="n">run_predicate</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">Obligation</span><span class="p">(</span>
+                <span class="n">repo</span><span class="o">=</span><span class="n">repo</span><span class="p">,</span>
+                <span class="n">number</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"number"</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="n">title</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">),</span>
+                <span class="n">url</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"url"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">),</span>
+                <span class="n">created</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"createdAt"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">),</span>
+                <span class="n">age_days</span><span class="o">=</span><span class="n">_age_days</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"createdAt"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">),</span> <span class="n">now</span><span class="p">),</span>
+                <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span>
+                <span class="n">verify</span><span class="o">=</span><span class="n">verify_text</span><span class="p">,</span>
+                <span class="n">predicate</span><span class="o">=</span><span class="n">command</span><span class="p">,</span>
+                <span class="n">evidence</span><span class="o">=</span><span class="n">evidence</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+        <span class="n">counts</span><span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">state</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">counts</span><span class="p">[</span><span class="s2">"with_predicate"</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">predicate</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="n">counts</span><span class="p">[</span><span class="s2">"total"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">envelope</span><span class="p">(</span>
+        <span class="n">owners</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">resolved</span><span class="p">),</span>
+        <span class="n">trusted_owners</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="n">trusted</span><span class="p">),</span>
+        <span class="n">truncated</span><span class="o">=</span><span class="n">truncated</span><span class="p">,</span>
+        <span class="n">counts</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">counts</span><span class="p">),</span>
+        <span class="n">rows</span><span class="o">=</span><span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">_sort_key</span><span class="p">)],</span>
+    <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

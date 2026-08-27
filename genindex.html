@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; openloops 0.1.3 documentation</title>
+  <title>Index &mdash; openloops 0.1.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=360bc84d"></script>
+      <script src="_static/documentation_options.js?v=fd825880"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -54,6 +54,7 @@
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/digest.html">openloops.digest</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/egress.html">openloops.egress</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/obligations.html">openloops.obligations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/store.html">openloops.store</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/tools.html">openloops.tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/transcripts.html">openloops.transcripts</a></li>
@@ -125,6 +126,10 @@
 </li>
         <li><a href="module_docs/openloops.html#openloops.Locator.as_dict">(openloops.Locator method)</a>
 </li>
+        <li><a href="module_docs/openloops.html#openloops.Obligation.as_dict">(openloops.Obligation method)</a>
+</li>
+        <li><a href="module_docs/openloops/obligations.html#openloops.obligations.Obligation.as_dict">(openloops.obligations.Obligation method)</a>
+</li>
         <li><a href="module_docs/openloops.html#openloops.Session.as_dict">(openloops.Session method)</a>
 </li>
         <li><a href="module_docs/openloops.html#openloops.Verdict.as_dict">(openloops.Verdict method)</a>
@@ -192,6 +197,8 @@
         <li><a href="module_docs/openloops.html#openloops.Verdict.confidence">(openloops.Verdict attribute)</a>
 </li>
       </ul></li>
+      <li><a href="module_docs/openloops/obligations.html#openloops.obligations.configured_owners">configured_owners() (in module openloops.obligations)</a>
+</li>
       <li><a href="module_docs/openloops/egress.html#openloops.egress.CREDENTIAL_PATTERNS">CREDENTIAL_PATTERNS (in module openloops.egress)</a>
 </li>
       <li><a href="module_docs/openloops.html#openloops.CredentialFound">CredentialFound</a>, <a href="module_docs/openloops/egress.html#openloops.egress.CredentialFound">[1]</a>
@@ -220,10 +227,10 @@
 </li>
       <li><a href="module_docs/openloops/job.html#openloops.job.DFLT_INTERVAL">DFLT_INTERVAL (in module openloops.job)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/openloops/job.html#openloops.job.DFLT_LABEL">DFLT_LABEL (in module openloops.job)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/openloops.html#openloops.Digest">Digest (class in openloops)</a>
 
       <ul>
@@ -244,6 +251,8 @@
         <li><a href="module_docs/openloops/store.html#openloops.store.digests_store">(in module openloops.store)</a>
 </li>
       </ul></li>
+      <li><a href="module_docs/openloops/obligations.html#openloops.obligations.DISCHARGED">DISCHARGED (in module openloops.obligations)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -286,6 +295,16 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="module_docs/openloops.html#openloops.gh_issues">gh_issues() (in module openloops)</a>
+
+      <ul>
+        <li><a href="module_docs/openloops/obligations.html#openloops.obligations.gh_issues">(in module openloops.obligations)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="module_docs/openloops.html#openloops.GhUnavailable">GhUnavailable</a>, <a href="module_docs/openloops/obligations.html#openloops.obligations.GhUnavailable">[1]</a>
+</li>
       <li><a href="module_docs/openloops/base.html#openloops.base.Session.git_branch">git_branch (openloops.base.Session property)</a>
 
       <ul>
@@ -382,6 +401,8 @@
 </li>
         <li><a href="module_docs/openloops/job.html#module-openloops.job">openloops.job</a>
 </li>
+        <li><a href="module_docs/openloops/obligations.html#module-openloops.obligations">openloops.obligations</a>
+</li>
         <li><a href="module_docs/openloops/store.html#module-openloops.store">openloops.store</a>
 </li>
         <li><a href="module_docs/openloops/tools.html#module-openloops.tools">openloops.tools</a>
@@ -395,6 +416,16 @@
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="module_docs/openloops.html#openloops.Obligation">Obligation (class in openloops)</a>
+
+      <ul>
+        <li><a href="module_docs/openloops/obligations.html#openloops.obligations.Obligation">(class in openloops.obligations)</a>
+</li>
+      </ul></li>
+      <li><a href="module_docs/openloops/obligations.html#openloops.obligations.OBLIGATION_FIELDS">OBLIGATION_FIELDS (in module openloops.obligations)</a>
+</li>
+      <li><a href="module_docs/openloops/obligations.html#openloops.obligations.OBLIGATION_STATES">OBLIGATION_STATES (in module openloops.obligations)</a>
+</li>
       <li><a href="module_docs/openloops/base.html#openloops.base.OPEN">OPEN (in module openloops.base)</a>
 </li>
       <li>
@@ -432,8 +463,6 @@
         <li><a href="module_docs/openloops/base.html#module-openloops.base">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     openloops.digest
 
@@ -441,6 +470,8 @@
         <li><a href="module_docs/openloops/digest.html#module-openloops.digest">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     openloops.egress
 
@@ -453,6 +484,13 @@
 
       <ul>
         <li><a href="module_docs/openloops/job.html#module-openloops.job">module</a>
+</li>
+      </ul></li>
+      <li>
+    openloops.obligations
+
+      <ul>
+        <li><a href="module_docs/openloops/obligations.html#module-openloops.obligations">module</a>
 </li>
       </ul></li>
       <li>
@@ -476,6 +514,14 @@
         <li><a href="module_docs/openloops/transcripts.html#module-openloops.transcripts">module</a>
 </li>
       </ul></li>
+      <li><a href="module_docs/openloops.html#openloops.owed">owed() (in module openloops)</a>
+
+      <ul>
+        <li><a href="module_docs/openloops/obligations.html#openloops.obligations.owed">(in module openloops.obligations)</a>
+</li>
+        <li><a href="module_docs/openloops/tools.html#openloops.tools.owed">(in module openloops.tools)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -490,6 +536,12 @@
         <li><a href="module_docs/openloops/transcripts.html#openloops.transcripts.parse_session">(in module openloops.transcripts)</a>
 </li>
       </ul></li>
+      <li><a href="module_docs/openloops.html#openloops.parse_verify">parse_verify() (in module openloops)</a>
+
+      <ul>
+        <li><a href="module_docs/openloops/obligations.html#openloops.obligations.parse_verify">(in module openloops.obligations)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/openloops.html#openloops.ClaudeCodeTranscripts.path_of">path_of() (openloops.ClaudeCodeTranscripts method)</a>
@@ -500,6 +552,12 @@
       </ul></li>
       <li><a href="module_docs/openloops/job.html#openloops.job.plist_xml">plist_xml() (in module openloops.job)</a>
 </li>
+      <li><a href="module_docs/openloops.html#openloops.PredicateOutcome">PredicateOutcome (class in openloops)</a>
+
+      <ul>
+        <li><a href="module_docs/openloops/obligations.html#openloops.obligations.PredicateOutcome">(class in openloops.obligations)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -568,14 +626,20 @@
         <li><a href="module_docs/openloops/base.html#openloops.base.Session">(class in openloops.base)</a>
 </li>
       </ul></li>
+      <li><a href="module_docs/openloops.html#openloops.shell_predicate">shell_predicate() (in module openloops)</a>
+
+      <ul>
+        <li><a href="module_docs/openloops/obligations.html#openloops.obligations.shell_predicate">(in module openloops.obligations)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/openloops.html#openloops.show">show() (in module openloops)</a>
 
       <ul>
         <li><a href="module_docs/openloops/tools.html#openloops.tools.show">(in module openloops.tools)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/openloops.html#openloops.state_dir">state_dir() (in module openloops)</a>
 
       <ul>
@@ -612,6 +676,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="module_docs/openloops/obligations.html#openloops.obligations.UNKNOWN">UNKNOWN (in module openloops.obligations)</a>
+</li>
       <li><a href="module_docs/openloops/store.html#openloops.store.Utf8TextFiles">Utf8TextFiles (class in openloops.store)</a>
 </li>
   </ul></td>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openloops &mdash; openloops 0.1.3 documentation</title>
+  <title>openloops &mdash; openloops 0.1.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=360bc84d"></script>
+      <script src="../_static/documentation_options.js?v=fd825880"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -62,10 +62,16 @@
 <li class="toctree-l3"><a class="reference internal" href="#openloops.Digest.as_dict"><code class="docutils literal notranslate"><span class="pre">Digest.as_dict()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.GhUnavailable"><code class="docutils literal notranslate"><span class="pre">GhUnavailable</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.Locator"><code class="docutils literal notranslate"><span class="pre">Locator</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#openloops.Locator.as_dict"><code class="docutils literal notranslate"><span class="pre">Locator.as_dict()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.Obligation"><code class="docutils literal notranslate"><span class="pre">Obligation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.Obligation.as_dict"><code class="docutils literal notranslate"><span class="pre">Obligation.as_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.PredicateOutcome"><code class="docutils literal notranslate"><span class="pre">PredicateOutcome</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.Session"><code class="docutils literal notranslate"><span class="pre">Session</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#openloops.Session.as_dict"><code class="docutils literal notranslate"><span class="pre">Session.as_dict()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#openloops.Session.compaction"><code class="docutils literal notranslate"><span class="pre">Session.compaction</span></code></a></li>
@@ -88,12 +94,16 @@
 <li class="toctree-l2"><a class="reference internal" href="#openloops.default_source"><code class="docutils literal notranslate"><span class="pre">default_source()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.digest_key"><code class="docutils literal notranslate"><span class="pre">digest_key()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.digests_store"><code class="docutils literal notranslate"><span class="pre">digests_store()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.gh_issues"><code class="docutils literal notranslate"><span class="pre">gh_issues()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.ls"><code class="docutils literal notranslate"><span class="pre">ls()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.make_digest"><code class="docutils literal notranslate"><span class="pre">make_digest()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.owed"><code class="docutils literal notranslate"><span class="pre">owed()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.parse_session"><code class="docutils literal notranslate"><span class="pre">parse_session()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.parse_verify"><code class="docutils literal notranslate"><span class="pre">parse_verify()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.render"><code class="docutils literal notranslate"><span class="pre">render()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.retained"><code class="docutils literal notranslate"><span class="pre">retained()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.scrub"><code class="docutils literal notranslate"><span class="pre">scrub()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.shell_predicate"><code class="docutils literal notranslate"><span class="pre">shell_predicate()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.state_dir"><code class="docutils literal notranslate"><span class="pre">state_dir()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.status"><code class="docutils literal notranslate"><span class="pre">status()</span></code></a></li>
@@ -107,6 +117,7 @@
 <li class="toctree-l1"><a class="reference internal" href="openloops/digest.html">openloops.digest</a></li>
 <li class="toctree-l1"><a class="reference internal" href="openloops/egress.html">openloops.egress</a></li>
 <li class="toctree-l1"><a class="reference internal" href="openloops/job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openloops/obligations.html">openloops.obligations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="openloops/store.html">openloops.store</a></li>
 <li class="toctree-l1"><a class="reference internal" href="openloops/tools.html">openloops.tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="openloops/transcripts.html">openloops.transcripts</a></li>
@@ -164,9 +175,21 @@ the box: <code class="docutils literal notranslate"><span class="pre">transcript
 <code class="docutils literal notranslate"><span class="pre">digests_store=</span></code> (a directory of markdown files under <code class="docutils literal notranslate"><span class="pre">~/.local/share/openloops/</span></code>).
 Swap either for a test fixture, a git-synced directory, or blob storage without
 touching anything else.</p>
-<p><strong>Not in this release, and deliberately:</strong> anything that tracks what you owe or are
-owed. That is the project’s headline claim and it is withheld pending a measurement —
-see the README.</p>
+<p>There is a second thing here, added later and kept deliberately small:
+<code class="docutils literal notranslate"><span class="pre">openloops.owed()</span></code> lists the open <code class="docutils literal notranslate"><span class="pre">manual-task</span></code> issues your agents filed when they
+got blocked on you, and — this is its whole reason to exist — re-runs the shell
+predicate each issue carries before showing it, so an obligation discharged out of band
+reads <em>discharged</em> rather than sitting open for months. It reads and reports; it never
+closes, relabels or writes anything, and it keeps no copy of anything: the label is the
+record. Its trust boundary (evaluating a predicate executes text from an issue body)
+and its kill criterion are both written out in <a class="reference internal" href="openloops/obligations.html#module-openloops.obligations" title="openloops.obligations"><code class="xref py py-mod docutils literal notranslate"><span class="pre">openloops.obligations</span></code></a>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">report</span> <span class="o">=</span> <span class="n">openloops</span><span class="o">.</span><span class="n">owed</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">report</span><span class="p">[</span><span class="s1">'counts'</span><span class="p">]</span>
+<span class="go">{'open': 6, 'discharged': 1, 'unknown': 2, 'with_predicate': 7, 'total': 9}</span>
+</pre></div>
+</div>
+<p><strong>Still not here, and deliberately:</strong> a ledger. No store, no schema, no history, no
+event log, no cross-repo links, no session model, and no write path of any kind.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openloops.ClaudeCodeTranscripts">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">ClaudeCodeTranscripts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">since_days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projects</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_scratchpads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/transcripts.html#ClaudeCodeTranscripts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.ClaudeCodeTranscripts" title="Link to this definition"></a></dt>
@@ -237,6 +260,15 @@ no generation timestamp, which is what lets the regeneration test in
 
 </dd></dl>
 
+<dl class="py exception">
+<dt class="sig sig-object py" id="openloops.GhUnavailable">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">GhUnavailable</span></span><a class="reference internal" href="../_modules/openloops/obligations.html#GhUnavailable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.GhUnavailable" title="Link to this definition"></a></dt>
+<dd><p>The world could not be read: no <code class="docutils literal notranslate"><span class="pre">gh</span></code>, no credentials, no network, a timeout.</p>
+<p>Raised only by the listing path, and never propagated to a caller of <a class="reference internal" href="#openloops.owed" title="openloops.owed"><code class="xref py py-func docutils literal notranslate"><span class="pre">owed()</span></code></a> —
+it becomes <code class="docutils literal notranslate"><span class="pre">listed:</span> <span class="pre">False</span></code> plus an <code class="docutils literal notranslate"><span class="pre">error</span></code>, which every surface must render as
+<code class="docutils literal notranslate"><span class="pre">?</span></code>. Turning it into an empty list would be the one unrecoverable bug here.</p>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="openloops.Locator">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">Locator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/base.html#Locator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.Locator" title="Link to this definition"></a></dt>
@@ -254,6 +286,37 @@ offset into a file that is garbage-collected after thirty days.</p>
 <dd><p>JSON-ready form.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openloops.Obligation">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">Obligation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">age_days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'open'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evidence</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/obligations.html#Obligation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.Obligation" title="Link to this definition"></a></dt>
+<dd><p>One open <cite>manual-task</cite> issue, with the verdict its own predicate returned.</p>
+<p><code class="docutils literal notranslate"><span class="pre">verify</span></code> is the <code class="docutils literal notranslate"><span class="pre">**Verify:**</span></code> field exactly as the issue wrote it and
+<code class="docutils literal notranslate"><span class="pre">predicate</span></code> is the runnable command extracted from it — both are carried so a
+reader can disagree with <code class="docutils literal notranslate"><span class="pre">state</span></code> rather than absorb it.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Obligation</span><span class="p">(</span><span class="s1">'acme/widget'</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">'t'</span><span class="p">,</span> <span class="s1">'u'</span><span class="p">,</span> <span class="s1">'2026-01-01T00:00:00Z'</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">state</span>
+<span class="go">'open'</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="openloops.Obligation.as_dict">
+<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openloops/obligations.html#Obligation.as_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.Obligation.as_dict" title="Link to this definition"></a></dt>
+<dd><p>JSON-ready form.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openloops.PredicateOutcome">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">PredicateOutcome</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/obligations.html#PredicateOutcome"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.PredicateOutcome" title="Link to this definition"></a></dt>
+<dd><p>What evaluating one predicate produced.</p>
+<p><code class="docutils literal notranslate"><span class="pre">status</span></code> is the shell exit status, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for “could not be run” — the
+difference between an answer and the absence of one.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">PredicateOutcome</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">PredicateOutcome</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">'timed out'</span><span class="p">)</span><span class="o">.</span><span class="n">output</span>
+<span class="go">(0, 'timed out')</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py class">
@@ -443,6 +506,18 @@ free.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="openloops.gh_issues">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">gh_issues</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">owners</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'manual-task'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'open'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openloops/obligations.html#gh_issues"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.gh_issues" title="Link to this definition"></a></dt>
+<dd><p>The default <code class="docutils literal notranslate"><span class="pre">issues_source</span></code>: the open <cite>manual-task</cite> issues, from <code class="docutils literal notranslate"><span class="pre">gh</span></code>.</p>
+<p>This is a <em>filtered</em> search, not an enumeration — the label is applied server-side
+and the result is capped — which is the only form of search this package is allowed
+to use. Walking a whole fleet’s issues through the search API silently returns wrong
+answers past its first thousand results; that job belongs to per-repo listing.</p>
+<p>Returns whatever <code class="docutils literal notranslate"><span class="pre">gh</span></code> returned, unparsed and unjudged: a list of dicts with
+<code class="docutils literal notranslate"><span class="pre">createdAt</span></code>, <code class="docutils literal notranslate"><span class="pre">number</span></code>, <code class="docutils literal notranslate"><span class="pre">repository</span></code>, <code class="docutils literal notranslate"><span class="pre">title</span></code>, <code class="docutils literal notranslate"><span class="pre">url</span></code> and <code class="docutils literal notranslate"><span class="pre">body</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="openloops.ls">
 <span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">ls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'open'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digests_store</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MutableMapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openloops/tools.html#ls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.ls" title="Link to this definition"></a></dt>
 <dd><p>The digests in the store, newest last-turn first.</p>
@@ -471,6 +546,51 @@ than writing a secret into a store that may be synced.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">make_digest</span><span class="p">(</span><span class="n">Session</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">'s1'</span><span class="p">),</span> <span class="n">Verdict</span><span class="p">(</span><span class="s1">'open'</span><span class="p">,</span> <span class="s1">'why'</span><span class="p">),</span> <span class="n">source</span><span class="o">=</span><span class="s1">'demo'</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">key</span>
 <span class="go">'demo/open/s1.md'</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.owed">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">owed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">owners</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trusted_owners</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'manual-task'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicate_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">now</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issues_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_predicate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openloops/obligations.html#owed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.owed" title="Link to this definition"></a></dt>
+<dd><p>The open <cite>manual-task</cite> obligations, each re-checked against the world.</p>
+<p><code class="docutils literal notranslate"><span class="pre">verify=False</span></code> lists without executing anything; every row that carries a
+predicate then reads <code class="docutils literal notranslate"><span class="pre">unknown</span></code>, because that is what is true about it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">owners=</span></code> scopes the search (default: <code class="xref py py-func docutils literal notranslate"><span class="pre">configured_owners()</span></code>).
+<code class="docutils literal notranslate"><span class="pre">trusted_owners=</span></code> scopes what may <em>execute</em> and defaults to <code class="docutils literal notranslate"><span class="pre">owners</span></code>, so
+widening the search never quietly widens what runs — pass it explicitly to search
+wider than you trust.</p>
+<p>Two seams, each one keyword argument, each defaulting to a real implementation:
+<code class="docutils literal notranslate"><span class="pre">issues_source=</span></code> (defaults to <a class="reference internal" href="#openloops.gh_issues" title="openloops.gh_issues"><code class="xref py py-func docutils literal notranslate"><span class="pre">gh_issues()</span></code></a>; a list of dicts substitutes) and
+<code class="docutils literal notranslate"><span class="pre">run_predicate=</span></code> (defaults to <a class="reference internal" href="#openloops.shell_predicate" title="openloops.shell_predicate"><code class="xref py py-func docutils literal notranslate"><span class="pre">shell_predicate()</span></code></a>; any callable from command
+to exit status substitutes). With both injected this reaches no network and needs no
+<code class="docutils literal notranslate"><span class="pre">gh</span></code>.</p>
+<p>Returns one envelope, never a bare list, because a reader has to be able to tell
+“nothing is owed” from “I could not find out”:</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">listed</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">False</span></code> when the <em>listing itself</em> failed. Every surface must render that as
+<code class="docutils literal notranslate"><span class="pre">?</span></code>. The counts are zeros and they mean nothing.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">checked</span></code></dt><dd><p>whether predicates were evaluated at all.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">truncated</span></code></dt><dd><p>the result set saturated its own cap, so the count is a floor.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">counts</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">open</span></code> / <code class="docutils literal notranslate"><span class="pre">discharged</span></code> / <code class="docutils literal notranslate"><span class="pre">unknown</span></code> / <code class="docutils literal notranslate"><span class="pre">with_predicate</span></code> / <code class="docutils literal notranslate"><span class="pre">total</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">rows</span></code></dt><dd><p>one dict per obligation, with every key in <code class="xref py py-data docutils literal notranslate"><span class="pre">OBLIGATION_FIELDS</span></code>.</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">report</span> <span class="o">=</span> <span class="n">owed</span><span class="p">(</span><span class="n">issues_source</span><span class="o">=</span><span class="p">[],</span> <span class="n">run_predicate</span><span class="o">=</span><span class="k">lambda</span> <span class="n">command</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">report</span><span class="p">[</span><span class="s1">'listed'</span><span class="p">],</span> <span class="n">report</span><span class="p">[</span><span class="s1">'counts'</span><span class="p">][</span><span class="s1">'total'</span><span class="p">],</span> <span class="n">report</span><span class="p">[</span><span class="s1">'rows'</span><span class="p">]</span>
+<span class="go">(True, 0, [])</span>
+</pre></div>
+</div>
+<p>A listing that could not run is not “nothing owed”:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">broken</span><span class="p">(</span><span class="o">**</span><span class="n">query</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">raise</span> <span class="n">GhUnavailable</span><span class="p">(</span><span class="s1">'gh: not logged in'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">report</span> <span class="o">=</span> <span class="n">owed</span><span class="p">(</span><span class="n">issues_source</span><span class="o">=</span><span class="n">broken</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">report</span><span class="p">[</span><span class="s1">'listed'</span><span class="p">],</span> <span class="n">report</span><span class="p">[</span><span class="s1">'error'</span><span class="p">],</span> <span class="n">report</span><span class="p">[</span><span class="s1">'counts'</span><span class="p">][</span><span class="s1">'total'</span><span class="p">]</span>
+<span class="go">(False, 'gh: not logged in', 0)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -505,6 +625,40 @@ the last or most-frequent one names a different repository about half the time.<
 <span class="go">('s1', 'proj', 1, 'done')</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">started_at</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">ended_at</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">git_branch</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">ended_mid_turn</span>
 <span class="go">('T1', 'T2', 'main', False)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.parse_verify">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">parse_verify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openloops/obligations.html#parse_verify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.parse_verify" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">(predicate,</span> <span class="pre">verify_text)</span></code> for an issue body. Both are <code class="docutils literal notranslate"><span class="pre">''</span></code> when absent.</p>
+<p>The predicate is the first code span in the field. Prose with no code span – the
+documented “no predicate is possible here” answer – yields no command, and the
+prose is kept so the row can say <em>why</em> rather than merely say nothing.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_verify</span><span class="p">(</span><span class="s1">'**Verify:** `test -f x`'</span><span class="p">)</span>
+<span class="go">('test -f x', '`test -f x`')</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parse_verify</span><span class="p">(</span><span class="s1">'no such field here'</span><span class="p">)</span>
+<span class="go">('', '')</span>
+</pre></div>
+</div>
+<p>A field that says no predicate is possible yields no command <strong>even when its prose
+contains a code span</strong> – the documented wording mentions <cite>gh</cite> and <cite>true</cite> naturally,
+and both exit 0, which would report a live obligation as done:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_verify</span><span class="p">(</span><span class="s1">'**Verify:** none possible - no `gh` query observes a decision.'</span><span class="p">)</span>
+<span class="go">('', 'none possible - no `gh` query observes a decision.')</span>
+</pre></div>
+</div>
+<p>A quoted example of the format is not this issue’s own predicate:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">body</span> <span class="o">=</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">'```'</span><span class="p">,</span> <span class="s1">'**Verify:** `quoted`'</span><span class="p">,</span> <span class="s1">'```'</span><span class="p">,</span> <span class="s1">'**Verify:** `real`'</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parse_verify</span><span class="p">(</span><span class="n">body</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">'real'</span>
+</pre></div>
+</div>
+<p>An unterminated code span is not a command – it is a malformed field, and saying so
+is the difference between a row that reads <code class="docutils literal notranslate"><span class="pre">?</span></code> and one that silently reads open:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_verify</span><span class="p">(</span><span class="s1">'**Verify:** `echo one &amp;&amp;'</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'echo two`'</span><span class="p">)</span>
+<span class="go">('', '`echo one &amp;&amp;')</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -553,6 +707,23 @@ caller-supplied: a rewrite can in principle produce a home path as easily as rem
 one, and a postcondition that is only true of benign inputs is not a postcondition.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">scrub</span><span class="p">(</span><span class="s2">"built /nowhere/proj/x"</span><span class="p">,</span> <span class="n">aliases</span><span class="o">=</span><span class="p">{</span><span class="s2">"/nowhere/proj"</span><span class="p">:</span> <span class="s2">"$PROJ"</span><span class="p">})</span>
 <span class="go">'built $PROJ/x'</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.shell_predicate">
+<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">shell_predicate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="openloops/obligations.html#openloops.obligations.PredicateOutcome" title="openloops.obligations.PredicateOutcome"><span class="pre">PredicateOutcome</span></a></span></span><a class="reference internal" href="../_modules/openloops/obligations.html#shell_predicate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.shell_predicate" title="Link to this definition"></a></dt>
+<dd><p>The default <code class="docutils literal notranslate"><span class="pre">run_predicate</span></code>: run the command in a subshell, bounded in time.</p>
+<p>The exit status is the answer and nothing else is interpreted. Anything that is not
+an exit status — a timeout, a shell that would not start — comes back as
+<code class="docutils literal notranslate"><span class="pre">status=None</span></code>, which is <code class="docutils literal notranslate"><span class="pre">unknown</span></code>, which is <code class="docutils literal notranslate"><span class="pre">?</span></code>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">shell_predicate</span><span class="p">(</span><span class="s1">'exit 0'</span><span class="p">)</span><span class="o">.</span><span class="n">status</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shell_predicate</span><span class="p">(</span><span class="s1">'exit 3'</span><span class="p">)</span><span class="o">.</span><span class="n">status</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shell_predicate</span><span class="p">(</span><span class="s1">'   '</span><span class="p">)</span><span class="o">.</span><span class="n">status</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="go">True</span>
 </pre></div>
 </div>
 </dd></dl>

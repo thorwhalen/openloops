@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openloops.tools &mdash; openloops 0.1.3 documentation</title>
+  <title>openloops.tools &mdash; openloops 0.1.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=360bc84d"></script>
+      <script src="../../_static/documentation_options.js?v=fd825880"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -54,6 +54,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/digest.html">openloops.digest</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/egress.html">openloops.egress</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/obligations.html">openloops.obligations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/store.html">openloops.store</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/tools.html">openloops.tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/transcripts.html">openloops.transcripts</a></li>
@@ -102,6 +103,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">OPEN</span><span class="p">,</span> <span class="n">STATES</span><span class="p">,</span> <span class="n">Session</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.obligations</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DFLT_LABEL</span><span class="p">,</span>
+    <span class="n">DFLT_LIMIT</span><span class="p">,</span>
+    <span class="n">DFLT_LIST_TIMEOUT</span><span class="p">,</span>
+    <span class="n">DFLT_PREDICATE_TIMEOUT</span><span class="p">,</span>
+    <span class="n">owed</span> <span class="k">as</span> <span class="n">_owed</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops.store</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">data_dir</span><span class="p">,</span>
     <span class="n">default_source</span><span class="p">,</span>
@@ -114,7 +122,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops._sync</span><span class="w"> </span><span class="kn">import</span> <span class="n">retained</span><span class="p">,</span> <span class="n">sync</span> <span class="k">as</span> <span class="n">_sync</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops.transcripts</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClaudeCodeTranscripts</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"ROW_FIELDS"</span><span class="p">,</span> <span class="s2">"sync"</span><span class="p">,</span> <span class="s2">"ls"</span><span class="p">,</span> <span class="s2">"show"</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"ROW_FIELDS"</span><span class="p">,</span> <span class="s2">"sync"</span><span class="p">,</span> <span class="s2">"ls"</span><span class="p">,</span> <span class="s2">"show"</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">,</span> <span class="s2">"owed"</span><span class="p">]</span>
 
 <span class="c1">#: The keys every :func:`ls` row carries, whatever the digest happens to record.</span>
 <span class="n">ROW_FIELDS</span> <span class="o">=</span> <span class="p">(</span>
@@ -352,9 +360,53 @@
 
 
 
+<div class="viewcode-block" id="owed">
+<a class="viewcode-back" href="../../module_docs/openloops/tools.html#openloops.owed">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">owed</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">verify</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">owners</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">trusted_owners</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DFLT_LABEL</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_LIMIT</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DFLT_LIST_TIMEOUT</span><span class="p">,</span>
+    <span class="n">predicate_timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DFLT_PREDICATE_TIMEOUT</span><span class="p">,</span>
+    <span class="n">issues_source</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">run_predicate</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""What you still owe your agents, with each obligation re-checked against the world.</span>
+
+<span class="sd">    Lists the open `manual-task` issues across ``owners`` and evaluates the</span>
+<span class="sd">    ``**Verify:**`` predicate each one carries, reporting three states: ``open``,</span>
+<span class="sd">    ``discharged`` (the predicate returned 0 — done, but the issue is still open) and</span>
+<span class="sd">    ``unknown`` (nothing could be checked). Nothing is ever closed, relabelled or</span>
+<span class="sd">    written; see :mod:`openloops.obligations` for the trust boundary that evaluating a</span>
+<span class="sd">    predicate crosses, and ``verify=False`` for the way to read without executing.</span>
+
+<span class="sd">    The result is an envelope rather than a list, because ``listed=False`` — the query</span>
+<span class="sd">    itself failed — must not be readable as "nothing owed".</span>
+
+<span class="sd">    &gt;&gt;&gt; report = owed(issues_source=[], run_predicate=lambda command: 0)</span>
+<span class="sd">    &gt;&gt;&gt; report['listed'], report['counts']['total']</span>
+<span class="sd">    (True, 0)</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">_owed</span><span class="p">(</span>
+        <span class="n">verify</span><span class="o">=</span><span class="n">verify</span><span class="p">,</span>
+        <span class="n">owners</span><span class="o">=</span><span class="n">owners</span><span class="p">,</span>
+        <span class="n">trusted_owners</span><span class="o">=</span><span class="n">trusted_owners</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+        <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+        <span class="n">predicate_timeout</span><span class="o">=</span><span class="n">predicate_timeout</span><span class="p">,</span>
+        <span class="n">issues_source</span><span class="o">=</span><span class="n">issues_source</span><span class="p">,</span>
+        <span class="n">run_predicate</span><span class="o">=</span><span class="n">run_predicate</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
 <span class="c1">#: Single source of truth for what every surface exposes. The CLI dispatches this list;</span>
 <span class="c1">#: an MCP or HTTP adapter would reference the same names as strings.</span>
-<span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">sync</span><span class="p">,</span> <span class="n">ls</span><span class="p">,</span> <span class="n">show</span><span class="p">,</span> <span class="n">status</span><span class="p">]</span>
+<span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">sync</span><span class="p">,</span> <span class="n">ls</span><span class="p">,</span> <span class="n">show</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">owed</span><span class="p">]</span>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
