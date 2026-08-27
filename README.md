@@ -460,21 +460,28 @@ report = openloops.owed()  # open `manual-task` issues, each re-checked
 print(report["counts"])  # {'open': 2, 'discharged': 1, 'unknown': 1, ...}
 
 report = openloops.blocked()  # cross-repo blocker edges, every one resolved
-print([r["repo"] + "#" + str(r["number"])
-       for r in report["rows"] if r["state"] == "unblocked"])
+print(
+    [
+        r["repo"] + "#" + str(r["number"])
+        for r in report["rows"]
+        if r["state"] == "unblocked"
+    ]
+)
 ```
 
 `owed()` and `blocked()` return an **envelope, never a bare list** — because a caller
 has to be able to tell "nothing is owed" from "I could not find out":
 
 ```python
-{"listed": True,      # False ⇒ the listing/discovery itself failed; the counts mean nothing
- "checked": True,     # blocked() calls this "resolved"
- "error": "",
- "truncated": False,  # the result set hit its cap: the counts are a floor
- "owners": [...],
- "counts": {...},
- "rows": [...]}       # every row carries every documented key, present and empty if unset
+{
+    "listed": True,  # False ⇒ the listing/discovery itself failed; the counts mean nothing
+    "checked": True,  # blocked() calls this "resolved"
+    "error": "",
+    "truncated": False,  # the result set hit its cap: the counts are a floor
+    "owners": [...],
+    "counts": {...},
+    "rows": [...],
+}  # every row carries every documented key, present and empty if unset
 ```
 
 Check `listed` before you read `counts`. That is the whole contract.
@@ -490,18 +497,18 @@ stub wearing a keyword argument as a disguise:
 
 ```python
 openloops.sync(
-    transcript_source=my_sessions,   # any Mapping[str, Session]
-    digests_store=my_store,          # any MutableMapping[str, str]
+    transcript_source=my_sessions,  # any Mapping[str, Session]
+    digests_store=my_store,  # any MutableMapping[str, str]
 )
 
 openloops.owed(
-    issues_source=[...],             # a list of dicts, or any callable
-    run_predicate=lambda cmd: 0,     # any callable from command to exit status
+    issues_source=[...],  # a list of dicts, or any callable
+    run_predicate=lambda cmd: 0,  # any callable from command to exit status
 )
 
 openloops.blocked(
     issues_source=[...],
-    blockers_source={"acme/widget#12": [...]},   # or any callable of (repo, number)
+    blockers_source={"acme/widget#12": [...]},  # or any callable of (repo, number)
 )
 ```
 

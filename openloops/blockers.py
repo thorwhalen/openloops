@@ -426,9 +426,7 @@ def gh_blocked_by(
     rows GitHub sends, unparsed and unjudged; :func:`_verdict` is what reads a state
     out of them. An issue with no edges answers ``[]``, which is an answer.
     """
-    path = (
-        f"repos/{repo}/issues/{number}/dependencies/blocked_by?per_page={_PER_PAGE}"
-    )
+    path = f"repos/{repo}/issues/{number}/dependencies/blocked_by?per_page={_PER_PAGE}"
     return _json_list(
         _gh(["api", path, "--paginate"], timeout=timeout), what=f"gh api {path}"
     )
@@ -729,7 +727,9 @@ def blocked(
                 BlockedIssue(
                     **common,
                     state=UNKNOWN,
-                    evidence=_evidence("the blocker edges could not be read:", str(exc)),
+                    evidence=_evidence(
+                        "the blocker edges could not be read:", str(exc)
+                    ),
                 )
             )
             continue
