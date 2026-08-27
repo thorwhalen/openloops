@@ -652,8 +652,13 @@ report = openloops.owed()  # open `manual-task` issues, each re-checked
 print(report["counts"])  # {'open': 2, 'discharged': 1, 'unknown': 1, ...}
 
 report = openloops.blocked()  # cross-repo blocker edges, every one resolved
-print([r["repo"] + "#" + str(r["number"])
-       for r in report["rows"] if r["state"] == "unblocked"])
+print(
+    [
+        r["repo"] + "#" + str(r["number"])
+        for r in report["rows"]
+        if r["state"] == "unblocked"
+    ]
+)
 
 openloops.install_skills(dry_run=True)  # the plan, having touched nothing
 ```

@@ -303,7 +303,9 @@ def _install_report(plan: dict) -> str:
         "",
     ]
     for row in plan["actions"]:
-        lines.append(f"{row['action']:<9}{row['kind']:<7}{row['name']:<26}{row['reason']}")
+        lines.append(
+            f"{row['action']:<9}{row['kind']:<7}{row['name']:<26}{row['reason']}"
+        )
         lines.append(f"                  -> {row['destination']}")
     if plan["counts"]["conflict"]:
         # Nothing was touched at those destinations, and saying so is the whole point:

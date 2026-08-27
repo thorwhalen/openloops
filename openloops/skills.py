@@ -124,7 +124,11 @@ class Asset:
     def destination(self, host: Path) -> Path:
         """Where this asset goes under *host*."""
         directory = host / _HOST_SUBDIR[self.kind]
-        return directory / self.name if self.kind == "skill" else directory / f"{self.name}.md"
+        return (
+            directory / self.name
+            if self.kind == "skill"
+            else directory / f"{self.name}.md"
+        )
 
 
 def _existing(path: Path, what: str) -> Path:
@@ -173,9 +177,12 @@ def _identical(source: Path, destination: Path) -> bool:
         if not destination.is_dir():
             return False
         left = {p.relative_to(source) for p in source.rglob("*") if p.is_file()}
-        right = {p.relative_to(destination) for p in destination.rglob("*") if p.is_file()}
+        right = {
+            p.relative_to(destination) for p in destination.rglob("*") if p.is_file()
+        }
         return left == right and all(
-            (source / rel).read_bytes() == (destination / rel).read_bytes() for rel in left
+            (source / rel).read_bytes() == (destination / rel).read_bytes()
+            for rel in left
         )
     return destination.is_file() and source.read_bytes() == destination.read_bytes()
 
@@ -285,7 +292,9 @@ def install_skills(
             if linking:
                 try:
                     os.symlink(
-                        asset.source, destination, target_is_directory=asset.source.is_dir()
+                        asset.source,
+                        destination,
+                        target_is_directory=asset.source.is_dir(),
                     )
                 except OSError:
                     # The probe said yes and this said no -- a network share, a
@@ -308,7 +317,10 @@ def install_skills(
                 "reason": reason,
             }
         )
-    counts = {state: sum(row["action"] == state for row in rows) for state in ("install", "ok", "conflict")}
+    counts = {
+        state: sum(row["action"] == state for row in rows)
+        for state in ("install", "ok", "conflict")
+    }
     return {
         "target": str(host),
         "method": "symlink" if linking else "copy",

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "openloops"
-version = "0.1.6"
+version = "0.1.7"
 description = "Track the open loops between you and your coding agents: what they left open, what they need from you, and what is no longer blocked"
 readme = "README.md"
 license = "Apache-2.0"

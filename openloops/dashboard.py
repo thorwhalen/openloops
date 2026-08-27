@@ -252,10 +252,16 @@ def _ref(safe: _Sanitizer, row: Mapping[str, Any]) -> str:
     """``owner/name#number``, linked when the payload gave a URL this page will follow."""
     ref = f"{safe.text(row.get('repo'))}#{safe.text(row.get('number'))}"
     url = safe.url(row.get("url"))
-    return f'<a class="ref" href="{url}">{ref}</a>' if url else f'<span class="ref">{ref}</span>'
+    return (
+        f'<a class="ref" href="{url}">{ref}</a>'
+        if url
+        else f'<span class="ref">{ref}</span>'
+    )
 
 
-def _obligation_row(safe: _Sanitizer, row: Mapping[str, Any], *, tone: str, chip: str) -> str:
+def _obligation_row(
+    safe: _Sanitizer, row: Mapping[str, Any], *, tone: str, chip: str
+) -> str:
     days = row.get("age_days")
     days = int(days) if isinstance(days, (int, float)) else None
     predicate = safe.text(row.get("predicate")) or "(none — nothing to re-check)"
@@ -266,13 +272,15 @@ def _obligation_row(safe: _Sanitizer, row: Mapping[str, Any], *, tone: str, chip
         '<div class="body">',
         f'<p class="ask">{safe.text(row.get("title"))}</p>',
         f'<p class="where">{_ref(safe, row)} <span class="sep">·</span> opened '
-        f'{safe.text(str(row.get("created") or "")[:10]) or "?"}</p>',
+        f"{safe.text(str(row.get('created') or '')[:10]) or '?'}</p>",
         # Never abbreviated. It is the reason to believe the verdict, and a predicate
         # you cannot read is a verdict you cannot disagree with.
         f'<p class="line"><span class="tag">verify</span><code>{predicate}</code></p>',
     ]
     if evidence:
-        lines.append(f'<p class="line"><span class="tag">said</span><code>{evidence}</code></p>')
+        lines.append(
+            f'<p class="line"><span class="tag">said</span><code>{evidence}</code></p>'
+        )
     lines += ["</div>", _gauge(days, tone), "</li>"]
     return "".join(lines)
 
@@ -290,7 +298,7 @@ def _unblocked_row(safe: _Sanitizer, row: Mapping[str, Any]) -> str:
             '<div class="body">',
             f'<p class="ask">{safe.text(row.get("title"))}</p>',
             f'<p class="where">{_ref(safe, row)} <span class="sep">·</span> open '
-            f'{_figure(age)}d</p>',
+            f"{_figure(age)}d</p>",
             # The number nobody currently has, and the reason this register leads.
             f'<p class="verdict">Free to proceed for {_figure(free)} days, and nothing '
             "anywhere has said so.</p>",
@@ -320,7 +328,7 @@ def _waiting_row(safe: _Sanitizer, row: Mapping[str, Any]) -> str:
             # `owner/name#number` is as long as the repository is, and a column sized
             # for the short ones silently overlaps the title on the long ones.
             f'<p class="thin-ask">{_ref(safe, row)} <span class="sep">·</span> '
-            f'{safe.text(row.get("title"))}</p>',
+            f"{safe.text(row.get('title'))}</p>",
             f'<code class="thin-on">{" ".join(open_refs) or "(unresolved)"}</code>',
             "</li>",
         ]
@@ -331,8 +339,14 @@ def _session_row(safe: _Sanitizer, row: Mapping[str, Any], now: datetime | None)
     days = _days_between(row.get("last_turn"), now)
     low = (row.get("confidence") or "high") != "high"
     tone = "unsure" if low else "flight"
-    heading = row.get("ai_title") or row.get("title") or row.get("project") or "(untitled)"
-    where = [row.get("project"), row.get("branches"), f"{row.get('turns') or '?'} turns"]
+    heading = (
+        row.get("ai_title") or row.get("title") or row.get("project") or "(untitled)"
+    )
+    where = [
+        row.get("project"),
+        row.get("branches"),
+        f"{row.get('turns') or '?'} turns",
+    ]
     session = str(row.get("session") or "")
     return "".join(
         [
@@ -341,7 +355,9 @@ def _session_row(safe: _Sanitizer, row: Mapping[str, Any], now: datetime | None)
             '<div class="body">',
             f'<p class="ask">{safe.text(heading)}</p>',
             '<p class="where">'
-            + f' <span class="sep">·</span> '.join(safe.text(part) for part in where if part)
+            + f' <span class="sep">·</span> '.join(
+                safe.text(part) for part in where if part
+            )
             + "</p>",
             f'<p class="line"><span class="tag">read it</span><code>ol show '
             f"{safe.text(session[:8])}</code></p>",
@@ -358,13 +374,15 @@ def _session_row(safe: _Sanitizer, row: Mapping[str, Any], now: datetime | None)
     )
 
 
-def _register(*, ident: str, name: str, figure: str, tone: str, rule: str, body: str) -> str:
+def _register(
+    *, ident: str, name: str, figure: str, tone: str, rule: str, body: str
+) -> str:
     """One band: a heading, the count in the largest figure on the page, and its rule."""
     return (
         f'<section class="register register--{tone}" id="{ident}">'
         f'<div class="register-head">'
         f'<p class="figure">{figure}</p>'
-        f"<div><h2>{name}</h2><p class=\"rule\">{rule}</p></div>"
+        f'<div><h2>{name}</h2><p class="rule">{rule}</p></div>'
         f"</div>{body}</section>"
     )
 
@@ -459,7 +477,9 @@ def _unknowns(
             {
                 "kind": "obligation",
                 "title": safe.text(row.get("title")),
-                "why": safe.text(_clip(str(row.get("evidence") or "nothing could be checked"))),
+                "why": safe.text(
+                    _clip(str(row.get("evidence") or "nothing could be checked"))
+                ),
                 "note": _ref(safe, row),
                 "weight": 1,
             }
@@ -469,7 +489,9 @@ def _unknowns(
             {
                 "kind": "cross-repo",
                 "title": safe.text(row.get("title")),
-                "why": safe.text(_clip(str(row.get("evidence") or "the edges could not be read"))),
+                "why": safe.text(
+                    _clip(str(row.get("evidence") or "the edges could not be read"))
+                ),
                 "note": _ref(safe, row),
                 "weight": 1,
             }
@@ -495,7 +517,11 @@ def _unknowns(
             safe.text(row.get("ai_title") or row.get("title") or row.get("session"))
             for row in low[:MAX_NAMED_SESSIONS]
         )
-        more = f", and {len(low) - MAX_NAMED_SESSIONS} more" if len(low) > MAX_NAMED_SESSIONS else ""
+        more = (
+            f", and {len(low) - MAX_NAMED_SESSIONS} more"
+            if len(low) > MAX_NAMED_SESSIONS
+            else ""
+        )
         items.append(
             {
                 "kind": "ol ls",
@@ -615,18 +641,25 @@ def _earned(owed: Mapping[str, Any], blocked: Mapping[str, Any], sessions) -> li
     if owed.get("listed") and owed.get("checked", True):
         counts = owed.get("counts", {})
         lines.append(
-            "`ol owed` read " + _plural(counts.get("total", 0), "obligation") + " and ran "
-            + _plural(counts.get("with_predicate", 0), "predicate") + "."
+            "`ol owed` read "
+            + _plural(counts.get("total", 0), "obligation")
+            + " and ran "
+            + _plural(counts.get("with_predicate", 0), "predicate")
+            + "."
         )
     if blocked.get("listed") and blocked.get("resolved", True):
         counts = blocked.get("counts", {})
         lines.append(
-            "`ol blocked` resolved every edge on " + _plural(counts.get("total", 0), "issue")
-            + " from " + _plural(counts.get("candidates", 0), "candidate") + "."
+            "`ol blocked` resolved every edge on "
+            + _plural(counts.get("total", 0), "issue")
+            + " from "
+            + _plural(counts.get("candidates", 0), "candidate")
+            + "."
         )
     if sessions:
         lines.append(
-            "`ol ls` read " + _plural(len(sessions), "open digest")
+            "`ol ls` read "
+            + _plural(len(sessions), "open digest")
             + ", all with a stated reason."
         )
     return lines
@@ -685,8 +718,16 @@ def render_dashboard(
     counts = headline_counts(owed, blocked, sessions)
 
     parts = [
-        _masthead(safe, owed, blocked, sessions, title=title, stamp=stamp, source=source,
-                  counts=counts),
+        _masthead(
+            safe,
+            owed,
+            blocked,
+            sessions,
+            title=title,
+            stamp=stamp,
+            source=source,
+            counts=counts,
+        ),
         _needs_register(safe, owed),
         _free_register(safe, blocked),
         _flight_register(safe, sessions, now, max_sessions=max_sessions),
@@ -735,15 +776,20 @@ def _masthead(
         for name, figure, tone in tally
     )
     scope = ", ".join(safe.text(o) for o in owed.get("owners", ())) or "(none resolved)"
-    blocked_scope = ", ".join(
-        safe.text(x) for x in (blocked.get("repos") or blocked.get("owners") or ())
-    ) or "(none resolved)"
+    blocked_scope = (
+        ", ".join(
+            safe.text(x) for x in (blocked.get("repos") or blocked.get("owners") or ())
+        )
+        or "(none resolved)"
+    )
     bcounts = blocked.get("counts", {})
     ocounts = owed.get("counts", {})
     if not owed.get("listed", False):
         owed_detail = safe.text(owed.get("error") or "no reason was reported")
     elif not owed.get("checked", True):
-        owed_detail = "listed but NOT evaluated — every row carrying a predicate reads ?"
+        owed_detail = (
+            "listed but NOT evaluated — every row carrying a predicate reads ?"
+        )
     else:
         owed_detail = (
             f"{ocounts.get('with_predicate', 0)} of {ocounts.get('total', 0)} rows carried a "
@@ -777,7 +823,7 @@ def _masthead(
             "ol ls",
             "read",
             True,
-            f'{_plural(len(sessions), "open digest")}, from a local store rather than from GitHub',
+            f"{_plural(len(sessions), 'open digest')}, from a local store rather than from GitHub",
             f"source: {safe.text(source) or 'this machine'}",
         ),
     ]
@@ -812,14 +858,19 @@ def _needs_register(safe: _Sanitizer, owed: Mapping[str, Any]) -> str:
         figure = str(len(open_rows))
         body = (
             '<ol class="ledger">'
-            + "".join(_obligation_row(safe, r, tone="needs", chip="open") for r in open_rows)
+            + "".join(
+                _obligation_row(safe, r, tone="needs", chip="open") for r in open_rows
+            )
             + "</ol>"
             if open_rows
-            else _empty("No open obligation is waiting on you in the repositories that were read.")
+            else _empty(
+                "No open obligation is waiting on you in the repositories that were read."
+            )
         )
         if done_rows:
             done = "".join(
-                _obligation_row(safe, row, tone="done", chip="done") for row in done_rows
+                _obligation_row(safe, row, tone="done", chip="done")
+                for row in done_rows
             )
             body += (
                 '<p class="subhead">Discharged — the predicate passes, so there is nothing '
@@ -915,7 +966,8 @@ def _project_tally(safe: _Sanitizer, sessions: Sequence[Mapping[str, Any]]) -> s
     if not ranked:
         return ""
     cells = "".join(
-        f'<li><b>{count}</b><span>{safe.text(project)}</span></li>' for project, count in ranked
+        f"<li><b>{count}</b><span>{safe.text(project)}</span></li>"
+        for project, count in ranked
     )
     return f'<ul class="tallystrip">{cells}</ul>'
 
@@ -963,7 +1015,7 @@ def _cannot(safe: _Sanitizer, command: str, error: Any, mistaken_for: str) -> st
     """What a register prints when its envelope never listed. Never a zero."""
     return (
         f'<div class="cannot"><p class="cannot-mark">?</p><div>'
-        f"<p class=\"ask\"><code>{safe.text(command)}</code> could not read the world, so "
+        f'<p class="ask"><code>{safe.text(command)}</code> could not read the world, so '
         f"this register is unknown — not empty.</p>"
         f'<p class="why">{safe.text(error or "no reason was reported")}</p>'
         f'<p class="note">Do not read this as “{safe.text(mistaken_for)}”. '
@@ -982,7 +1034,7 @@ def _footer(safe: _Sanitizer, stamp: str) -> str:
         )
     return (
         '<footer class="colophon">'
-        f'<p>Rendered by <code>ol dashboard</code> at {safe.text(stamp)} from '
+        f"<p>Rendered by <code>ol dashboard</code> at {safe.text(stamp)} from "
         "<code>ol owed</code>, <code>ol blocked</code> and <code>ol ls</code>. "
         "Re-run it to get a newer one; there is no other way for this page to change.</p>"
         "<p>openloops never writes to GitHub. Nothing here closed, reopened, relabelled or "
