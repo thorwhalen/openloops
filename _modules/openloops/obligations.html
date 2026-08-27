@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openloops.obligations &mdash; openloops 0.1.4 documentation</title>
+  <title>openloops.obligations &mdash; openloops 0.1.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=fd825880"></script>
+      <script src="../../_static/documentation_options.js?v=59fadc99"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_classify.html">openloops._classify</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_sync.html">openloops._sync</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/blockers.html">openloops.blockers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/digest.html">openloops.digest</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/egress.html">openloops.egress</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/job.html">openloops.job</a></li>
@@ -522,8 +523,10 @@
 <span class="n">_CODE_SPAN</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(?P&lt;ticks&gt;`+)(?P&lt;code&gt;.+?)(?P=ticks)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
 
 <span class="c1">#: A fenced block, ``` or ~~~, however many fence characters it opened with.</span>
-<span class="n">_FENCED_BLOCK</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"^[ \t]*(?P&lt;fence&gt;```+|~~~+).*?^[ \t]*(?P=fence)[ \t]*$"</span><span class="p">,</span>
-                           <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+<span class="n">_FENCED_BLOCK</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s2">"^[ \t]*(?P&lt;fence&gt;```+|~~~+).*?^[ \t]*(?P=fence)[ \t]*$"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span>
+<span class="p">)</span>
+
 
 <span class="c1">#: Text the capture skill's own documentation of the field is quoted in. An agent that</span>
 <span class="c1">#: pastes the spec into its `&lt;details&gt;What I found&lt;/details&gt;` must not have the spec's</span>
@@ -555,7 +558,13 @@
 <span class="c1">#: and prose containing a code span (`gh`, `true`) must never be executed -- `gh` with no</span>
 <span class="c1">#: arguments exits 0, which would mark a live obligation DONE. That is the phantom</span>
 <span class="c1">#: discharge this whole module exists to prevent, so it is checked first and by prefix.</span>
-<span class="n">_NO_PREDICATE_PREFIXES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"none possible"</span><span class="p">,</span> <span class="s2">"none"</span><span class="p">,</span> <span class="s2">"n/a"</span><span class="p">,</span> <span class="s2">"no predicate"</span><span class="p">,</span> <span class="s2">"not possible"</span><span class="p">)</span>
+<span class="n">_NO_PREDICATE_PREFIXES</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"none possible"</span><span class="p">,</span>
+    <span class="s2">"none"</span><span class="p">,</span>
+    <span class="s2">"n/a"</span><span class="p">,</span>
+    <span class="s2">"no predicate"</span><span class="p">,</span>
+    <span class="s2">"not possible"</span><span class="p">,</span>
+<span class="p">)</span>
 
 
 <div class="viewcode-block" id="parse_verify">

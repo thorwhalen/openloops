@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openloops.tools &mdash; openloops 0.1.4 documentation</title>
+  <title>openloops.tools &mdash; openloops 0.1.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=fd825880"></script>
+      <script src="../../_static/documentation_options.js?v=59fadc99"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -54,6 +54,7 @@
 <li class="toctree-l1"><a class="reference internal" href="_classify.html">openloops._classify</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_sync.html">openloops._sync</a></li>
 <li class="toctree-l1"><a class="reference internal" href="base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="blockers.html">openloops.blockers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="digest.html">openloops.digest</a></li>
 <li class="toctree-l1"><a class="reference internal" href="egress.html">openloops.egress</a></li>
 <li class="toctree-l1"><a class="reference internal" href="job.html">openloops.job</a></li>
@@ -61,6 +62,7 @@
 <li class="toctree-l1"><a class="reference internal" href="store.html">openloops.store</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">openloops.tools</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.tools.ROW_FIELDS"><code class="docutils literal notranslate"><span class="pre">ROW_FIELDS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.tools.blocked"><code class="docutils literal notranslate"><span class="pre">blocked()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.tools.ls"><code class="docutils literal notranslate"><span class="pre">ls()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.tools.owed"><code class="docutils literal notranslate"><span class="pre">owed()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.tools.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
@@ -109,6 +111,27 @@ two surfaces is a sign that there are two implementations, and there is one here
 <dt class="sig sig-object py" id="openloops.tools.ROW_FIELDS">
 <span class="sig-prename descclassname"><span class="pre">openloops.tools.</span></span><span class="sig-name descname"><span class="pre">ROW_FIELDS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('session',</span> <span class="pre">'source',</span> <span class="pre">'state',</span> <span class="pre">'title',</span> <span class="pre">'ai_title',</span> <span class="pre">'project',</span> <span class="pre">'branches',</span> <span class="pre">'started',</span> <span class="pre">'ended',</span> <span class="pre">'last_turn',</span> <span class="pre">'turns',</span> <span class="pre">'model',</span> <span class="pre">'confidence',</span> <span class="pre">'verified')</span></span><a class="headerlink" href="#openloops.tools.ROW_FIELDS" title="Link to this definition"></a></dt>
 <dd><p>The keys every <a class="reference internal" href="#openloops.tools.ls" title="openloops.tools.ls"><code class="xref py py-func docutils literal notranslate"><span class="pre">ls()</span></code></a> row carries, whatever the digest happens to record.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.tools.blocked">
+<span class="sig-prename descclassname"><span class="pre">openloops.tools.</span></span><span class="sig-name descname"><span class="pre">blocked</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">owners</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'is:blocked'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issues_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blockers_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/openloops/tools.html#blocked"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.tools.blocked" title="Link to this definition"></a></dt>
+<dd><p>What your repositories are waiting on — and what is no longer waiting.</p>
+<p>The sibling of <a class="reference internal" href="#openloops.tools.owed" title="openloops.tools.owed"><code class="xref py py-func docutils literal notranslate"><span class="pre">owed()</span></code></a>: an obligation points at a person, a blocker edge
+points at another repository, and both are commitments nothing is watching. Lists
+the open issues carrying a <code class="docutils literal notranslate"><span class="pre">blocked_by</span></code> dependency across <code class="docutils literal notranslate"><span class="pre">owners</span></code> (or exactly
+the <code class="docutils literal notranslate"><span class="pre">repos</span></code> you name), resolves every edge, and reports three states:
+<code class="docutils literal notranslate"><span class="pre">unblocked</span></code> (every blocker closed — the work is free and nobody has been told),
+<code class="docutils literal notranslate"><span class="pre">blocked</span></code> (naming the foreign repository it waits on) and <code class="docutils literal notranslate"><span class="pre">unknown</span></code> (nothing
+could be resolved). Nothing is ever closed, relabelled or written; see
+<a class="reference internal" href="blockers.html#module-openloops.blockers" title="openloops.blockers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">openloops.blockers</span></code></a> for what discovery costs and what it is measured to miss.</p>
+<p>The result is an envelope rather than a list, because <code class="docutils literal notranslate"><span class="pre">listed=False</span></code> — discovery
+itself failed — must not be readable as “nothing is waiting”.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">report</span> <span class="o">=</span> <span class="n">blocked</span><span class="p">(</span><span class="n">issues_source</span><span class="o">=</span><span class="p">[],</span> <span class="n">blockers_source</span><span class="o">=</span><span class="p">{})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">report</span><span class="p">[</span><span class="s1">'listed'</span><span class="p">],</span> <span class="n">report</span><span class="p">[</span><span class="s1">'counts'</span><span class="p">][</span><span class="s1">'total'</span><span class="p">]</span>
+<span class="go">(True, 0)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">

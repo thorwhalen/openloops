@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openloops.__main__ &mdash; openloops 0.1.4 documentation</title>
+  <title>openloops.__main__ &mdash; openloops 0.1.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=fd825880"></script>
+      <script src="../../_static/documentation_options.js?v=59fadc99"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_classify.html">openloops._classify</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_sync.html">openloops._sync</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/blockers.html">openloops.blockers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/digest.html">openloops.digest</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/egress.html">openloops.egress</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/job.html">openloops.job</a></li>
@@ -106,6 +107,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops</span><span class="w"> </span><span class="kn">import</span> <span class="n">job</span> <span class="k">as</span> <span class="n">_job</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops</span><span class="w"> </span><span class="kn">import</span> <span class="n">tools</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.blockers</span><span class="w"> </span><span class="kn">import</span> <span class="n">DFLT_CANDIDATE_LIMIT</span><span class="p">,</span> <span class="n">UNBLOCKED</span><span class="p">,</span> <span class="n">UNKNOWN</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"main"</span><span class="p">]</span>
 
@@ -295,6 +297,86 @@
     <span class="p">)</span>
 
 
+<span class="c1">#: How the cross-repo states print. ASCII again, and the words are the actions: a</span>
+<span class="c1">#: `ready` row is work you can start now, a `waits` row is work you cannot.</span>
+<span class="n">_BLOCKED_MARKS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"unblocked"</span><span class="p">:</span> <span class="s2">"ready"</span><span class="p">,</span> <span class="s2">"blocked"</span><span class="p">:</span> <span class="s2">"waits"</span><span class="p">,</span> <span class="s2">"unknown"</span><span class="p">:</span> <span class="s2">"?"</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_blocked_report</span><span class="p">(</span><span class="n">report</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Render :func:`openloops.tools.blocked`. Every verdict prints its own edges."""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">report</span><span class="p">[</span><span class="s2">"listed"</span><span class="p">]:</span>
+        <span class="c1"># Same rule as `owed`, for the same reason: a clean board that was never read</span>
+        <span class="c1"># is worse than no board at all.</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"blocked ?  could not check - </span><span class="si">{</span><span class="n">report</span><span class="p">[</span><span class="s1">'error'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+
+    <span class="n">counts</span> <span class="o">=</span> <span class="n">report</span><span class="p">[</span><span class="s2">"counts"</span><span class="p">]</span>
+    <span class="n">headline</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">counts</span><span class="p">[</span><span class="s1">'unblocked'</span><span class="p">]</span><span class="si">}</span><span class="s2"> unblocked, </span><span class="si">{</span><span class="n">counts</span><span class="p">[</span><span class="s1">'blocked'</span><span class="p">]</span><span class="si">}</span><span class="s2"> blocked, "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">counts</span><span class="p">[</span><span class="s1">'unknown'</span><span class="p">]</span><span class="si">}</span><span class="s2"> unknown"</span>
+    <span class="p">)</span>
+    <span class="n">scope</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">report</span><span class="p">[</span><span class="s2">"repos"</span><span class="p">]</span> <span class="ow">or</span> <span class="n">report</span><span class="p">[</span><span class="s2">"owners"</span><span class="p">])</span> <span class="ow">or</span> <span class="s2">"(none)"</span>
+    <span class="n">notes</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"scope: </span><span class="si">{</span><span class="n">scope</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"candidates: </span><span class="si">{</span><span class="n">counts</span><span class="p">[</span><span class="s1">'candidates'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">counts</span><span class="p">[</span><span class="s2">"without_edges"</span><span class="p">]:</span>
+        <span class="c1"># Search over-reports; saying by how much is what keeps discovery honest.</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">counts</span><span class="p">[</span><span class="s1">'without_edges'</span><span class="p">]</span><span class="si">}</span><span class="s2"> had no dependency edge at all"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">report</span><span class="p">[</span><span class="s2">"resolved"</span><span class="p">]:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"NOT resolved (--no-resolve): every row reads ?"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">report</span><span class="p">[</span><span class="s2">"truncated"</span><span class="p">]:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"TRUNCATED: the candidate list hit its cap, so this is a floor"</span><span class="p">)</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">headline</span><span class="p">,</span> <span class="s2">"  "</span> <span class="o">+</span> <span class="s2">"  |  "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">notes</span><span class="p">),</span> <span class="s2">""</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">report</span><span class="p">[</span><span class="s2">"rows"</span><span class="p">]:</span>
+        <span class="n">mark</span> <span class="o">=</span> <span class="n">_BLOCKED_MARKS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">"state"</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s2">"state"</span><span class="p">])</span>
+        <span class="n">where</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">'repo'</span><span class="p">]</span><span class="si">}</span><span class="s2">#</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">'number'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">mark</span><span class="si">:</span><span class="s2">&lt;6</span><span class="si">}{</span><span class="n">row</span><span class="p">[</span><span class="s1">'age_days'</span><span class="p">]</span><span class="si">:</span><span class="s2">&gt;4</span><span class="si">}</span><span class="s2">d  </span><span class="si">{</span><span class="n">where</span><span class="si">:</span><span class="s2">&lt;28</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">'title'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="c1"># The edges are never abbreviated. They are the reason to believe the verdict,</span>
+        <span class="c1"># and the foreign repository they name is the answer to "waiting on whom".</span>
+        <span class="n">refs</span> <span class="o">=</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">blocker</span><span class="p">[</span><span class="s2">"ref"</span><span class="p">]</span> <span class="k">for</span> <span class="n">blocker</span> <span class="ow">in</span> <span class="n">row</span><span class="p">[</span><span class="s2">"blockers"</span><span class="p">])</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"        blocked by: </span><span class="si">{</span><span class="n">refs</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'(unresolved)'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s2">"state"</span><span class="p">]</span> <span class="o">==</span> <span class="n">UNBLOCKED</span><span class="p">:</span>
+            <span class="c1"># The number nobody currently has: how long the work has been free.</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"                    -&gt; free for </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">'unblocked_days'</span><span class="p">]</span><span class="si">}</span><span class="s2">d, "</span>
+                <span class="s2">"and nothing has said so"</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">row</span><span class="p">[</span><span class="s2">"state"</span><span class="p">]</span> <span class="o">==</span> <span class="n">UNKNOWN</span> <span class="ow">and</span> <span class="n">row</span><span class="p">[</span><span class="s2">"evidence"</span><span class="p">]:</span>
+            <span class="c1"># Why it could not be read. For a `waits` row the line above already</span>
+            <span class="c1"># carries every blocker and its state, and repeating it is noise.</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"                    -&gt; </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">'evidence'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">report</span><span class="p">[</span><span class="s2">"rows"</span><span class="p">]:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"(nothing is waiting on another repo)"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">blocked</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_CANDIDATE_LIMIT</span><span class="p">,</span>
+    <span class="n">no_resolve</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">owners</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">repos</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">"""What your repos are waiting on, and what stopped waiting without telling anyone.</span>
+
+<span class="sd">    The sibling of `ol owed`: that one points at you, this one points at another repo.</span>
+<span class="sd">    Lists the open issues carrying a `blocked_by` dependency and resolves every edge.</span>
+<span class="sd">    `ready` means every blocker is closed — the work is free and nobody was told, which</span>
+<span class="sd">    is the row worth reading. `waits` names the foreign repo it is still waiting on.</span>
+<span class="sd">    `?` means nothing could be resolved, which is never the same as nothing waiting.</span>
+
+<span class="sd">    Resolving costs one API call per candidate, so `--limit` bounds it and a saturated</span>
+<span class="sd">    list says so. `--repos owner/name,owner/other` enumerates those repos exactly</span>
+<span class="sd">    instead of trusting the search index. `--no-resolve` spends nothing and reads `?`.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">_blocked_report</span><span class="p">(</span>
+        <span class="n">tools</span><span class="o">.</span><span class="n">blocked</span><span class="p">(</span>
+            <span class="n">resolve</span><span class="o">=</span><span class="ow">not</span> <span class="n">no_resolve</span><span class="p">,</span>
+            <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+            <span class="n">owners</span><span class="o">=</span><span class="p">[</span><span class="n">o</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="p">(</span><span class="n">owners</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">","</span><span class="p">,</span> <span class="s2">" "</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">repos</span><span class="o">=</span><span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="p">(</span><span class="n">repos</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">","</span><span class="p">,</span> <span class="s2">" "</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()],</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">install_job</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">_job</span><span class="o">.</span><span class="n">DFLT_INTERVAL</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Install the periodic sync job (macOS launchd). Re-run to change the interval."""</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">_job</span><span class="o">.</span><span class="n">install</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">)</span>
@@ -329,6 +411,7 @@
 <span class="n">_commands</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">brief</span><span class="p">,</span>
     <span class="n">owed</span><span class="p">,</span>
+    <span class="n">blocked</span><span class="p">,</span>
     <span class="n">sync</span><span class="p">,</span>
     <span class="n">ls</span><span class="p">,</span>
     <span class="n">show</span><span class="p">,</span>

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; openloops 0.1.4 documentation</title>
+  <title>Index &mdash; openloops 0.1.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=fd825880"></script>
+      <script src="_static/documentation_options.js?v=59fadc99"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/_classify.html">openloops._classify</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/_sync.html">openloops._sync</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/blockers.html">openloops.blockers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/digest.html">openloops.digest</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/egress.html">openloops.egress</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/job.html">openloops.job</a></li>
@@ -88,6 +89,7 @@
 
 <div class="genindex-jumpbox">
  <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
@@ -122,6 +124,14 @@
 </li>
         <li><a href="module_docs/openloops/base.html#openloops.base.Verdict.as_dict">(openloops.base.Verdict method)</a>
 </li>
+        <li><a href="module_docs/openloops.html#openloops.BlockedIssue.as_dict">(openloops.BlockedIssue method)</a>
+</li>
+        <li><a href="module_docs/openloops.html#openloops.Blocker.as_dict">(openloops.Blocker method)</a>
+</li>
+        <li><a href="module_docs/openloops/blockers.html#openloops.blockers.BlockedIssue.as_dict">(openloops.blockers.BlockedIssue method)</a>
+</li>
+        <li><a href="module_docs/openloops/blockers.html#openloops.blockers.Blocker.as_dict">(openloops.blockers.Blocker method)</a>
+</li>
         <li><a href="module_docs/openloops.html#openloops.Digest.as_dict">(openloops.Digest method)</a>
 </li>
         <li><a href="module_docs/openloops.html#openloops.Locator.as_dict">(openloops.Locator method)</a>
@@ -154,6 +164,40 @@
   </ul></td>
 </tr></table>
 
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="module_docs/openloops/blockers.html#openloops.blockers.BLOCKED">BLOCKED (in module openloops.blockers)</a>
+</li>
+      <li><a href="module_docs/openloops.html#openloops.blocked">blocked() (in module openloops)</a>
+
+      <ul>
+        <li><a href="module_docs/openloops/blockers.html#openloops.blockers.blocked">(in module openloops.blockers)</a>
+</li>
+        <li><a href="module_docs/openloops/tools.html#openloops.tools.blocked">(in module openloops.tools)</a>
+</li>
+      </ul></li>
+      <li><a href="module_docs/openloops/blockers.html#openloops.blockers.BLOCKED_FIELDS">BLOCKED_FIELDS (in module openloops.blockers)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="module_docs/openloops.html#openloops.BlockedIssue">BlockedIssue (class in openloops)</a>
+
+      <ul>
+        <li><a href="module_docs/openloops/blockers.html#openloops.blockers.BlockedIssue">(class in openloops.blockers)</a>
+</li>
+      </ul></li>
+      <li><a href="module_docs/openloops.html#openloops.Blocker">Blocker (class in openloops)</a>
+
+      <ul>
+        <li><a href="module_docs/openloops/blockers.html#openloops.blockers.Blocker">(class in openloops.blockers)</a>
+</li>
+      </ul></li>
+      <li><a href="module_docs/openloops/blockers.html#openloops.blockers.BLOCKER_STATES">BLOCKER_STATES (in module openloops.blockers)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -179,10 +223,10 @@
         <li><a href="module_docs/openloops/transcripts.html#openloops.transcripts.ClaudeCodeTranscripts">(class in openloops.transcripts)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/openloops/_classify.html#openloops._classify.CLOSE_CUES">CLOSE_CUES (in module openloops._classify)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/openloops/_classify.html#openloops._classify.CLOSING_CHARS">CLOSING_CHARS (in module openloops._classify)</a>
 </li>
       <li><a href="module_docs/openloops/base.html#openloops.base.Session.compaction">compaction (openloops.base.Session attribute)</a>
@@ -203,6 +247,12 @@
 </li>
       <li><a href="module_docs/openloops.html#openloops.CredentialFound">CredentialFound</a>, <a href="module_docs/openloops/egress.html#openloops.egress.CredentialFound">[1]</a>
 </li>
+      <li><a href="module_docs/openloops.html#openloops.BlockedIssue.cross_repo">cross_repo (openloops.BlockedIssue attribute)</a>
+
+      <ul>
+        <li><a href="module_docs/openloops/blockers.html#openloops.blockers.BlockedIssue.cross_repo">(openloops.blockers.BlockedIssue attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -295,15 +345,27 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="module_docs/openloops.html#openloops.gh_blocked_by">gh_blocked_by() (in module openloops)</a>
+
+      <ul>
+        <li><a href="module_docs/openloops/blockers.html#openloops.blockers.gh_blocked_by">(in module openloops.blockers)</a>
+</li>
+      </ul></li>
+      <li><a href="module_docs/openloops.html#openloops.gh_blocked_candidates">gh_blocked_candidates() (in module openloops)</a>
+
+      <ul>
+        <li><a href="module_docs/openloops/blockers.html#openloops.blockers.gh_blocked_candidates">(in module openloops.blockers)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="module_docs/openloops.html#openloops.gh_issues">gh_issues() (in module openloops)</a>
 
       <ul>
         <li><a href="module_docs/openloops/obligations.html#openloops.obligations.gh_issues">(in module openloops.obligations)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="module_docs/openloops.html#openloops.GhUnavailable">GhUnavailable</a>, <a href="module_docs/openloops/obligations.html#openloops.obligations.GhUnavailable">[1]</a>
+      <li><a href="module_docs/openloops.html#openloops.GhUnavailable">GhUnavailable</a>, <a href="module_docs/openloops/blockers.html#openloops.blockers.GhUnavailable">[1]</a>, <a href="module_docs/openloops/obligations.html#openloops.obligations.GhUnavailable">[2]</a>
 </li>
       <li><a href="module_docs/openloops/base.html#openloops.base.Session.git_branch">git_branch (openloops.base.Session property)</a>
 
@@ -395,6 +457,8 @@
 </li>
         <li><a href="module_docs/openloops/base.html#module-openloops.base">openloops.base</a>
 </li>
+        <li><a href="module_docs/openloops/blockers.html#module-openloops.blockers">openloops.blockers</a>
+</li>
         <li><a href="module_docs/openloops/digest.html#module-openloops.digest">openloops.digest</a>
 </li>
         <li><a href="module_docs/openloops/egress.html#module-openloops.egress">openloops.egress</a>
@@ -464,14 +528,21 @@
 </li>
       </ul></li>
       <li>
+    openloops.blockers
+
+      <ul>
+        <li><a href="module_docs/openloops/blockers.html#module-openloops.blockers">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
     openloops.digest
 
       <ul>
         <li><a href="module_docs/openloops/digest.html#module-openloops.digest">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     openloops.egress
 
@@ -570,16 +641,22 @@
         <li><a href="module_docs/openloops.html#openloops.Session.recap">(openloops.Session attribute)</a>
 </li>
       </ul></li>
+      <li><a href="module_docs/openloops.html#openloops.Blocker.ref">ref (openloops.Blocker property)</a>
+
+      <ul>
+        <li><a href="module_docs/openloops/blockers.html#openloops.blockers.Blocker.ref">(openloops.blockers.Blocker property)</a>
+</li>
+      </ul></li>
       <li><a href="module_docs/openloops.html#openloops.render">render() (in module openloops)</a>
 
       <ul>
         <li><a href="module_docs/openloops/digest.html#openloops.digest.render">(in module openloops.digest)</a>
 </li>
       </ul></li>
-      <li><a href="module_docs/openloops.html#openloops.retained">retained() (in module openloops)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="module_docs/openloops.html#openloops.retained">retained() (in module openloops)</a>
+</li>
       <li><a href="module_docs/openloops.html#openloops.ClaudeCodeTranscripts.revision">revision() (openloops.ClaudeCodeTranscripts method)</a>
 
       <ul>
@@ -672,10 +749,18 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="module_docs/openloops/job.html#openloops.job.uninstall">uninstall() (in module openloops.job)</a>
+      <li><a href="module_docs/openloops/blockers.html#openloops.blockers.UNBLOCKED">UNBLOCKED (in module openloops.blockers)</a>
 </li>
+      <li><a href="module_docs/openloops.html#openloops.BlockedIssue.unblocked_days">unblocked_days (openloops.BlockedIssue attribute)</a>
+
+      <ul>
+        <li><a href="module_docs/openloops/blockers.html#openloops.blockers.BlockedIssue.unblocked_days">(openloops.blockers.BlockedIssue attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="module_docs/openloops/job.html#openloops.job.uninstall">uninstall() (in module openloops.job)</a>
+</li>
       <li><a href="module_docs/openloops/obligations.html#openloops.obligations.UNKNOWN">UNKNOWN (in module openloops.obligations)</a>
 </li>
       <li><a href="module_docs/openloops/store.html#openloops.store.Utf8TextFiles">Utf8TextFiles (class in openloops.store)</a>

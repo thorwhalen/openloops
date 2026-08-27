@@ -7,6 +7,7 @@
    module_docs/openloops/_classify
    module_docs/openloops/_sync
    module_docs/openloops/base
+   module_docs/openloops/blockers
    module_docs/openloops/digest
    module_docs/openloops/egress
    module_docs/openloops/job

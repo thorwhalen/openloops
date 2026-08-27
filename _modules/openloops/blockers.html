@@ -1,0 +1,927 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openloops.blockers &mdash; openloops 0.1.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=59fadc99"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            openloops
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops.html">openloops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/__main__.html">openloops.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_classify.html">openloops._classify</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/_sync.html">openloops._sync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/blockers.html">openloops.blockers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/digest.html">openloops.digest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/egress.html">openloops.egress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/job.html">openloops.job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/obligations.html">openloops.obligations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/store.html">openloops.store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/tools.html">openloops.tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/openloops/transcripts.html">openloops.transcripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">openloops</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">openloops.blockers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openloops.blockers</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""The other kind of open loop: the one that points at a repository, not at a person.</span>
+
+<span class="sd">An agent working in repo X finds that the real fix belongs in repo Y. It files in Y,</span>
+<span class="sd">writes a workaround in X, and moves on. Y gets fixed. **X is never told.** Nobody was</span>
+<span class="sd">blocking, nothing waited on a human, so the loop is invisible to :func:`openloops.owed`</span>
+<span class="sd">— and the workaround in X quietly becomes architecture, noticeable months later only</span>
+<span class="sd">when somebody asks why the code looks like that.</span>
+
+<span class="sd">GitHub already models the edge, and it is already cross-repo: the</span>
+<span class="sd">``dependencies/blocked_by`` collection on an issue answers with each blocker's own</span>
+<span class="sd">repository, number and state. The representation costs nothing and exists today.</span>
+<span class="sd">**What is missing is the harvest** — nothing notices when a blocker is resolved,</span>
+<span class="sd">because the edge is queryable, not eventful. Closing an issue in Y emits no event that</span>
+<span class="sd">anything in X is listening to, exactly as setting a secret emits none that</span>
+<span class="sd">:mod:`openloops.obligations` could hear. This module is that harvest and nothing else.</span>
+
+<span class="sd">:func:`blocked` lists the open issues across a fleet that carry a ``blocked_by`` edge,</span>
+<span class="sd">resolves every edge, and reports **three** states — never two:</span>
+
+<span class="sd">===============  ==============================================================</span>
+<span class="sd">``unblocked``    every blocker is closed. *This is the row that matters*: the work</span>
+<span class="sd">                 can proceed and nobody has been told. It sorts first, and it</span>
+<span class="sd">                 carries ``unblocked_days`` — how long it has been free.</span>
+<span class="sd">``blocked``      at least one blocker is still open. The row names which, with the</span>
+<span class="sd">                 foreign repository, because "who am I waiting on" is the second</span>
+<span class="sd">                 question a reader has.</span>
+<span class="sd">``unknown``      the edges could not be resolved. Displayed as ``?``.</span>
+<span class="sd">===============  ==============================================================</span>
+
+<span class="sd">``?`` is not a rounding error, it is the whole point. A run that could not reach the</span>
+<span class="sd">dependency graph must not report a clean board, so nothing here is allowed to collapse</span>
+<span class="sd">``unknown`` into ``unblocked`` or into ``blocked``.</span>
+
+<span class="sd">**Nothing here mutates anything.** An ``unblocked`` row is a finding, not an</span>
+<span class="sd">instruction: the workaround in X may still be the right code, and only a human knows.</span>
+<span class="sd">You are shown the edge, the blocker's state and the date it closed, and you decide.</span>
+
+<span class="sd">Discovery is a candidate list, not an answer</span>
+<span class="sd">--------------------------------------------</span>
+
+<span class="sd">Finding the blocked issues in the first place has two implementations here, and which</span>
+<span class="sd">runs is decided by whether ``repos=`` is given.</span>
+
+<span class="sd">**Across a fleet** (``owners=``, the default): one ``gh search issues`` call carrying</span>
+<span class="sd">GitHub's own ``is:blocked`` qualifier. One request answers for every repository, which</span>
+<span class="sd">is what makes this cheap enough to run at the start of a session. But the qualifier is</span>
+<span class="sd">a *search index*, and a search index is not the dependency graph. Measured on one real</span>
+<span class="sd">fleet on 2026-08-27, scoped to three owners: ``is:blocked`` returned 15 open issues, of</span>
+<span class="sd">which **10 carried a ``blocked_by`` edge and 5 carried no dependency edge of any kind**</span>
+<span class="sd">— not a stale edge, and four of the five carry no sub-issue relation either (the fifth, checked, has two sub-issues, which is a correlation rather than an explanation, since its parent has no dependency edges), simply none. Recall</span>
+<span class="sd">was perfect on that fleet: all 10 were found, checked against a full per-repository</span>
+<span class="sd">enumeration of 821 open issues across 148 repositories. Precision was 10/15.</span>
+
+<span class="sd">So a candidate is a *candidate*. Every one is re-resolved against</span>
+<span class="sd">``dependencies/blocked_by``, which is the graph rather than an index of it, and one</span>
+<span class="sd">with no edge is dropped and counted as ``without_edges`` — visible in the envelope and</span>
+<span class="sd">printed by the CLI, because a discovery step that quietly disagrees with reality is the</span>
+<span class="sd">same class of defect as a count that cannot say ``?``. The recall figure is one</span>
+<span class="sd">measurement on one fleet on one day and nothing here treats it as a guarantee, which</span>
+<span class="sd">is what the second implementation is for.</span>
+
+<span class="sd">**Per repository** (``repos=``): one paginated REST listing per repository, filtered on</span>
+<span class="sd">the ``issue_dependencies_summary`` GitHub already returns on every row of it — its</span>
+<span class="sd">``blocked_by`` count is the blockers still open and ``total_blocked_by`` is all of</span>
+<span class="sd">them. This reads the dependency counts themselves rather than an index of them, so it</span>
+<span class="sd">cannot over-report and cannot miss; it is the per-repo enumeration ADR-005</span>
+<span class="sd">``github-authoritative`` requires of anything that must not lose a row, since the</span>
+<span class="sd">search API is hard-capped at 1000 results. It costs one request per hundred open</span>
+<span class="sd">issues in each repository you name, so it is the audit, not the daily command.</span>
+
+<span class="sd">The N+1, and what bounds it</span>
+<span class="sd">---------------------------</span>
+
+<span class="sd">Resolving edges is **one API call per candidate** — there is no batch form. ``limit=``</span>
+<span class="sd">is that bound and it defaults to :data:`DFLT_CANDIDATE_LIMIT`; one more than it is</span>
+<span class="sd">requested, so a candidate list that saturates its own cap comes back ``truncated:</span>
+<span class="sd">True`` and every surface says so. When the bound is hit the count is a **floor**, never</span>
+<span class="sd">a total: rows past the cap are not resolved, not guessed at, and not counted. At the</span>
+<span class="sd">default that is at most 51 requests against a 5000/hour core limit, which per ADR-005</span>
+<span class="sd">is read from each response's own ``X-Ratelimit-*`` headers rather than from the</span>
+<span class="sd">rate-limit endpoint — a claim this module keeps by never asking for the number at all.</span>
+
+<span class="sd">**Kill criterion** (this ships on an argument, so it names in advance what would retire</span>
+<span class="sd">it): if, ninety days after this ships, ``counts['unblocked']`` has never once been</span>
+<span class="sd">non-zero on a real run, delete it. Its entire reason to exist over ``gh search issues</span>
+<span class="sd">-- 'is:blocked'`` is finding the row that became free while nobody watched; with no</span>
+<span class="sd">such row it is a slower alias that draws a table. Removal is one command — delete this</span>
+<span class="sd">module and ``tests/test_blockers.py``, and drop ``blocked`` from</span>
+<span class="sd">``openloops.tools._dispatch_funcs``, from ``openloops.__main__._commands`` and from</span>
+<span class="sd">``openloops.__init__``. Nothing imports it, nothing persists, and no other module</span>
+<span class="sd">changes.</span>
+
+<span class="sd">**What this is not.** It is a *reader*, like everything else here. No store, no schema,</span>
+<span class="sd">no history, no event log, no local copy of the dependency graph: the edge on GitHub</span>
+<span class="sd">**is** the record. Deleting this module loses no data.</span>
+
+<span class="sd">    &gt;&gt;&gt; from datetime import datetime, timezone</span>
+<span class="sd">    &gt;&gt;&gt; candidates = [</span>
+<span class="sd">    ...     {'number': 12, 'title': 'Drop the workaround once the engine lands',</span>
+<span class="sd">    ...      'url': 'https://github.com/acme/widget/issues/12',</span>
+<span class="sd">    ...      'createdAt': '2026-07-01T00:00:00Z',</span>
+<span class="sd">    ...      'repository': {'nameWithOwner': 'acme/widget'}},</span>
+<span class="sd">    ...     {'number': 13, 'title': 'Waiting on the parser rewrite',</span>
+<span class="sd">    ...      'url': 'https://github.com/acme/widget/issues/13',</span>
+<span class="sd">    ...      'createdAt': '2026-08-01T00:00:00Z',</span>
+<span class="sd">    ...      'repository': {'nameWithOwner': 'acme/widget'}},</span>
+<span class="sd">    ... ]</span>
+<span class="sd">    &gt;&gt;&gt; edges = {</span>
+<span class="sd">    ...     'acme/widget#12': [{'number': 15, 'state': 'closed',</span>
+<span class="sd">    ...                         'closed_at': '2026-08-20T00:00:00Z',</span>
+<span class="sd">    ...                         'repository': {'full_name': 'acme/engine'}}],</span>
+<span class="sd">    ...     'acme/widget#13': [{'number': 7, 'state': 'open',</span>
+<span class="sd">    ...                         'repository': {'full_name': 'acme/parser'}}],</span>
+<span class="sd">    ... }</span>
+<span class="sd">    &gt;&gt;&gt; report = blocked(                    # a dict and a dict: no gh, no network</span>
+<span class="sd">    ...     issues_source=candidates,</span>
+<span class="sd">    ...     blockers_source=edges,</span>
+<span class="sd">    ...     now=datetime(2026, 8, 27, tzinfo=timezone.utc),</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; report['counts']['unblocked'], report['counts']['blocked']</span>
+<span class="sd">    (1, 1)</span>
+<span class="sd">    &gt;&gt;&gt; for row in report['rows']:</span>
+<span class="sd">    ...     print(row['state'], f"{row['repo']}#{row['number']}",</span>
+<span class="sd">    ...           ' '.join(b['ref'] for b in row['blockers']))</span>
+<span class="sd">    unblocked acme/widget#12 acme/engine#15 [closed]</span>
+<span class="sd">    blocked acme/widget#13 acme/parser#7 [open]</span>
+
+<span class="sd">The unblocked row says how long it has been free — the number nobody currently has:</span>
+
+<span class="sd">    &gt;&gt;&gt; report['rows'][0]['unblocked_days']</span>
+<span class="sd">    7</span>
+
+<span class="sd">A candidate the dependency graph does not agree with is dropped, and the disagreement</span>
+<span class="sd">is counted rather than hidden:</span>
+
+<span class="sd">    &gt;&gt;&gt; quiet = blocked(issues_source=candidates, blockers_source={},</span>
+<span class="sd">    ...                 now=datetime(2026, 8, 27, tzinfo=timezone.utc))</span>
+<span class="sd">    &gt;&gt;&gt; quiet['counts']['without_edges'], quiet['counts']['total']</span>
+<span class="sd">    (2, 0)</span>
+
+<span class="sd">A run that could not resolve is never a clean board:</span>
+
+<span class="sd">    &gt;&gt;&gt; def unreachable(repo, number):</span>
+<span class="sd">    ...     raise GhUnavailable('gh: not logged in')</span>
+<span class="sd">    &gt;&gt;&gt; dark = blocked(issues_source=candidates, blockers_source=unreachable,</span>
+<span class="sd">    ...                now=datetime(2026, 8, 27, tzinfo=timezone.utc))</span>
+<span class="sd">    &gt;&gt;&gt; dark['counts']['unknown'], dark['counts']['unblocked']</span>
+<span class="sd">    (2, 0)</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">asdict</span><span class="p">,</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">fields</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="c1"># One `gh` shell-out, one owner-resolution rule and one age calculation exist in this</span>
+<span class="c1"># package, and they live in `obligations` because that is where they were first needed.</span>
+<span class="c1"># A second `_gh` would be a defect (ADR-007 mandates exactly one), and a second owner</span>
+<span class="c1"># rule would let two commands answer about different fleets without saying so. If a</span>
+<span class="c1"># third module ever wants them they move to a shared home; two do not justify the move.</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.obligations</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DFLT_LIST_TIMEOUT</span><span class="p">,</span>
+    <span class="n">OWNERS_ENV_VAR</span><span class="p">,</span>
+    <span class="n">UNKNOWN</span><span class="p">,</span>
+    <span class="n">GhUnavailable</span><span class="p">,</span>
+    <span class="n">_age_days</span><span class="p">,</span>
+    <span class="n">_evidence</span><span class="p">,</span>
+    <span class="n">_gh</span><span class="p">,</span>
+    <span class="n">_repo_of</span><span class="p">,</span>
+    <span class="n">configured_owners</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"BLOCKED"</span><span class="p">,</span>
+    <span class="s2">"BLOCKED_FIELDS"</span><span class="p">,</span>
+    <span class="s2">"BLOCKER_STATES"</span><span class="p">,</span>
+    <span class="s2">"UNBLOCKED"</span><span class="p">,</span>
+    <span class="s2">"UNKNOWN"</span><span class="p">,</span>
+    <span class="s2">"BlockedIssue"</span><span class="p">,</span>
+    <span class="s2">"Blocker"</span><span class="p">,</span>
+    <span class="s2">"GhUnavailable"</span><span class="p">,</span>
+    <span class="s2">"blocked"</span><span class="p">,</span>
+    <span class="s2">"gh_blocked_by"</span><span class="p">,</span>
+    <span class="s2">"gh_blocked_candidates"</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1">#: Loop state: every blocker is closed. The work can proceed and nobody has been told.</span>
+<span class="n">UNBLOCKED</span> <span class="o">=</span> <span class="s2">"unblocked"</span>
+<span class="c1">#: Loop state: at least one blocker is still open, and the row names which.</span>
+<span class="n">BLOCKED</span> <span class="o">=</span> <span class="s2">"blocked"</span>
+<span class="c1">#: The three states, in the order a reader cares about them. ``unknown`` is</span>
+<span class="c1">#: :data:`openloops.obligations.UNKNOWN`: not-checked means the same thing either way.</span>
+<span class="n">BLOCKER_STATES</span> <span class="o">=</span> <span class="p">(</span><span class="n">UNBLOCKED</span><span class="p">,</span> <span class="n">BLOCKED</span><span class="p">,</span> <span class="n">UNKNOWN</span><span class="p">)</span>
+
+<span class="c1">#: GitHub's own search qualifier for "this issue has a blocking dependency". It is an</span>
+<span class="c1">#: index over the graph rather than the graph; see this module's docstring for what</span>
+<span class="c1">#: that cost when it was measured.</span>
+<span class="n">DFLT_QUERY</span> <span class="o">=</span> <span class="s2">"is:blocked"</span>
+
+<span class="c1">#: How many candidates to resolve. Resolution is one API call per candidate and there</span>
+<span class="c1">#: is no batch form, so this *is* the N+1 bound. Past it the result is ``truncated``</span>
+<span class="c1">#: and the counts are a floor.</span>
+<span class="n">DFLT_CANDIDATE_LIMIT</span> <span class="o">=</span> <span class="mi">50</span>
+
+<span class="c1">#: Page size for both listing calls. ``gh api --paginate`` walks the rest.</span>
+<span class="n">_PER_PAGE</span> <span class="o">=</span> <span class="mi">100</span>
+
+<span class="c1">#: The two states GitHub gives an issue. Anything else is ``unknown``, never guessed.</span>
+<span class="n">_OPEN</span><span class="p">,</span> <span class="n">_CLOSED</span> <span class="o">=</span> <span class="s2">"open"</span><span class="p">,</span> <span class="s2">"closed"</span>
+
+<span class="c1">#: The candidate fields the fleet-wide search asks for. No ``body``: unlike an</span>
+<span class="c1">#: obligation, a blocked issue carries its answer in the graph rather than in its text.</span>
+<span class="n">_SEARCH_FIELDS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"createdAt"</span><span class="p">,</span> <span class="s2">"number"</span><span class="p">,</span> <span class="s2">"repository"</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">,</span> <span class="s2">"url"</span><span class="p">)</span>
+
+
+<span class="c1">#: Internal candidate key: GitHub's own blocker count, from the audit path only.</span>
+<span class="n">_EXPECTED_BLOCKERS</span> <span class="o">=</span> <span class="s2">"_expected_blockers"</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># The row shapes.</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="Blocker">
+<a class="viewcode-back" href="../../module_docs/openloops/blockers.html#openloops.Blocker">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Blocker</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One edge: the issue, in whatever repository it lives, that blocks another.</span>
+
+<span class="sd">    ``repo`` is the *blocker's* repository, and carrying it is the whole point — an</span>
+<span class="sd">    edge that did not name it would answer only the easy half of the question.</span>
+
+<span class="sd">    &gt;&gt;&gt; Blocker('acme/engine', 15, 'closed').ref</span>
+<span class="sd">    'acme/engine#15 [closed]'</span>
+<span class="sd">    &gt;&gt;&gt; Blocker('acme/engine', 15).ref</span>
+<span class="sd">    'acme/engine#15 [?]'</span>
+<span class="sd">    &gt;&gt;&gt; Blocker('', 15, 'closed').ref</span>
+<span class="sd">    '?#15 [closed]'</span>
+<span class="sd">    """</span>
+
+    <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">number</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">state</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">closed_at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ref</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""``owner/name#number [state]`` — how a blocker is written down.</span>
+
+<span class="sd">        A ``?`` in either half is a fact about what could be read, never a shrug: an</span>
+<span class="sd">        edge whose repository the payload did not name says so rather than borrowing</span>
+<span class="sd">        the blocked issue's own repository and inventing a same-repo dependency.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'?'</span><span class="si">}</span><span class="s2">#</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">number</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'?'</span><span class="si">}</span><span class="s2">]"</span>
+
+<div class="viewcode-block" id="Blocker.as_dict">
+<a class="viewcode-back" href="../../module_docs/openloops/blockers.html#openloops.Blocker.as_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""JSON-ready form, with :attr:`ref` materialised for surfaces that print it."""</span>
+        <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="s2">"ref"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="BlockedIssue">
+<a class="viewcode-back" href="../../module_docs/openloops/blockers.html#openloops.BlockedIssue">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BlockedIssue</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One open issue that carries blocker edges, with the verdict those edges imply.</span>
+
+<span class="sd">    ``blockers`` is carried in full next to ``state`` so a reader can disagree with the</span>
+<span class="sd">    verdict rather than absorb it — the same rule :class:`openloops.obligations.</span>
+<span class="sd">    Obligation` follows for its predicate.</span>
+
+<span class="sd">    &gt;&gt;&gt; BlockedIssue('acme/widget', 12, 't', 'u', '2026-01-01T00:00:00Z', 3).state</span>
+<span class="sd">    'unknown'</span>
+<span class="sd">    """</span>
+
+    <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">number</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">created</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">age_days</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">state</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">UNKNOWN</span>
+    <span class="n">blockers</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Blocker</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="c1">#: At least one blocker lives in another repository — the shape this module is for.</span>
+    <span class="n">cross_repo</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1">#: Days since the last blocker closed, for an ``unblocked`` row: how long the work</span>
+    <span class="c1">#: has been free while nobody was told. ``0`` for every other state.</span>
+    <span class="n">unblocked_days</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">evidence</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+<div class="viewcode-block" id="BlockedIssue.as_dict">
+<a class="viewcode-back" href="../../module_docs/openloops/blockers.html#openloops.BlockedIssue.as_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""JSON-ready form, blockers included."""</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="o">**</span><span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+            <span class="s2">"blockers"</span><span class="p">:</span> <span class="p">[</span><span class="n">blocker</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">blocker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blockers</span><span class="p">],</span>
+        <span class="p">}</span></div>
+</div>
+
+
+
+<span class="c1">#: Every key on every row, whatever the issue's edges happened to say. A row shape that</span>
+<span class="c1">#: varies by issue makes ``row["blockers"]`` a coin flip and a JSON schema a lie.</span>
+<span class="n">BLOCKED_FIELDS</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="n">BlockedIssue</span><span class="p">))</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># Reading the world. Both calls go through the package's single `gh` shell-out.</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_json_list</span><span class="p">(</span><span class="n">payload</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">what</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Parse a ``gh`` JSON array. Anything else is :class:`GhUnavailable`.</span>
+
+<span class="sd">    Never an empty list on a parse failure: "I could not read the answer" and "the</span>
+<span class="sd">    answer is nothing" are the two things this package refuses to conflate.</span>
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">payload</span> <span class="ow">or</span> <span class="s2">"[]"</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">GhUnavailable</span><span class="p">(</span><span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2">` returned no usable JSON: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">GhUnavailable</span><span class="p">(</span><span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2">` returned something other than a list"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">row</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_search_candidates</span><span class="p">(</span>
+    <span class="n">owners</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""One fleet-wide ``gh search issues`` call. Cheap, and only ever a candidate list.</span>
+
+<span class="sd">    A *filtered* search, not an enumeration, which is the only form ADR-005 allows:</span>
+<span class="sd">    the qualifier is applied server-side and the result is capped.</span>
+<span class="sd">    """</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"search"</span><span class="p">,</span> <span class="s2">"issues"</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">owner</span> <span class="ow">in</span> <span class="n">owners</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"--owner"</span><span class="p">,</span> <span class="n">owner</span><span class="p">]</span>
+    <span class="n">args</span> <span class="o">+=</span> <span class="p">[</span>
+        <span class="s2">"--state"</span><span class="p">,</span>
+        <span class="n">_OPEN</span><span class="p">,</span>
+        <span class="s2">"--limit"</span><span class="p">,</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">limit</span><span class="p">),</span>
+        <span class="s2">"--json"</span><span class="p">,</span>
+        <span class="s2">","</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_SEARCH_FIELDS</span><span class="p">),</span>
+        <span class="s2">"--"</span><span class="p">,</span>
+        <span class="n">query</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">_json_list</span><span class="p">(</span><span class="n">_gh</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">),</span> <span class="n">what</span><span class="o">=</span><span class="s2">"gh search issues"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_repo_candidates</span><span class="p">(</span>
+    <span class="n">repos</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Per-repository enumeration, filtered on the dependency counts GitHub returns.</span>
+
+<span class="sd">    The listing endpoint already carries ``issue_dependencies_summary`` on every row,</span>
+<span class="sd">    so one paginated request per repository names every issue with a blocker without</span>
+<span class="sd">    touching the search index at all. Pull requests are skipped: they are in the same</span>
+<span class="sd">    collection and they are not what this counts.</span>
+<span class="sd">    """</span>
+    <span class="n">found</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">repo</span> <span class="ow">in</span> <span class="n">repos</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"repos/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">/issues?state=</span><span class="si">{</span><span class="n">_OPEN</span><span class="si">}</span><span class="s2">&amp;per_page=</span><span class="si">{</span><span class="n">_PER_PAGE</span><span class="si">}</span><span class="s2">"</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">_json_list</span><span class="p">(</span>
+            <span class="n">_gh</span><span class="p">([</span><span class="s2">"api"</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="s2">"--paginate"</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">),</span> <span class="n">what</span><span class="o">=</span><span class="sa">f</span><span class="s2">"gh api </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"pull_request"</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">summary</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"issue_dependencies_summary"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">summary</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">summary</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"total_blocked_by"</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">found</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="c1"># GitHub's own count of this issue's blockers, kept so that an edge</span>
+                    <span class="c1"># listing which disagrees with it can be reported as `?` rather than</span>
+                    <span class="c1"># dropped. On this path the row was SELECTED because the count was</span>
+                    <span class="c1"># non-zero, so an empty listing is a contradiction, not an absence.</span>
+                    <span class="n">_EXPECTED_BLOCKERS</span><span class="p">:</span> <span class="n">summary</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"total_blocked_by"</span><span class="p">),</span>
+                    <span class="s2">"number"</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"number"</span><span class="p">),</span>
+                    <span class="s2">"title"</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">),</span>
+                    <span class="s2">"url"</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"html_url"</span><span class="p">),</span>
+                    <span class="s2">"createdAt"</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"created_at"</span><span class="p">),</span>
+                    <span class="s2">"repository"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"nameWithOwner"</span><span class="p">:</span> <span class="n">repo</span><span class="p">},</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">limit</span><span class="p">:</span>
+                <span class="c1"># Stopping here rather than reading on is what makes the cap visible:</span>
+                <span class="c1"># the caller asked for one more than it reports, so a full list is</span>
+                <span class="c1"># reported as truncated instead of being silently trimmed.</span>
+                <span class="k">return</span> <span class="n">found</span>
+    <span class="k">return</span> <span class="n">found</span>
+
+
+<div class="viewcode-block" id="gh_blocked_candidates">
+<a class="viewcode-back" href="../../module_docs/openloops/blockers.html#openloops.gh_blocked_candidates">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">gh_blocked_candidates</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">owners</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+    <span class="n">repos</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+    <span class="n">query</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DFLT_QUERY</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_CANDIDATE_LIMIT</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DFLT_LIST_TIMEOUT</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""The default ``issues_source``: open issues that *may* carry a blocker edge.</span>
+
+<span class="sd">    ``repos=`` chooses the exact per-repository enumeration; otherwise ``owners=``</span>
+<span class="sd">    drives one fleet-wide search. Both return rows shaped the way ``gh search issues``</span>
+<span class="sd">    shapes them — ``createdAt``, ``number``, ``repository``, ``title``, ``url`` — so</span>
+<span class="sd">    everything downstream reads one shape. Which one to use, and what each costs and</span>
+<span class="sd">    misses, is the "Discovery is a candidate list" section of this module's docstring.</span>
+
+<span class="sd">    A large repository can take longer than ``timeout`` to paginate; that is a</span>
+<span class="sd">    :class:`GhUnavailable`, which reads ``?``, not an empty answer.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">repos</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_repo_candidates</span><span class="p">(</span><span class="n">repos</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">owners</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">GhUnavailable</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"no owners to search: set </span><span class="si">{</span><span class="n">OWNERS_ENV_VAR</span><span class="si">}</span><span class="s2">, or name repositories directly"</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">_search_candidates</span><span class="p">(</span><span class="n">owners</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="gh_blocked_by">
+<a class="viewcode-back" href="../../module_docs/openloops/blockers.html#openloops.gh_blocked_by">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">gh_blocked_by</span><span class="p">(</span>
+    <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DFLT_LIST_TIMEOUT</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""The default ``blockers_source``: the blocker edges out of one issue.</span>
+
+<span class="sd">    One request per issue — the N+1 :func:`blocked` bounds with ``limit=``. Returns the</span>
+<span class="sd">    rows GitHub sends, unparsed and unjudged; :func:`_verdict` is what reads a state</span>
+<span class="sd">    out of them. An issue with no edges answers ``[]``, which is an answer.</span>
+<span class="sd">    """</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"repos/</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">/issues/</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">/dependencies/blocked_by?per_page=</span><span class="si">{</span><span class="n">_PER_PAGE</span><span class="si">}</span><span class="s2">"</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">_json_list</span><span class="p">(</span>
+        <span class="n">_gh</span><span class="p">([</span><span class="s2">"api"</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="s2">"--paginate"</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">),</span> <span class="n">what</span><span class="o">=</span><span class="sa">f</span><span class="s2">"gh api </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># Reading a verdict out of the edges.</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_repo_of_blocker</span><span class="p">(</span><span class="n">edge</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The blocker's ``owner/name``, from the payload or failing that from its URL.</span>
+
+<span class="sd">    &gt;&gt;&gt; _repo_of_blocker({'repository': {'full_name': 'acme/engine'}})</span>
+<span class="sd">    'acme/engine'</span>
+<span class="sd">    &gt;&gt;&gt; _repo_of_blocker({'html_url': 'https://github.com/acme/engine/issues/15'})</span>
+<span class="sd">    'acme/engine'</span>
+<span class="sd">    &gt;&gt;&gt; _repo_of_blocker({})</span>
+<span class="sd">    ''</span>
+<span class="sd">    """</span>
+    <span class="n">repository</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"repository"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">repository</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+        <span class="n">named</span> <span class="o">=</span> <span class="n">repository</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"full_name"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">repository</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"nameWithOwner"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">named</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">named</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">repository</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">repository</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">repository</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"html_url"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">edge</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"url"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">part</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span> <span class="k">if</span> <span class="n">part</span><span class="p">]</span>
+    <span class="c1"># .../github.com/OWNER/NAME/issues/N — the two segments before the collection name.</span>
+    <span class="k">for</span> <span class="n">collection</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"issues"</span><span class="p">,</span> <span class="s2">"pull"</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">collection</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">:</span>
+            <span class="n">at</span> <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">at</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">parts</span><span class="p">[</span><span class="n">at</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">parts</span><span class="p">[</span><span class="n">at</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">return</span> <span class="s2">""</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_blockers_from</span><span class="p">(</span><span class="n">edges</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Blocker</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Turn raw dependency rows into :class:`Blocker` values, judging nothing yet.</span>
+
+<span class="sd">    &gt;&gt;&gt; _blockers_from([{'number': 15, 'state': 'closed',</span>
+<span class="sd">    ...                  'repository': {'full_name': 'acme/engine'}}])[0].ref</span>
+<span class="sd">    'acme/engine#15 [closed]'</span>
+<span class="sd">    """</span>
+    <span class="n">blockers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">edge</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">blockers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">Blocker</span><span class="p">(</span>
+                <span class="n">repo</span><span class="o">=</span><span class="n">_repo_of_blocker</span><span class="p">(</span><span class="n">edge</span><span class="p">),</span>
+                <span class="n">number</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"number"</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="n">state</span><span class="o">=</span><span class="n">state</span> <span class="k">if</span> <span class="n">state</span> <span class="ow">in</span> <span class="p">(</span><span class="n">_OPEN</span><span class="p">,</span> <span class="n">_CLOSED</span><span class="p">)</span> <span class="k">else</span> <span class="s2">""</span><span class="p">,</span>
+                <span class="n">url</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"html_url"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">),</span>
+                <span class="n">closed_at</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"closed_at"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">blockers</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_refs</span><span class="p">(</span><span class="n">blockers</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Blocker</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">blocker</span><span class="o">.</span><span class="n">ref</span> <span class="k">for</span> <span class="n">blocker</span> <span class="ow">in</span> <span class="n">blockers</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_verdict</span><span class="p">(</span><span class="n">blockers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Blocker</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""``(state, evidence)`` for one issue's edges. The three-state rule lives here.</span>
+
+<span class="sd">    Read it as a sequence of refusals: an unreadable blocker state is never rounded to</span>
+<span class="sd">    either answer; one blocker still open is enough to keep the row blocked; only *all*</span>
+<span class="sd">    of them closed makes a row free.</span>
+
+<span class="sd">    &gt;&gt;&gt; _verdict([Blocker('acme/engine', 15, 'closed')])</span>
+<span class="sd">    ('unblocked', 'every blocker is closed: acme/engine#15 [closed]')</span>
+<span class="sd">    &gt;&gt;&gt; _verdict([Blocker('a/b', 1, 'open'), Blocker('a/c', 2, 'closed')])[0]</span>
+<span class="sd">    'blocked'</span>
+<span class="sd">    &gt;&gt;&gt; _verdict([Blocker('a/b', 1, 'wat')])[0]</span>
+<span class="sd">    'unknown'</span>
+<span class="sd">    &gt;&gt;&gt; _verdict([])[0]</span>
+<span class="sd">    'unknown'</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">blockers</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">UNKNOWN</span><span class="p">,</span> <span class="s2">"no blocker edges were returned"</span>
+    <span class="n">unreadable</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">blockers</span> <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">state</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">_OPEN</span><span class="p">,</span> <span class="n">_CLOSED</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">unreadable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">UNKNOWN</span><span class="p">,</span> <span class="n">_evidence</span><span class="p">(</span>
+            <span class="s2">"a blocker's state could not be read:"</span><span class="p">,</span> <span class="n">_refs</span><span class="p">(</span><span class="n">unreadable</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="n">still_open</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">blockers</span> <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">_OPEN</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">still_open</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">BLOCKED</span><span class="p">,</span> <span class="n">_evidence</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">still_open</span><span class="p">)</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">blockers</span><span class="p">)</span><span class="si">}</span><span class="s2"> blockers still open:"</span><span class="p">,</span>
+            <span class="n">_refs</span><span class="p">(</span><span class="n">still_open</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">UNBLOCKED</span><span class="p">,</span> <span class="n">_evidence</span><span class="p">(</span><span class="s2">"every blocker is closed:"</span><span class="p">,</span> <span class="n">_refs</span><span class="p">(</span><span class="n">blockers</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_unblocked_days</span><span class="p">(</span><span class="n">blockers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Blocker</span><span class="p">],</span> <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""How long since the *last* blocker closed. ``0`` when none of them says.</span>
+
+<span class="sd">    ISO-8601 stamps in UTC sort lexicographically, so the maximum is the most recent.</span>
+
+<span class="sd">    &gt;&gt;&gt; from datetime import datetime, timezone</span>
+<span class="sd">    &gt;&gt;&gt; _unblocked_days(</span>
+<span class="sd">    ...     [Blocker('a/b', 1, 'closed', closed_at='2026-08-20T00:00:00Z'),</span>
+<span class="sd">    ...      Blocker('a/c', 2, 'closed', closed_at='2026-08-10T00:00:00Z')],</span>
+<span class="sd">    ...     datetime(2026, 8, 27, tzinfo=timezone.utc))</span>
+<span class="sd">    7</span>
+<span class="sd">    """</span>
+    <span class="n">stamps</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span><span class="o">.</span><span class="n">closed_at</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">blockers</span> <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">closed_at</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">_age_days</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">stamps</span><span class="p">),</span> <span class="n">now</span><span class="p">)</span> <span class="k">if</span> <span class="n">stamps</span> <span class="k">else</span> <span class="mi">0</span>
+
+
+<span class="c1">#: What each state is worth in the ordering: what is free to do first, what was never</span>
+<span class="c1">#: checked next, what is still waiting last. Within a state, cross-repo rows come</span>
+<span class="c1">#: first — a same-repo blocker is at least visible to the repo that owns it.</span>
+<span class="n">_STATE_RANK</span> <span class="o">=</span> <span class="p">{</span><span class="n">UNBLOCKED</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UNKNOWN</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">BLOCKED</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_sort_key</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="n">BlockedIssue</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">_STATE_RANK</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span>
+        <span class="mi">0</span> <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">cross_repo</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="o">-</span><span class="n">row</span><span class="o">.</span><span class="n">age_days</span><span class="p">,</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">repo</span><span class="p">,</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># The operation.</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_candidates</span><span class="p">(</span><span class="n">issues_source</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">query</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Call the source if it is callable; otherwise take it as the rows themselves."""</span>
+    <span class="k">if</span> <span class="n">issues_source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">gh_blocked_candidates</span><span class="p">(</span><span class="o">**</span><span class="n">query</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">issues_source</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">issues_source</span><span class="p">(</span><span class="o">**</span><span class="n">query</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">issues_source</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_edges_of</span><span class="p">(</span>
+    <span class="n">blockers_source</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""One issue's edges, from whichever kind of source was injected.</span>
+
+<span class="sd">    A mapping keyed ``'owner/name#number'`` is accepted because a test fixture is</span>
+<span class="sd">    naturally written that way, and a missing key there means "no edges" — which the</span>
+<span class="sd">    caller reads as a candidate the graph does not agree with, not as an error.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">blockers_source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">gh_blocked_by</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">blockers_source</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">blockers_source</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">repo</span><span class="si">}</span><span class="s2">#</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="p">()))</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">blockers_source</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="blocked">
+<a class="viewcode-back" href="../../module_docs/openloops/blockers.html#openloops.blocked">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">blocked</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">resolve</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">owners</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">repos</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+    <span class="n">query</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DFLT_QUERY</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_CANDIDATE_LIMIT</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DFLT_LIST_TIMEOUT</span><span class="p">,</span>
+    <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">issues_source</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">blockers_source</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Open issues that carry a blocker edge, with every edge resolved.</span>
+
+<span class="sd">    The row that matters sorts first: ``unblocked`` — every blocker closed, the work</span>
+<span class="sd">    free to proceed, and nothing anywhere has said so. ``blocked`` rows name what they</span>
+<span class="sd">    are waiting on, foreign repository included. ``unknown`` means the edges could not</span>
+<span class="sd">    be read, and it is never rounded into either of the others.</span>
+
+<span class="sd">    ``owners=`` scopes the fleet-wide search (default: :func:`openloops.obligations.</span>
+<span class="sd">    configured_owners`, the same fleet ``ol owed`` answers about, so two commands never</span>
+<span class="sd">    quietly disagree about which repositories exist). ``repos=`` instead enumerates the</span>
+<span class="sd">    repositories you name exactly, which is the audit path.</span>
+
+<span class="sd">    ``resolve=False`` lists candidates without spending one API call each; every row</span>
+<span class="sd">    then reads ``unknown``, because that is what is true about it.</span>
+
+<span class="sd">    Two seams, each one keyword argument, each defaulting to a real implementation:</span>
+<span class="sd">    ``issues_source=`` (defaults to :func:`gh_blocked_candidates`; a list of dicts</span>
+<span class="sd">    substitutes) and ``blockers_source=`` (defaults to :func:`gh_blocked_by`; a mapping</span>
+<span class="sd">    from ``'owner/name#number'`` to edges, or any callable of ``(repo, number)``,</span>
+<span class="sd">    substitutes). With both injected this reaches no network and needs no ``gh``.</span>
+
+<span class="sd">    Returns one envelope, never a bare list, because a reader has to be able to tell</span>
+<span class="sd">    "nothing is waiting" from "I could not find out":</span>
+
+<span class="sd">    ``listed``</span>
+<span class="sd">        ``False`` when *discovery itself* failed. Every surface must render that as</span>
+<span class="sd">        ``?``. The counts are zeros and they mean nothing.</span>
+<span class="sd">    ``resolved``</span>
+<span class="sd">        whether edges were resolved at all.</span>
+<span class="sd">    ``truncated``</span>
+<span class="sd">        the candidate list saturated ``limit``, so the counts are a floor.</span>
+<span class="sd">    ``counts``</span>
+<span class="sd">        ``unblocked`` / ``blocked`` / ``unknown``, plus ``cross_repo``, ``candidates``</span>
+<span class="sd">        (how many discovery offered), ``without_edges`` (how many of those the</span>
+<span class="sd">        dependency graph disagreed about) and ``total`` (how many rows).</span>
+<span class="sd">    ``rows``</span>
+<span class="sd">        one dict per issue, with every key in :data:`BLOCKED_FIELDS`.</span>
+
+<span class="sd">    &gt;&gt;&gt; report = blocked(issues_source=[], blockers_source={})</span>
+<span class="sd">    &gt;&gt;&gt; report['listed'], report['counts']['total'], report['rows']</span>
+<span class="sd">    (True, 0, [])</span>
+
+<span class="sd">    Discovery that could not run is not "nothing is waiting":</span>
+
+<span class="sd">    &gt;&gt;&gt; def broken(**query):</span>
+<span class="sd">    ...     raise GhUnavailable('gh: not logged in')</span>
+<span class="sd">    &gt;&gt;&gt; report = blocked(issues_source=broken)</span>
+<span class="sd">    &gt;&gt;&gt; report['listed'], report['error'], report['counts']['total']</span>
+<span class="sd">    (False, 'gh: not logged in', 0)</span>
+<span class="sd">    """</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span> <span class="k">if</span> <span class="n">now</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">now</span>
+    <span class="n">named_repos</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">repos</span><span class="p">)</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">UNBLOCKED</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">BLOCKED</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">UNKNOWN</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">"cross_repo"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">"candidates"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">"without_edges"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">"total"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">envelope</span><span class="p">(</span><span class="o">**</span><span class="n">overrides</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"listed"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"resolved"</span><span class="p">:</span> <span class="n">resolve</span><span class="p">,</span>
+            <span class="s2">"error"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+            <span class="s2">"truncated"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"query"</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span>
+            <span class="s2">"owners"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"repos"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">named_repos</span><span class="p">),</span>
+            <span class="s2">"counts"</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">counts</span><span class="p">),</span>
+            <span class="s2">"rows"</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="n">base</span><span class="p">,</span> <span class="o">**</span><span class="n">overrides</span><span class="p">}</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Resolving owners can itself need `gh`. It is skipped when repositories were</span>
+        <span class="c1"># named or when the caller supplied the rows, so an injected source stays</span>
+        <span class="c1"># offline and an audit of three repositories does not ask about a whole fleet.</span>
+        <span class="k">if</span> <span class="n">owners</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">resolved_owners</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">owners</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">named_repos</span> <span class="ow">or</span> <span class="n">issues_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">resolved_owners</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">resolved_owners</span> <span class="o">=</span> <span class="n">configured_owners</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">_candidates</span><span class="p">(</span>
+            <span class="n">issues_source</span><span class="p">,</span>
+            <span class="n">owners</span><span class="o">=</span><span class="n">resolved_owners</span><span class="p">,</span>
+            <span class="n">repos</span><span class="o">=</span><span class="n">named_repos</span><span class="p">,</span>
+            <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span>
+            <span class="n">limit</span><span class="o">=</span><span class="n">limit</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># one more than we report: saturation must be visible</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="n">GhUnavailable</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">envelope</span><span class="p">(</span><span class="n">listed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span> <span class="n">owners</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">owners</span> <span class="ow">or</span> <span class="p">()))</span>
+
+    <span class="n">truncated</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">limit</span>
+    <span class="n">considered</span> <span class="o">=</span> <span class="n">raw</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span>
+    <span class="n">rows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BlockedIssue</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">without_edges</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">issue</span> <span class="ow">in</span> <span class="n">considered</span><span class="p">:</span>
+        <span class="n">repo</span> <span class="o">=</span> <span class="n">_repo_of</span><span class="p">(</span><span class="n">issue</span><span class="p">)</span>
+        <span class="n">number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"number"</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">created</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"createdAt"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span>
+        <span class="n">common</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"repo"</span><span class="p">:</span> <span class="n">repo</span><span class="p">,</span>
+            <span class="s2">"number"</span><span class="p">:</span> <span class="n">number</span><span class="p">,</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">),</span>
+            <span class="s2">"url"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"url"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">),</span>
+            <span class="s2">"created"</span><span class="p">:</span> <span class="n">created</span><span class="p">,</span>
+            <span class="s2">"age_days"</span><span class="p">:</span> <span class="n">_age_days</span><span class="p">(</span><span class="n">created</span><span class="p">,</span> <span class="n">now</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">resolve</span><span class="p">:</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">BlockedIssue</span><span class="p">(</span>
+                    <span class="o">**</span><span class="n">common</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">UNKNOWN</span><span class="p">,</span> <span class="n">evidence</span><span class="o">=</span><span class="s2">"not resolved (resolve=False)"</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">edges</span> <span class="o">=</span> <span class="n">_edges_of</span><span class="p">(</span><span class="n">blockers_source</span><span class="p">,</span> <span class="n">repo</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - a source that blew up is not an answer</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">BlockedIssue</span><span class="p">(</span>
+                    <span class="o">**</span><span class="n">common</span><span class="p">,</span>
+                    <span class="n">state</span><span class="o">=</span><span class="n">UNKNOWN</span><span class="p">,</span>
+                    <span class="n">evidence</span><span class="o">=</span><span class="n">_evidence</span><span class="p">(</span><span class="s2">"the blocker edges could not be read:"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">blockers</span> <span class="o">=</span> <span class="n">_blockers_from</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">blockers</span><span class="p">:</span>
+            <span class="n">expected</span> <span class="o">=</span> <span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_EXPECTED_BLOCKERS</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">expected</span><span class="p">:</span>
+                <span class="c1"># GitHub said this issue has blockers and then listed none. That is a</span>
+                <span class="c1"># contradiction, not an absence -- most likely a blocker in a repository</span>
+                <span class="c1"># this token cannot read. Dropping it would print a clean board over an</span>
+                <span class="c1"># issue known to be waiting, which is the one failure this module exists</span>
+                <span class="c1"># to prevent. It is `?`.</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">BlockedIssue</span><span class="p">(</span>
+                        <span class="o">**</span><span class="n">common</span><span class="p">,</span>
+                        <span class="n">state</span><span class="o">=</span><span class="n">UNKNOWN</span><span class="p">,</span>
+                        <span class="n">evidence</span><span class="o">=</span><span class="n">_evidence</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">"GitHub reports </span><span class="si">{</span><span class="n">expected</span><span class="si">}</span><span class="s2"> blocker(s) but listed none;"</span><span class="p">,</span>
+                            <span class="s2">"a blocker in a repository this token cannot read would"</span><span class="p">,</span>
+                            <span class="s2">"look exactly like this"</span><span class="p">,</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="c1"># Search offered a row the dependency graph does not agree with, and nothing</span>
+            <span class="c1"># claims otherwise. Not a third state and not this module's subject -- but</span>
+            <span class="c1"># counted, and every surface prints the count.</span>
+            <span class="n">without_edges</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">continue</span>
+        <span class="n">state</span><span class="p">,</span> <span class="n">evidence</span> <span class="o">=</span> <span class="n">_verdict</span><span class="p">(</span><span class="n">blockers</span><span class="p">)</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">BlockedIssue</span><span class="p">(</span>
+                <span class="o">**</span><span class="n">common</span><span class="p">,</span>
+                <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span>
+                <span class="n">blockers</span><span class="o">=</span><span class="n">blockers</span><span class="p">,</span>
+                <span class="n">cross_repo</span><span class="o">=</span><span class="nb">any</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">repo</span> <span class="ow">and</span> <span class="n">b</span><span class="o">.</span><span class="n">repo</span> <span class="o">!=</span> <span class="n">repo</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">blockers</span><span class="p">),</span>
+                <span class="n">unblocked_days</span><span class="o">=</span><span class="p">(</span>
+                    <span class="n">_unblocked_days</span><span class="p">(</span><span class="n">blockers</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span> <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="n">UNBLOCKED</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="p">),</span>
+                <span class="n">evidence</span><span class="o">=</span><span class="n">evidence</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+        <span class="n">counts</span><span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">state</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">counts</span><span class="p">[</span><span class="s2">"cross_repo"</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">cross_repo</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="n">counts</span><span class="p">[</span><span class="s2">"candidates"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">considered</span><span class="p">)</span>
+    <span class="n">counts</span><span class="p">[</span><span class="s2">"without_edges"</span><span class="p">]</span> <span class="o">=</span> <span class="n">without_edges</span>
+    <span class="n">counts</span><span class="p">[</span><span class="s2">"total"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">envelope</span><span class="p">(</span>
+        <span class="n">owners</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">resolved_owners</span><span class="p">),</span>
+        <span class="n">truncated</span><span class="o">=</span><span class="n">truncated</span><span class="p">,</span>
+        <span class="n">counts</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">counts</span><span class="p">),</span>
+        <span class="n">rows</span><span class="o">=</span><span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">_sort_key</span><span class="p">)],</span>
+    <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

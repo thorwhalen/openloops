@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>&lt;no title&gt; &mdash; openloops 0.1.4 documentation</title>
+  <title>&lt;no title&gt; &mdash; openloops 0.1.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=fd825880"></script>
+      <script src="_static/documentation_options.js?v=59fadc99"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -52,6 +52,7 @@
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/_classify.html">openloops._classify</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/_sync.html">openloops._sync</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/base.html">openloops.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/blockers.html">openloops.blockers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/digest.html">openloops.digest</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/egress.html">openloops.egress</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/job.html">openloops.job</a></li>
@@ -89,6 +90,8 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops.html">openloops</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.BlockedIssue"><code class="docutils literal notranslate"><span class="pre">BlockedIssue</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.Blocker"><code class="docutils literal notranslate"><span class="pre">Blocker</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.ClaudeCodeTranscripts"><code class="docutils literal notranslate"><span class="pre">ClaudeCodeTranscripts</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.CredentialFound"><code class="docutils literal notranslate"><span class="pre">CredentialFound</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.Digest"><code class="docutils literal notranslate"><span class="pre">Digest</span></code></a></li>
@@ -99,11 +102,14 @@
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.Session"><code class="docutils literal notranslate"><span class="pre">Session</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.Verdict"><code class="docutils literal notranslate"><span class="pre">Verdict</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.asks_the_human"><code class="docutils literal notranslate"><span class="pre">asks_the_human()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.blocked"><code class="docutils literal notranslate"><span class="pre">blocked()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.classify"><code class="docutils literal notranslate"><span class="pre">classify()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.data_dir"><code class="docutils literal notranslate"><span class="pre">data_dir()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.default_source"><code class="docutils literal notranslate"><span class="pre">default_source()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.digest_key"><code class="docutils literal notranslate"><span class="pre">digest_key()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.digests_store"><code class="docutils literal notranslate"><span class="pre">digests_store()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.gh_blocked_by"><code class="docutils literal notranslate"><span class="pre">gh_blocked_by()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.gh_blocked_candidates"><code class="docutils literal notranslate"><span class="pre">gh_blocked_candidates()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.gh_issues"><code class="docutils literal notranslate"><span class="pre">gh_issues()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.ls"><code class="docutils literal notranslate"><span class="pre">ls()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.make_digest"><code class="docutils literal notranslate"><span class="pre">make_digest()</span></code></a></li>
@@ -150,6 +156,21 @@
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/base.html#openloops.base.STATES"><code class="docutils literal notranslate"><span class="pre">STATES</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/base.html#openloops.base.Session"><code class="docutils literal notranslate"><span class="pre">Session</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/base.html#openloops.base.Verdict"><code class="docutils literal notranslate"><span class="pre">Verdict</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/blockers.html">openloops.blockers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#discovery-is-a-candidate-list-not-an-answer">Discovery is a candidate list, not an answer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#the-n-1-and-what-bounds-it">The N+1, and what bounds it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.BLOCKED"><code class="docutils literal notranslate"><span class="pre">BLOCKED</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.BLOCKED_FIELDS"><code class="docutils literal notranslate"><span class="pre">BLOCKED_FIELDS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.BLOCKER_STATES"><code class="docutils literal notranslate"><span class="pre">BLOCKER_STATES</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.BlockedIssue"><code class="docutils literal notranslate"><span class="pre">BlockedIssue</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.Blocker"><code class="docutils literal notranslate"><span class="pre">Blocker</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.GhUnavailable"><code class="docutils literal notranslate"><span class="pre">GhUnavailable</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.UNBLOCKED"><code class="docutils literal notranslate"><span class="pre">UNBLOCKED</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.blocked"><code class="docutils literal notranslate"><span class="pre">blocked()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.gh_blocked_by"><code class="docutils literal notranslate"><span class="pre">gh_blocked_by()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.gh_blocked_candidates"><code class="docutils literal notranslate"><span class="pre">gh_blocked_candidates()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/digest.html">openloops.digest</a><ul>
@@ -211,6 +232,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/tools.html">openloops.tools</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.ROW_FIELDS"><code class="docutils literal notranslate"><span class="pre">ROW_FIELDS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.blocked"><code class="docutils literal notranslate"><span class="pre">blocked()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.ls"><code class="docutils literal notranslate"><span class="pre">ls()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.owed"><code class="docutils literal notranslate"><span class="pre">owed()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
