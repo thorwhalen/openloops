@@ -1,6 +1,0 @@
-# Build output. The repository root already ignores `dist/` and `build/` at any depth,
-# so this file changes nothing for git. It exists for the build: hatchling ships the
-# nearest VCS ignore file inside the sdist, and without one here it walks up and ships
-# the *repository's* -- 1.4 KB describing a project this tarball does not contain.
-dist/
-build/
