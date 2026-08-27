@@ -52,7 +52,11 @@ That is a real capability and it is bounded here in five ways, each of them visi
    --no-verify``) lists without running anything; every row that has a predicate then
    reads ``?``, because that is the truth about it.
 4. **Every evaluation is time-bounded**, by ``predicate_timeout=``. A timeout is
-   ``unknown``, never an answer.
+   ``unknown``, never an answer. On POSIX the predicate runs in its own process group
+   and the timeout kills the group, so anything it started dies with it. On Windows only
+   the shell itself is killed — a predicate that backgrounds work can outlive its
+   timeout there, which is a platform limit worth knowing rather than a promise broken
+   quietly.
 5. **The whole thing is one keyword argument away from being someone else's code.**
    ``run_predicate=`` replaces the evaluator; ``issues_source=`` replaces the reader.
 
@@ -527,7 +531,12 @@ def shell_predicate(
     # waiting for EOF, and a backgrounded child inherits the write end -- so
     # `sleep 8 & exit 0` blocks the full timeout and an ANSWERED predicate comes back
     # as `unknown`. Files let us wait on the shell itself and read whatever it left.
-    with tempfile.TemporaryDirectory(prefix="openloops-predicate-") as scratch:
+    # `ignore_cleanup_errors` is load-bearing on Windows: a killed child can still
+    # hold the output file when the block exits, and an un-ignored cleanup raises
+    # PermissionError out of what is supposed to be a bounded, total evaluation.
+    with tempfile.TemporaryDirectory(
+        prefix="openloops-predicate-", ignore_cleanup_errors=True
+    ) as scratch:
         out_path = os.path.join(scratch, "out")
         err_path = os.path.join(scratch, "err")
         try:

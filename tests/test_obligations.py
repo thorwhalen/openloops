@@ -7,7 +7,9 @@ the property worth checking.
 
 from __future__ import annotations
 
+import os
 import subprocess
+import sys
 import time
 from datetime import datetime, timezone
 
@@ -341,13 +343,20 @@ def test_the_default_evaluator_refuses_an_empty_predicate():
     assert shell_predicate("   ").status is None
 
 
+SLEEP_30 = f'"{sys.executable}" -c "import time; time.sleep(30)"'
+
+
 def test_the_default_evaluator_bounds_its_own_wait():
     """A predicate that outlasts its timeout is `unknown`, never an answer."""
-    outcome = shell_predicate("sleep 30", timeout=0.5)
+    outcome = shell_predicate(SLEEP_30, timeout=0.5)
     assert outcome.status is None, "a timeout is not an answer"
     assert "timed out" in outcome.output
 
 
+@pytest.mark.skipif(
+    os.name == "nt",
+    reason="killing the whole tree needs a process group; Windows kills only the shell",
+)
 def test_a_timeout_kills_what_the_predicate_started(tmp_path):
     """The timeout bounds the EXECUTION, not just our wait for it.
 
@@ -356,15 +365,21 @@ def test_a_timeout_kills_what_the_predicate_started(tmp_path):
     effect nobody is accounting for. Measured, which is why this test exists.
     """
     marker = tmp_path / "escaped"
-    outcome = shell_predicate(f"(sleep 2; touch {marker}) & sleep 30", timeout=0.5)
+    child = (
+        f'"{sys.executable}" -c '
+        f'"import time,pathlib; time.sleep(2); pathlib.Path(r\'{marker}\').touch()"'
+    )
+    outcome = shell_predicate(f"({child}) & {SLEEP_30}", timeout=0.5)
     assert outcome.status is None
     time.sleep(3)
     assert not marker.exists(), "the predicate's child escaped its timeout"
 
 
+@pytest.mark.skipif(os.name == "nt", reason="`&` is not backgrounding in cmd.exe")
 def test_a_background_child_does_not_turn_an_answer_into_unknown():
-    """`sleep 8 & exit 0` answered 0; a child holding a pipe must not hide that."""
-    outcome = shell_predicate("sleep 8 & exit 0", timeout=2.0)
+    """A predicate that answered 0 must not read `unknown` because a child lingers."""
+    child = f'"{sys.executable}" -c "import time; time.sleep(8)"'
+    outcome = shell_predicate(f"{child} & exit 0", timeout=2.0)
     assert outcome.status == 0
 
 
@@ -372,7 +387,13 @@ def test_a_background_child_does_not_turn_an_answer_into_unknown():
     "command, why",
     [
         ("definitely-not-a-real-command-xyz", "command not found is not an answer"),
-        ("if [ 1 -eq 1 ; then echo hi", "a shell syntax error is not an answer"),
+        pytest.param(
+            "if [ 1 -eq 1 ; then echo hi",
+            "a shell syntax error is not an answer",
+            marks=pytest.mark.skipif(
+                os.name == "nt", reason="that is not a syntax error to cmd.exe"
+            ),
+        ),
     ],
 )
 def test_a_non_zero_exit_for_the_wrong_reason_is_unknown(command, why):
