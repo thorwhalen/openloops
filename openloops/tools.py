@@ -470,6 +470,6 @@ _dispatch_funcs = [sync, ls, show, status, owed, blocked, dashboard]
 
 
 if __name__ == "__main__":
-    import argh
+    import cw
 
-    argh.dispatch_commands(_dispatch_funcs)
+    raise SystemExit(cw.dispatch(_dispatch_funcs))

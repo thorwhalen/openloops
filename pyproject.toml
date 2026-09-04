@@ -32,11 +32,11 @@ classifiers = [
 ]
 # `dol` supplies the key-value store facade that makes the digest destination a
 # one-argument swap -- a local directory today, a git-synced one or blob storage
-# later, all the same interface -- and `argh` builds the CLI from the same functions
-# the library exposes. Two of dol's file-store defaults are wrong for this use and are
+# later, all the same interface -- and `cw` builds the CLI from the same functions
+# the library exposes (MIT, and its own runtime dependency count is zero). Two of dol's file-store defaults are wrong for this use and are
 # configured away rather than inherited; see openloops/store.py. Nothing here reaches
 # the network, at import time or at run time.
-dependencies = ["dol", "argh"]
+dependencies = ["dol", "cw>=0.1.1,<0.2"]
 
 [project.scripts]
 ol = "openloops.__main__:main"

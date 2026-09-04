@@ -52,9 +52,14 @@ def _rows_table(rows: list[dict]) -> str:
     return "\n".join(lines)
 
 
-#: argh infers an argparse ``type=`` from the *default value*, not the annotation, so a
-#: numeric option defaulting to ``None`` is handed through as a string and blows up deep
-#: inside the reader. A negative sentinel gives argh a float to key on and means "all".
+#: "All history", spelled as a number because ``--since-days`` is a number.
+#:
+#: This started as a workaround for a dispatcher that read ``type=`` off the default
+#: value rather than the annotation, which handed a ``None``-defaulted numeric option
+#: through as a string. Neither argh 0.31 nor cw does that -- both read the ``float``
+#: annotation, verified on this signature -- so the sentinel is no longer load-bearing
+#: for parsing. It stays because it is what ``ol sync --help`` prints as the default,
+#: and that line is part of the CLI's published surface.
 ALL_HISTORY = -1.0
 
 
@@ -440,30 +445,36 @@ _commands = [
 
 
 def main(argv: list[str] | None = None) -> None:
-    """Dispatch the ``ol`` command. Bare ``ol`` runs :func:`brief`."""
-    import argh
+    """Dispatch the ``ol`` command. Bare ``ol`` runs :func:`brief`.
+
+    Returns ``None`` when the command succeeded and raises ``SystemExit`` when it did
+    not, which is what ``argh`` did and what the tests that call this function directly
+    rely on. ``cw.run`` *returns* the exit code rather than raising it, so the raise is
+    written here rather than inherited -- without it every usage error would exit 0.
+
+    The ``cw`` import is inside the function on purpose: ``import openloops`` must not
+    cost a CLI library, and ``tests/test_smoke.py`` asserts it.
+    """
+    import cw
 
     argv = list(sys.argv[1:] if argv is None else argv)
     if not argv:
         argv = [DEFAULT_COMMAND]
-    parser = argh.ArghParser(prog="ol", description=__doc__.splitlines()[0])
-    parser.add_commands(_commands)
+    parser = cw.mk_parser(_commands, prog="ol", description=__doc__.splitlines()[0])
     try:
-        import argcomplete
-
-        argcomplete.autocomplete(parser)
-    except ImportError:
-        pass
-    try:
-        # `output_file` defaults to the `sys.stdout` argh captured at import time, which
-        # is the wrong stream under any harness that replaces it. Pass the live one.
-        parser.dispatch(argv=argv, output_file=sys.stdout)
+        # cw resolves `sys.stdout` at call time rather than at import time, so a result
+        # lands on the live stream under any harness that replaces it. `cw.run` also
+        # offers the parser to argcomplete, exactly where argh's dispatch did -- which
+        # is why there is no hand-written `import argcomplete` block here.
+        code = cw.run(parser, argv)
     except (ValueError, KeyError) as exc:
         # A mistyped state or an unknown session id is ordinary user error. A traceback
         # is not an error message, and it prints this machine's install paths besides.
         message = exc.args[0] if exc.args else str(exc)
         print(f"ol: {message}", file=sys.stderr)
         sys.exit(2)
+    if code:
+        raise SystemExit(code)
 
 
 if __name__ == "__main__":
