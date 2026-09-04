@@ -49,7 +49,7 @@ def test_it_runs_on_a_machine_that_has_never_run_claude_code(isolated_dirs, caps
 
 def test_importing_openloops_does_not_import_the_cli_library():
     """A surface's dependency must not become an import-time cost for the library."""
-    code = "import sys, openloops; print('argh' in sys.modules, 'argcomplete' in sys.modules)"
+    code = "import sys, openloops; print('cw' in sys.modules, 'argcomplete' in sys.modules)"
     out = subprocess.run(
         [sys.executable, "-c", code], capture_output=True, text=True, check=True
     )
