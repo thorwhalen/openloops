@@ -27,6 +27,7 @@ test in this suite:
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -52,10 +53,16 @@ main()
 
 @pytest.fixture
 def cli_env(isolated_dirs):
-    """The environment a subprocess needs to see the same scratch dirs as the fixture."""
+    """The environment a subprocess needs to see the same scratch dirs as the fixture.
+
+    Built by *overriding* the ambient environment rather than replacing it: a Python
+    subprocess on Windows needs SystemRoot and a real PATH to start at all, and a
+    hand-built four-key environment makes every one of these tests fail with exit 1
+    before the CLI is reached.
+    """
     return {
+        **os.environ,
         "PYTHONPATH": str(_ROOT),
-        "PATH": "/usr/bin:/bin",
         "COLUMNS": "80",
         "OPENLOOPS_DATA_DIR": str(isolated_dirs / "data"),
         "OPENLOOPS_STATE_DIR": str(isolated_dirs / "state"),
