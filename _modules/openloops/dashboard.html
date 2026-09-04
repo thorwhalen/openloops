@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openloops.dashboard &mdash; openloops 0.1.6 documentation</title>
+  <title>openloops.dashboard &mdash; openloops 0.1.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=6e0256f3"></script>
+      <script src="../../_static/documentation_options.js?v=ca7ad2ea"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -342,10 +342,16 @@
 <span class="w">    </span><span class="sd">"""``owner/name#number``, linked when the payload gave a URL this page will follow."""</span>
     <span class="n">ref</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'repo'</span><span class="p">))</span><span class="si">}</span><span class="s2">#</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'number'</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span>
     <span class="n">url</span> <span class="o">=</span> <span class="n">safe</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"url"</span><span class="p">))</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">'&lt;a class="ref" href="</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s1">"&gt;</span><span class="si">{</span><span class="n">ref</span><span class="si">}</span><span class="s1">&lt;/a&gt;'</span> <span class="k">if</span> <span class="n">url</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">'&lt;span class="ref"&gt;</span><span class="si">{</span><span class="n">ref</span><span class="si">}</span><span class="s1">&lt;/span&gt;'</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">'&lt;a class="ref" href="</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s1">"&gt;</span><span class="si">{</span><span class="n">ref</span><span class="si">}</span><span class="s1">&lt;/a&gt;'</span>
+        <span class="k">if</span> <span class="n">url</span>
+        <span class="k">else</span> <span class="sa">f</span><span class="s1">'&lt;span class="ref"&gt;</span><span class="si">{</span><span class="n">ref</span><span class="si">}</span><span class="s1">&lt;/span&gt;'</span>
+    <span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_obligation_row</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">tone</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chip</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_obligation_row</span><span class="p">(</span>
+    <span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">tone</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chip</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">days</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"age_days"</span><span class="p">)</span>
     <span class="n">days</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">days</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">days</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="n">predicate</span> <span class="o">=</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"predicate"</span><span class="p">))</span> <span class="ow">or</span> <span class="s2">"(none — nothing to re-check)"</span>
@@ -356,13 +362,15 @@
         <span class="s1">'&lt;div class="body"&gt;'</span><span class="p">,</span>
         <span class="sa">f</span><span class="s1">'&lt;p class="ask"&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">))</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span><span class="p">,</span>
         <span class="sa">f</span><span class="s1">'&lt;p class="where"&gt;</span><span class="si">{</span><span class="n">_ref</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span><span class="w"> </span><span class="n">row</span><span class="p">)</span><span class="si">}</span><span class="s1"> &lt;span class="sep"&gt;·&lt;/span&gt; opened '</span>
-        <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"created"</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">""</span><span class="p">)[:</span><span class="mi">10</span><span class="p">])</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">"?"</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'created'</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">''</span><span class="p">)[:</span><span class="mi">10</span><span class="p">])</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'?'</span><span class="si">}</span><span class="s2">&lt;/p&gt;"</span><span class="p">,</span>
         <span class="c1"># Never abbreviated. It is the reason to believe the verdict, and a predicate</span>
         <span class="c1"># you cannot read is a verdict you cannot disagree with.</span>
         <span class="sa">f</span><span class="s1">'&lt;p class="line"&gt;&lt;span class="tag"&gt;verify&lt;/span&gt;&lt;code&gt;</span><span class="si">{</span><span class="n">predicate</span><span class="si">}</span><span class="s1">&lt;/code&gt;&lt;/p&gt;'</span><span class="p">,</span>
     <span class="p">]</span>
     <span class="k">if</span> <span class="n">evidence</span><span class="p">:</span>
-        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'&lt;p class="line"&gt;&lt;span class="tag"&gt;said&lt;/span&gt;&lt;code&gt;</span><span class="si">{</span><span class="n">evidence</span><span class="si">}</span><span class="s1">&lt;/code&gt;&lt;/p&gt;'</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">'&lt;p class="line"&gt;&lt;span class="tag"&gt;said&lt;/span&gt;&lt;code&gt;</span><span class="si">{</span><span class="n">evidence</span><span class="si">}</span><span class="s1">&lt;/code&gt;&lt;/p&gt;'</span>
+        <span class="p">)</span>
     <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"&lt;/div&gt;"</span><span class="p">,</span> <span class="n">_gauge</span><span class="p">(</span><span class="n">days</span><span class="p">,</span> <span class="n">tone</span><span class="p">),</span> <span class="s2">"&lt;/li&gt;"</span><span class="p">]</span>
     <span class="k">return</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
 
@@ -380,7 +388,7 @@
             <span class="s1">'&lt;div class="body"&gt;'</span><span class="p">,</span>
             <span class="sa">f</span><span class="s1">'&lt;p class="ask"&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">))</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span><span class="p">,</span>
             <span class="sa">f</span><span class="s1">'&lt;p class="where"&gt;</span><span class="si">{</span><span class="n">_ref</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span><span class="w"> </span><span class="n">row</span><span class="p">)</span><span class="si">}</span><span class="s1"> &lt;span class="sep"&gt;·&lt;/span&gt; open '</span>
-            <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">_figure</span><span class="p">(</span><span class="n">age</span><span class="p">)</span><span class="si">}</span><span class="s1">d&lt;/p&gt;'</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">_figure</span><span class="p">(</span><span class="n">age</span><span class="p">)</span><span class="si">}</span><span class="s2">d&lt;/p&gt;"</span><span class="p">,</span>
             <span class="c1"># The number nobody currently has, and the reason this register leads.</span>
             <span class="sa">f</span><span class="s1">'&lt;p class="verdict"&gt;Free to proceed for </span><span class="si">{</span><span class="n">_figure</span><span class="p">(</span><span class="n">free</span><span class="p">)</span><span class="si">}</span><span class="s1"> days, and nothing '</span>
             <span class="s2">"anywhere has said so.&lt;/p&gt;"</span><span class="p">,</span>
@@ -410,7 +418,7 @@
             <span class="c1"># `owner/name#number` is as long as the repository is, and a column sized</span>
             <span class="c1"># for the short ones silently overlaps the title on the long ones.</span>
             <span class="sa">f</span><span class="s1">'&lt;p class="thin-ask"&gt;</span><span class="si">{</span><span class="n">_ref</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span><span class="w"> </span><span class="n">row</span><span class="p">)</span><span class="si">}</span><span class="s1"> &lt;span class="sep"&gt;·&lt;/span&gt; '</span>
-            <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">))</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'title'</span><span class="p">))</span><span class="si">}</span><span class="s2">&lt;/p&gt;"</span><span class="p">,</span>
             <span class="sa">f</span><span class="s1">'&lt;code class="thin-on"&gt;</span><span class="si">{</span><span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">open_refs</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">"(unresolved)"</span><span class="si">}</span><span class="s1">&lt;/code&gt;'</span><span class="p">,</span>
             <span class="s2">"&lt;/li&gt;"</span><span class="p">,</span>
         <span class="p">]</span>
@@ -421,8 +429,14 @@
     <span class="n">days</span> <span class="o">=</span> <span class="n">_days_between</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"last_turn"</span><span class="p">),</span> <span class="n">now</span><span class="p">)</span>
     <span class="n">low</span> <span class="o">=</span> <span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"confidence"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"high"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"high"</span>
     <span class="n">tone</span> <span class="o">=</span> <span class="s2">"unsure"</span> <span class="k">if</span> <span class="n">low</span> <span class="k">else</span> <span class="s2">"flight"</span>
-    <span class="n">heading</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ai_title"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"project"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"(untitled)"</span>
-    <span class="n">where</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"project"</span><span class="p">),</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"branches"</span><span class="p">),</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'turns'</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'?'</span><span class="si">}</span><span class="s2"> turns"</span><span class="p">]</span>
+    <span class="n">heading</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ai_title"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"project"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"(untitled)"</span>
+    <span class="p">)</span>
+    <span class="n">where</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"project"</span><span class="p">),</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"branches"</span><span class="p">),</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'turns'</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'?'</span><span class="si">}</span><span class="s2"> turns"</span><span class="p">,</span>
+    <span class="p">]</span>
     <span class="n">session</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"session"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span>
     <span class="k">return</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
         <span class="p">[</span>
@@ -431,7 +445,9 @@
             <span class="s1">'&lt;div class="body"&gt;'</span><span class="p">,</span>
             <span class="sa">f</span><span class="s1">'&lt;p class="ask"&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">heading</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span><span class="p">,</span>
             <span class="s1">'&lt;p class="where"&gt;'</span>
-            <span class="o">+</span> <span class="sa">f</span><span class="s1">' &lt;span class="sep"&gt;·&lt;/span&gt; '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">where</span> <span class="k">if</span> <span class="n">part</span><span class="p">)</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s1">' &lt;span class="sep"&gt;·&lt;/span&gt; '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">where</span> <span class="k">if</span> <span class="n">part</span>
+            <span class="p">)</span>
             <span class="o">+</span> <span class="s2">"&lt;/p&gt;"</span><span class="p">,</span>
             <span class="sa">f</span><span class="s1">'&lt;p class="line"&gt;&lt;span class="tag"&gt;read it&lt;/span&gt;&lt;code&gt;ol show '</span>
             <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">session</span><span class="p">[:</span><span class="mi">8</span><span class="p">])</span><span class="si">}</span><span class="s2">&lt;/code&gt;&lt;/p&gt;"</span><span class="p">,</span>
@@ -448,13 +464,15 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_register</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">ident</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">figure</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tone</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rule</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_register</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span> <span class="n">ident</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">figure</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tone</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rule</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""One band: a heading, the count in the largest figure on the page, and its rule."""</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s1">'&lt;section class="register register--</span><span class="si">{</span><span class="n">tone</span><span class="si">}</span><span class="s1">" id="</span><span class="si">{</span><span class="n">ident</span><span class="si">}</span><span class="s1">"&gt;'</span>
         <span class="sa">f</span><span class="s1">'&lt;div class="register-head"&gt;'</span>
         <span class="sa">f</span><span class="s1">'&lt;p class="figure"&gt;</span><span class="si">{</span><span class="n">figure</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span>
-        <span class="sa">f</span><span class="s2">"&lt;div&gt;&lt;h2&gt;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&lt;/h2&gt;&lt;p class=</span><span class="se">\"</span><span class="s2">rule</span><span class="se">\"</span><span class="s2">&gt;</span><span class="si">{</span><span class="n">rule</span><span class="si">}</span><span class="s2">&lt;/p&gt;&lt;/div&gt;"</span>
+        <span class="sa">f</span><span class="s1">'&lt;div&gt;&lt;h2&gt;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&lt;/h2&gt;&lt;p class="rule"&gt;</span><span class="si">{</span><span class="n">rule</span><span class="si">}</span><span class="s1">&lt;/p&gt;&lt;/div&gt;'</span>
         <span class="sa">f</span><span class="s2">"&lt;/div&gt;</span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="s2">&lt;/section&gt;"</span>
     <span class="p">)</span>
 
@@ -549,7 +567,9 @@
             <span class="p">{</span>
                 <span class="s2">"kind"</span><span class="p">:</span> <span class="s2">"obligation"</span><span class="p">,</span>
                 <span class="s2">"title"</span><span class="p">:</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">)),</span>
-                <span class="s2">"why"</span><span class="p">:</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">_clip</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"evidence"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"nothing could be checked"</span><span class="p">))),</span>
+                <span class="s2">"why"</span><span class="p">:</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                    <span class="n">_clip</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"evidence"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"nothing could be checked"</span><span class="p">))</span>
+                <span class="p">),</span>
                 <span class="s2">"note"</span><span class="p">:</span> <span class="n">_ref</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">row</span><span class="p">),</span>
                 <span class="s2">"weight"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
             <span class="p">}</span>
@@ -559,7 +579,9 @@
             <span class="p">{</span>
                 <span class="s2">"kind"</span><span class="p">:</span> <span class="s2">"cross-repo"</span><span class="p">,</span>
                 <span class="s2">"title"</span><span class="p">:</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">)),</span>
-                <span class="s2">"why"</span><span class="p">:</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">_clip</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"evidence"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"the edges could not be read"</span><span class="p">))),</span>
+                <span class="s2">"why"</span><span class="p">:</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                    <span class="n">_clip</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"evidence"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"the edges could not be read"</span><span class="p">))</span>
+                <span class="p">),</span>
                 <span class="s2">"note"</span><span class="p">:</span> <span class="n">_ref</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">row</span><span class="p">),</span>
                 <span class="s2">"weight"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
             <span class="p">}</span>
@@ -585,7 +607,11 @@
             <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ai_title"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"session"</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">low</span><span class="p">[:</span><span class="n">MAX_NAMED_SESSIONS</span><span class="p">]</span>
         <span class="p">)</span>
-        <span class="n">more</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">", and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">low</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">MAX_NAMED_SESSIONS</span><span class="si">}</span><span class="s2"> more"</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">low</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MAX_NAMED_SESSIONS</span> <span class="k">else</span> <span class="s2">""</span>
+        <span class="n">more</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">", and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">low</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">MAX_NAMED_SESSIONS</span><span class="si">}</span><span class="s2"> more"</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">low</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MAX_NAMED_SESSIONS</span>
+            <span class="k">else</span> <span class="s2">""</span>
+        <span class="p">)</span>
         <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="p">{</span>
                 <span class="s2">"kind"</span><span class="p">:</span> <span class="s2">"ol ls"</span><span class="p">,</span>
@@ -714,18 +740,25 @@
     <span class="k">if</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"checked"</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
         <span class="n">counts</span> <span class="o">=</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"counts"</span><span class="p">,</span> <span class="p">{})</span>
         <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="s2">"`ol owed` read "</span> <span class="o">+</span> <span class="n">_plural</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"total"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">"obligation"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" and ran "</span>
-            <span class="o">+</span> <span class="n">_plural</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"with_predicate"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">"predicate"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"."</span>
+            <span class="s2">"`ol owed` read "</span>
+            <span class="o">+</span> <span class="n">_plural</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"total"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">"obligation"</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">" and ran "</span>
+            <span class="o">+</span> <span class="n">_plural</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"with_predicate"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">"predicate"</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">"."</span>
         <span class="p">)</span>
     <span class="k">if</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"resolved"</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
         <span class="n">counts</span> <span class="o">=</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"counts"</span><span class="p">,</span> <span class="p">{})</span>
         <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="s2">"`ol blocked` resolved every edge on "</span> <span class="o">+</span> <span class="n">_plural</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"total"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">"issue"</span><span class="p">)</span>
-            <span class="o">+</span> <span class="s2">" from "</span> <span class="o">+</span> <span class="n">_plural</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"candidates"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">"candidate"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"."</span>
+            <span class="s2">"`ol blocked` resolved every edge on "</span>
+            <span class="o">+</span> <span class="n">_plural</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"total"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">"issue"</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">" from "</span>
+            <span class="o">+</span> <span class="n">_plural</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"candidates"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">"candidate"</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">"."</span>
         <span class="p">)</span>
     <span class="k">if</span> <span class="n">sessions</span><span class="p">:</span>
         <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="s2">"`ol ls` read "</span> <span class="o">+</span> <span class="n">_plural</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">),</span> <span class="s2">"open digest"</span><span class="p">)</span>
+            <span class="s2">"`ol ls` read "</span>
+            <span class="o">+</span> <span class="n">_plural</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">),</span> <span class="s2">"open digest"</span><span class="p">)</span>
             <span class="o">+</span> <span class="s2">", all with a stated reason."</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">lines</span>
@@ -786,8 +819,16 @@
     <span class="n">counts</span> <span class="o">=</span> <span class="n">headline_counts</span><span class="p">(</span><span class="n">owed</span><span class="p">,</span> <span class="n">blocked</span><span class="p">,</span> <span class="n">sessions</span><span class="p">)</span>
 
     <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">_masthead</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">owed</span><span class="p">,</span> <span class="n">blocked</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">stamp</span><span class="o">=</span><span class="n">stamp</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
-                  <span class="n">counts</span><span class="o">=</span><span class="n">counts</span><span class="p">),</span>
+        <span class="n">_masthead</span><span class="p">(</span>
+            <span class="n">safe</span><span class="p">,</span>
+            <span class="n">owed</span><span class="p">,</span>
+            <span class="n">blocked</span><span class="p">,</span>
+            <span class="n">sessions</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">stamp</span><span class="o">=</span><span class="n">stamp</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+            <span class="n">counts</span><span class="o">=</span><span class="n">counts</span><span class="p">,</span>
+        <span class="p">),</span>
         <span class="n">_needs_register</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">owed</span><span class="p">),</span>
         <span class="n">_free_register</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">blocked</span><span class="p">),</span>
         <span class="n">_flight_register</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span> <span class="n">now</span><span class="p">,</span> <span class="n">max_sessions</span><span class="o">=</span><span class="n">max_sessions</span><span class="p">),</span>
@@ -837,15 +878,20 @@
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">figure</span><span class="p">,</span> <span class="n">tone</span> <span class="ow">in</span> <span class="n">tally</span>
     <span class="p">)</span>
     <span class="n">scope</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"owners"</span><span class="p">,</span> <span class="p">()))</span> <span class="ow">or</span> <span class="s2">"(none resolved)"</span>
-    <span class="n">blocked_scope</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-        <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"repos"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"owners"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">())</span>
-    <span class="p">)</span> <span class="ow">or</span> <span class="s2">"(none resolved)"</span>
+    <span class="n">blocked_scope</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"repos"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"owners"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">())</span>
+        <span class="p">)</span>
+        <span class="ow">or</span> <span class="s2">"(none resolved)"</span>
+    <span class="p">)</span>
     <span class="n">bcounts</span> <span class="o">=</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"counts"</span><span class="p">,</span> <span class="p">{})</span>
     <span class="n">ocounts</span> <span class="o">=</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"counts"</span><span class="p">,</span> <span class="p">{})</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
         <span class="n">owed_detail</span> <span class="o">=</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"error"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"no reason was reported"</span><span class="p">)</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"checked"</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
-        <span class="n">owed_detail</span> <span class="o">=</span> <span class="s2">"listed but NOT evaluated — every row carrying a predicate reads ?"</span>
+        <span class="n">owed_detail</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">"listed but NOT evaluated — every row carrying a predicate reads ?"</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">owed_detail</span> <span class="o">=</span> <span class="p">(</span>
             <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ocounts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'with_predicate'</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">ocounts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'total'</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> rows carried a "</span>
@@ -879,7 +925,7 @@
             <span class="s2">"ol ls"</span><span class="p">,</span>
             <span class="s2">"read"</span><span class="p">,</span>
             <span class="kc">True</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">_plural</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">),</span><span class="w"> </span><span class="s2">"open digest"</span><span class="p">)</span><span class="si">}</span><span class="s1">, from a local store rather than from GitHub'</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">_plural</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">),</span><span class="w"> </span><span class="s1">'open digest'</span><span class="p">)</span><span class="si">}</span><span class="s2">, from a local store rather than from GitHub"</span><span class="p">,</span>
             <span class="sa">f</span><span class="s2">"source: </span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'this machine'</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="p">),</span>
     <span class="p">]</span>
@@ -914,14 +960,19 @@
         <span class="n">figure</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">open_rows</span><span class="p">))</span>
         <span class="n">body</span> <span class="o">=</span> <span class="p">(</span>
             <span class="s1">'&lt;ol class="ledger"&gt;'</span>
-            <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_obligation_row</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">tone</span><span class="o">=</span><span class="s2">"needs"</span><span class="p">,</span> <span class="n">chip</span><span class="o">=</span><span class="s2">"open"</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">open_rows</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">_obligation_row</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">tone</span><span class="o">=</span><span class="s2">"needs"</span><span class="p">,</span> <span class="n">chip</span><span class="o">=</span><span class="s2">"open"</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">open_rows</span>
+            <span class="p">)</span>
             <span class="o">+</span> <span class="s2">"&lt;/ol&gt;"</span>
             <span class="k">if</span> <span class="n">open_rows</span>
-            <span class="k">else</span> <span class="n">_empty</span><span class="p">(</span><span class="s2">"No open obligation is waiting on you in the repositories that were read."</span><span class="p">)</span>
+            <span class="k">else</span> <span class="n">_empty</span><span class="p">(</span>
+                <span class="s2">"No open obligation is waiting on you in the repositories that were read."</span>
+            <span class="p">)</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">done_rows</span><span class="p">:</span>
             <span class="n">done</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                <span class="n">_obligation_row</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">tone</span><span class="o">=</span><span class="s2">"done"</span><span class="p">,</span> <span class="n">chip</span><span class="o">=</span><span class="s2">"done"</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">done_rows</span>
+                <span class="n">_obligation_row</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">tone</span><span class="o">=</span><span class="s2">"done"</span><span class="p">,</span> <span class="n">chip</span><span class="o">=</span><span class="s2">"done"</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">done_rows</span>
             <span class="p">)</span>
             <span class="n">body</span> <span class="o">+=</span> <span class="p">(</span>
                 <span class="s1">'&lt;p class="subhead"&gt;Discharged — the predicate passes, so there is nothing '</span>
@@ -1017,7 +1068,8 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">ranked</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">""</span>
     <span class="n">cells</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s1">'&lt;li&gt;&lt;b&gt;</span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s1">&lt;/b&gt;&lt;span&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">project</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/span&gt;&lt;/li&gt;'</span> <span class="k">for</span> <span class="n">project</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">ranked</span>
+        <span class="sa">f</span><span class="s2">"&lt;li&gt;&lt;b&gt;</span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">&lt;/b&gt;&lt;span&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">project</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/span&gt;&lt;/li&gt;"</span>
+        <span class="k">for</span> <span class="n">project</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">ranked</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s1">'&lt;ul class="tallystrip"&gt;</span><span class="si">{</span><span class="n">cells</span><span class="si">}</span><span class="s1">&lt;/ul&gt;'</span>
 
@@ -1065,7 +1117,7 @@
 <span class="w">    </span><span class="sd">"""What a register prints when its envelope never listed. Never a zero."""</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s1">'&lt;div class="cannot"&gt;&lt;p class="cannot-mark"&gt;?&lt;/p&gt;&lt;div&gt;'</span>
-        <span class="sa">f</span><span class="s2">"&lt;p class=</span><span class="se">\"</span><span class="s2">ask</span><span class="se">\"</span><span class="s2">&gt;&lt;code&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">command</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/code&gt; could not read the world, so "</span>
+        <span class="sa">f</span><span class="s1">'&lt;p class="ask"&gt;&lt;code&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">command</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/code&gt; could not read the world, so '</span>
         <span class="sa">f</span><span class="s2">"this register is unknown — not empty.&lt;/p&gt;"</span>
         <span class="sa">f</span><span class="s1">'&lt;p class="why"&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">error</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">"no reason was reported"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span>
         <span class="sa">f</span><span class="s1">'&lt;p class="note"&gt;Do not read this as “</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">mistaken_for</span><span class="p">)</span><span class="si">}</span><span class="s1">”. '</span>
@@ -1084,7 +1136,7 @@
         <span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="s1">'&lt;footer class="colophon"&gt;'</span>
-        <span class="sa">f</span><span class="s1">'&lt;p&gt;Rendered by &lt;code&gt;ol dashboard&lt;/code&gt; at </span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">stamp</span><span class="p">)</span><span class="si">}</span><span class="s1"> from '</span>
+        <span class="sa">f</span><span class="s2">"&lt;p&gt;Rendered by &lt;code&gt;ol dashboard&lt;/code&gt; at </span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">stamp</span><span class="p">)</span><span class="si">}</span><span class="s2"> from "</span>
         <span class="s2">"&lt;code&gt;ol owed&lt;/code&gt;, &lt;code&gt;ol blocked&lt;/code&gt; and &lt;code&gt;ol ls&lt;/code&gt;. "</span>
         <span class="s2">"Re-run it to get a newer one; there is no other way for this page to change.&lt;/p&gt;"</span>
         <span class="s2">"&lt;p&gt;openloops never writes to GitHub. Nothing here closed, reopened, relabelled or "</span>

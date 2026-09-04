@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openloops.__main__ &mdash; openloops 0.1.6 documentation</title>
+  <title>openloops.__main__ &mdash; openloops 0.1.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=6e0256f3"></script>
+      <script src="../../_static/documentation_options.js?v=ca7ad2ea"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -107,6 +107,12 @@ the useful thing.</p>
 <dt class="sig sig-object py" id="openloops.__main__.main">
 <span class="sig-prename descclassname"><span class="pre">openloops.__main__.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/openloops/__main__.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.__main__.main" title="Link to this definition"></a></dt>
 <dd><p>Dispatch the <code class="docutils literal notranslate"><span class="pre">ol</span></code> command. Bare <code class="docutils literal notranslate"><span class="pre">ol</span></code> runs <code class="xref py py-func docutils literal notranslate"><span class="pre">brief()</span></code>.</p>
+<p>Returns <code class="docutils literal notranslate"><span class="pre">None</span></code> when the command succeeded and raises <code class="docutils literal notranslate"><span class="pre">SystemExit</span></code> when it did
+not, which is what <code class="docutils literal notranslate"><span class="pre">argh</span></code> did and what the tests that call this function directly
+rely on. <code class="docutils literal notranslate"><span class="pre">cw.run</span></code> <em>returns</em> the exit code rather than raising it, so the raise is
+written here rather than inherited – without it every usage error would exit 0.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">cw</span></code> import is inside the function on purpose: <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">openloops</span></code> must not
+cost a CLI library, and <code class="docutils literal notranslate"><span class="pre">tests/test_smoke.py</span></code> asserts it.</p>
 </dd></dl>
 
 </section>

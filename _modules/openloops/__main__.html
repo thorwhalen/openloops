@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openloops.__main__ &mdash; openloops 0.1.6 documentation</title>
+  <title>openloops.__main__ &mdash; openloops 0.1.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=6e0256f3"></script>
+      <script src="../../_static/documentation_options.js?v=ca7ad2ea"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -142,9 +142,14 @@
     <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
 
 
-<span class="c1">#: argh infers an argparse ``type=`` from the *default value*, not the annotation, so a</span>
-<span class="c1">#: numeric option defaulting to ``None`` is handed through as a string and blows up deep</span>
-<span class="c1">#: inside the reader. A negative sentinel gives argh a float to key on and means "all".</span>
+<span class="c1">#: "All history", spelled as a number because ``--since-days`` is a number.</span>
+<span class="c1">#:</span>
+<span class="c1">#: This started as a workaround for a dispatcher that read ``type=`` off the default</span>
+<span class="c1">#: value rather than the annotation, which handed a ``None``-defaulted numeric option</span>
+<span class="c1">#: through as a string. Neither argh 0.31 nor cw does that -- both read the ``float``</span>
+<span class="c1">#: annotation, verified on this signature -- so the sentinel is no longer load-bearing</span>
+<span class="c1">#: for parsing. It stays because it is what ``ol sync --help`` prints as the default,</span>
+<span class="c1">#: and that line is part of the CLI's published surface.</span>
 <span class="n">ALL_HISTORY</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
 
 
@@ -393,7 +398,9 @@
         <span class="s2">""</span><span class="p">,</span>
     <span class="p">]</span>
     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">plan</span><span class="p">[</span><span class="s2">"actions"</span><span class="p">]:</span>
-        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">'action'</span><span class="p">]</span><span class="si">:</span><span class="s2">&lt;9</span><span class="si">}{</span><span class="n">row</span><span class="p">[</span><span class="s1">'kind'</span><span class="p">]</span><span class="si">:</span><span class="s2">&lt;7</span><span class="si">}{</span><span class="n">row</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">:</span><span class="s2">&lt;26</span><span class="si">}{</span><span class="n">row</span><span class="p">[</span><span class="s1">'reason'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">'action'</span><span class="p">]</span><span class="si">:</span><span class="s2">&lt;9</span><span class="si">}{</span><span class="n">row</span><span class="p">[</span><span class="s1">'kind'</span><span class="p">]</span><span class="si">:</span><span class="s2">&lt;7</span><span class="si">}{</span><span class="n">row</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">:</span><span class="s2">&lt;26</span><span class="si">}{</span><span class="n">row</span><span class="p">[</span><span class="s1">'reason'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span>
         <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"                  -&gt; </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">'destination'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">plan</span><span class="p">[</span><span class="s2">"counts"</span><span class="p">][</span><span class="s2">"conflict"</span><span class="p">]:</span>
         <span class="c1"># Nothing was touched at those destinations, and saying so is the whole point:</span>
@@ -530,30 +537,36 @@
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../../module_docs/openloops/__main__.html#openloops.__main__.main">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Dispatch the ``ol`` command. Bare ``ol`` runs :func:`brief`."""</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">argh</span>
+<span class="w">    </span><span class="sd">"""Dispatch the ``ol`` command. Bare ``ol`` runs :func:`brief`.</span>
+
+<span class="sd">    Returns ``None`` when the command succeeded and raises ``SystemExit`` when it did</span>
+<span class="sd">    not, which is what ``argh`` did and what the tests that call this function directly</span>
+<span class="sd">    rely on. ``cw.run`` *returns* the exit code rather than raising it, so the raise is</span>
+<span class="sd">    written here rather than inherited -- without it every usage error would exit 0.</span>
+
+<span class="sd">    The ``cw`` import is inside the function on purpose: ``import openloops`` must not</span>
+<span class="sd">    cost a CLI library, and ``tests/test_smoke.py`` asserts it.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">cw</span>
 
     <span class="n">argv</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">argv</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">argv</span><span class="p">:</span>
         <span class="n">argv</span> <span class="o">=</span> <span class="p">[</span><span class="n">DEFAULT_COMMAND</span><span class="p">]</span>
-    <span class="n">parser</span> <span class="o">=</span> <span class="n">argh</span><span class="o">.</span><span class="n">ArghParser</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="s2">"ol"</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_commands</span><span class="p">(</span><span class="n">_commands</span><span class="p">)</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">cw</span><span class="o">.</span><span class="n">mk_parser</span><span class="p">(</span><span class="n">_commands</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="s2">"ol"</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">argcomplete</span>
-
-        <span class="n">argcomplete</span><span class="o">.</span><span class="n">autocomplete</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-        <span class="k">pass</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># `output_file` defaults to the `sys.stdout` argh captured at import time, which</span>
-        <span class="c1"># is the wrong stream under any harness that replaces it. Pass the live one.</span>
-        <span class="n">parser</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="n">argv</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+        <span class="c1"># cw resolves `sys.stdout` at call time rather than at import time, so a result</span>
+        <span class="c1"># lands on the live stream under any harness that replaces it. `cw.run` also</span>
+        <span class="c1"># offers the parser to argcomplete, exactly where argh's dispatch did -- which</span>
+        <span class="c1"># is why there is no hand-written `import argcomplete` block here.</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="n">cw</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">argv</span><span class="p">)</span>
     <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
         <span class="c1"># A mistyped state or an unknown session id is ordinary user error. A traceback</span>
         <span class="c1"># is not an error message, and it prints this machine's install paths besides.</span>
         <span class="n">message</span> <span class="o">=</span> <span class="n">exc</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">exc</span><span class="o">.</span><span class="n">args</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"ol: </span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span></div>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">code</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span><span class="n">code</span><span class="p">)</span></div>
 
 
 
