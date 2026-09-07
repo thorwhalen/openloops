@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openloops.dashboard &mdash; openloops 0.1.7 documentation</title>
+  <title>openloops.dashboard &mdash; openloops 0.1.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=ca7ad2ea"></script>
+      <script src="../../_static/documentation_options.js?v=22607128"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -116,12 +116,16 @@
 <span class="sd">   which checks earned that, because a clean board with no provenance is the same lie</span>
 <span class="sd">   told quietly.</span>
 
-<span class="sd">Everything printed goes through :class:`_Sanitizer`, which is :func:`openloops.egress</span>
+<span class="sd">Everything printed goes through :class:`Sanitizer`, which is :func:`openloops.egress</span>
 <span class="sd">.scrub` plus HTML escaping plus a scheme allowlist on every link. A page that carries a</span>
 <span class="sd">repository name and an issue title is fine; one that carries a home path or a token is</span>
 <span class="sd">the failure ``openloops.egress`` exists to prevent, and this renderer scrubs its input</span>
 <span class="sd">rather than trusting it. A credential-shaped field is *withheld and counted*, never</span>
 <span class="sd">silently dropped — the count is printed in the footer.</span>
+
+<span class="sd">:data:`CSS` and :class:`Sanitizer` are public for sibling renderers — a tool that shows</span>
+<span class="sd">a different half of the same picture and wants to look like this page — so that the look</span>
+<span class="sd">and the egress rule stay in one place instead of being copied and drifting.</span>
 
 <span class="sd">    &gt;&gt;&gt; html = render_dashboard({}, {}, [], made_at='2026-01-01T00:00:00Z')</span>
 <span class="sd">    &gt;&gt;&gt; '&lt;title&gt;' in html and 'snapshot' in html</span>
@@ -141,9 +145,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops.obligations</span><span class="w"> </span><span class="kn">import</span> <span class="n">DISCHARGED</span><span class="p">,</span> <span class="n">UNKNOWN</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"CSS"</span><span class="p">,</span>
     <span class="s2">"DFLT_MAX_SESSIONS"</span><span class="p">,</span>
     <span class="s2">"DFLT_TITLE"</span><span class="p">,</span>
     <span class="s2">"GAUGE_FULL_DAYS"</span><span class="p">,</span>
+    <span class="s2">"Sanitizer"</span><span class="p">,</span>
     <span class="s2">"headline_counts"</span><span class="p">,</span>
     <span class="s2">"render_dashboard"</span><span class="p">,</span>
     <span class="s2">"unchecked_count"</span><span class="p">,</span>
@@ -181,7 +187,9 @@
 <span class="c1"># --------------------------------------------------------------------------------</span>
 
 
-<span class="k">class</span><span class="w"> </span><span class="nc">_Sanitizer</span><span class="p">:</span>
+<div class="viewcode-block" id="Sanitizer">
+<a class="viewcode-back" href="../../module_docs/openloops/dashboard.html#openloops.Sanitizer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Sanitizer</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Scrub, then escape. The single path from an envelope to the document.</span>
 
 <span class="sd">    Two failures are possible and they are treated differently, exactly as</span>
@@ -191,7 +199,7 @@
 <span class="sd">    :attr:`withheld` is printed in the footer so the run reports it rather than quietly</span>
 <span class="sd">    losing a field.</span>
 
-<span class="sd">    &gt;&gt;&gt; s = _Sanitizer()</span>
+<span class="sd">    &gt;&gt;&gt; s = Sanitizer()</span>
 <span class="sd">    &gt;&gt;&gt; s.text('a &lt; b')</span>
 <span class="sd">    'a &amp;lt; b'</span>
 <span class="sd">    &gt;&gt;&gt; s.text('token=' + 'ghp_' + 'A' * 36)</span>
@@ -204,6 +212,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">aliases</span> <span class="o">=</span> <span class="n">aliases</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">withheld</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
+<div class="viewcode-block" id="Sanitizer.text">
+<a class="viewcode-back" href="../../module_docs/openloops/dashboard.html#openloops.Sanitizer.text">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""One field, safe to place in the document."""</span>
         <span class="k">try</span><span class="p">:</span>
@@ -211,14 +221,19 @@
         <span class="k">except</span> <span class="n">CredentialFound</span> <span class="k">as</span> <span class="n">found</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">withheld</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">pattern_name</span><span class="p">)</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s2">"[withheld: credential-shaped text (</span><span class="si">{</span><span class="n">found</span><span class="o">.</span><span class="n">pattern_name</span><span class="si">}</span><span class="s2">)]"</span>
-        <span class="k">return</span> <span class="n">_html</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">clean</span><span class="p">,</span> <span class="n">quote</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_html</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">clean</span><span class="p">,</span> <span class="n">quote</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="Sanitizer.url">
+<a class="viewcode-back" href="../../module_docs/openloops/dashboard.html#openloops.Sanitizer.url">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""A link target, or ``''`` when it is not one this page will follow."""</span>
         <span class="n">raw</span> <span class="o">=</span> <span class="s2">""</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">raw</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">_LINK_SCHEMES</span><span class="p">):</span>
             <span class="k">return</span> <span class="s2">""</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span></div>
+</div>
+
 
 
 <span class="c1"># --------------------------------------------------------------------------------</span>
@@ -338,7 +353,7 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_ref</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_ref</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""``owner/name#number``, linked when the payload gave a URL this page will follow."""</span>
     <span class="n">ref</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'repo'</span><span class="p">))</span><span class="si">}</span><span class="s2">#</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'number'</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span>
     <span class="n">url</span> <span class="o">=</span> <span class="n">safe</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"url"</span><span class="p">))</span>
@@ -350,7 +365,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_obligation_row</span><span class="p">(</span>
-    <span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">tone</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chip</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">tone</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chip</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">days</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"age_days"</span><span class="p">)</span>
     <span class="n">days</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">days</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">days</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="k">else</span> <span class="kc">None</span>
@@ -375,7 +390,7 @@
     <span class="k">return</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_unblocked_row</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_unblocked_row</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">free</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"unblocked_days"</span><span class="p">)</span>
     <span class="n">free</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">free</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">free</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="n">refs</span> <span class="o">=</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ref"</span><span class="p">))</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"blockers"</span><span class="p">,</span> <span class="p">()))</span>
@@ -401,7 +416,7 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_waiting_row</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_waiting_row</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""A still-blocked edge, one dense line. The foreign repo is the whole content."""</span>
     <span class="n">open_refs</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ref"</span><span class="p">))</span>
@@ -425,7 +440,7 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_session_row</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_session_row</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">days</span> <span class="o">=</span> <span class="n">_days_between</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"last_turn"</span><span class="p">),</span> <span class="n">now</span><span class="p">)</span>
     <span class="n">low</span> <span class="o">=</span> <span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"confidence"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"high"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"high"</span>
     <span class="n">tone</span> <span class="o">=</span> <span class="s2">"unsure"</span> <span class="k">if</span> <span class="n">low</span> <span class="k">else</span> <span class="s2">"flight"</span>
@@ -487,7 +502,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_unknowns</span><span class="p">(</span>
-    <span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span>
+    <span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span>
     <span class="n">owed</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">blocked</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">sessions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
@@ -656,7 +671,7 @@
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="n">items</span> <span class="o">=</span> <span class="n">_unknowns</span><span class="p">(</span><span class="n">_Sanitizer</span><span class="p">(),</span> <span class="nb">dict</span><span class="p">(</span><span class="n">owed</span><span class="p">),</span> <span class="nb">dict</span><span class="p">(</span><span class="n">blocked</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="n">sessions</span><span class="p">))</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">_unknowns</span><span class="p">(</span><span class="n">Sanitizer</span><span class="p">(),</span> <span class="nb">dict</span><span class="p">(</span><span class="n">owed</span><span class="p">),</span> <span class="nb">dict</span><span class="p">(</span><span class="n">blocked</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="n">sessions</span><span class="p">))</span>
     <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"weight"</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">)</span></div>
 
 
@@ -808,7 +823,7 @@
 <span class="sd">    &gt;&gt;&gt; 'gh: not logged in' in page and 'could not' in page</span>
 <span class="sd">    True</span>
 <span class="sd">    """</span>
-    <span class="n">safe</span> <span class="o">=</span> <span class="n">_Sanitizer</span><span class="p">(</span><span class="n">aliases</span><span class="p">)</span>
+    <span class="n">safe</span> <span class="o">=</span> <span class="n">Sanitizer</span><span class="p">(</span><span class="n">aliases</span><span class="p">)</span>
     <span class="n">owed</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">owed</span> <span class="ow">or</span> <span class="p">{})</span>
     <span class="n">blocked</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">blocked</span> <span class="ow">or</span> <span class="p">{})</span>
     <span class="n">sessions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sessions</span> <span class="ow">or</span> <span class="p">[])</span>
@@ -838,7 +853,7 @@
     <span class="n">head</span> <span class="o">=</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s2">"&lt;title&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">title</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/title&gt;"</span>
         <span class="s1">'&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;'</span>
-        <span class="sa">f</span><span class="s2">"&lt;style&gt;</span><span class="si">{</span><span class="n">_CSS</span><span class="si">}</span><span class="s2">&lt;/style&gt;"</span>
+        <span class="sa">f</span><span class="s2">"&lt;style&gt;</span><span class="si">{</span><span class="n">CSS</span><span class="si">}</span><span class="s2">&lt;/style&gt;"</span>
     <span class="p">)</span>
     <span class="n">body</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'&lt;main class="sheet"&gt;</span><span class="si">{</span><span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/main&gt;'</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">standalone</span><span class="p">:</span>
@@ -852,7 +867,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_masthead</span><span class="p">(</span>
-    <span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span>
+    <span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span>
     <span class="n">owed</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">blocked</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">sessions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
@@ -950,7 +965,7 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_needs_register</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">owed</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_needs_register</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span> <span class="n">owed</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
         <span class="n">body</span> <span class="o">=</span> <span class="n">_cannot</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="s2">"ol owed"</span><span class="p">,</span> <span class="n">owed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"error"</span><span class="p">),</span> <span class="s2">"nothing is owed"</span><span class="p">)</span>
         <span class="n">figure</span> <span class="o">=</span> <span class="s2">"?"</span>
@@ -991,7 +1006,7 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_free_register</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">blocked</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_free_register</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span> <span class="n">blocked</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
         <span class="n">body</span> <span class="o">=</span> <span class="n">_cannot</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="s2">"ol blocked"</span><span class="p">,</span> <span class="n">blocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"error"</span><span class="p">),</span> <span class="s2">"nothing is waiting"</span><span class="p">)</span>
         <span class="n">figure</span> <span class="o">=</span> <span class="s2">"?"</span>
@@ -1024,7 +1039,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_flight_register</span><span class="p">(</span>
-    <span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span>
+    <span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span>
     <span class="n">sessions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
     <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
@@ -1057,7 +1072,7 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_project_tally</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">sessions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_project_tally</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span> <span class="n">sessions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Where the open sessions actually are. A hundred rows do not answer that; this does."""</span>
     <span class="n">counts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
@@ -1075,7 +1090,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_unknown_register</span><span class="p">(</span>
-    <span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span>
+    <span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span>
     <span class="n">unknowns</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
     <span class="n">unknown_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">owed</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
@@ -1113,7 +1128,7 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_cannot</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">mistaken_for</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_cannot</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">mistaken_for</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""What a register prints when its envelope never listed. Never a zero."""</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s1">'&lt;div class="cannot"&gt;&lt;p class="cannot-mark"&gt;?&lt;/p&gt;&lt;div&gt;'</span>
@@ -1125,7 +1140,7 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_footer</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">_Sanitizer</span><span class="p">,</span> <span class="n">stamp</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_footer</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span> <span class="n">stamp</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">withheld</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="k">if</span> <span class="n">safe</span><span class="o">.</span><span class="n">withheld</span><span class="p">:</span>
         <span class="n">kinds</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">withheld</span><span class="p">)))</span>
@@ -1164,7 +1179,7 @@
 <span class="s2">  --done:#7f8f8a; --done-wash:#1a201e;</span>
 <span class="s2">"""</span>
 
-<span class="n">_CSS</span> <span class="o">=</span> <span class="p">(</span>
+<span class="n">CSS</span> <span class="o">=</span> <span class="p">(</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">:root{</span>
 <span class="sd">  --ground:#eff0ec; --surface:#f8f9f5; --sunk:#e7e9e3;</span>
@@ -1386,6 +1401,13 @@
 <span class="s2">@media (prefers-reduced-motion:reduce){ *{transition:none !important; animation:none !important} }</span>
 <span class="s2">"""</span>
 <span class="p">)</span>
+
+
+<span class="c1">#: Deprecated aliases kept for one release. :data:`CSS` and :class:`Sanitizer` are the</span>
+<span class="c1">#: names to import; these were the private spellings before sibling renderers needed</span>
+<span class="c1">#: them, and they are the same objects.</span>
+<span class="n">_CSS</span> <span class="o">=</span> <span class="n">CSS</span>
+<span class="n">_Sanitizer</span> <span class="o">=</span> <span class="n">Sanitizer</span>
 </pre></div>
 
            </div>

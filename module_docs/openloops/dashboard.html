@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openloops.dashboard &mdash; openloops 0.1.7 documentation</title>
+  <title>openloops.dashboard &mdash; openloops 0.1.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=ca7ad2ea"></script>
+      <script src="../../_static/documentation_options.js?v=22607128"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -59,6 +59,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#openloops.dashboard.DFLT_MAX_SESSIONS"><code class="docutils literal notranslate"><span class="pre">DFLT_MAX_SESSIONS</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.dashboard.DFLT_TITLE"><code class="docutils literal notranslate"><span class="pre">DFLT_TITLE</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.dashboard.GAUGE_FULL_DAYS"><code class="docutils literal notranslate"><span class="pre">GAUGE_FULL_DAYS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openloops.dashboard.Sanitizer"><code class="docutils literal notranslate"><span class="pre">Sanitizer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.dashboard.Sanitizer.text"><code class="docutils literal notranslate"><span class="pre">Sanitizer.text()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openloops.dashboard.Sanitizer.url"><code class="docutils literal notranslate"><span class="pre">Sanitizer.url()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.dashboard.headline_counts"><code class="docutils literal notranslate"><span class="pre">headline_counts()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.dashboard.render_dashboard"><code class="docutils literal notranslate"><span class="pre">render_dashboard()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#openloops.dashboard.unchecked_count"><code class="docutils literal notranslate"><span class="pre">unchecked_count()</span></code></a></li>
@@ -126,12 +131,15 @@ make this page worse than no page. When the count really is zero the section say
 which checks earned that, because a clean board with no provenance is the same lie
 told quietly.</p></li>
 </ol>
-<p>Everything printed goes through <code class="xref py py-class docutils literal notranslate"><span class="pre">_Sanitizer</span></code>, which is <code class="xref py py-func docutils literal notranslate"><span class="pre">openloops.egress</span>
+<p>Everything printed goes through <a class="reference internal" href="#openloops.dashboard.Sanitizer" title="openloops.dashboard.Sanitizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sanitizer</span></code></a>, which is <code class="xref py py-func docutils literal notranslate"><span class="pre">openloops.egress</span>
 <span class="pre">.scrub()</span></code> plus HTML escaping plus a scheme allowlist on every link. A page that carries a
 repository name and an issue title is fine; one that carries a home path or a token is
 the failure <code class="docutils literal notranslate"><span class="pre">openloops.egress</span></code> exists to prevent, and this renderer scrubs its input
 rather than trusting it. A credential-shaped field is <em>withheld and counted</em>, never
 silently dropped — the count is printed in the footer.</p>
+<p><code class="xref py py-data docutils literal notranslate"><span class="pre">CSS</span></code> and <a class="reference internal" href="#openloops.dashboard.Sanitizer" title="openloops.dashboard.Sanitizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sanitizer</span></code></a> are public for sibling renderers — a tool that shows
+a different half of the same picture and wants to look like this page — so that the look
+and the egress rule stay in one place instead of being copied and drifting.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">html</span> <span class="o">=</span> <span class="n">render_dashboard</span><span class="p">({},</span> <span class="p">{},</span> <span class="p">[],</span> <span class="n">made_at</span><span class="o">=</span><span class="s1">'2026-01-01T00:00:00Z'</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="s1">'&lt;title&gt;'</span> <span class="ow">in</span> <span class="n">html</span> <span class="ow">and</span> <span class="s1">'snapshot'</span> <span class="ow">in</span> <span class="n">html</span>
 <span class="go">True</span>
@@ -155,6 +163,39 @@ page that showed all 150-odd would bury the two registers above it.</p>
 <span class="sig-prename descclassname"><span class="pre">openloops.dashboard.</span></span><span class="sig-name descname"><span class="pre">GAUGE_FULL_DAYS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">90</span></span><a class="headerlink" href="#openloops.dashboard.GAUGE_FULL_DAYS" title="Link to this definition"></a></dt>
 <dd><p>Where the age gauge tops out. Ninety days is the point past which the length of the
 bar stops being informative and the number beside it is doing all the work.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openloops.dashboard.Sanitizer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.dashboard.</span></span><span class="sig-name descname"><span class="pre">Sanitizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aliases</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/openloops/dashboard.html#Sanitizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.dashboard.Sanitizer" title="Link to this definition"></a></dt>
+<dd><p>Scrub, then escape. The single path from an envelope to the document.</p>
+<p>Two failures are possible and they are treated differently, exactly as
+<a class="reference internal" href="egress.html#module-openloops.egress" title="openloops.egress"><code class="xref py py-mod docutils literal notranslate"><span class="pre">openloops.egress</span></code></a> prescribes. A home path is <em>rewritten</em> — it is an identifier
+and the tail is the part a reader needs. A credential is <em>withheld and counted</em>: the
+field is replaced by a visible notice naming the pattern class, never the text, and
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">withheld</span></code> is printed in the footer so the run reports it rather than quietly
+losing a field.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Sanitizer</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s1">'a &lt; b'</span><span class="p">)</span>
+<span class="go">'a &amp;lt; b'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s1">'token='</span> <span class="o">+</span> <span class="s1">'ghp_'</span> <span class="o">+</span> <span class="s1">'A'</span> <span class="o">*</span> <span class="mi">36</span><span class="p">)</span>
+<span class="go">'[withheld: credential-shaped text (github_token)]'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">withheld</span>
+<span class="go">['github_token']</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="openloops.dashboard.Sanitizer.text">
+<span class="sig-name descname"><span class="pre">text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/openloops/dashboard.html#Sanitizer.text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.dashboard.Sanitizer.text" title="Link to this definition"></a></dt>
+<dd><p>One field, safe to place in the document.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openloops.dashboard.Sanitizer.url">
+<span class="sig-name descname"><span class="pre">url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/openloops/dashboard.html#Sanitizer.url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.dashboard.Sanitizer.url" title="Link to this definition"></a></dt>
+<dd><p>A link target, or <code class="docutils literal notranslate"><span class="pre">''</span></code> when it is not one this page will follow.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py function">
