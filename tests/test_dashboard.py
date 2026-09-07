@@ -452,3 +452,18 @@ def test_odd_field_values_do_not_break_the_render(bad):
 def test_the_shipped_module_carries_no_home_path():
     module = Path(__file__).resolve().parent.parent / "openloops" / "dashboard.py"
     assert scan_files([module], aliases={}) == []
+
+
+def test_the_stylesheet_and_the_sanitizer_are_public_for_sibling_renderers():
+    """crowsnest renders a live-session page in this design; a copy would drift.
+
+    The private spellings stay bound to the same objects for one release, so a caller
+    that still imports them keeps working while it moves to the public names.
+    """
+    from openloops import dashboard
+
+    assert dashboard.CSS is dashboard._CSS
+    assert dashboard.Sanitizer is dashboard._Sanitizer
+    assert {"CSS", "Sanitizer"} <= set(dashboard.__all__)
+    # And the public name is the one the page is actually rendered with.
+    assert f"<style>{dashboard.CSS}</style>" in page()

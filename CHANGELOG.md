@@ -27,6 +27,9 @@ corresponds to a git version tag (which is also the release published to PyPI).
   executing anything, and every evaluation is time-bounded.
 - `OPENLOOPS_OWNERS` — comma- or space-separated owners to search. Without it the
   authenticated `gh` login is used, and whichever it was is reported on every result.
+- `openloops.dashboard.CSS` and `openloops.dashboard.Sanitizer` are public names, for
+  sibling renderers that want to look like the board and scrub their input the same way.
+  `_CSS` and `_Sanitizer` remain bound to the same objects for one release.
 
 ### Changed
 
