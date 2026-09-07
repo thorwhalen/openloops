@@ -381,6 +381,8 @@ skill is told to prefer those rows when it summarises what is in flight.
 If `open` ever came to mean "a process is running", this would be a session dashboard.
 It is not one, and `claude` already has that view.
 
+**For the live half, there is [crowsnest](https://github.com/thorwhalen/crowsnest).** It reads the session registry and the tail of the same transcripts to say which sessions are running right now and which of them is busy, idle, or stopped waiting on you — and it uses openloops' own `parse_session` to read them, so the two agree about what a session said. The split is the one this section is about: crowsnest answers *what is running now*, openloops answers *what sessions left open and what you owe them*. A session crowsnest calls idle may still be carrying three open loops, and a loop openloops surfaces may belong to a session that exited a week ago.
+
 ### What a digest says — and what it never says
 
 A digest is a dated record of **what one session said**. It carries the session's last

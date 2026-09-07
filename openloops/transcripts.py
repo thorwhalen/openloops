@@ -14,7 +14,9 @@ themselves or left empty.
 
 It never looks at whether a process is running. A session's transcript is a document;
 what openloops reports is what the document says. Liveness is a different tool's job,
-and mixing the two is how a digest store becomes a session dashboard.
+and mixing the two is how a digest store becomes a session dashboard. That tool is
+`crowsnest <https://github.com/thorwhalen/crowsnest>`_, which reads the session registry
+and the tail of these same transcripts to say who is busy, idle or waiting on you.
 
 >>> src = ClaudeCodeTranscripts(root='/nonexistent-dir-for-doctest')
 >>> len(src)

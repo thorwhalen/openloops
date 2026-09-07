@@ -26,12 +26,16 @@ the package exists for:
    which checks earned that, because a clean board with no provenance is the same lie
    told quietly.
 
-Everything printed goes through :class:`_Sanitizer`, which is :func:`openloops.egress
+Everything printed goes through :class:`Sanitizer`, which is :func:`openloops.egress
 .scrub` plus HTML escaping plus a scheme allowlist on every link. A page that carries a
 repository name and an issue title is fine; one that carries a home path or a token is
 the failure ``openloops.egress`` exists to prevent, and this renderer scrubs its input
 rather than trusting it. A credential-shaped field is *withheld and counted*, never
 silently dropped — the count is printed in the footer.
+
+:data:`CSS` and :class:`Sanitizer` are public for sibling renderers — a tool that shows
+a different half of the same picture and wants to look like this page — so that the look
+and the egress rule stay in one place instead of being copied and drifting.
 
     >>> html = render_dashboard({}, {}, [], made_at='2026-01-01T00:00:00Z')
     >>> '<title>' in html and 'snapshot' in html
@@ -51,9 +55,11 @@ from openloops.egress import CredentialFound, scrub
 from openloops.obligations import DISCHARGED, UNKNOWN
 
 __all__ = [
+    "CSS",
     "DFLT_MAX_SESSIONS",
     "DFLT_TITLE",
     "GAUGE_FULL_DAYS",
+    "Sanitizer",
     "headline_counts",
     "render_dashboard",
     "unchecked_count",
@@ -91,7 +97,7 @@ _SECONDS_PER_DAY = 86400.0
 # --------------------------------------------------------------------------------
 
 
-class _Sanitizer:
+class Sanitizer:
     """Scrub, then escape. The single path from an envelope to the document.
 
     Two failures are possible and they are treated differently, exactly as
@@ -101,7 +107,7 @@ class _Sanitizer:
     :attr:`withheld` is printed in the footer so the run reports it rather than quietly
     losing a field.
 
-    >>> s = _Sanitizer()
+    >>> s = Sanitizer()
     >>> s.text('a < b')
     'a &lt; b'
     >>> s.text('token=' + 'ghp_' + 'A' * 36)
@@ -248,7 +254,7 @@ def _rail(chip: str, tone: str, days: int | None, unit: str = "d") -> str:
     )
 
 
-def _ref(safe: _Sanitizer, row: Mapping[str, Any]) -> str:
+def _ref(safe: Sanitizer, row: Mapping[str, Any]) -> str:
     """``owner/name#number``, linked when the payload gave a URL this page will follow."""
     ref = f"{safe.text(row.get('repo'))}#{safe.text(row.get('number'))}"
     url = safe.url(row.get("url"))
@@ -260,7 +266,7 @@ def _ref(safe: _Sanitizer, row: Mapping[str, Any]) -> str:
 
 
 def _obligation_row(
-    safe: _Sanitizer, row: Mapping[str, Any], *, tone: str, chip: str
+    safe: Sanitizer, row: Mapping[str, Any], *, tone: str, chip: str
 ) -> str:
     days = row.get("age_days")
     days = int(days) if isinstance(days, (int, float)) else None
@@ -285,7 +291,7 @@ def _obligation_row(
     return "".join(lines)
 
 
-def _unblocked_row(safe: _Sanitizer, row: Mapping[str, Any]) -> str:
+def _unblocked_row(safe: Sanitizer, row: Mapping[str, Any]) -> str:
     free = row.get("unblocked_days")
     free = int(free) if isinstance(free, (int, float)) else None
     refs = " ".join(safe.text(b.get("ref")) for b in row.get("blockers", ()))
@@ -311,7 +317,7 @@ def _unblocked_row(safe: _Sanitizer, row: Mapping[str, Any]) -> str:
     )
 
 
-def _waiting_row(safe: _Sanitizer, row: Mapping[str, Any]) -> str:
+def _waiting_row(safe: Sanitizer, row: Mapping[str, Any]) -> str:
     """A still-blocked edge, one dense line. The foreign repo is the whole content."""
     open_refs = [
         safe.text(b.get("ref"))
@@ -335,7 +341,7 @@ def _waiting_row(safe: _Sanitizer, row: Mapping[str, Any]) -> str:
     )
 
 
-def _session_row(safe: _Sanitizer, row: Mapping[str, Any], now: datetime | None) -> str:
+def _session_row(safe: Sanitizer, row: Mapping[str, Any], now: datetime | None) -> str:
     days = _days_between(row.get("last_turn"), now)
     low = (row.get("confidence") or "high") != "high"
     tone = "unsure" if low else "flight"
@@ -397,7 +403,7 @@ def _empty(message: str) -> str:
 
 
 def _unknowns(
-    safe: _Sanitizer,
+    safe: Sanitizer,
     owed: Mapping[str, Any],
     blocked: Mapping[str, Any],
     sessions: Sequence[Mapping[str, Any]],
@@ -564,7 +570,7 @@ def unknown_count(
     """
     if not owed.get("listed", False) or not blocked.get("listed", False):
         return None
-    items = _unknowns(_Sanitizer(), dict(owed), dict(blocked), list(sessions))
+    items = _unknowns(Sanitizer(), dict(owed), dict(blocked), list(sessions))
     return sum(int(item.get("weight", 1)) for item in items)
 
 
@@ -707,7 +713,7 @@ def render_dashboard(
     >>> 'gh: not logged in' in page and 'could not' in page
     True
     """
-    safe = _Sanitizer(aliases)
+    safe = Sanitizer(aliases)
     owed = dict(owed or {})
     blocked = dict(blocked or {})
     sessions = list(sessions or [])
@@ -737,7 +743,7 @@ def render_dashboard(
     head = (
         f"<title>{safe.text(title)}</title>"
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
-        f"<style>{_CSS}</style>"
+        f"<style>{CSS}</style>"
     )
     body = f'<main class="sheet">{"".join(parts)}</main>'
     if not standalone:
@@ -750,7 +756,7 @@ def render_dashboard(
 
 
 def _masthead(
-    safe: _Sanitizer,
+    safe: Sanitizer,
     owed: Mapping[str, Any],
     blocked: Mapping[str, Any],
     sessions: Sequence[Mapping[str, Any]],
@@ -848,7 +854,7 @@ def _masthead(
     )
 
 
-def _needs_register(safe: _Sanitizer, owed: Mapping[str, Any]) -> str:
+def _needs_register(safe: Sanitizer, owed: Mapping[str, Any]) -> str:
     if not owed.get("listed", False):
         body = _cannot(safe, "ol owed", owed.get("error"), "nothing is owed")
         figure = "?"
@@ -889,7 +895,7 @@ def _needs_register(safe: _Sanitizer, owed: Mapping[str, Any]) -> str:
     )
 
 
-def _free_register(safe: _Sanitizer, blocked: Mapping[str, Any]) -> str:
+def _free_register(safe: Sanitizer, blocked: Mapping[str, Any]) -> str:
     if not blocked.get("listed", False):
         body = _cannot(safe, "ol blocked", blocked.get("error"), "nothing is waiting")
         figure = "?"
@@ -922,7 +928,7 @@ def _free_register(safe: _Sanitizer, blocked: Mapping[str, Any]) -> str:
 
 
 def _flight_register(
-    safe: _Sanitizer,
+    safe: Sanitizer,
     sessions: Sequence[Mapping[str, Any]],
     now: datetime | None,
     *,
@@ -955,7 +961,7 @@ def _flight_register(
     )
 
 
-def _project_tally(safe: _Sanitizer, sessions: Sequence[Mapping[str, Any]]) -> str:
+def _project_tally(safe: Sanitizer, sessions: Sequence[Mapping[str, Any]]) -> str:
     """Where the open sessions actually are. A hundred rows do not answer that; this does."""
     counts: dict[str, int] = {}
     for row in sessions:
@@ -973,7 +979,7 @@ def _project_tally(safe: _Sanitizer, sessions: Sequence[Mapping[str, Any]]) -> s
 
 
 def _unknown_register(
-    safe: _Sanitizer,
+    safe: Sanitizer,
     unknowns: Sequence[Mapping[str, Any]],
     unknown_count: int | None,
     owed: Mapping[str, Any],
@@ -1011,7 +1017,7 @@ def _unknown_register(
     )
 
 
-def _cannot(safe: _Sanitizer, command: str, error: Any, mistaken_for: str) -> str:
+def _cannot(safe: Sanitizer, command: str, error: Any, mistaken_for: str) -> str:
     """What a register prints when its envelope never listed. Never a zero."""
     return (
         f'<div class="cannot"><p class="cannot-mark">?</p><div>'
@@ -1023,7 +1029,7 @@ def _cannot(safe: _Sanitizer, command: str, error: Any, mistaken_for: str) -> st
     )
 
 
-def _footer(safe: _Sanitizer, stamp: str) -> str:
+def _footer(safe: Sanitizer, stamp: str) -> str:
     withheld = ""
     if safe.withheld:
         kinds = ", ".join(sorted(set(safe.withheld)))
@@ -1062,7 +1068,7 @@ _DARK_TOKENS = """
   --done:#7f8f8a; --done-wash:#1a201e;
 """
 
-_CSS = (
+CSS = (
     """
 :root{
   --ground:#eff0ec; --surface:#f8f9f5; --sunk:#e7e9e3;
@@ -1284,3 +1290,10 @@ b,strong{font-weight:600}
 @media (prefers-reduced-motion:reduce){ *{transition:none !important; animation:none !important} }
 """
 )
+
+
+#: Deprecated aliases kept for one release. :data:`CSS` and :class:`Sanitizer` are the
+#: names to import; these were the private spellings before sibling renderers needed
+#: them, and they are the same objects.
+_CSS = CSS
+_Sanitizer = Sanitizer
