@@ -1,4 +1,0 @@
-openloops._sync
-===============
-.. automodule:: openloops._sync
-   :members:

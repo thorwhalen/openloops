@@ -1,0 +1,29 @@
+openloops.dashboard
+===================
+
+.. automodule:: openloops.dashboard
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      DFLT_TITLE
+      DFLT_MAX_SESSIONS
+      GAUGE_FULL_DAYS
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      headline_counts
+      render_dashboard
+      unchecked_count
+      unknown_count
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Sanitizer
+   

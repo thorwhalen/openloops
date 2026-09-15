@@ -1,4 +1,0 @@
-openloops.blockers
-==================
-.. automodule:: openloops.blockers
-   :members:

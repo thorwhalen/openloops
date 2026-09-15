@@ -1,0 +1,20 @@
+openloops.transcripts
+=====================
+
+.. automodule:: openloops.transcripts
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      claude_projects_dir
+      parse_session
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      ClaudeCodeTranscripts
+      Revisioned
+   

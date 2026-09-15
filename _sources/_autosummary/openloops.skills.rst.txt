@@ -1,0 +1,28 @@
+openloops.skills
+================
+
+.. automodule:: openloops.skills
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      HOST_ENV_VAR
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      agents_dir
+      bundled
+      host_dir
+      install_skills
+      skills_dir
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Asset
+   

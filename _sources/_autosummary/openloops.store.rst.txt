@@ -1,0 +1,26 @@
+openloops.store
+===============
+
+.. automodule:: openloops.store
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      data_dir
+      state_dir
+      default_source
+      digests_store
+      digest_key
+      parse_digest_key
+      load_sync_state
+      save_sync_state
+      sync_state_path
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Utf8TextFiles
+   

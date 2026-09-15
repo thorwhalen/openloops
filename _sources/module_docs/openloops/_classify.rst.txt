@@ -1,4 +1,0 @@
-openloops._classify
-===================
-.. automodule:: openloops._classify
-   :members:

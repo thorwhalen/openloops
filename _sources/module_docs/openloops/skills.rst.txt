@@ -1,4 +1,0 @@
-openloops.skills
-================
-.. automodule:: openloops.skills
-   :members:

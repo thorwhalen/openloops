@@ -1,0 +1,38 @@
+openloops.obligations
+=====================
+
+.. automodule:: openloops.obligations
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      DISCHARGED
+      UNKNOWN
+      OBLIGATION_STATES
+      OBLIGATION_FIELDS
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      configured_owners
+      gh_issues
+      owed
+      parse_verify
+      shell_predicate
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Obligation
+      PredicateOutcome
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+   
+      GhUnavailable
+   

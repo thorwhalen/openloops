@@ -1,0 +1,22 @@
+openloops.job
+=============
+
+.. automodule:: openloops.job
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      DFLT_LABEL
+      DFLT_INTERVAL
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      install
+      uninstall
+      job_status
+      plist_xml
+   

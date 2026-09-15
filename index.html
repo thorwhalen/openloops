@@ -1,326 +1,1273 @@
 
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
-<head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to openloops’s documentation! &mdash; openloops 0.1.8 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
-      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
-      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
 
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<link rel="alternate" type="text/markdown" href="index.html.md">
+<link rel="describedby" href="llms.txt" type="text/markdown">
+    <title>openloops &#8212; openloops</title>
   
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=22607128"></script>
-      <script src="_static/doctools.js?v=fd6eb6e6"></script>
-      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
-      <script src="_static/toggleprompt.js?v=d7ede5d2"></script>
-      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
-      <script src="_static/copybutton.js?v=f281be69"></script>
-    <script src="_static/js/theme.js"></script>
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d75fae25" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/epythet.css?v=93ea43a0" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+
+    <script src="_static/documentation_options.js?v=8618f531"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=fd10adb8"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="openloops" href="module_docs/openloops.html" /> 
-</head>
+    <link rel="next" title="API reference" href="api.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.9" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
 
-          
-          
-          <a href="#" class="icon icon-home">
-            openloops
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops.html">openloops</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/__main__.html">openloops.__main__</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/_classify.html">openloops._classify</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/_sync.html">openloops._sync</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/base.html">openloops.base</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/blockers.html">openloops.blockers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/dashboard.html">openloops.dashboard</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/digest.html">openloops.digest</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/egress.html">openloops.egress</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/job.html">openloops.job</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/obligations.html">openloops.obligations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/skills.html">openloops.skills</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/store.html">openloops.store</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/tools.html">openloops.tools</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/transcripts.html">openloops.transcripts</a></li>
-</ul>
 
-        </div>
-      </div>
-    </nav>
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">openloops</a>
-      </nav>
+  
+    
+  
 
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Welcome to openloops’s documentation!</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
-      </li>
+<a class="navbar-brand logo" href="#">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">openloops</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ai-agents.html">
+    For AI agents
+  </a>
+</li>
+
   </ul>
-  <hr/>
-</div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
-  <section id="welcome-to-openloops-s-documentation">
-<h1>Welcome to openloops’s documentation!<a class="headerlink" href="#welcome-to-openloops-s-documentation" title="Link to this heading"></a></h1>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops.html">openloops</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.BlockedIssue"><code class="docutils literal notranslate"><span class="pre">BlockedIssue</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.Blocker"><code class="docutils literal notranslate"><span class="pre">Blocker</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.ClaudeCodeTranscripts"><code class="docutils literal notranslate"><span class="pre">ClaudeCodeTranscripts</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.CredentialFound"><code class="docutils literal notranslate"><span class="pre">CredentialFound</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.Digest"><code class="docutils literal notranslate"><span class="pre">Digest</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.GhUnavailable"><code class="docutils literal notranslate"><span class="pre">GhUnavailable</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.Locator"><code class="docutils literal notranslate"><span class="pre">Locator</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.Obligation"><code class="docutils literal notranslate"><span class="pre">Obligation</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.PredicateOutcome"><code class="docutils literal notranslate"><span class="pre">PredicateOutcome</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.Session"><code class="docutils literal notranslate"><span class="pre">Session</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.Verdict"><code class="docutils literal notranslate"><span class="pre">Verdict</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.agents_dir"><code class="docutils literal notranslate"><span class="pre">agents_dir()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.asks_the_human"><code class="docutils literal notranslate"><span class="pre">asks_the_human()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.blocked"><code class="docutils literal notranslate"><span class="pre">blocked()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.classify"><code class="docutils literal notranslate"><span class="pre">classify()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.data_dir"><code class="docutils literal notranslate"><span class="pre">data_dir()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.default_source"><code class="docutils literal notranslate"><span class="pre">default_source()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.digest_key"><code class="docutils literal notranslate"><span class="pre">digest_key()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.digests_store"><code class="docutils literal notranslate"><span class="pre">digests_store()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.gh_blocked_by"><code class="docutils literal notranslate"><span class="pre">gh_blocked_by()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.gh_blocked_candidates"><code class="docutils literal notranslate"><span class="pre">gh_blocked_candidates()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.gh_issues"><code class="docutils literal notranslate"><span class="pre">gh_issues()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.headline_counts"><code class="docutils literal notranslate"><span class="pre">headline_counts()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.install_skills"><code class="docutils literal notranslate"><span class="pre">install_skills()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.ls"><code class="docutils literal notranslate"><span class="pre">ls()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.make_digest"><code class="docutils literal notranslate"><span class="pre">make_digest()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.owed"><code class="docutils literal notranslate"><span class="pre">owed()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.parse_session"><code class="docutils literal notranslate"><span class="pre">parse_session()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.parse_verify"><code class="docutils literal notranslate"><span class="pre">parse_verify()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.render"><code class="docutils literal notranslate"><span class="pre">render()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.render_dashboard"><code class="docutils literal notranslate"><span class="pre">render_dashboard()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.retained"><code class="docutils literal notranslate"><span class="pre">retained()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.scrub"><code class="docutils literal notranslate"><span class="pre">scrub()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.shell_predicate"><code class="docutils literal notranslate"><span class="pre">shell_predicate()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.skills_dir"><code class="docutils literal notranslate"><span class="pre">skills_dir()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.state_dir"><code class="docutils literal notranslate"><span class="pre">state_dir()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.status"><code class="docutils literal notranslate"><span class="pre">status()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops.html#openloops.sync"><code class="docutils literal notranslate"><span class="pre">sync()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/__main__.html">openloops.__main__</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/__main__.html#openloops.__main__.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/_classify.html">openloops._classify</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/_classify.html#openloops._classify.ASK_CUES"><code class="docutils literal notranslate"><span class="pre">ASK_CUES</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/_classify.html#openloops._classify.CLOSE_CUES"><code class="docutils literal notranslate"><span class="pre">CLOSE_CUES</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/_classify.html#openloops._classify.CLOSING_CHARS"><code class="docutils literal notranslate"><span class="pre">CLOSING_CHARS</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/_classify.html#openloops._classify.DEFER_CUES"><code class="docutils literal notranslate"><span class="pre">DEFER_CUES</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/_classify.html#openloops._classify.asks_the_human"><code class="docutils literal notranslate"><span class="pre">asks_the_human()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/_classify.html#openloops._classify.classify"><code class="docutils literal notranslate"><span class="pre">classify()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/_classify.html#openloops._classify.ends_with_a_question"><code class="docutils literal notranslate"><span class="pre">ends_with_a_question()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/_classify.html#openloops._classify.find_cues"><code class="docutils literal notranslate"><span class="pre">find_cues()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/_classify.html#openloops._classify.latest_cue"><code class="docutils literal notranslate"><span class="pre">latest_cue()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/_sync.html">openloops._sync</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/_sync.html#openloops._sync.DIGEST_SCHEMA"><code class="docutils literal notranslate"><span class="pre">DIGEST_SCHEMA</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/_sync.html#openloops._sync.sync"><code class="docutils literal notranslate"><span class="pre">sync()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/_sync.html#openloops._sync.sync_report_lines"><code class="docutils literal notranslate"><span class="pre">sync_report_lines()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/base.html">openloops.base</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/base.html#openloops.base.ARCHIVE"><code class="docutils literal notranslate"><span class="pre">ARCHIVE</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/base.html#openloops.base.Digest"><code class="docutils literal notranslate"><span class="pre">Digest</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/base.html#openloops.base.Locator"><code class="docutils literal notranslate"><span class="pre">Locator</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/base.html#openloops.base.OPEN"><code class="docutils literal notranslate"><span class="pre">OPEN</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/base.html#openloops.base.STATES"><code class="docutils literal notranslate"><span class="pre">STATES</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/base.html#openloops.base.Session"><code class="docutils literal notranslate"><span class="pre">Session</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/base.html#openloops.base.Verdict"><code class="docutils literal notranslate"><span class="pre">Verdict</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/blockers.html">openloops.blockers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#discovery-is-a-candidate-list-not-an-answer">Discovery is a candidate list, not an answer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#the-n-1-and-what-bounds-it">The N+1, and what bounds it</a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.BLOCKED"><code class="docutils literal notranslate"><span class="pre">BLOCKED</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.BLOCKED_FIELDS"><code class="docutils literal notranslate"><span class="pre">BLOCKED_FIELDS</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.BLOCKER_STATES"><code class="docutils literal notranslate"><span class="pre">BLOCKER_STATES</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.BlockedIssue"><code class="docutils literal notranslate"><span class="pre">BlockedIssue</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.Blocker"><code class="docutils literal notranslate"><span class="pre">Blocker</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.GhUnavailable"><code class="docutils literal notranslate"><span class="pre">GhUnavailable</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.UNBLOCKED"><code class="docutils literal notranslate"><span class="pre">UNBLOCKED</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.blocked"><code class="docutils literal notranslate"><span class="pre">blocked()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.gh_blocked_by"><code class="docutils literal notranslate"><span class="pre">gh_blocked_by()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/blockers.html#openloops.blockers.gh_blocked_candidates"><code class="docutils literal notranslate"><span class="pre">gh_blocked_candidates()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/dashboard.html">openloops.dashboard</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/dashboard.html#openloops.dashboard.DFLT_MAX_SESSIONS"><code class="docutils literal notranslate"><span class="pre">DFLT_MAX_SESSIONS</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/dashboard.html#openloops.dashboard.DFLT_TITLE"><code class="docutils literal notranslate"><span class="pre">DFLT_TITLE</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/dashboard.html#openloops.dashboard.GAUGE_FULL_DAYS"><code class="docutils literal notranslate"><span class="pre">GAUGE_FULL_DAYS</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/dashboard.html#openloops.dashboard.Sanitizer"><code class="docutils literal notranslate"><span class="pre">Sanitizer</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/dashboard.html#openloops.dashboard.headline_counts"><code class="docutils literal notranslate"><span class="pre">headline_counts()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/dashboard.html#openloops.dashboard.render_dashboard"><code class="docutils literal notranslate"><span class="pre">render_dashboard()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/dashboard.html#openloops.dashboard.unchecked_count"><code class="docutils literal notranslate"><span class="pre">unchecked_count()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/dashboard.html#openloops.dashboard.unknown_count"><code class="docutils literal notranslate"><span class="pre">unknown_count()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/digest.html">openloops.digest</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/digest.html#openloops.digest.SECTION_LIMITS"><code class="docutils literal notranslate"><span class="pre">SECTION_LIMITS</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/digest.html#openloops.digest.make_digest"><code class="docutils literal notranslate"><span class="pre">make_digest()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/digest.html#openloops.digest.render"><code class="docutils literal notranslate"><span class="pre">render()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/egress.html">openloops.egress</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/egress.html#openloops.egress.CREDENTIAL_PATTERNS"><code class="docutils literal notranslate"><span class="pre">CREDENTIAL_PATTERNS</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/egress.html#openloops.egress.CredentialFound"><code class="docutils literal notranslate"><span class="pre">CredentialFound</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/egress.html#openloops.egress.apply_aliases"><code class="docutils literal notranslate"><span class="pre">apply_aliases()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/egress.html#openloops.egress.default_aliases"><code class="docutils literal notranslate"><span class="pre">default_aliases()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/egress.html#openloops.egress.find_absolute_paths"><code class="docutils literal notranslate"><span class="pre">find_absolute_paths()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/egress.html#openloops.egress.find_credentials"><code class="docutils literal notranslate"><span class="pre">find_credentials()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/egress.html#openloops.egress.rewrite_paths"><code class="docutils literal notranslate"><span class="pre">rewrite_paths()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/egress.html#openloops.egress.scan"><code class="docutils literal notranslate"><span class="pre">scan()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/egress.html#openloops.egress.scan_files"><code class="docutils literal notranslate"><span class="pre">scan_files()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/egress.html#openloops.egress.scrub"><code class="docutils literal notranslate"><span class="pre">scrub()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/job.html">openloops.job</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/job.html#openloops.job.DFLT_INTERVAL"><code class="docutils literal notranslate"><span class="pre">DFLT_INTERVAL</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/job.html#openloops.job.DFLT_LABEL"><code class="docutils literal notranslate"><span class="pre">DFLT_LABEL</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/job.html#openloops.job.install"><code class="docutils literal notranslate"><span class="pre">install()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/job.html#openloops.job.job_status"><code class="docutils literal notranslate"><span class="pre">job_status()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/job.html#openloops.job.plist_xml"><code class="docutils literal notranslate"><span class="pre">plist_xml()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/job.html#openloops.job.uninstall"><code class="docutils literal notranslate"><span class="pre">uninstall()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/obligations.html">openloops.obligations</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#trust-boundary-stated-here-because-it-should-be-read-not-discovered">Trust boundary — stated here because it should be read, not discovered</a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.DISCHARGED"><code class="docutils literal notranslate"><span class="pre">DISCHARGED</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.GhUnavailable"><code class="docutils literal notranslate"><span class="pre">GhUnavailable</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.OBLIGATION_FIELDS"><code class="docutils literal notranslate"><span class="pre">OBLIGATION_FIELDS</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.OBLIGATION_STATES"><code class="docutils literal notranslate"><span class="pre">OBLIGATION_STATES</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.Obligation"><code class="docutils literal notranslate"><span class="pre">Obligation</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.PredicateOutcome"><code class="docutils literal notranslate"><span class="pre">PredicateOutcome</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.UNKNOWN"><code class="docutils literal notranslate"><span class="pre">UNKNOWN</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.configured_owners"><code class="docutils literal notranslate"><span class="pre">configured_owners()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.gh_issues"><code class="docutils literal notranslate"><span class="pre">gh_issues()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.owed"><code class="docutils literal notranslate"><span class="pre">owed()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.parse_verify"><code class="docutils literal notranslate"><span class="pre">parse_verify()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/obligations.html#openloops.obligations.shell_predicate"><code class="docutils literal notranslate"><span class="pre">shell_predicate()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/skills.html">openloops.skills</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/skills.html#openloops.skills.Asset"><code class="docutils literal notranslate"><span class="pre">Asset</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/skills.html#openloops.skills.HOST_ENV_VAR"><code class="docutils literal notranslate"><span class="pre">HOST_ENV_VAR</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/skills.html#openloops.skills.agents_dir"><code class="docutils literal notranslate"><span class="pre">agents_dir()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/skills.html#openloops.skills.bundled"><code class="docutils literal notranslate"><span class="pre">bundled()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/skills.html#openloops.skills.host_dir"><code class="docutils literal notranslate"><span class="pre">host_dir()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/skills.html#openloops.skills.install_skills"><code class="docutils literal notranslate"><span class="pre">install_skills()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/skills.html#openloops.skills.skills_dir"><code class="docutils literal notranslate"><span class="pre">skills_dir()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/store.html">openloops.store</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/store.html#openloops.store.Utf8TextFiles"><code class="docutils literal notranslate"><span class="pre">Utf8TextFiles</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/store.html#openloops.store.data_dir"><code class="docutils literal notranslate"><span class="pre">data_dir()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/store.html#openloops.store.default_source"><code class="docutils literal notranslate"><span class="pre">default_source()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/store.html#openloops.store.digest_key"><code class="docutils literal notranslate"><span class="pre">digest_key()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/store.html#openloops.store.digests_store"><code class="docutils literal notranslate"><span class="pre">digests_store()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/store.html#openloops.store.load_sync_state"><code class="docutils literal notranslate"><span class="pre">load_sync_state()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/store.html#openloops.store.parse_digest_key"><code class="docutils literal notranslate"><span class="pre">parse_digest_key()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/store.html#openloops.store.save_sync_state"><code class="docutils literal notranslate"><span class="pre">save_sync_state()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/store.html#openloops.store.state_dir"><code class="docutils literal notranslate"><span class="pre">state_dir()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/store.html#openloops.store.sync_state_path"><code class="docutils literal notranslate"><span class="pre">sync_state_path()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/tools.html">openloops.tools</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.ROW_FIELDS"><code class="docutils literal notranslate"><span class="pre">ROW_FIELDS</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.blocked"><code class="docutils literal notranslate"><span class="pre">blocked()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.dashboard"><code class="docutils literal notranslate"><span class="pre">dashboard()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.ls"><code class="docutils literal notranslate"><span class="pre">ls()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.owed"><code class="docutils literal notranslate"><span class="pre">owed()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.status"><code class="docutils literal notranslate"><span class="pre">status()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/tools.html#openloops.tools.sync"><code class="docutils literal notranslate"><span class="pre">sync()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/openloops/transcripts.html">openloops.transcripts</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/transcripts.html#openloops.transcripts.ClaudeCodeTranscripts"><code class="docutils literal notranslate"><span class="pre">ClaudeCodeTranscripts</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/transcripts.html#openloops.transcripts.Revisioned"><code class="docutils literal notranslate"><span class="pre">Revisioned</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/transcripts.html#openloops.transcripts.claude_projects_dir"><code class="docutils literal notranslate"><span class="pre">claude_projects_dir()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/openloops/transcripts.html#openloops.transcripts.parse_session"><code class="docutils literal notranslate"><span class="pre">parse_session()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</div>
-</section>
-<section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
-</ul>
-<p>Release: 0.1.8</p>
-<p>Last change: Sep 07, 2026</p>
-</section>
-
-
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="module_docs/openloops.html" class="btn btn-neutral float-right" title="openloops" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+</nav></div>
+      
     </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
 
-  <hr/>
-
-  <div role="contentinfo">
-    <p></p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
-      </div>
-    </section>
-  </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
+      
+      
+        <div class="navbar-item">
 
-</body>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/thorwhalen/openloops" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ai-agents.html">
+    For AI agents
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/thorwhalen/openloops" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none"></div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <!-- generated by epythet -->
+<section id="openloops">
+<h1>openloops<a class="headerlink" href="#openloops" title="Link to this heading">#</a></h1>
+<p>An <strong>open loop</strong> is a commitment that outlived the session that made it and that
+nothing is watching. An agent said it would come back to something and the message
+scrolled away. An agent got blocked on you and filed an issue you never re-read. An
+agent found the real fix belonged in another repository, filed it there, wrote a
+workaround here, and nobody ever told this repository the blocker was closed.</p>
+<p><code class="docutils literal notranslate"><span class="pre">openloops</span></code> finds those and re-checks them. It answers three questions and nothing
+else. It never writes: it does not close, reopen, relabel or comment on anything,
+anywhere, and there is no local database — the transcript, the label and the
+dependency edge <em>are</em> the records.</p>
+<p><strong>The surface most people want is not a command.</strong> If you delegate development to
+agents, what you want is an agent that runs the commands and tells you what matters.
+That is what to install first; the <code class="docutils literal notranslate"><span class="pre">ol</span></code> command underneath it is plumbing, and it is
+documented further down for when you want it directly.</p>
+<section id="start-here-install-the-skills-then-ask-your-agent">
+<h2>Start here: install the skills, then ask your agent<a class="headerlink" href="#start-here-install-the-skills-then-ask-your-agent" title="Link to this heading">#</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>openloops<span class="w">        </span><span class="c1"># Python 3.10+. Puts an `ol` command on your PATH.</span>
+ol<span class="w"> </span>install-skills<span class="w">            </span><span class="c1"># link the skills and the subagent into ~/.claude</span>
+<span class="w">                             </span><span class="c1"># --only openloops,openloops-sweep to skip the capture skill</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">installed</span> <span class="n">into</span> <span class="o">~/.</span><span class="n">claude</span>
+  <span class="n">method</span><span class="p">:</span> <span class="n">symlink</span>   <span class="n">install</span><span class="p">:</span> <span class="mi">3</span>   <span class="n">ok</span><span class="p">:</span> <span class="mi">0</span>   <span class="n">conflict</span><span class="p">:</span> <span class="mi">0</span>
+
+<span class="n">install</span>  <span class="n">skill</span>  <span class="n">openloops</span>                 <span class="ow">not</span> <span class="n">present</span>
+                  <span class="o">-&gt;</span> <span class="o">~/.</span><span class="n">claude</span><span class="o">/</span><span class="n">skills</span><span class="o">/</span><span class="n">openloops</span>
+<span class="n">install</span>  <span class="n">skill</span>  <span class="n">openloops</span><span class="o">-</span><span class="n">needs</span><span class="o">-</span><span class="n">human</span>     <span class="ow">not</span> <span class="n">present</span>
+                  <span class="o">-&gt;</span> <span class="o">~/.</span><span class="n">claude</span><span class="o">/</span><span class="n">skills</span><span class="o">/</span><span class="n">openloops</span><span class="o">-</span><span class="n">needs</span><span class="o">-</span><span class="n">human</span>
+<span class="n">install</span>  <span class="n">agent</span>  <span class="n">openloops</span><span class="o">-</span><span class="n">sweep</span>           <span class="ow">not</span> <span class="n">present</span>
+                  <span class="o">-&gt;</span> <span class="o">~/.</span><span class="n">claude</span><span class="o">/</span><span class="n">agents</span><span class="o">/</span><span class="n">openloops</span><span class="o">-</span><span class="n">sweep</span><span class="o">.</span><span class="n">md</span>
+</pre></div>
+</div>
+<p>Then open a coding session and ask, in whatever words you would have used anyway:</p>
+<blockquote>
+<div><p><strong>what needs my attention?</strong></p>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>## Needs you now
+- CI secrets are not provisioned on acme/widget — acme/widget#1, 23 days old. One
+  `gh secret set PYPI_PASSWORD --repo acme/widget` and the publish job stops
+  failing on merge.
+- Decide whether the parser ships in 2.0 or waits — acme/parser#4, 2 days old.
+  A judgement call, so no check can ever discharge it; it sits here until you answer.
+- Unchecked: acme/widget#9. Its predicate runs the doctests against a live
+  third-party fetch and timed out at 20s. Not open, not done — nothing observed it.
+
+## Free to proceed
+- acme/widget#109 — every blocker closed. acme/engine#15 has been closed for 5 days
+  and nothing has said so. The rename workaround in widget can come out.
+- acme/engine#7 — the deploy key is there and the check now passes. The issue is
+  merely still open. I have not closed it.
+
+## In flight
+- widget: two sessions, the 2.0 parser and an egress scrubbing pass.
+- parser, infra, engine: one session each, none of them waiting on you.
+- Two widget issues wait on acme/engine and widgets/aix. Nothing for you there.
+
+2 need you, 2 are free to start, 1 could not be checked.
+</pre></div>
+</div>
+<p>That answer is a <strong>synthesis, not a paste</strong> — the skill asks for exactly that, and an
+agent that hands you three screens of command output has failed to use it. Every row
+behind it is one the <code class="docutils literal notranslate"><span class="pre">ol</span></code> commands printed; you can see the same rows raw, in the
+plumbing sections below.</p>
+<p>Ask again tomorrow and it is a different answer, because <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code> and <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">blocked</span></code>
+re-run each obligation’s check and re-resolve each blocker edge before answering. That
+re-check is the whole product; everything else is a list you could have got from <code class="docutils literal notranslate"><span class="pre">gh</span></code>.</p>
+<section id="two-things-to-set-up-once">
+<h3>Two things to set up once<a class="headerlink" href="#two-things-to-set-up-once" title="Link to this heading">#</a></h3>
+<p><strong>The GitHub CLI, logged in.</strong> Two of the three questions are answered out of GitHub, so
+they need <code class="docutils literal notranslate"><span class="pre">gh</span></code> on your PATH and authenticated. The session-digest half needs nothing at
+all — no model, no network, no account, no configuration.</p>
+<p><strong>Which repositories you mean.</strong> Left alone, the fleet is whatever login <code class="docutils literal notranslate"><span class="pre">gh</span></code> is
+authenticated as. If you work across an organisation, that is a count that looks clean
+and is wrong, so say so once:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">OPENLOOPS_OWNERS</span><span class="o">=</span><span class="s2">"your-login some-org another-org"</span>
+</pre></div>
+</div>
+<p>Every result prints the owners it used, and the read skill is told to check that line
+and tell you when it looks too narrow. More on the resolution order below.</p>
+</section>
+<section id="what-got-installed">
+<h3>What got installed<a class="headerlink" href="#what-got-installed" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Kind</p></th>
+<th class="head"><p>What it is for</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">openloops</span></code></p></td>
+<td><p>skill</p></td>
+<td><p><strong>the read side.</strong> Teaches an agent which of the three commands answers which question, how to synthesise the three into one page, and — most of all — never to round a <code class="docutils literal notranslate"><span class="pre">?</span></code> into a clean answer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">openloops-needs-human</span></code></p></td>
+<td><p>skill</p></td>
+<td><p><strong>the capture side.</strong> Teaches an agent to file a <code class="docutils literal notranslate"><span class="pre">manual-task</span></code> issue, with a re-checkable predicate, at the moment it gets blocked on you. Without it, <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code> has nothing to read.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">openloops-sweep</span></code></p></td>
+<td><p>subagent</p></td>
+<td><p>the same sweep, run in a fresh context, returning a page instead of three screens. For the session you keep open all day.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">~/.claude</span></code> is Claude Code’s config directory, and <code class="docutils literal notranslate"><span class="pre">CLAUDE_CONFIG_DIR</span></code> is honoured if
+you have moved it. Any other agent host: <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">install-skills</span> <span class="pre">--target</span> <span class="pre">DIR</span></code>. They are
+plain markdown files with YAML front matter; nothing about them is Claude-specific
+except where they get installed.</p>
+<p><strong>Re-running it changes nothing.</strong> Each asset is a symlink into the installed package,
+so <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-U</span> <span class="pre">openloops</span></code> upgrades the skills too, and a second <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">install-skills</span></code>
+reads <code class="docutils literal notranslate"><span class="pre">ok:</span> <span class="pre">3</span></code>. Where symlinks are unavailable — Windows without Developer Mode — it
+copies instead, and the report says which happened rather than pretending they are the
+same thing.</p>
+<p><strong>Nothing already there is ever overwritten.</strong> A destination holding something that is
+not ours is reported and left exactly as it was:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">installed</span> <span class="n">into</span> <span class="o">~/.</span><span class="n">claude</span>
+  <span class="n">method</span><span class="p">:</span> <span class="n">symlink</span>   <span class="n">install</span><span class="p">:</span> <span class="mi">2</span>   <span class="n">ok</span><span class="p">:</span> <span class="mi">0</span>   <span class="n">conflict</span><span class="p">:</span> <span class="mi">1</span>
+
+<span class="n">conflict</span> <span class="n">skill</span>  <span class="n">openloops</span>                 <span class="n">something</span> <span class="k">else</span> <span class="k">with</span> <span class="n">this</span> <span class="n">name</span> <span class="ow">is</span> <span class="n">already</span> <span class="n">there</span>
+                  <span class="o">-&gt;</span> <span class="o">~/.</span><span class="n">claude</span><span class="o">/</span><span class="n">skills</span><span class="o">/</span><span class="n">openloops</span>
+<span class="n">install</span>  <span class="n">skill</span>  <span class="n">openloops</span><span class="o">-</span><span class="n">needs</span><span class="o">-</span><span class="n">human</span>     <span class="ow">not</span> <span class="n">present</span>
+                  <span class="o">-&gt;</span> <span class="o">~/.</span><span class="n">claude</span><span class="o">/</span><span class="n">skills</span><span class="o">/</span><span class="n">openloops</span><span class="o">-</span><span class="n">needs</span><span class="o">-</span><span class="n">human</span>
+<span class="n">install</span>  <span class="n">agent</span>  <span class="n">openloops</span><span class="o">-</span><span class="n">sweep</span>           <span class="ow">not</span> <span class="n">present</span>
+                  <span class="o">-&gt;</span> <span class="o">~/.</span><span class="n">claude</span><span class="o">/</span><span class="n">agents</span><span class="o">/</span><span class="n">openloops</span><span class="o">-</span><span class="n">sweep</span><span class="o">.</span><span class="n">md</span>
+
+<span class="n">conflict</span> <span class="n">means</span> <span class="n">nothing</span> <span class="n">was</span> <span class="n">written</span> <span class="n">there</span><span class="o">.</span> <span class="n">Look</span> <span class="n">at</span> <span class="n">the</span> <span class="n">file</span><span class="p">,</span> <span class="n">then</span> <span class="n">re</span><span class="o">-</span><span class="n">run</span> <span class="k">with</span> <span class="o">--</span><span class="n">force</span> <span class="n">to</span> <span class="n">replace</span> <span class="n">it</span><span class="o">.</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ol<span class="w"> </span>install-skills<span class="w"> </span>--dry-run<span class="w">     </span><span class="c1"># print the plan, touch nothing</span>
+ol<span class="w"> </span>install-skills<span class="w"> </span>--copy<span class="w">        </span><span class="c1"># copy instead of link (stops tracking upgrades)</span>
+ol<span class="w"> </span>install-skills<span class="w"> </span>--force<span class="w">       </span><span class="c1"># replace what is there — after you have looked at it</span>
+ol<span class="w"> </span>install-skills<span class="w"> </span>--target<span class="w"> </span>DIR<span class="w">  </span><span class="c1"># some other agent host's config directory</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="the-sweep-subagent-for-the-session-you-keep-open-all-day">
+<h2>The sweep subagent, for the session you keep open all day<a class="headerlink" href="#the-sweep-subagent-for-the-session-you-keep-open-all-day" title="Link to this heading">#</a></h2>
+<p>The session you want to have this conversation in is a long one: the master session you
+leave open and come back to. Running the sweep inline fills that session’s context with
+command output that is stale ten minutes later, and does it again every time you ask.</p>
+<p><code class="docutils literal notranslate"><span class="pre">openloops-sweep</span></code> is the fix, and it is one file. It runs the three commands in its own
+fresh context and returns only the synthesis, so the tenth “what needs my attention?” of
+the day costs the main session the same as the first — about a page — no matter how long
+the conversation has run.</p>
+<p>The read skill dispatches to it when it is installed. Inline is still right for a one-off
+question, or when you are about to drill into one row.</p>
+</section>
+<section id="the-capture-skill-and-why-ol-owed-has-anything-to-read">
+<h2>The capture skill, and why <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code> has anything to read<a class="headerlink" href="#the-capture-skill-and-why-ol-owed-has-anything-to-read" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code> reads open issues labelled <code class="docutils literal notranslate"><span class="pre">manual-task</span></code>. On a fresh machine there are none,
+and there is no amount of reading that will produce any: <strong>something has to file them.</strong></p>
+<p>That something is <code class="docutils literal notranslate"><span class="pre">openloops-needs-human</span></code>, installed above. It fires at the moment an
+agent gets blocked on you — a secret it cannot write, a permission it does not have, a
+decision that is yours, a recorded decision that now looks wrong — and files the blocker
+as a labelled issue in the affected repository <em>before</em> writing the hand-back message
+you were never going to re-read.</p>
+<blockquote>
+<div><p><strong>Did openloops file this issue?</strong> No. <strong>openloops never writes to GitHub.</strong> The
+<code class="docutils literal notranslate"><span class="pre">manual-task</span></code> issues it reads are filed by whatever you have told your coding agents to
+do when they get blocked on you, running under your own <code class="docutils literal notranslate"><span class="pre">gh</span></code> credentials; the capture
+skill is one such thing and you can point yours at anything else. If an issue appeared
+that you did not write, an agent wrote it, and that is the system working. openloops
+only reads them back.</p>
+</div></blockquote>
+<p>The label is the whole storage design. It outlives the session, it is queryable from a
+terminal or a phone with every session stopped, and it needs no database to disagree
+with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gh<span class="w"> </span>search<span class="w"> </span>issues<span class="w"> </span>--owner<span class="w"> </span>acme<span class="w"> </span>--label<span class="w"> </span>manual-task<span class="w"> </span>--state<span class="w"> </span>open
+</pre></div>
+</div>
+<p>What <code class="docutils literal notranslate"><span class="pre">openloops</span></code> adds to that one-liner is the re-check — and the re-check only works if
+the issue carries something to run.</p>
+<section id="the-field-that-decides-whether-an-obligation-can-ever-be-closed">
+<h3>The field that decides whether an obligation can ever be closed<a class="headerlink" href="#the-field-that-decides-whether-an-obligation-can-ever-be-closed" title="Link to this heading">#</a></h3>
+<p><strong>An obligation without a predicate can never be re-checked.</strong> It will sit at <code class="docutils literal notranslate"><span class="pre">open</span></code>
+forever, correctly, because nothing openloops can run would ever observe it as done. The
+capture skill writes these; it is worth two minutes to know what a good one looks like,
+because you are the one who will read the count.</p>
+<p>Obligations get discharged <strong>out of band.</strong> Somebody adds a deploy key in a web UI,
+pays an invoice, answers in chat. None of that emits an event anyone is listening to,
+so the issue sits open for months describing something that was done in five minutes.
+A stale row annoys; a phantom row destroys the count, and the count is the whole
+product.</p>
+<p>So each obligation carries its own answer, in its body, as a shell command whose <strong>exit
+status is the question</strong>:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gs">**Verify:**</span> <span class="sb">`gh secret list --repo OWNER/REPO --json name -q '.[].name' | grep -qx PYPI_PASSWORD`</span>
+</pre></div>
+</div>
+<p>The rules the parser actually applies, in the order they bite:</p>
+<ul class="simple">
+<li><p>The field is <code class="docutils literal notranslate"><span class="pre">Verify:</span></code> at the start of a line. The <code class="docutils literal notranslate"><span class="pre">**</span></code> bold markers are optional —
+the field is the contract, not its markup.</p></li>
+<li><p><strong>The predicate is the first backtick code span in the field.</strong> Everything outside it
+is prose.</p></li>
+<li><p><strong>Fenced and indented code blocks are ignored</strong> when looking for the field, so an
+issue that quotes this format in a <code class="docutils literal notranslate"><span class="pre">&lt;details&gt;</span></code> block does not get the example run
+instead of its own predicate.</p></li>
+<li><p><strong>A field that begins <code class="docutils literal notranslate"><span class="pre">none</span> <span class="pre">possible</span></code>, <code class="docutils literal notranslate"><span class="pre">none</span></code>, <code class="docutils literal notranslate"><span class="pre">n/a</span></code>, <code class="docutils literal notranslate"><span class="pre">no</span> <span class="pre">predicate</span></code> or <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">possible</span></code> yields no command, even if the prose that follows contains a code span.</strong>
+This matters: the natural way to write that sentence mentions <code class="docutils literal notranslate"><span class="pre">`gh`</span></code> or
+<code class="docutils literal notranslate"><span class="pre">`true`</span></code>, and both exit <code class="docutils literal notranslate"><span class="pre">0</span></code>, which would report a live obligation as done. Use it
+for genuine judgement calls.</p></li>
+<li><p>A field with a backtick but no closed code span is <em>malformed</em>, and reads <code class="docutils literal notranslate"><span class="pre">?</span></code> rather
+than <code class="docutils literal notranslate"><span class="pre">open</span></code> — a typo should not look like an answer.</p></li>
+</ul>
+<p>What makes a good one:</p>
+<ul class="simple">
+<li><p><strong>It observes the world, not the issue.</strong> <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">secret</span> <span class="pre">list</span> <span class="pre">…</span></code>, <code class="docutils literal notranslate"><span class="pre">curl</span> <span class="pre">-fsS</span> <span class="pre">https://…</span></code>,
+<code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">api</span> <span class="pre">repos/…</span></code>. Never something that reads the issue itself: closing an issue is not
+doing the thing.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">0</span></code> means done and nothing else.</strong> Non-zero for anything short of done.</p></li>
+<li><p><strong>It fails loudly when it cannot check.</strong> openloops already catches the common
+shapes — exit <code class="docutils literal notranslate"><span class="pre">126</span></code>/<code class="docutils literal notranslate"><span class="pre">127</span></code>, death by signal, and stderr saying <code class="docutils literal notranslate"><span class="pre">command</span> <span class="pre">not</span> <span class="pre">found</span></code>,
+<code class="docutils literal notranslate"><span class="pre">bad</span> <span class="pre">credentials</span></code>, <code class="docutils literal notranslate"><span class="pre">HTTP</span> <span class="pre">401</span></code>, <code class="docutils literal notranslate"><span class="pre">could</span> <span class="pre">not</span> <span class="pre">resolve</span> <span class="pre">host</span></code> and friends — and turns them
+into <code class="docutils literal notranslate"><span class="pre">?</span></code> rather than <code class="docutils literal notranslate"><span class="pre">open</span></code>, because a check that never reached the world has not
+observed anything. Write yours so it lands in one of those rather than silently
+exiting <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
+<li><p><strong>It finishes fast.</strong> Every evaluation is time-bounded (20s by default) and a timeout
+is <code class="docutils literal notranslate"><span class="pre">?</span></code>, not an answer.</p></li>
+</ul>
+<p>One honest limit: predicates are POSIX shell. On a shell that cannot parse one, the
+command exits non-zero and the row reads <code class="docutils literal notranslate"><span class="pre">open</span></code>. That is the safe direction to be wrong
+in, and it is why the exit status is always on screen.</p>
+</section>
+</section>
+<section id="means-nothing-was-checked-read-this-once">
+<h2><code class="docutils literal notranslate"><span class="pre">?</span></code> means nothing was checked — read this once<a class="headerlink" href="#means-nothing-was-checked-read-this-once" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code> and <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">blocked</span></code> each report <strong>three</strong> states, never two, and the third is
+<code class="docutils literal notranslate"><span class="pre">unknown</span></code>, printed <code class="docutils literal notranslate"><span class="pre">?</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">?</span></code> is not a rounding error. A tool that says “nothing owed” because <code class="docutils literal notranslate"><span class="pre">gh</span></code> was missing,
+or “nothing is waiting” because the network was down, is worse than no tool: it hands
+you a clean board you did not earn, and you stop looking. So <code class="docutils literal notranslate"><span class="pre">unknown</span></code> is never
+collapsed into either of the other states — not into the alarming one, not into the
+reassuring one — and every row that reads <code class="docutils literal notranslate"><span class="pre">?</span></code> prints <em>why</em> on the next line: a timeout,
+a missing <code class="docutils literal notranslate"><span class="pre">gh</span></code>, an untrusted owner, a malformed predicate.</p>
+<p>When the listing itself fails there are no rows to mark, so the whole command says so
+and refuses to print a count:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>owed ?  could not check - gh: not logged in
+</pre></div>
+</div>
+<p>That refusal is the single most important design decision in the package, and the read
+skill spends more words on it than on anything else: an agent that answers “nothing
+owed” when rows read <code class="docutils literal notranslate"><span class="pre">?</span></code> has told the exact lie this package exists to prevent.</p>
+<p>One disambiguation, because the character appears in two places: the <code class="docutils literal notranslate"><span class="pre">?</span></code> in the second
+column of <code class="docutils literal notranslate"><span class="pre">ol</span></code>’s own output is <strong>not</strong> this. It means low confidence — the session
+never said it was finished — and it is explained under <code class="docutils literal notranslate"><span class="pre">ol</span></code> below. The digest half
+checks nothing against the world by design, so it has nothing to be unable to check.</p>
+</section>
+<section id="before-you-run-it-this-executes-text-from-an-issue-body">
+<h2>Before you run it: this executes text from an issue body<a class="headerlink" href="#before-you-run-it-this-executes-text-from-an-issue-body" title="Link to this heading">#</a></h2>
+<p>Evaluating a predicate means <strong>running a command that came out of a GitHub issue</strong> —
+whether you typed <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code> or an agent did. That is a real capability, and it is
+bounded in five ways, all of them visible:</p>
+<ul class="simple">
+<li><p><strong>Only owners you configured.</strong> A predicate runs only when the issue’s repository
+owner is trusted, which defaults to exactly the owners you searched — so widening the
+search never quietly widens what runs. A row outside that set reads <code class="docutils literal notranslate"><span class="pre">?</span></code>: never
+<code class="docutils literal notranslate"><span class="pre">open</span></code>, because nothing checked it, and never <code class="docutils literal notranslate"><span class="pre">done</span></code>, because nothing ran. In Python
+it is <code class="docutils literal notranslate"><span class="pre">trusted_owners=</span></code>; on the CLI it follows <code class="docutils literal notranslate"><span class="pre">--owners</span></code>.</p></li>
+<li><p><strong>The command is always printed next to its verdict</strong>, in full and never abbreviated,
+so nothing executes invisibly and you can disagree with the answer.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span> <span class="pre">--no-verify</span></code> lists without executing anything.</strong> Every row that has a
+predicate then reads <code class="docutils literal notranslate"><span class="pre">?</span></code>, because that is what is true about it. The read skill is
+told to reach for it on a machine that is not yours, or after you have just added an
+owner whose issues neither of you has read.</p></li>
+<li><p><strong>Every evaluation is time-bounded</strong>, and a timeout is <code class="docutils literal notranslate"><span class="pre">?</span></code> rather than an answer. On
+POSIX the predicate runs in its own process group and the timeout kills the group, so
+anything it started dies with it. On Windows only the shell itself is killed — a
+predicate that backgrounds work can outlive its timeout there. That is a platform
+limit worth knowing rather than a promise broken quietly.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">run_predicate=</span></code> replaces the evaluator entirely</strong>, and <code class="docutils literal notranslate"><span class="pre">issues_source=</span></code> the reader.</p></li>
+</ul>
+<p>The default is to check, and that is deliberate rather than an oversight: not checking
+has a silent failure mode (a count quietly full of things you finished weeks ago) and
+checking has a loud one (a command you can see on screen).</p>
+</section>
+<hr class="docutils" />
+<section id="the-plumbing-the-ol-command">
+<h2>The plumbing: the <code class="docutils literal notranslate"><span class="pre">ol</span></code> command<a class="headerlink" href="#the-plumbing-the-ol-command" title="Link to this heading">#</a></h2>
+<p>This is what the skills call. It is a perfectly good thing to type yourself — it is how
+the author uses it half the time — but if you came here wanting an overview of what your
+agents are doing, the section at the top is the one you want.</p>
+<section id="which-command-answers-which-question">
+<h3>Which command answers which question<a class="headerlink" href="#which-command-answers-which-question" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>You want to know</p></th>
+<th class="head"><p>Run</p></th>
+<th class="head"><p>Needs <code class="docutils literal notranslate"><span class="pre">gh</span></code>?</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>What did my sessions leave open?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ol</span></code></p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-odd"><td><p>What do I still owe my agents?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code></p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-even"><td><p>What is waiting on another repo — and what is not any more?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">blocked</span></code></p></td>
+<td><p>yes</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Everything else is a variation on those:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ol<span class="w"> </span>ls<span class="w"> </span>--state<span class="w"> </span>all<span class="w">           </span><span class="c1"># every digest, newest first</span>
+ol<span class="w"> </span>ls<span class="w"> </span>--confidence<span class="w"> </span>high<span class="w">     </span><span class="c1"># drop the ones open only because nothing said otherwise</span>
+ol<span class="w"> </span>show<span class="w"> </span>2b1f<span class="w">                </span><span class="c1"># one digest, by session id or a unique prefix</span>
+ol<span class="w"> </span>status<span class="w">                   </span><span class="c1"># where the digests are, how many, how stale the cache is</span>
+ol<span class="w"> </span>dashboard<span class="w"> </span>--out<span class="w"> </span>b.html<span class="w">   </span><span class="c1"># all three answers as one self-contained HTML page</span>
+ol<span class="w"> </span>install-job<span class="w">              </span><span class="c1"># run the digest sync every 15 minutes (macOS launchd)</span>
+</pre></div>
+</div>
+<p>Every block of command output below came out of the shipped renderers. Repository,
+project and machine names have been replaced with generic ones; nothing else has been
+touched.</p>
+</section>
+</section>
+<section id="ol-what-your-sessions-left-open">
+<h2><code class="docutils literal notranslate"><span class="pre">ol</span></code> — what your sessions left open<a class="headerlink" href="#ol-what-your-sessions-left-open" title="Link to this heading">#</a></h2>
+<p>Claude Code keeps a full JSONL transcript of every session, then garbage-collects it
+after about a month. Meanwhile the thing you actually wanted from that session — what
+it did, what it left for you, how to get back to it — was one paragraph at the end.
+<code class="docutils literal notranslate"><span class="pre">ol</span></code> reads the transcripts, writes one short dated markdown digest per session, and
+keeps the digests. It is a <strong>retention</strong> device, not a dashboard.</p>
+<p>Bare <code class="docutils literal notranslate"><span class="pre">ol</span></code> syncs and then prints what is open:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>2026-08-27 10:05   015dcf33  widget                ship the 2.0 parser
+2026-08-27 09:53   f8c0b9e2  engine                cross-repo blocker harvest
+2026-08-27 09:47 ? 7f400fcb  parser                skill_management
+2026-08-26 21:42 ? 8437d111  infra                 sync the staging box
+2026-08-26 12:35   8cad34f9  widget                egress scrubbing pass
+
+acme-laptop: 170 sessions scanned, 0 digests written, 170 unchanged, 0 moved; 170 digests in store.
+</pre></div>
+</div>
+<p>Columns: the session’s last turn, a <code class="docutils literal notranslate"><span class="pre">?</span></code> for low confidence, the session id (<code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">show</span></code>
+takes any unique prefix), the project directory, and the session’s own title for
+itself.</p>
+<p><strong>The gotcha: <code class="docutils literal notranslate"><span class="pre">open</span></code> here is loop state, never process state.</strong> A <code class="docutils literal notranslate"><span class="pre">?</span></code> in the second
+column does not mean the session is running or crashed. It means the session’s own
+closing words never said it was finished, so the classifier defaulted to <code class="docutils literal notranslate"><span class="pre">open</span></code>. Five
+rules decide it, and the digest always prints which one fired and what cues it saw, so
+you can disagree:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Rule</p></th>
+<th class="head"><p>Reads as</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>the last turn is a usage-limit or API-error notice</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">open</span></code> — it was cut off</p></td>
+</tr>
+<tr class="row-odd"><td><p>the transcript stops before the assistant’s turn completed</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">open</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>the closing line is a question put to you</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">open</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>the latest cue in the closing lines defers something</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">open</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>the latest cue in the closing lines declares it finished</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">archive</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>nothing decided it, but the session’s own recap does</p></td>
+<td><p>either</p></td>
+</tr>
+<tr class="row-even"><td><p>nothing decided it at all</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">open</span></code>, marked low confidence</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong><code class="docutils literal notranslate"><span class="pre">archive</span></code> is earned, <code class="docutils literal notranslate"><span class="pre">open</span></code> is the default.</strong> A session only reaches <code class="docutils literal notranslate"><span class="pre">archive</span></code> by
+saying it finished. Against hand-labelled sessions the cue rules never produced a false
+<code class="docutils literal notranslate"><span class="pre">archive</span></code> but caught only about half the genuinely finished ones — and that is the right
+direction to be wrong in, because a false <code class="docutils literal notranslate"><span class="pre">archive</span></code> buries a loop this tool exists to
+surface, while a false <code class="docutils literal notranslate"><span class="pre">open</span></code> only lengthens a list already sorted by recency.</p>
+<p><strong>Conflicts resolve at sentence granularity, and inside a sentence an open cue always
+beats a close cue.</strong> Real closing paragraphs carry both kinds: <em>“say the word and I’ll
+remove it. Nothing is blocking; safe to close”</em> is finished, and <em>“you’re safe to exit …
+the two threads waiting for you are”</em> is not — the last cue-bearing sentence decides
+those. But <em>“<strong>Needs you</strong> (nothing blocking, all tracked): the #146 decision”</em> puts the
+close cue inside a parenthetical of the sentence that hands work back, so within one
+sentence the asymmetry decides instead of position.</p>
+<p>Expect most sessions to land in <code class="docutils literal notranslate"><span class="pre">open/</span></code>. That is what agentic sessions do, and a split
+that came out balanced would be a split that was lying. <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">ls</span> <span class="pre">--confidence</span> <span class="pre">high</span></code> drops
+the ones that are open only because nothing said otherwise — which is also why the read
+skill is told to prefer those rows when it summarises what is in flight.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">open</span></code> ever came to mean “a process is running”, this would be a session dashboard.
+It is not one, and <code class="docutils literal notranslate"><span class="pre">claude</span></code> already has that view.</p>
+<p><strong>For the live half, there is <a class="reference external" href="https://github.com/thorwhalen/crowsnest">crowsnest</a>.</strong> It reads the session registry and the tail of the same transcripts to say which sessions are running right now and which of them is busy, idle, or stopped waiting on you — and it uses openloops’ own <code class="docutils literal notranslate"><span class="pre">parse_session</span></code> to read them, so the two agree about what a session said. The split is the one this section is about: crowsnest answers <em>what is running now</em>, openloops answers <em>what sessions left open and what you owe them</em>. A session crowsnest calls idle may still be carrying three open loops, and a loop openloops surfaces may belong to a session that exited a week ago.</p>
+<section id="what-a-digest-says-and-what-it-never-says">
+<h3>What a digest says — and what it never says<a class="headerlink" href="#what-a-digest-says-and-what-it-never-says" title="Link to this heading">#</a></h3>
+<p>A digest is a dated record of <strong>what one session said</strong>. It carries the session’s last
+turn, the prompt that provoked it, a context-compaction summary if the session made
+one, and any pull-request links the session recorded for itself. Every heading carries
+the timestamp of the thing under it.</p>
+<p>It never says that anything is <em>currently</em> true. There is no “still open”, no “more to
+do”, no “waiting on you” — because <code class="docutils literal notranslate"><span class="pre">ol</span></code> has checked nothing against the world, and a
+snapshot presented as a live fact is worse than no snapshot at all. The front matter
+says <code class="docutils literal notranslate"><span class="pre">verified:</span> <span class="pre">false</span></code> for exactly that reason.</p>
+<p>This is the constraint the whole design is arranged around. A tool that quietly tells
+you a loop is open when you closed it out of band destroys the count, and the count is
+the product. It is also why the other two commands exist: they are the ones that <em>can</em>
+re-check, and they do.</p>
+</section>
+<section id="where-the-digests-are-stored">
+<h3>Where the digests are stored<a class="headerlink" href="#where-the-digests-are-stored" title="Link to this heading">#</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~/.local/share/openloops/digests/{source}/open/{session}.md
+                                          /archive/{session}.md
+~/.local/state/openloops/sync-state.json      ← a cache, not data
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">{source}</span></code> is this machine. Two machines syncing digests into one git repository never
+write the same path, so there is no merge to reconcile — the directory layout <em>is</em> the
+answer to cross-machine sync. The label seeds from the machine’s short hostname and is
+then <strong>sticky</strong>, remembered in the state directory: macOS renames a host that collides on
+a network, and a label that drifted would silently fork the store into two copies. Every
+sync prints the label it is writing under, and <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_SOURCE</span></code> overrides it.</p>
+<p>The cache is deliberately somewhere else. Deleting it re-reads every transcript and
+must produce byte-identical digests; deleting the digests loses whatever the
+transcripts no longer hold. Those are very different operations and they should not
+live in the same folder.</p>
+<p>Override with <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_DATA_DIR</span></code>, <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_STATE_DIR</span></code>, <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_SOURCE</span></code>.</p>
+</section>
+<section id="keeping-it-up-to-date">
+<h3>Keeping it up to date<a class="headerlink" href="#keeping-it-up-to-date" title="Link to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ol<span class="w"> </span>install-job<span class="w">              </span><span class="c1"># a launchd StartInterval agent, every 15 minutes</span>
+ol<span class="w"> </span>job-status<span class="w">               </span><span class="c1"># installed? loaded? when did it last actually write?</span>
+ol<span class="w"> </span>uninstall-job
+</pre></div>
+</div>
+<p>It is a periodic job, not a daemon, and that is a decision rather than an
+implementation detail: a tick that crashes is repaired by the next one, whereas a
+resident process that dies leaves its last output behind with nothing scheduled to
+correct it. <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">job-status</span></code> reports when a tick last <em>wrote</em>, because “the job is
+registered” and “the job is working” are not the same claim.</p>
+<p>The installer is macOS-only. On Linux, put <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">sync</span></code> in a systemd user timer or a
+crontab line — <code class="docutils literal notranslate"><span class="pre">openloops</span></code> itself is cross-platform.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="ol-owed-what-you-still-owe-your-agents">
+<h2><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code> — what you still owe your agents<a class="headerlink" href="#ol-owed-what-you-still-owe-your-agents" title="Link to this heading">#</a></h2>
+<p>When an agent gets blocked on something only you can do — a secret it cannot write, a
+permission it does not have, a decision that is yours — the ask usually dies in a final
+message nobody re-reads. The fix is not a new database: it is a <code class="docutils literal notranslate"><span class="pre">manual-task</span></code> label on
+an issue in the affected repo, filed by the capture skill above.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code> lists those issues, and runs each one’s check before printing it:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>2 open, 1 discharged, 1 unknown
+  owners: acme  |  predicates: 3 of 4
+
+open   23d  acme/widget#1              CI secrets are not provisioned on this repo
+          verify: gh secret list --repo acme/widget --json name -q '.[].name' | grep -qx PYPI_PASSWORD
+                  -&gt; exit 1
+open    2d  acme/parser#4              Decide whether the parser ships in 2.0 or waits
+          verify: (none)
+                  -&gt; none possible - a judgement call.
+?      23d  acme/widget#9              Doctests depend on a live third-party HTTP fetch
+          verify: python3 -m pytest -q --doctest-modules --pyargs widget.remote
+                  -&gt; the predicate timed out after 20s
+done   30d  acme/engine#7              Add a deploy key so CI can clone the fixture repo
+          verify: [ "$(gh api repos/acme/engine/keys --jq length)" -gt 0 ]
+                  -&gt; exit 0
+</pre></div>
+</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Printed</p></th>
+<th class="head"><p>State</p></th>
+<th class="head"><p>Means</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">open</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">open</span></code></p></td>
+<td><p>no predicate at all, or the predicate ran and returned non-zero</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">done</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">discharged</span></code></p></td>
+<td><p>the predicate returned <code class="docutils literal notranslate"><span class="pre">0</span></code> — the ask is finished, the issue is merely still open</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">?</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">unknown</span></code></p></td>
+<td><p>nothing could be checked: no <code class="docutils literal notranslate"><span class="pre">gh</span></code>, no network, a timeout, an untrusted owner, a malformed predicate</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">done</span></code> rows are reported, never acted on. A passing predicate is evidence, not
+authority; you close the issue, or you don’t. The read skill is told the same thing in
+the same words, because a model that closes an issue on a shell exit status has written
+a record nobody can audit back.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ol<span class="w"> </span>owed<span class="w">                     </span><span class="c1"># list them, and re-check each one against the world</span>
+ol<span class="w"> </span>owed<span class="w"> </span>--no-verify<span class="w">         </span><span class="c1"># list them, executing nothing — every predicate row reads ?</span>
+ol<span class="w"> </span>owed<span class="w"> </span>--owners<span class="w"> </span>acme,widgets
+ol<span class="w"> </span>owed<span class="w"> </span>--limit<span class="w"> </span><span class="m">100</span>
+</pre></div>
+</div>
+<p>Writing the <code class="docutils literal notranslate"><span class="pre">**Verify:**</span></code> predicate is covered above, under the capture skill; so is
+what it means that running one executes text out of an issue body.</p>
+</section>
+<hr class="docutils" />
+<section id="ol-blocked-what-is-waiting-on-another-repo-and-what-is-not-any-more">
+<h2><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">blocked</span></code> — what is waiting on another repo, and what is not any more<a class="headerlink" href="#ol-blocked-what-is-waiting-on-another-repo-and-what-is-not-any-more" title="Link to this heading">#</a></h2>
+<p>The same shape, pointed at a repository instead of at a person.</p>
+<p>An agent working in repo X finds that the real fix belongs in repo Y. It files in Y,
+writes a workaround in X, and moves on. Y gets fixed. <strong>X is never told.</strong> Nobody was
+blocking, nothing waited on a human, so the loop is invisible to <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code> — and the
+workaround in X quietly becomes architecture, noticed months later only when somebody
+asks why the code looks like that.</p>
+<p>GitHub already models the edge, and it already crosses repositories: an issue’s
+<strong>blocked-by dependencies</strong> name each blocker’s own repository, number and state. They
+are a first-class GitHub field, set on the issue itself in GitHub’s own UI, not a
+convention openloops invented — the representation costs nothing and exists today.
+<strong>What is missing is the harvest</strong>: nothing notices when a blocker closes, because the
+edge is queryable, not eventful.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">blocked</span></code> is that harvest:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span> <span class="n">unblocked</span><span class="p">,</span> <span class="mi">2</span> <span class="n">blocked</span><span class="p">,</span> <span class="mi">0</span> <span class="n">unknown</span>
+  <span class="n">scope</span><span class="p">:</span> <span class="n">acme</span><span class="p">,</span> <span class="n">widgets</span>  <span class="o">|</span>  <span class="n">candidates</span><span class="p">:</span> <span class="mi">4</span>  <span class="o">|</span>  <span class="mi">1</span> <span class="n">had</span> <span class="n">no</span> <span class="n">dependency</span> <span class="n">edge</span> <span class="n">at</span> <span class="nb">all</span>
+
+<span class="n">ready</span>    <span class="mi">8</span><span class="n">d</span>  <span class="n">acme</span><span class="o">/</span><span class="n">widget</span><span class="c1">#109              Drop the rename workaround once the engine lands it</span>
+        <span class="n">blocked</span> <span class="n">by</span><span class="p">:</span> <span class="n">acme</span><span class="o">/</span><span class="n">engine</span><span class="c1">#15 [closed]</span>
+                    <span class="o">-&gt;</span> <span class="n">free</span> <span class="k">for</span> <span class="mi">5</span><span class="n">d</span><span class="p">,</span> <span class="ow">and</span> <span class="n">nothing</span> <span class="n">has</span> <span class="n">said</span> <span class="n">so</span>
+<span class="n">waits</span>    <span class="mi">8</span><span class="n">d</span>  <span class="n">acme</span><span class="o">/</span><span class="n">widget</span><span class="c1">#27               Criteria carry a structured definition, not free text</span>
+        <span class="n">blocked</span> <span class="n">by</span><span class="p">:</span> <span class="n">acme</span><span class="o">/</span><span class="n">engine</span><span class="c1">#61 [open]</span>
+<span class="n">waits</span>    <span class="mi">8</span><span class="n">d</span>  <span class="n">acme</span><span class="o">/</span><span class="n">widget</span><span class="c1">#34               Track the six facade gaps, and which phase each one blocks</span>
+        <span class="n">blocked</span> <span class="n">by</span><span class="p">:</span> <span class="n">widgets</span><span class="o">/</span><span class="n">aix</span><span class="c1">#40 [open] widgets/aix#41 [open]</span>
+</pre></div>
+</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Printed</p></th>
+<th class="head"><p>State</p></th>
+<th class="head"><p>Means</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ready</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">unblocked</span></code></p></td>
+<td><p>every blocker is closed. The work can proceed and nobody has been told — <strong>this is the row the command exists for.</strong> It sorts first and says how many days it has been free</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">waits</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">blocked</span></code></p></td>
+<td><p>at least one blocker is still open, and the row names which, with the foreign repository</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">?</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">unknown</span></code></p></td>
+<td><p>the edges could not be resolved</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">ready</span></code> is a finding, not an instruction. The workaround in X may still be the right
+code; only you know that.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ol<span class="w"> </span>blocked<span class="w">                                  </span><span class="c1"># search a fleet, resolve every edge</span>
+ol<span class="w"> </span>blocked<span class="w"> </span>--owners<span class="w"> </span>acme,widgets
+ol<span class="w"> </span>blocked<span class="w"> </span>--repos<span class="w"> </span>acme/widget,acme/engine<span class="w">  </span><span class="c1"># the audit path: enumerate these exactly</span>
+ol<span class="w"> </span>blocked<span class="w"> </span>--no-resolve<span class="w">                     </span><span class="c1"># spend nothing; every row reads ?</span>
+ol<span class="w"> </span>blocked<span class="w"> </span>--limit<span class="w"> </span><span class="m">100</span>
+</pre></div>
+</div>
+<section id="the-gotcha-discovery-is-a-candidate-list-not-an-answer">
+<h3>The gotcha: discovery is a candidate list, not an answer<a class="headerlink" href="#the-gotcha-discovery-is-a-candidate-list-not-an-answer" title="Link to this heading">#</a></h3>
+<p>Finding the blocked issues has two implementations, and which one runs depends on
+whether you passed <code class="docutils literal notranslate"><span class="pre">--repos</span></code>.</p>
+<p><strong>Across a fleet</strong> (the default): one <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">search</span> <span class="pre">issues</span></code> call carrying GitHub’s own
+<code class="docutils literal notranslate"><span class="pre">is:blocked</span></code> qualifier. One request answers for every repository, which is what makes
+this cheap enough to run at the start of a session. But the qualifier is a <em>search
+index</em>, and a search index is not the dependency graph. Measured on one real fleet on
+2026-08-27, scoped to three owners: <code class="docutils literal notranslate"><span class="pre">is:blocked</span></code> returned 15 open issues, of which <strong>10
+carried a blocked-by edge and 5 carried no dependency edge of any kind</strong> — not a stale
+edge, and four of the five carry no sub-issue relation either, simply none. Recall was perfect
+on that fleet: all 10 were found, checked against a full per-repository enumeration of
+821 open issues across 148 repositories. Precision was 10/15.</p>
+<p>So every candidate is re-resolved against the dependency graph itself, and one with no
+edge is dropped and <em>counted</em> — that is the <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">had</span> <span class="pre">no</span> <span class="pre">dependency</span> <span class="pre">edge</span> <span class="pre">at</span> <span class="pre">all</span></code> note in
+the header. A discovery step that quietly disagrees with reality is the same class of
+defect as a count that cannot say <code class="docutils literal notranslate"><span class="pre">?</span></code>.</p>
+<p><strong>Per repository</strong> (<code class="docutils literal notranslate"><span class="pre">--repos</span> <span class="pre">owner/name,owner/other</span></code>): one paginated listing per
+repository, filtered on the dependency counts GitHub already returns on every row of
+it. This reads the counts themselves rather than an index of them, so it cannot
+over-report and cannot miss. It is the audit, not the daily command.</p>
+</section>
+<section id="what-it-costs">
+<h3>What it costs<a class="headerlink" href="#what-it-costs" title="Link to this heading">#</a></h3>
+<p>Resolving edges is <strong>one API call per candidate</strong> — there is no batch form. <code class="docutils literal notranslate"><span class="pre">--limit</span></code>
+is that bound and it defaults to 50; one more than it is requested, so a candidate list
+that saturates its own cap comes back marked <code class="docutils literal notranslate"><span class="pre">TRUNCATED</span></code> and the counts are then a
+<strong>floor</strong>, never a total. At the default that is at most 51 requests against a
+5000/hour limit. A 15-candidate fleet run took 41-48 s wall-clock across several runs here.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--no-resolve</span></code> skips all of it and every row reads <code class="docutils literal notranslate"><span class="pre">?</span></code>, which is honest and free.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="ol-dashboard-the-same-four-registers-as-one-page">
+<h2><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">dashboard</span></code> — the same four registers as one page<a class="headerlink" href="#ol-dashboard-the-same-four-registers-as-one-page" title="Link to this heading">#</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ol<span class="w"> </span>dashboard<span class="w"> </span>--out<span class="w"> </span>board.html
+</pre></div>
+</div>
+<p>All three answers rendered as one self-contained HTML document: no stylesheet, no
+script, no font, no request to anywhere. It is the page you leave open on a second
+monitor, or publish somewhere your phone can reach.</p>
+<p>Being self-contained is what makes it publishable, and it is also its one limit: <strong>a
+page cannot re-check anything.</strong> So it stamps the moment it was made and says
+“snapshot” in its largest type, and its fourth register is <code class="docutils literal notranslate"><span class="pre">Unknown</span></code> — every <code class="docutils literal notranslate"><span class="pre">?</span></code>, with
+why, including the envelope-level failures. An <code class="docutils literal notranslate"><span class="pre">owed</span></code> that could not list is not
+“nothing owed”, and rendering that as a <code class="docutils literal notranslate"><span class="pre">0</span></code> would make the page worse than no page.
+When the count really is zero the section names which checks earned it.</p>
+<p>Everything printed goes through the same scrubber that guards the digests, plus HTML
+escaping and a scheme allowlist on every link. <code class="docutils literal notranslate"><span class="pre">--fragment</span></code> drops the document scaffold
+for a host that supplies its own <code class="docutils literal notranslate"><span class="pre">&lt;head&gt;</span></code>.</p>
+</section>
+<hr class="docutils" />
+<section id="turning-it-off">
+<h2>Turning it off<a class="headerlink" href="#turning-it-off" title="Link to this heading">#</a></h2>
+<p>Nothing here runs unless you type it, or an agent you installed a skill for does. There
+is one exception, and it is opt-in: <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">install-job</span></code> puts the digest sync on a timer.
+Check with <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">job-status</span></code>; if it says the plist is absent, nothing of openloops is
+running in the background at all.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ol<span class="w"> </span>uninstall-job<span class="w">            </span><span class="c1"># stop the timer, if you ever installed it</span>
+rm<span class="w"> </span>-rf<span class="w"> </span>~/.claude/skills/openloops<span class="w"> </span>~/.claude/skills/openloops-needs-human<span class="w"> </span><span class="se">\</span>
+<span class="w">       </span>~/.claude/agents/openloops-sweep.md<span class="w">      </span><span class="c1"># the skills are three symlinks</span>
+pip<span class="w"> </span>uninstall<span class="w"> </span>openloops<span class="w">     </span><span class="c1"># remove the package</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">uninstall</span></code> leaves your digests where they are — <code class="docutils literal notranslate"><span class="pre">~/.local/share/openloops/</span></code> by
+default, or wherever <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_DATA_DIR</span></code> points — because deleting a record is not part
+of removing a tool. Delete that directory yourself if you want the data gone too.</p>
+<p>Nothing needs undoing on GitHub. openloops never wrote anything there: no issue was
+created, closed, relabelled or commented on, and the <code class="docutils literal notranslate"><span class="pre">**Verify:**</span></code> lines in your issue
+bodies were put there by whoever wrote them, not by this package.</p>
+</section>
+<section id="which-repositories-all-this-is-about">
+<h2>Which repositories all this is about<a class="headerlink" href="#which-repositories-all-this-is-about" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code> and <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">blocked</span></code> answer about the same fleet, resolved the same way, so the
+two can never quietly disagree about which repositories exist. Three sources, first one
+wins:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">OPENLOOPS_OWNERS</span></code> — comma- or space-separated (or <code class="docutils literal notranslate"><span class="pre">--owners</span></code> on either command).</p></li>
+<li><p>The owners named by a <code class="docutils literal notranslate"><span class="pre">gh</span></code> alias called <code class="docutils literal notranslate"><span class="pre">owe</span></code>, if you have one. A fleet of several
+organisations is usually already written down there, and disagreeing with the thing
+you actually type is how a count goes quietly wrong.</p></li>
+<li><p>The login <code class="docutils literal notranslate"><span class="pre">gh</span></code> is authenticated as.</p></li>
+</ol>
+<p>Whichever it was is printed on every result, so a partial answer is a visible one. It is
+worth setting explicitly: the fallback is your personal login, and if you work across an
+organisation, a count that only ever saw your own repositories looks clean and is wrong.
+The read skill is told to check that line and say so.</p>
+</section>
+<section id="python-api">
+<h2>Python API<a class="headerlink" href="#python-api" title="Link to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">openloops</span>
+
+<span class="n">openloops</span><span class="o">.</span><span class="n">sync</span><span class="p">()</span>  <span class="c1"># read transcripts → write digests</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">openloops</span><span class="o">.</span><span class="n">ls</span><span class="p">(</span><span class="n">state</span><span class="o">=</span><span class="s2">"open"</span><span class="p">):</span>  <span class="c1"># what your sessions left open</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">"session"</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s2">"title"</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">openloops</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="s2">"2b1f"</span><span class="p">)[</span><span class="s2">"text"</span><span class="p">])</span>  <span class="c1"># one digest, in full</span>
+
+<span class="n">report</span> <span class="o">=</span> <span class="n">openloops</span><span class="o">.</span><span class="n">owed</span><span class="p">()</span>  <span class="c1"># open `manual-task` issues, each re-checked</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">report</span><span class="p">[</span><span class="s2">"counts"</span><span class="p">])</span>  <span class="c1"># {'open': 2, 'discharged': 1, 'unknown': 1, ...}</span>
+
+<span class="n">report</span> <span class="o">=</span> <span class="n">openloops</span><span class="o">.</span><span class="n">blocked</span><span class="p">()</span>  <span class="c1"># cross-repo blocker edges, every one resolved</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">r</span><span class="p">[</span><span class="s2">"repo"</span><span class="p">]</span> <span class="o">+</span> <span class="s2">"#"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"number"</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">report</span><span class="p">[</span><span class="s2">"rows"</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s2">"state"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"unblocked"</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">openloops</span><span class="o">.</span><span class="n">install_skills</span><span class="p">(</span><span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># the plan, having touched nothing</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">owed()</span></code> and <code class="docutils literal notranslate"><span class="pre">blocked()</span></code> return an <strong>envelope, never a bare list</strong> — because a caller
+has to be able to tell “nothing is owed” from “I could not find out”:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">"listed"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># False ⇒ the listing/discovery itself failed; the counts mean nothing</span>
+    <span class="s2">"checked"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># blocked() calls this "resolved"</span>
+    <span class="s2">"error"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+    <span class="s2">"truncated"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># the result set hit its cap: the counts are a floor</span>
+    <span class="s2">"owners"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
+    <span class="s2">"counts"</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
+    <span class="s2">"rows"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
+<span class="p">}</span>  <span class="c1"># every row carries every documented key, present and empty if unset</span>
+</pre></div>
+</div>
+<p>Check <code class="docutils literal notranslate"><span class="pre">listed</span></code> before you read <code class="docutils literal notranslate"><span class="pre">counts</span></code>. That is the whole contract.</p>
+<p><code class="docutils literal notranslate"><span class="pre">openloops.tools</span></code> is the single dispatch list every surface goes through — the <code class="docutils literal notranslate"><span class="pre">ol</span></code>
+command today, an MCP server or an HTTP endpoint later. Operations go there, never
+straight into the CLI, which is what stops two surfaces from drifting apart.
+<code class="docutils literal notranslate"><span class="pre">install_skills</span></code> is deliberately <em>not</em> in it: “symlink files into this machine’s agent
+config” is not an operation a remote surface could honestly offer.</p>
+</section>
+<section id="the-seams">
+<h2>The seams<a class="headerlink" href="#the-seams" title="Link to this heading">#</a></h2>
+<p>Each is one keyword argument, and each defaults to a real implementation rather than a
+stub wearing a keyword argument as a disguise:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">openloops</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span>
+    <span class="n">transcript_source</span><span class="o">=</span><span class="n">my_sessions</span><span class="p">,</span>  <span class="c1"># any Mapping[str, Session]</span>
+    <span class="n">digests_store</span><span class="o">=</span><span class="n">my_store</span><span class="p">,</span>  <span class="c1"># any MutableMapping[str, str]</span>
+<span class="p">)</span>
+
+<span class="n">openloops</span><span class="o">.</span><span class="n">owed</span><span class="p">(</span>
+    <span class="n">issues_source</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">],</span>  <span class="c1"># a list of dicts, or any callable</span>
+    <span class="n">run_predicate</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cmd</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># any callable from command to exit status</span>
+<span class="p">)</span>
+
+<span class="n">openloops</span><span class="o">.</span><span class="n">blocked</span><span class="p">(</span>
+    <span class="n">issues_source</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">],</span>
+    <span class="n">blockers_source</span><span class="o">=</span><span class="p">{</span><span class="s2">"acme/widget#12"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">]},</span>  <span class="c1"># or any callable of (repo, number)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">transcript_source=</span></code> defaults to a direct reader of Claude Code’s on-disk layout.
+<code class="docutils literal notranslate"><span class="pre">digests_store=</span></code> defaults to a <code class="docutils literal notranslate"><span class="pre">dol</span></code> store over a directory of markdown files, with its
+encoding pinned to UTF-8 and its delete made a real delete. Point it at an S3-backed
+store, or at a git-synced directory shared between machines, and nothing else changes.</p>
+<p><code class="docutils literal notranslate"><span class="pre">issues_source=</span></code> and <code class="docutils literal notranslate"><span class="pre">run_predicate=</span></code> default to a <code class="docutils literal notranslate"><span class="pre">gh</span></code> search and a time-bounded
+subshell; <code class="docutils literal notranslate"><span class="pre">blockers_source=</span></code> to the dependency-graph call. <strong>With them injected, the
+GitHub half needs no network and no <code class="docutils literal notranslate"><span class="pre">gh</span></code> on PATH</strong> — which is how the whole of it is
+tested.</p>
+<p>Pass <code class="docutils literal notranslate"><span class="pre">state_dir=</span></code> too when you swap a digest seam in a test: the change-detection cache
+is separate from both, and left alone it would record your fixture’s revisions in the
+real one.</p>
+</section>
+<section id="nothing-leaves-without-being-scrubbed">
+<h2>Nothing leaves without being scrubbed<a class="headerlink" href="#nothing-leaves-without-being-scrubbed" title="Link to this heading">#</a></h2>
+<p>Transcripts are the highest-entropy secret source on a developer machine: pasted
+tokens, <code class="docutils literal notranslate"><span class="pre">.env</span></code> contents, tracebacks full of absolute paths. A digest store can be a
+synced git repository, so <strong>a written digest is an export surface</strong>, and the discipline
+belongs before the first byte is written rather than before the first push.</p>
+<ul class="simple">
+<li><p>Absolute paths under your home directory are rewritten to <code class="docutils literal notranslate"><span class="pre">~</span></code>-relative.</p></li>
+<li><p>Credential-shaped text <strong>raises</strong>. It is never silently redacted, because a silent
+redaction teaches nobody that a secret was there. That session is skipped, the run
+says so and exits non-zero, and the error names the pattern class and offset without
+ever quoting the match.</p></li>
+</ul>
+<p>The same two rules are what the capture skill applies to an issue title and body before
+it files anything, through the same <code class="docutils literal notranslate"><span class="pre">openloops.egress</span></code> functions — so an agent that
+gets blocked while holding a token in its context cannot publish it by accident, and
+cannot mask it and file anyway either.</p>
+</section>
+<section id="why-not-just-read-the-transcripts-or-use-gh-directly">
+<h2>Why not just read the transcripts, or use <code class="docutils literal notranslate"><span class="pre">gh</span></code> directly?<a class="headerlink" href="#why-not-just-read-the-transcripts-or-use-gh-directly" title="Link to this heading">#</a></h2>
+<p>For the digests: <code class="docutils literal notranslate"><span class="pre">claude</span></code> shows you your live sessions, which is a different question —
+and a better answer to it than this could be. The transcripts themselves answer the
+question <code class="docutils literal notranslate"><span class="pre">ol</span></code> answers, right up until they are deleted. A digest is a few hundred bytes
+and outlives the megabyte it came from.</p>
+<p>For the other two: the query is one line of <code class="docutils literal notranslate"><span class="pre">gh</span></code> and always was. The whole of what
+openloops adds is <strong>the re-check</strong> — running the predicate, resolving the edge — and
+the refusal to round an unchecked row into an answer. That is the entire difference
+between a list and a count you can act on.</p>
+<p>There is one caveat worth knowing before you read a digest as a diary: a Claude Code
+<em>session</em> is not a sitting. Sessions get resumed, so a single session can span days,
+and a digest keyed on one is a digest of a thread of work rather than of an afternoon.</p>
+</section>
+<section id="the-name">
+<h2>The name<a class="headerlink" href="#the-name" title="Link to this heading">#</a></h2>
+<p>Two live collisions, both deliberate, both worth knowing before you search for it:</p>
+<ul class="simple">
+<li><p><strong>OpenLoops</strong> is an established particle-physics one-loop amplitude library
+(<a class="reference external" href="https://openloops.hepforge.org">openloops.hepforge.org</a>). It is not on PyPI, and it
+is what a web search will find first.</p></li>
+<li><p><strong>openloops</strong> is also <a class="reference external" href="https://github.com/sholajegede/openloops">a browser-history tool</a>
+that groups your browsing into what you were trying to do — an adjacent product using
+the same metaphor, in a different distribution channel.</p></li>
+</ul>
+<p>Neither blocks <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">openloops</span></code>. The command is <code class="docutils literal notranslate"><span class="pre">ol</span></code> because a read path that
+costs eighteen characters to reach is a read path that does not get reached.</p>
+</section>
+<section id="design-tests">
+<h2>Design tests<a class="headerlink" href="#design-tests" title="Link to this heading">#</a></h2>
+<p>These are tests in the suite, not aspirations:</p>
+<ul class="simple">
+<li><p><strong>A digest is derived, never authored.</strong> Delete the digest store and the cache, sync
+again, and every digest whose transcript still exists comes back byte-for-byte.
+Digests whose transcripts have since been collected are <em>retained</em> — that is the
+point of the tool — and <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">status</span></code> counts them separately.</p></li>
+<li><p><strong>The suite passes with no network, no credentials, and no <code class="docutils literal notranslate"><span class="pre">~/.claude</span></code> present.</strong></p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">openloops</span></code> does not import the CLI library</strong>, and opens no socket. The core
+has no opinion about how it is called, and a job on a plane still has to run.</p></li>
+<li><p><strong>Nothing in this repository carries an absolute home path or credential-shaped
+text</strong> — checked mechanically, by the same code that scrubs your digests. The shipped
+skills are in the repository, so they are checked by it too.</p></li>
+<li><p><strong>No surface exposes an operation that writes.</strong> Enforcement is by omission: there is
+no <code class="docutils literal notranslate"><span class="pre">close</span></code>, no <code class="docutils literal notranslate"><span class="pre">comment</span></code>, no <code class="docutils literal notranslate"><span class="pre">POST</span></code>. A test walks the source and fails the build if a
+mutating verb or a mutating <code class="docutils literal notranslate"><span class="pre">gh</span></code> argument appears anywhere in the package.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">install-skills</span></code> never overwrites anything.</strong> An occupied destination reads
+<code class="docutils literal notranslate"><span class="pre">conflict</span></code> and is left exactly as it was; a second run of a clean install reads <code class="docutils literal notranslate"><span class="pre">ok</span></code>
+and writes nothing.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">unknown</span></code> never becomes <code class="docutils literal notranslate"><span class="pre">open</span></code>, <code class="docutils literal notranslate"><span class="pre">discharged</span></code>, <code class="docutils literal notranslate"><span class="pre">blocked</span></code> or <code class="docutils literal notranslate"><span class="pre">unblocked</span></code></strong>, and a
+listing that failed prints <code class="docutils literal notranslate"><span class="pre">?</span></code> rather than a count. Both are tested directly, because
+they are the two ways a tool like this becomes a liar.</p></li>
+</ul>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading">#</a></h2>
+<p>Apache-2.0.</p>
+<p class="epythet-aggregates">This documentation as a single file: <a href="openloops.md">openloops.md</a> (Markdown, for agents).</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-15 11:20 UTC from <a href="https://github.com/thorwhalen/openloops/commit/9624cba295e42ecbe8a3189ad4dcc9b57db59f23">9624cba</a> (main) · openloops 0.1.9 · <a href="about-this-build.html">about this build</a></p>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="right-next"
+       href="api.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">API reference</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#start-here-install-the-skills-then-ask-your-agent">Start here: install the skills, then ask your agent</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#two-things-to-set-up-once">Two things to set up once</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-got-installed">What got installed</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-sweep-subagent-for-the-session-you-keep-open-all-day">The sweep subagent, for the session you keep open all day</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-capture-skill-and-why-ol-owed-has-anything-to-read">The capture skill, and why <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code> has anything to read</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-field-that-decides-whether-an-obligation-can-ever-be-closed">The field that decides whether an obligation can ever be closed</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#means-nothing-was-checked-read-this-once"><code class="docutils literal notranslate"><span class="pre">?</span></code> means nothing was checked — read this once</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#before-you-run-it-this-executes-text-from-an-issue-body">Before you run it: this executes text from an issue body</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-plumbing-the-ol-command">The plumbing: the <code class="docutils literal notranslate"><span class="pre">ol</span></code> command</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#which-command-answers-which-question">Which command answers which question</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ol-what-your-sessions-left-open"><code class="docutils literal notranslate"><span class="pre">ol</span></code> — what your sessions left open</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-a-digest-says-and-what-it-never-says">What a digest says — and what it never says</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#where-the-digests-are-stored">Where the digests are stored</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#keeping-it-up-to-date">Keeping it up to date</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ol-owed-what-you-still-owe-your-agents"><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code> — what you still owe your agents</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ol-blocked-what-is-waiting-on-another-repo-and-what-is-not-any-more"><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">blocked</span></code> — what is waiting on another repo, and what is not any more</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-gotcha-discovery-is-a-candidate-list-not-an-answer">The gotcha: discovery is a candidate list, not an answer</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-it-costs">What it costs</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ol-dashboard-the-same-four-registers-as-one-page"><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">dashboard</span></code> — the same four registers as one page</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#turning-it-off">Turning it off</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#which-repositories-all-this-is-about">Which repositories all this is about</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-api">Python API</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-seams">The seams</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nothing-leaves-without-being-scrubbed">Nothing leaves without being scrubbed</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-not-just-read-the-transcripts-or-use-gh-directly">Why not just read the transcripts, or use <code class="docutils literal notranslate"><span class="pre">gh</span></code> directly?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-name">The name</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design-tests">Design tests</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#license">License</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/index.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
 </html>

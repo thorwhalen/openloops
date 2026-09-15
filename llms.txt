@@ -1,0 +1,31 @@
+# openloops
+
+> Track the open loops between you and your coding agents: what they left open, what they need from you, and what is no longer blocked
+
+
+## Pages
+
+- [openloops](index.html.md): An **open loop** is a commitment that outlived the session that made it and that
+- [API reference](api.html.md): | [`openloops`](_autosummary/openloops.html.md#module-openloops)   | What your Claude Code sessions ...
+- [openloops](_autosummary/openloops.html.md): What your Claude Code sessions were doing — kept after the transcripts are gone.
+- [openloops.base](_autosummary/openloops.base.html.md): Data structures shared across openloops: what a session is, and what a digest is.
+- [openloops.blockers](_autosummary/openloops.blockers.html.md): The other kind of open loop: the one that points at a repository, not at a person.
+- [openloops.dashboard](_autosummary/openloops.dashboard.html.md): One page you can look at instead of reading three command outputs.
+- [openloops.digest](_autosummary/openloops.digest.html.md): Rendering one session into one dated markdown digest. No model, no network.
+- [openloops.egress](_autosummary/openloops.egress.html.md): The egress choke point: nothing leaves openloops carrying a home path or a secret.
+- [openloops.job](_autosummary/openloops.job.html.md): The periodic job: launchd runs `ol sync`, writes, and exits. No daemon.
+- [openloops.obligations](_autosummary/openloops.obligations.html.md): What you still owe your agents — re-checked against the world before it is shown.
+- [openloops.skills](_autosummary/openloops.skills.html.md): The agent-facing surface: two skills, one subagent, and the command that installs them.
+- [openloops.store](_autosummary/openloops.store.html.md): Where digests live, and where the change-detection cache lives — two different things.
+- [openloops.tools](_autosummary/openloops.tools.html.md): The package’s single list of operations: plain functions, JSON-ready dicts.
+- [openloops.transcripts](_autosummary/openloops.transcripts.html.md): The default `transcript_source`: a direct reader of Claude Code’s on-disk state.
+- [For AI agents](ai-agents.html.md): `openloops` ships artifacts for coding agents alongside its code. This page lists
+- [About this build](about-this-build.html.md): This documentation was built on **2026-09-15 11:20 UTC** from commit <a href="https://github.com/tho...
+
+---
+
+For more comprehensive documentation, see [openloops.md](openloops.md)
+
+## Build
+
+- [build_info.json](build_info.json): build provenance (commit, version, tool versions, whether the docs match the package)

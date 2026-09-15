@@ -1,0 +1,24 @@
+openloops.tools
+===============
+
+.. automodule:: openloops.tools
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      ROW_FIELDS
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      sync
+      ls
+      show
+      status
+      owed
+      blocked
+      dashboard
+   

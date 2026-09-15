@@ -1,0 +1,36 @@
+openloops.blockers
+==================
+
+.. automodule:: openloops.blockers
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      UNBLOCKED
+      BLOCKED
+      BLOCKER_STATES
+      BLOCKED_FIELDS
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      blocked
+      gh_blocked_by
+      gh_blocked_candidates
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      BlockedIssue
+      Blocker
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+   
+      GhUnavailable
+   

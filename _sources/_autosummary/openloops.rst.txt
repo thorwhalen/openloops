@@ -1,0 +1,77 @@
+﻿openloops
+=========
+
+.. automodule:: openloops
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      agents_dir
+      asks_the_human
+      blocked
+      classify
+      data_dir
+      default_source
+      digest_key
+      digests_store
+      gh_blocked_by
+      gh_blocked_candidates
+      gh_issues
+      headline_counts
+      install_skills
+      ls
+      make_digest
+      owed
+      parse_session
+      parse_verify
+      render
+      render_dashboard
+      retained
+      scrub
+      shell_predicate
+      show
+      skills_dir
+      state_dir
+      status
+      sync
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      BlockedIssue
+      Blocker
+      ClaudeCodeTranscripts
+      Digest
+      Locator
+      Obligation
+      PredicateOutcome
+      Session
+      Verdict
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+   
+      CredentialFound
+      GhUnavailable
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   base
+   blockers
+   dashboard
+   digest
+   egress
+   job
+   obligations
+   skills
+   store
+   tools
+   transcripts

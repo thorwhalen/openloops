@@ -1,4 +1,0 @@
-openloops.tools
-===============
-.. automodule:: openloops.tools
-   :members:

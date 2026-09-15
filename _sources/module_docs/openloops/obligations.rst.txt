@@ -1,4 +1,0 @@
-openloops.obligations
-=====================
-.. automodule:: openloops.obligations
-   :members:

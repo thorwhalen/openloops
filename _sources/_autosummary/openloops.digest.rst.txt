@@ -1,0 +1,19 @@
+openloops.digest
+================
+
+.. automodule:: openloops.digest
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      SECTION_LIMITS
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      render
+      make_digest
+   

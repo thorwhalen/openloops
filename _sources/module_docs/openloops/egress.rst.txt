@@ -1,4 +1,0 @@
-openloops.egress
-================
-.. automodule:: openloops.egress
-   :members:

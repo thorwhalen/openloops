@@ -1,0 +1,922 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<link rel="alternate" type="text/markdown" href="openloops.obligations.html.md">
+<link rel="describedby" href="../llms.txt" type="text/markdown">
+    <title>openloops.obligations &#8212; openloops</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d75fae25" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/epythet.css?v=93ea43a0" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+
+    <script src="../_static/documentation_options.js?v=8618f531"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=fd10adb8"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/openloops.obligations';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="openloops.skills" href="openloops.skills.html" />
+    <link rel="prev" title="openloops.job" href="openloops.job.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.9" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">openloops</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../ai-agents.html">
+    For AI agents
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/thorwhalen/openloops" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../ai-agents.html">
+    For AI agents
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/thorwhalen/openloops" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="openloops.html">openloops</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="openloops.base.html">openloops.base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.blockers.html">openloops.blockers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.dashboard.html">openloops.dashboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.digest.html">openloops.digest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.egress.html">openloops.egress</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.job.html">openloops.job</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">openloops.obligations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.skills.html">openloops.skills</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.store.html">openloops.store</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.tools.html">openloops.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.transcripts.html">openloops.transcripts</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../api.html" class="nav-link">API reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="openloops.html" class="nav-link">openloops</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">openloops.obligations</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-openloops.obligations">
+<span id="openloops-obligations"></span><h1>openloops.obligations<a class="headerlink" href="#module-openloops.obligations" title="Link to this heading">#</a></h1>
+<p>What you still owe your agents — re-checked against the world before it is shown.</p>
+<p>When an agent gets blocked on something only you can do — a secret it cannot write, a
+permission it does not have, a decision that is yours — it files a <code class="code docutils literal notranslate"><span class="pre">manual-task</span></code> issue
+in the affected repo and says so in its closing message. The closing message dies with
+the session. The issue does not, and one query lists every one of them across a fleet.</p>
+<p>That query has one failure mode, and it is the one that matters: **obligations get
+discharged out of band.** Someone adds a deploy key in a web UI, pays an invoice,
+answers in chat. None of that emits an event anyone is listening to, so the issue sits
+open for months describing something that was done in five minutes. A stale increment
+annoys; a phantom row destroys the count, and the count is the product.</p>
+<p>So each obligation carries its own answer, in its body, as a shell command whose **exit
+status is the question**:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>**Verify:** `gh secret list --repo OWNER/REPO --json name -q '.[].name' | grep -qx NAME`
+</pre></div>
+</div>
+<p><a class="reference internal" href="#openloops.obligations.owed" title="openloops.obligations.owed"><code class="xref py py-func docutils literal notranslate"><span class="pre">owed()</span></code></a> lists the open ones, runs each predicate, and reports <strong>three</strong> states —
+never two:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<tbody>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">open</span></code></p></td>
+<td><p>no predicate at all, or the predicate ran and returned non-zero</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">discharged</span></code></p></td>
+<td><p>the predicate ran and returned <code class="docutils literal notranslate"><span class="pre">0</span></code>: the ask is done, the issue
+is merely still open</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">unknown</span></code></p></td>
+<td><p>the predicate could <em>not</em> be run, or errored in a way that is not
+an answer. Displayed as <code class="docutils literal notranslate"><span class="pre">?</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">?</span></code> is not a rounding error, it is the whole point. A surface that says “nothing
+owed” because it failed to check is worse than no surface at all, so nothing here is
+ever allowed to collapse <code class="docutils literal notranslate"><span class="pre">unknown</span></code> into <code class="docutils literal notranslate"><span class="pre">open</span></code> or into <code class="docutils literal notranslate"><span class="pre">discharged</span></code>.</p>
+<p><strong>Nothing here mutates anything.</strong> A passing predicate is evidence, not authority: it
+never closes, reopens or relabels an issue, and it never will — the standing rule is
+that a human obligation is not closed on a model’s judgement. You are shown the
+command, its exit status and what it printed, and you decide.</p>
+<section id="trust-boundary-stated-here-because-it-should-be-read-not-discovered">
+<h2>Trust boundary — stated here because it should be read, not discovered<a class="headerlink" href="#trust-boundary-stated-here-because-it-should-be-read-not-discovered" title="Link to this heading">#</a></h2>
+<p>Evaluating a predicate means <strong>executing text that came from a GitHub issue body</strong>.
+That is a real capability and it is bounded here in five ways, each of them visible:</p>
+<ol class="arabic simple">
+<li><p><strong>Only owners you named.</strong> A predicate is run only when the issue’s repository owner
+is in <code class="docutils literal notranslate"><span class="pre">trusted_owners=</span></code>, which defaults to the same <code class="docutils literal notranslate"><span class="pre">owners=</span></code> the search was
+scoped to. A row outside that set reads <code class="docutils literal notranslate"><span class="pre">?</span></code> — never <code class="docutils literal notranslate"><span class="pre">open</span></code>, because nothing
+checked it, and never <code class="docutils literal notranslate"><span class="pre">discharged</span></code>, because nothing ran.</p></li>
+<li><p><strong>The command is always shown next to its verdict.</strong> Every row carries the predicate
+verbatim, so nothing executes invisibly and you can disagree with the answer.</p></li>
+<li><p><strong>An explicit way not to execute at all.</strong> <code class="docutils literal notranslate"><span class="pre">owed(verify=False)</span></code> (<code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span>
+<span class="pre">--no-verify</span></code>) lists without running anything; every row that has a predicate then
+reads <code class="docutils literal notranslate"><span class="pre">?</span></code>, because that is the truth about it.</p></li>
+<li><p><strong>Every evaluation is time-bounded</strong>, by <code class="docutils literal notranslate"><span class="pre">predicate_timeout=</span></code>. A timeout is
+<code class="docutils literal notranslate"><span class="pre">unknown</span></code>, never an answer. On POSIX the predicate runs in its own process group
+and the timeout kills the group, so anything it started dies with it. On Windows only
+the shell itself is killed — a predicate that backgrounds work can outlive its
+timeout there, which is a platform limit worth knowing rather than a promise broken
+quietly.</p></li>
+<li><p><strong>The whole thing is one keyword argument away from being someone else’s code.</strong>
+<code class="docutils literal notranslate"><span class="pre">run_predicate=</span></code> replaces the evaluator; <code class="docutils literal notranslate"><span class="pre">issues_source=</span></code> replaces the reader.</p></li>
+</ol>
+<p>One honest limit: predicates are POSIX shell. On a shell that cannot parse one, the
+command exits non-zero and the row reads <code class="docutils literal notranslate"><span class="pre">open</span></code>. That is the safe direction to be
+wrong in — a stale increment annoys, a wrong decrement destroys the count — and it is
+why the exit status and the command text are always on screen.</p>
+<p><strong>Kill criterion</strong> (this module ships on an argument, so it names in advance what would
+retire it): if, ninety days after this ships, <code class="docutils literal notranslate"><span class="pre">counts['with_predicate']</span></code> is below half
+of <code class="docutils literal notranslate"><span class="pre">counts['total']</span></code> on a normal run, or nobody has run <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code> in a fortnight,
+delete it. Its entire reason to exist over a one-line <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">search</span> <span class="pre">issues</span></code> alias is the
+predicate; with no predicates to run it is a slower alias that draws a table. Removal is
+one command — delete this module and <code class="docutils literal notranslate"><span class="pre">tests/test_obligations.py</span></code>, and drop <code class="docutils literal notranslate"><span class="pre">owed</span></code>
+from <code class="docutils literal notranslate"><span class="pre">openloops.tools._dispatch_funcs</span></code> and <code class="docutils literal notranslate"><span class="pre">openloops.__main__._commands</span></code>. Nothing
+imports it, nothing persists, and no other module changes.</p>
+<p><strong>What this is not.</strong> It is a <em>reader</em>. There is no store, no schema, no history, no
+event log, no cross-repo linking, no session model and no local copy of anything: the
+<code class="code docutils literal notranslate"><span class="pre">manual-task</span></code> label <strong>is</strong> the record, and a second writable home for the same record
+type is the drift this deliberately does not build. State lives in first-class GitHub
+fields that a plain <code class="docutils literal notranslate"><span class="pre">gh</span></code> command can query, so deleting this module loses no data.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">issues</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s1">'number'</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">'title'</span><span class="p">:</span> <span class="s1">'Add a deploy key so CI can clone'</span><span class="p">,</span>
+<span class="gp">... </span>     <span class="s1">'url'</span><span class="p">:</span> <span class="s1">'https://github.com/acme/widget/issues/7'</span><span class="p">,</span>
+<span class="gp">... </span>     <span class="s1">'createdAt'</span><span class="p">:</span> <span class="s1">'2026-08-01T00:00:00Z'</span><span class="p">,</span>
+<span class="gp">... </span>     <span class="s1">'repository'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'nameWithOwner'</span><span class="p">:</span> <span class="s1">'acme/widget'</span><span class="p">},</span>
+<span class="gp">... </span>     <span class="s1">'body'</span><span class="p">:</span> <span class="s1">'**Verify:** `[ "$(gh api repos/acme/widget/keys --jq length)" -gt 0 ]`'</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s1">'number'</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">'title'</span><span class="p">:</span> <span class="s1">'Decide whether to publish this at all'</span><span class="p">,</span>
+<span class="gp">... </span>     <span class="s1">'url'</span><span class="p">:</span> <span class="s1">'https://github.com/acme/widget/issues/8'</span><span class="p">,</span>
+<span class="gp">... </span>     <span class="s1">'createdAt'</span><span class="p">:</span> <span class="s1">'2026-08-10T00:00:00Z'</span><span class="p">,</span>
+<span class="gp">... </span>     <span class="s1">'repository'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'nameWithOwner'</span><span class="p">:</span> <span class="s1">'acme/widget'</span><span class="p">},</span>
+<span class="gp">... </span>     <span class="s1">'body'</span><span class="p">:</span> <span class="s1">'**Verify:** none possible - a judgement call.'</span><span class="p">},</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">report</span> <span class="o">=</span> <span class="n">owed</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">issues_source</span><span class="o">=</span><span class="n">issues</span><span class="p">,</span>               <span class="c1"># a list of dicts: no gh, no network</span>
+<span class="gp">... </span>    <span class="n">run_predicate</span><span class="o">=</span><span class="k">lambda</span> <span class="n">command</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>    <span class="c1"># canned: the ask turns out to be done</span>
+<span class="gp">... </span>    <span class="n">trusted_owners</span><span class="o">=</span><span class="p">(</span><span class="s1">'acme'</span><span class="p">,),</span>
+<span class="gp">... </span>    <span class="n">now</span><span class="o">=</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">report</span><span class="p">[</span><span class="s1">'counts'</span><span class="p">][</span><span class="s1">'discharged'</span><span class="p">],</span> <span class="n">report</span><span class="p">[</span><span class="s1">'counts'</span><span class="p">][</span><span class="s1">'open'</span><span class="p">]</span>
+<span class="go">(1, 1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">report</span><span class="p">[</span><span class="s1">'rows'</span><span class="p">]:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">'state'</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">'age_days'</span><span class="p">],</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">'repo'</span><span class="p">]</span><span class="si">}</span><span class="s2">#</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">'number'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="go">open 10 acme/widget#8</span>
+<span class="go">discharged 19 acme/widget#7</span>
+</pre></div>
+</div>
+<p>The discharged row is reported, not closed:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">report</span><span class="p">[</span><span class="s1">'rows'</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="s1">'predicate'</span><span class="p">]</span>
+<span class="go">'[ "$(gh api repos/acme/widget/keys --jq length)" -gt 0 ]'</span>
+</pre></div>
+</div>
+<p>An owner you did not name is never executed, and never silently believed:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">quiet</span> <span class="o">=</span> <span class="n">owed</span><span class="p">(</span><span class="n">issues_source</span><span class="o">=</span><span class="n">issues</span><span class="p">,</span> <span class="n">run_predicate</span><span class="o">=</span><span class="k">lambda</span> <span class="n">command</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="n">trusted_owners</span><span class="o">=</span><span class="p">(),</span> <span class="n">now</span><span class="o">=</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[(</span><span class="n">row</span><span class="p">[</span><span class="s1">'number'</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">'state'</span><span class="p">])</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">quiet</span><span class="p">[</span><span class="s1">'rows'</span><span class="p">]]</span>
+<span class="go">[(8, 'open'), (7, 'unknown')]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">next</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">'evidence'</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">quiet</span><span class="p">[</span><span class="s1">'rows'</span><span class="p">]</span> <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s1">'number'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">7</span><span class="p">)</span>
+<span class="go">"not evaluated: owner 'acme' is not in trusted_owners"</span>
+</pre></div>
+</div>
+<p class="rubric">Module Attributes</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.obligations.DISCHARGED" title="openloops.obligations.DISCHARGED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DISCHARGED</span></code></a></p></td>
+<td><p>The predicate ran and returned 0.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.obligations.UNKNOWN" title="openloops.obligations.UNKNOWN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNKNOWN</span></code></a></p></td>
+<td><p>Nothing could be checked.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.obligations.OBLIGATION_STATES" title="openloops.obligations.OBLIGATION_STATES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OBLIGATION_STATES</span></code></a></p></td>
+<td><p>The three states, in the order a reader cares about them.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.obligations.OBLIGATION_FIELDS" title="openloops.obligations.OBLIGATION_FIELDS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OBLIGATION_FIELDS</span></code></a></p></td>
+<td><p>Every key on every row, whatever the issue happened to say.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Functions</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.obligations.configured_owners" title="openloops.obligations.configured_owners"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configured_owners</span></code></a>(*[, timeout])</p></td>
+<td><p>Whose repositories to search, resolved once.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.obligations.gh_issues" title="openloops.obligations.gh_issues"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gh_issues</span></code></a>(*, owners[, label, state, limit, ...])</p></td>
+<td><p>The default <code class="docutils literal notranslate"><span class="pre">issues_source</span></code>: the open <code class="code docutils literal notranslate"><span class="pre">manual-task</span></code> issues, from <code class="docutils literal notranslate"><span class="pre">gh</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.obligations.owed" title="openloops.obligations.owed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">owed</span></code></a>(*[, verify, owners, trusted_owners, ...])</p></td>
+<td><p>The open <code class="code docutils literal notranslate"><span class="pre">manual-task</span></code> obligations, each re-checked against the world.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.obligations.parse_verify" title="openloops.obligations.parse_verify"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_verify</span></code></a>(body)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">(predicate,</span> <span class="pre">verify_text)</span></code> for an issue body.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.obligations.shell_predicate" title="openloops.obligations.shell_predicate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shell_predicate</span></code></a>(command, *[, timeout])</p></td>
+<td><p>The default <code class="docutils literal notranslate"><span class="pre">run_predicate</span></code>: run the command in a subshell, bounded in time.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Classes</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.obligations.Obligation" title="openloops.obligations.Obligation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Obligation</span></code></a>(repo, number, title, url, ...[, ...])</p></td>
+<td><p>One open <code class="code docutils literal notranslate"><span class="pre">manual-task</span></code> issue, with the verdict its own predicate returned.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.obligations.PredicateOutcome" title="openloops.obligations.PredicateOutcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PredicateOutcome</span></code></a>(status[, output])</p></td>
+<td><p>What evaluating one predicate produced.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Exceptions</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.obligations.GhUnavailable" title="openloops.obligations.GhUnavailable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GhUnavailable</span></code></a></p></td>
+<td><p>The world could not be read: no <code class="docutils literal notranslate"><span class="pre">gh</span></code>, no credentials, no network, a timeout.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<dl class="py data">
+<dt class="sig sig-object py" id="openloops.obligations.DISCHARGED">
+<span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">DISCHARGED</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'discharged'</span></span><a class="headerlink" href="#openloops.obligations.DISCHARGED" title="Link to this definition">#</a></dt>
+<dd><p>The predicate ran and returned 0. The ask is done; the issue is just still open.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="openloops.obligations.GhUnavailable">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">GhUnavailable</span></span><a class="reference internal" href="../_modules/openloops/obligations.html#GhUnavailable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.obligations.GhUnavailable" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#RuntimeError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeError</span></code></a></p>
+<p>The world could not be read: no <code class="docutils literal notranslate"><span class="pre">gh</span></code>, no credentials, no network, a timeout.</p>
+<p>Raised only by the listing path, and never propagated to a caller of <a class="reference internal" href="#openloops.obligations.owed" title="openloops.obligations.owed"><code class="xref py py-func docutils literal notranslate"><span class="pre">owed()</span></code></a> —
+it becomes <code class="docutils literal notranslate"><span class="pre">listed:</span> <span class="pre">False</span></code> plus an <code class="docutils literal notranslate"><span class="pre">error</span></code>, which every surface must render as
+<code class="docutils literal notranslate"><span class="pre">?</span></code>. Turning it into an empty list would be the one unrecoverable bug here.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="openloops.obligations.OBLIGATION_FIELDS">
+<span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">OBLIGATION_FIELDS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('repo',</span> <span class="pre">'number',</span> <span class="pre">'title',</span> <span class="pre">'url',</span> <span class="pre">'created',</span> <span class="pre">'age_days',</span> <span class="pre">'state',</span> <span class="pre">'verify',</span> <span class="pre">'predicate',</span> <span class="pre">'evidence')</span></span><a class="headerlink" href="#openloops.obligations.OBLIGATION_FIELDS" title="Link to this definition">#</a></dt>
+<dd><p>Every key on every row, whatever the issue happened to say. A row shape that varies
+by issue makes <code class="docutils literal notranslate"><span class="pre">row[&quot;predicate&quot;]</span></code> a coin flip and makes a JSON schema a lie.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="openloops.obligations.OBLIGATION_STATES">
+<span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">OBLIGATION_STATES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('open',</span> <span class="pre">'discharged',</span> <span class="pre">'unknown')</span></span><a class="headerlink" href="#openloops.obligations.OBLIGATION_STATES" title="Link to this definition">#</a></dt>
+<dd><p>The three states, in the order a reader cares about them. <code class="docutils literal notranslate"><span class="pre">open</span></code> is
+<a class="reference internal" href="openloops.base.html#openloops.base.OPEN" title="openloops.base.OPEN"><code class="xref py py-data docutils literal notranslate"><span class="pre">openloops.base.OPEN</span></code></a>: a loop that is still open is the same idea either way.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openloops.obligations.Obligation">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">Obligation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">age_days</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'open'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/obligations.html#Obligation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.obligations.Obligation" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>One open <code class="code docutils literal notranslate"><span class="pre">manual-task</span></code> issue, with the verdict its own predicate returned.</p>
+<p><code class="docutils literal notranslate"><span class="pre">verify</span></code> is the <code class="docutils literal notranslate"><span class="pre">**Verify:**</span></code> field exactly as the issue wrote it and
+<code class="docutils literal notranslate"><span class="pre">predicate</span></code> is the runnable command extracted from it — both are carried so a
+reader can disagree with <code class="docutils literal notranslate"><span class="pre">state</span></code> rather than absorb it.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Obligation</span><span class="p">(</span><span class="s1">'acme/widget'</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">'t'</span><span class="p">,</span> <span class="s1">'u'</span><span class="p">,</span> <span class="s1">'2026-01-01T00:00:00Z'</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">state</span>
+<span class="go">'open'</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="openloops.obligations.Obligation.as_dict">
+<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/obligations.html#Obligation.as_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.obligations.Obligation.as_dict" title="Link to this definition">#</a></dt>
+<dd><p>JSON-ready form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openloops.obligations.PredicateOutcome">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">PredicateOutcome</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">status</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/obligations.html#PredicateOutcome"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.obligations.PredicateOutcome" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>What evaluating one predicate produced.</p>
+<p><code class="docutils literal notranslate"><span class="pre">status</span></code> is the shell exit status, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for “could not be run” — the
+difference between an answer and the absence of one.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">PredicateOutcome</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">PredicateOutcome</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">'timed out'</span><span class="p">)</span><span class="o">.</span><span class="n">output</span>
+<span class="go">(0, 'timed out')</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="openloops.obligations.UNKNOWN">
+<span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">UNKNOWN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'unknown'</span></span><a class="headerlink" href="#openloops.obligations.UNKNOWN" title="Link to this definition">#</a></dt>
+<dd><p>Nothing could be checked. Rendered <code class="docutils literal notranslate"><span class="pre">?</span></code>. Never collapsed into either other state.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.obligations.configured_owners">
+<span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">configured_owners</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/obligations.html#configured_owners"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.obligations.configured_owners" title="Link to this definition">#</a></dt>
+<dd><p>Whose repositories to search, resolved once.</p>
+<p>Three sources, in order, first one wins: <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_OWNERS</span></code> (comma- or
+space-separated); the owners named by the <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">owe</span></code> alias if one is installed,
+because a fleet is usually already written down there and disagreeing with it is
+how a count goes quietly wrong; and failing both, the login <code class="docutils literal notranslate"><span class="pre">gh</span></code> is authenticated
+as. The resolved list is reported back on every result, so a partial answer is a
+visible one rather than a silent one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</span></p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">'OPENLOOPS_OWNERS'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'acme, widgets co'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">configured_owners</span><span class="p">()</span>
+<span class="go">('acme', 'widgets', 'co')</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">del</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">'OPENLOOPS_OWNERS'</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.obligations.gh_issues">
+<span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">gh_issues</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">owners</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'manual-task'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'open'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/obligations.html#gh_issues"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.obligations.gh_issues" title="Link to this definition">#</a></dt>
+<dd><p>The default <code class="docutils literal notranslate"><span class="pre">issues_source</span></code>: the open <code class="code docutils literal notranslate"><span class="pre">manual-task</span></code> issues, from <code class="docutils literal notranslate"><span class="pre">gh</span></code>.</p>
+<p>This is a <em>filtered</em> search, not an enumeration — the label is applied server-side
+and the result is capped — which is the only form of search this package is allowed
+to use. Walking a whole fleet’s issues through the search API silently returns wrong
+answers past its first thousand results; that job belongs to per-repo listing.</p>
+<p>Returns whatever <code class="docutils literal notranslate"><span class="pre">gh</span></code> returned, unparsed and unjudged: a list of dicts with
+<code class="docutils literal notranslate"><span class="pre">createdAt</span></code>, <code class="docutils literal notranslate"><span class="pre">number</span></code>, <code class="docutils literal notranslate"><span class="pre">repository</span></code>, <code class="docutils literal notranslate"><span class="pre">title</span></code>, <code class="docutils literal notranslate"><span class="pre">url</span></code> and <code class="docutils literal notranslate"><span class="pre">body</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.obligations.owed">
+<span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">owed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">owners</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trusted_owners</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'manual-task'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicate_timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">now</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issues_source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_predicate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/obligations.html#owed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.obligations.owed" title="Link to this definition">#</a></dt>
+<dd><p>The open <code class="code docutils literal notranslate"><span class="pre">manual-task</span></code> obligations, each re-checked against the world.</p>
+<p><code class="docutils literal notranslate"><span class="pre">verify=False</span></code> lists without executing anything; every row that carries a
+predicate then reads <code class="docutils literal notranslate"><span class="pre">unknown</span></code>, because that is what is true about it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">owners=</span></code> scopes the search (default: <a class="reference internal" href="#openloops.obligations.configured_owners" title="openloops.obligations.configured_owners"><code class="xref py py-func docutils literal notranslate"><span class="pre">configured_owners()</span></code></a>).
+<code class="docutils literal notranslate"><span class="pre">trusted_owners=</span></code> scopes what may <em>execute</em> and defaults to <code class="docutils literal notranslate"><span class="pre">owners</span></code>, so
+widening the search never quietly widens what runs — pass it explicitly to search
+wider than you trust.</p>
+<p>Two seams, each one keyword argument, each defaulting to a real implementation:
+<code class="docutils literal notranslate"><span class="pre">issues_source=</span></code> (defaults to <a class="reference internal" href="#openloops.obligations.gh_issues" title="openloops.obligations.gh_issues"><code class="xref py py-func docutils literal notranslate"><span class="pre">gh_issues()</span></code></a>; a list of dicts substitutes) and
+<code class="docutils literal notranslate"><span class="pre">run_predicate=</span></code> (defaults to <a class="reference internal" href="#openloops.obligations.shell_predicate" title="openloops.obligations.shell_predicate"><code class="xref py py-func docutils literal notranslate"><span class="pre">shell_predicate()</span></code></a>; any callable from command
+to exit status substitutes). With both injected this reaches no network and needs no
+<code class="docutils literal notranslate"><span class="pre">gh</span></code>.</p>
+<p>Returns one envelope, never a bare list, because a reader has to be able to tell
+“nothing is owed” from “I could not find out”:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+</dl>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">listed</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">False</span></code> when the <em>listing itself</em> failed. Every surface must render that as
+<code class="docutils literal notranslate"><span class="pre">?</span></code>. The counts are zeros and they mean nothing.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">checked</span></code></dt><dd><p>whether predicates were evaluated at all.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">truncated</span></code></dt><dd><p>the result set saturated its own cap, so the count is a floor.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">counts</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">open</span></code> / <code class="docutils literal notranslate"><span class="pre">discharged</span></code> / <code class="docutils literal notranslate"><span class="pre">unknown</span></code> / <code class="docutils literal notranslate"><span class="pre">with_predicate</span></code> / <code class="docutils literal notranslate"><span class="pre">total</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">rows</span></code></dt><dd><p>one dict per obligation, with every key in <a class="reference internal" href="#openloops.obligations.OBLIGATION_FIELDS" title="openloops.obligations.OBLIGATION_FIELDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">OBLIGATION_FIELDS</span></code></a>.</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">report</span> <span class="o">=</span> <span class="n">owed</span><span class="p">(</span><span class="n">issues_source</span><span class="o">=</span><span class="p">[],</span> <span class="n">run_predicate</span><span class="o">=</span><span class="k">lambda</span> <span class="n">command</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">report</span><span class="p">[</span><span class="s1">'listed'</span><span class="p">],</span> <span class="n">report</span><span class="p">[</span><span class="s1">'counts'</span><span class="p">][</span><span class="s1">'total'</span><span class="p">],</span> <span class="n">report</span><span class="p">[</span><span class="s1">'rows'</span><span class="p">]</span>
+<span class="go">(True, 0, [])</span>
+</pre></div>
+</div>
+<p>A listing that could not run is not “nothing owed”:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">broken</span><span class="p">(</span><span class="o">**</span><span class="n">query</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">raise</span> <span class="n">GhUnavailable</span><span class="p">(</span><span class="s1">'gh: not logged in'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">report</span> <span class="o">=</span> <span class="n">owed</span><span class="p">(</span><span class="n">issues_source</span><span class="o">=</span><span class="n">broken</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">report</span><span class="p">[</span><span class="s1">'listed'</span><span class="p">],</span> <span class="n">report</span><span class="p">[</span><span class="s1">'error'</span><span class="p">],</span> <span class="n">report</span><span class="p">[</span><span class="s1">'counts'</span><span class="p">][</span><span class="s1">'total'</span><span class="p">]</span>
+<span class="go">(False, 'gh: not logged in', 0)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.obligations.parse_verify">
+<span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">parse_verify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/obligations.html#parse_verify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.obligations.parse_verify" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">(predicate,</span> <span class="pre">verify_text)</span></code> for an issue body. Both are <code class="docutils literal notranslate"><span class="pre">''</span></code> when absent.</p>
+<p>The predicate is the first code span in the field. Prose with no code span – the
+documented “no predicate is possible here” answer – yields no command, and the
+prose is kept so the row can say <em>why</em> rather than merely say nothing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_verify</span><span class="p">(</span><span class="s1">'**Verify:** `test -f x`'</span><span class="p">)</span>
+<span class="go">('test -f x', '`test -f x`')</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parse_verify</span><span class="p">(</span><span class="s1">'no such field here'</span><span class="p">)</span>
+<span class="go">('', '')</span>
+</pre></div>
+</div>
+<p>A field that says no predicate is possible yields no command **even when its prose
+contains a code span** – the documented wording mentions <code class="code docutils literal notranslate"><span class="pre">gh</span></code> and <code class="code docutils literal notranslate"><span class="pre">true</span></code> naturally,
+and both exit 0, which would report a live obligation as done:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_verify</span><span class="p">(</span><span class="s1">'**Verify:** none possible - no `gh` query observes a decision.'</span><span class="p">)</span>
+<span class="go">('', 'none possible - no `gh` query observes a decision.')</span>
+</pre></div>
+</div>
+<p>A quoted example of the format is not this issue’s own predicate:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">body</span> <span class="o">=</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">'```'</span><span class="p">,</span> <span class="s1">'**Verify:** `quoted`'</span><span class="p">,</span> <span class="s1">'```'</span><span class="p">,</span> <span class="s1">'**Verify:** `real`'</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parse_verify</span><span class="p">(</span><span class="n">body</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">'real'</span>
+</pre></div>
+</div>
+<p>An unterminated code span is not a command – it is a malformed field, and saying so
+is the difference between a row that reads <code class="docutils literal notranslate"><span class="pre">?</span></code> and one that silently reads open:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_verify</span><span class="p">(</span><span class="s1">'**Verify:** `echo one &amp;&amp;'</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'echo two`'</span><span class="p">)</span>
+<span class="go">('', '`echo one &amp;&amp;')</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.obligations.shell_predicate">
+<span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">shell_predicate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/obligations.html#shell_predicate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.obligations.shell_predicate" title="Link to this definition">#</a></dt>
+<dd><p>The default <code class="docutils literal notranslate"><span class="pre">run_predicate</span></code>: run the command in a subshell, bounded in time.</p>
+<p>The exit status is the answer and nothing else is interpreted. Anything that is not
+an exit status — a timeout, a shell that would not start — comes back as
+<code class="docutils literal notranslate"><span class="pre">status=None</span></code>, which is <code class="docutils literal notranslate"><span class="pre">unknown</span></code>, which is <code class="docutils literal notranslate"><span class="pre">?</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#openloops.obligations.PredicateOutcome" title="openloops.obligations.PredicateOutcome"><code class="xref py py-class docutils literal notranslate"><span class="pre">PredicateOutcome</span></code></a></span></p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">shell_predicate</span><span class="p">(</span><span class="s1">'exit 0'</span><span class="p">)</span><span class="o">.</span><span class="n">status</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shell_predicate</span><span class="p">(</span><span class="s1">'exit 3'</span><span class="p">)</span><span class="o">.</span><span class="n">status</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shell_predicate</span><span class="p">(</span><span class="s1">'   '</span><span class="p">)</span><span class="o">.</span><span class="n">status</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="openloops.job.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">openloops.job</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="openloops.skills.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">openloops.skills</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trust-boundary-stated-here-because-it-should-be-read-not-discovered">Trust boundary — stated here because it should be read, not discovered</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.DISCHARGED"><code class="docutils literal notranslate"><span class="pre">DISCHARGED</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.GhUnavailable"><code class="docutils literal notranslate"><span class="pre">GhUnavailable</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.OBLIGATION_FIELDS"><code class="docutils literal notranslate"><span class="pre">OBLIGATION_FIELDS</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.OBLIGATION_STATES"><code class="docutils literal notranslate"><span class="pre">OBLIGATION_STATES</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.Obligation"><code class="docutils literal notranslate"><span class="pre">Obligation</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.Obligation.as_dict"><code class="docutils literal notranslate"><span class="pre">Obligation.as_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.PredicateOutcome"><code class="docutils literal notranslate"><span class="pre">PredicateOutcome</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.UNKNOWN"><code class="docutils literal notranslate"><span class="pre">UNKNOWN</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.configured_owners"><code class="docutils literal notranslate"><span class="pre">configured_owners()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.gh_issues"><code class="docutils literal notranslate"><span class="pre">gh_issues()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.owed"><code class="docutils literal notranslate"><span class="pre">owed()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.parse_verify"><code class="docutils literal notranslate"><span class="pre">parse_verify()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.shell_predicate"><code class="docutils literal notranslate"><span class="pre">shell_predicate()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/_autosummary/openloops.obligations.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,31 @@
+openloops.egress
+================
+
+.. automodule:: openloops.egress
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      CREDENTIAL_PATTERNS
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      apply_aliases
+      default_aliases
+      find_credentials
+      find_absolute_paths
+      rewrite_paths
+      scan
+      scan_files
+      scrub
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+   
+      CredentialFound
+   
