@@ -270,3 +270,10 @@ costs the same, no matter how long the conversation has run.
 
 Inline is right for a one-off question, or when the user is going to want to drill into
 a specific row immediately afterwards.
+
+## Designing a to-do or owed-item surface
+
+Before designing how any surface shows, defers, or dismisses an open loop or owed
+item, read [crowsnest's triage-ux reference](https://github.com/thorwhalen/crowsnest/blob/main/crowsnest/data/skills/crowsnest-report/references/triage-ux.md)
+(sections 1-2 suffice) — GTD, its rivals, inbox-UX critiques, and the design
+implications they lead to.
