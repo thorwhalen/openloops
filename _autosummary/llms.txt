@@ -1,0 +1,23 @@
+# openloops
+
+> Track the open loops between you and your coding agents: what they left open, what they need from you, and what is no longer blocked
+
+
+## Pages in this subsection
+
+- [openloops](openloops.html.md): What your Claude Code sessions were doing — kept after the transcripts are gone.
+- [openloops.base](openloops.base.html.md): Data structures shared across openloops: what a session is, and what a digest is.
+- [openloops.blockers](openloops.blockers.html.md): The other kind of open loop: the one that points at a repository, not at a person.
+- [openloops.dashboard](openloops.dashboard.html.md): One page you can look at instead of reading three command outputs.
+- [openloops.digest](openloops.digest.html.md): Rendering one session into one dated markdown digest. No model, no network.
+- [openloops.egress](openloops.egress.html.md): The egress choke point: nothing leaves openloops carrying a home path or a secret.
+- [openloops.job](openloops.job.html.md): The periodic job: launchd runs &#96;ol sync&#96;, writes, and exits. No daemon.
+- [openloops.obligations](openloops.obligations.html.md): What you still owe your agents — re-checked against the world before it is shown.
+- [openloops.skills](openloops.skills.html.md): The agent-facing surface: two skills, one subagent, and the command that installs them.
+- [openloops.store](openloops.store.html.md): Where digests live, and where the change-detection cache lives — two different things.
+- [openloops.tools](openloops.tools.html.md): The package’s single list of operations: plain functions, JSON-ready dicts.
+- [openloops.transcripts](openloops.transcripts.html.md): The default &#96;transcript_source&#96;: a direct reader of Claude Code’s on-disk state.
+
+## Optional
+
+- [Top-level llms.txt](../llms.txt): Complete documentation index.

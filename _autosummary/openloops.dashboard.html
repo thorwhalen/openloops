@@ -10,6 +10,8 @@
 
 <link rel="alternate" type="text/markdown" href="openloops.dashboard.html.md">
 <link rel="describedby" href="../llms.txt" type="text/markdown">
+<link rel="alternate" type="text/markdown" href="openloops.dashboard.html.md">
+<link rel="describedby" href="llms.txt">
     <title>openloops.dashboard &#8212; openloops</title>
   
   
@@ -42,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
-    <script src="../_static/documentation_options.js?v=8618f531"></script>
+    <script src="../_static/documentation_options.js?v=bafade30"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -55,7 +57,7 @@
     <link rel="prev" title="openloops.blockers" href="openloops.blockers.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.9" />
+  <meta name="docsearch:version" content="0.1.10" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -420,15 +422,23 @@ make this page worse than no page. When the count really is zero the section say
 which checks earned that, because a clean board with no provenance is the same lie
 told quietly.</p></li>
 </ol>
-<p>Everything printed goes through <a class="reference internal" href="#openloops.dashboard.Sanitizer" title="openloops.dashboard.Sanitizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sanitizer</span></code></a>, which is <code class="xref py py-func docutils literal notranslate"><span class="pre">openloops.egress</span>
-<span class="pre">.scrub()</span></code> plus HTML escaping plus a scheme allowlist on every link. A page that carries a
+<p>Everything this module prints goes through <a class="reference internal" href="#openloops.dashboard.Sanitizer" title="openloops.dashboard.Sanitizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sanitizer</span></code></a>, which is
+<a class="reference internal" href="openloops.egress.html#openloops.egress.scrub" title="openloops.egress.scrub"><code class="xref py py-func docutils literal notranslate"><span class="pre">openloops.egress.scrub()</span></code></a> plus HTML escaping plus a scheme allowlist on every link.
+The one carve-out is the shared kit below: <a class="reference internal" href="#openloops.dashboard.register" title="openloops.dashboard.register"><code class="xref py py-func docutils literal notranslate"><span class="pre">register()</span></code></a> and <a class="reference internal" href="#openloops.dashboard.rail" title="openloops.dashboard.rail"><code class="xref py py-func docutils literal notranslate"><span class="pre">rail()</span></code></a> **escape
+nothing**. Every argument they take is markup, interpolated as given and some of it into
+an unquoted attribute, because that is what a markup builder is; a caller that passes
+anything it did not write itself puts it through <a class="reference internal" href="#openloops.dashboard.Sanitizer" title="openloops.dashboard.Sanitizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sanitizer</span></code></a> first. This module
+passes literals. A page that carries a
 repository name and an issue title is fine; one that carries a home path or a token is
 the failure <code class="docutils literal notranslate"><span class="pre">openloops.egress</span></code> exists to prevent, and this renderer scrubs its input
 rather than trusting it. A credential-shaped field is <em>withheld and counted</em>, never
 silently dropped — the count is printed in the footer.</p>
-<p><code class="xref py py-data docutils literal notranslate"><span class="pre">CSS</span></code> and <a class="reference internal" href="#openloops.dashboard.Sanitizer" title="openloops.dashboard.Sanitizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sanitizer</span></code></a> are public for sibling renderers — a tool that shows
-a different half of the same picture and wants to look like this page — so that the look
-and the egress rule stay in one place instead of being copied and drifting.</p>
+<p><code class="xref py py-data docutils literal notranslate"><span class="pre">CSS</span></code>, <a class="reference internal" href="#openloops.dashboard.Sanitizer" title="openloops.dashboard.Sanitizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sanitizer</span></code></a>, <a class="reference internal" href="#openloops.dashboard.register" title="openloops.dashboard.register"><code class="xref py py-func docutils literal notranslate"><span class="pre">register()</span></code></a> and <a class="reference internal" href="#openloops.dashboard.rail" title="openloops.dashboard.rail"><code class="xref py py-func docutils literal notranslate"><span class="pre">rail()</span></code></a> are public for
+sibling renderers — a tool that shows a different half of the same picture and wants to
+look like this page — so that the look, the egress rule and the markup the stylesheet
+dresses stay in one place instead of being copied and drifting. They are the shared kit:
+the stylesheet here is what makes <code class="docutils literal notranslate"><span class="pre">register--needs</span></code> a colour and <code class="docutils literal notranslate"><span class="pre">rail</span></code> a column, so
+a package that writes those class names by hand is one rename away from a broken page.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">html</span> <span class="o">=</span> <span class="n">render_dashboard</span><span class="p">({},</span> <span class="p">{},</span> <span class="p">[],</span> <span class="n">made_at</span><span class="o">=</span><span class="s1">'2026-01-01T00:00:00Z'</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="s1">'&lt;title&gt;'</span> <span class="ow">in</span> <span class="n">html</span> <span class="ow">and</span> <span class="s1">'snapshot'</span> <span class="ow">in</span> <span class="n">html</span>
 <span class="go">True</span>
@@ -454,6 +464,12 @@ and the egress rule stay in one place instead of being copied and drifting.</p>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#openloops.dashboard.headline_counts" title="openloops.dashboard.headline_counts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">headline_counts</span></code></a>(owed, blocked, sessions)</p></td>
 <td><p>The four figures across the top of the page.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.dashboard.rail" title="openloops.dashboard.rail"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rail</span></code></a>(chip, tone, age[, unit, extra])</p></td>
+<td><p>The fixed left column of every row: what state it is in, and for how long.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.dashboard.register" title="openloops.dashboard.register"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register</span></code></a>(*, ident, name, figure, tone, rule, ...)</p></td>
+<td><p>One band: a heading, the count in the largest figure on the page, and its rule.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#openloops.dashboard.render_dashboard" title="openloops.dashboard.render_dashboard"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render_dashboard</span></code></a>(owed, blocked, sessions, *)</p></td>
 <td><p>The three envelopes as one self-contained HTML page.</p></td>
@@ -556,6 +572,70 @@ caller reads back is the number the page printed.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">headline_counts</span><span class="p">({</span><span class="s1">'listed'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">'counts'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'open'</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="s1">'rows'</span><span class="p">:</span> <span class="p">[]},</span>
 <span class="gp">... </span>                <span class="p">{</span><span class="s1">'listed'</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span> <span class="p">[])[</span><span class="s1">'free_to_proceed'</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
 <span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.dashboard.rail">
+<span class="sig-prename descclassname"><span class="pre">openloops.dashboard.</span></span><span class="sig-name descname"><span class="pre">rail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tone</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">age</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'d'</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/dashboard.html#rail"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.dashboard.rail" title="Link to this definition">#</a></dt>
+<dd><p>The fixed left column of every row: what state it is in, and for how long.</p>
+<p>Shared kit (see the module docstring): <code class="xref py py-data docutils literal notranslate"><span class="pre">CSS</span></code> styles <code class="docutils literal notranslate"><span class="pre">rail</span></code>, <code class="docutils literal notranslate"><span class="pre">chip</span></code>,
+<code class="docutils literal notranslate"><span class="pre">chip--&lt;tone&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">age</span></code>, so a sibling renderer that builds this by hand breaks
+the next time a class name here changes.</p>
+<p><code class="docutils literal notranslate"><span class="pre">age</span></code> is the figure beside the unit — a number, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for the <code class="docutils literal notranslate"><span class="pre">?</span></code> that
+means nobody knows. It is not required to be a day count: pass a string and a
+<code class="docutils literal notranslate"><span class="pre">unit</span></code> of your own for a page whose durations run from seconds to days.</p>
+<p><code class="docutils literal notranslate"><span class="pre">extra</span></code> is further markup placed between the state chip and the age — a second
+chip a sibling page needs and this one has no equivalent of.</p>
+<p>Nothing here is escaped, <code class="docutils literal notranslate"><span class="pre">extra</span></code> least of all: see the module docstring.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rail</span><span class="p">(</span><span class="s2">"owed"</span><span class="p">,</span> <span class="s2">"needs"</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">'&lt;div class="rail"&gt;&lt;span class="chip chip--needs"&gt;owed&lt;/span&gt;&lt;span class="age"&gt;&lt;b&gt;3&lt;/b&gt;&lt;i&gt;d&lt;/i&gt;&lt;/span&gt;&lt;/div&gt;'</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.dashboard.register">
+<span class="sig-prename descclassname"><span class="pre">openloops.dashboard.</span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">ident</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tone</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_open</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/dashboard.html#register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.dashboard.register" title="Link to this definition">#</a></dt>
+<dd><p>One band: a heading, the count in the largest figure on the page, and its rule.</p>
+<p>Shared kit (see the module docstring): <code class="xref py py-data docutils literal notranslate"><span class="pre">CSS</span></code> styles <code class="docutils literal notranslate"><span class="pre">register</span></code>,
+<code class="docutils literal notranslate"><span class="pre">register--&lt;tone&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">register-head</span></code>, laying the head out as <code class="docutils literal notranslate"><span class="pre">auto</span> <span class="pre">1fr</span></code> —
+the figure in the first column, the heading and the rule in the second.</p>
+<p><code class="docutils literal notranslate"><span class="pre">folds</span></code> renders the band as a <code class="docutils literal notranslate"><span class="pre">&lt;details&gt;</span></code> a person can close, <code class="docutils literal notranslate"><span class="pre">start_open</span></code>
+opening it anyway; both default off, which is the plain <code class="docutils literal notranslate"><span class="pre">&lt;section&gt;</span></code> this page has
+always rendered. A <code class="docutils literal notranslate"><span class="pre">&lt;summary&gt;</span></code> may hold phrasing content and a heading only, so
+the folding head carries the figure and the rule as <code class="docutils literal notranslate"><span class="pre">&lt;span&gt;``s</span> <span class="pre">rather</span> <span class="pre">than</span>
+<span class="pre">``&lt;p&gt;``s.</span> <span class="pre">**That</span> <span class="pre">head</span> <span class="pre">needs</span> <span class="pre">placement</span> <span class="pre">rules</span> <span class="pre">this</span> <span class="pre">stylesheet</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">yet</span> <span class="pre">carry**:</span>
+<span class="pre">three</span> <span class="pre">flat</span> <span class="pre">children</span> <span class="pre">auto-place</span> <span class="pre">into</span> <span class="pre">the</span> <span class="pre">same</span> <span class="pre">grid</span> <span class="pre">as</span> <span class="pre">two,</span> <span class="pre">which</span> <span class="pre">puts</span> <span class="pre">the</span> <span class="pre">rule</span> <span class="pre">under</span>
+<span class="pre">the</span> <span class="pre">figure,</span> <span class="pre">and</span> <span class="pre">``display:grid</span></code> on a <code class="docutils literal notranslate"><span class="pre">&lt;summary&gt;</span></code> costs it its marker. The caller
+that folds today (crowsnest) supplies them; moving them here is issue 13.
+<code class="docutils literal notranslate"><span class="pre">start_open</span></code> is ignored when <code class="docutils literal notranslate"><span class="pre">folds</span></code> is false — there is no disclosure to open —
+because a caller decides <code class="docutils literal notranslate"><span class="pre">folds</span></code> from whether it has rows and passes both.</p>
+<p>A band with nothing in it is not worth folding — there is nothing to hide — so that
+decision belongs to the caller, which knows whether its body is rows.</p>
+<p><code class="docutils literal notranslate"><span class="pre">extra</span></code> is markup that heads the band’s body. A <code class="docutils literal notranslate"><span class="pre">&lt;summary&gt;</span></code> may not hold
+interactive content and what a caller puts here is usually a control, so in the
+<code class="docutils literal notranslate"><span class="pre">&lt;details&gt;</span></code> it goes inside the body; in the <code class="docutils literal notranslate"><span class="pre">&lt;section&gt;</span></code> it stays in the head,
+under the rule. That is above the head’s hairline in one form and below it in the
+other, which is how the caller that needs it already reads.</p>
+<p>Nothing here is escaped: see the module docstring. <code class="docutils literal notranslate"><span class="pre">ident</span></code> and <code class="docutils literal notranslate"><span class="pre">tone</span></code> reach an
+unquoted attribute, so they are the two that must be literals or already safe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">register</span><span class="p">(</span><span class="n">ident</span><span class="o">=</span><span class="s2">"x"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Needs you"</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="s2">"2"</span><span class="p">,</span> <span class="n">tone</span><span class="o">=</span><span class="s2">"needs"</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="s2">"now"</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+<span class="go">'&lt;section class="register register--needs" id="x"&gt;&lt;div class="register-head"&gt;&lt;p class="figure"&gt;2&lt;/p&gt;&lt;div&gt;&lt;h2&gt;Needs you&lt;/h2&gt;&lt;p class="rule"&gt;now&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/section&gt;'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">register</span><span class="p">(</span><span class="n">ident</span><span class="o">=</span><span class="s2">"x"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Quiet"</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="s2">"9"</span><span class="p">,</span> <span class="n">tone</span><span class="o">=</span><span class="s2">"done"</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="s2">"why"</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
+<span class="gp">... </span>         <span class="n">folds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">start_open</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">'&lt;details class="register register--done" id="x" open&gt;&lt;summary class="register-head"&gt;&lt;span class="figure"&gt;9&lt;/span&gt;&lt;h2&gt;Quiet&lt;/h2&gt;&lt;span class="rule"&gt;why&lt;/span&gt;&lt;/summary&gt;&lt;/details&gt;'</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -700,6 +780,8 @@ number rather than the true one.</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.dashboard.headline_counts"><code class="docutils literal notranslate"><span class="pre">headline_counts()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.dashboard.rail"><code class="docutils literal notranslate"><span class="pre">rail()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.dashboard.register"><code class="docutils literal notranslate"><span class="pre">register()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.dashboard.render_dashboard"><code class="docutils literal notranslate"><span class="pre">render_dashboard()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.dashboard.unchecked_count"><code class="docutils literal notranslate"><span class="pre">unchecked_count()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.dashboard.unknown_count"><code class="docutils literal notranslate"><span class="pre">unknown_count()</span></code></a></li>

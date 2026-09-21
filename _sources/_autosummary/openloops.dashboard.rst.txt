@@ -17,6 +17,8 @@ openloops.dashboard
    .. autosummary::
    
       headline_counts
+      rail
+      register
       render_dashboard
       unchecked_count
       unknown_count

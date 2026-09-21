@@ -2,14 +2,14 @@
 
 One page you can look at instead of reading three command outputs.
 
-[`render_dashboard()`](#openloops.dashboard.render_dashboard) takes what [`openloops.owed()`](openloops.html.md#openloops.owed), [`openloops.blocked()`](openloops.html.md#openloops.blocked)
-and [`openloops.ls()`](openloops.html.md#openloops.ls) returned and renders a single self-contained HTML document —
+[`render_dashboard()`](#openloops.dashboard.render_dashboard) takes what [`openloops.owed()`](openloops.md#openloops.owed), [`openloops.blocked()`](openloops.md#openloops.blocked)
+and [`openloops.ls()`](openloops.md#openloops.ls) returned and renders a single self-contained HTML document —
 no stylesheet, no script, no font and no request to anywhere. That is not decoration:
 the page is meant to be published, and a published page runs no `gh`, shells out to
 nothing and reaches no network.
 
 So **the page is a snapshot, and it says so in its largest type.** This module inverts
-the one rule [`openloops.digest`](openloops.digest.html.md#module-openloops.digest) holds to — a digest deliberately stamps no
+the one rule [`openloops.digest`](openloops.digest.md#module-openloops.digest) holds to — a digest deliberately stamps no
 generation time so that regenerating it is byte-stable — because here the generation
 time is the whole claim. `made_at` is a required-in-practice argument rather than a
 hidden `now()`, which is also what lets a test compare bytes.
@@ -29,7 +29,7 @@ the package exists for:
    told quietly.
 
 Everything this module prints goes through [`Sanitizer`](#openloops.dashboard.Sanitizer), which is
-[`openloops.egress.scrub()`](openloops.egress.html.md#openloops.egress.scrub) plus HTML escaping plus a scheme allowlist on every link.
+[`openloops.egress.scrub()`](openloops.egress.md#openloops.egress.scrub) plus HTML escaping plus a scheme allowlist on every link.
 The one carve-out is the shared kit below: [`register()`](#openloops.dashboard.register) and [`rail()`](#openloops.dashboard.rail) \*\*escape
 nothing\*\*. Every argument they take is markup, interpolated as given and some of it into
 an unquoted attribute, because that is what a markup builder is; a caller that passes
@@ -96,7 +96,7 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 Scrub, then escape. The single path from an envelope to the document.
 
 Two failures are possible and they are treated differently, exactly as
-[`openloops.egress`](openloops.egress.html.md#module-openloops.egress) prescribes. A home path is *rewritten* — it is an identifier
+[`openloops.egress`](openloops.egress.md#module-openloops.egress) prescribes. A home path is *rewritten* — it is an identifier
 and the tail is the part a reader needs. A credential is *withheld and counted*: the
 field is replaced by a visible notice naming the pattern class, never the text, and
 `withheld` is printed in the footer so the run reports it rather than quietly
@@ -130,7 +130,7 @@ A link target, or `''` when it is not one this page will follow.
 
 The four figures across the top of the page. `None` is `?`, never a zero.
 
-Shared by the masthead and by [`openloops.tools.dashboard()`](openloops.tools.html.md#openloops.tools.dashboard), so the number a
+Shared by the masthead and by [`openloops.tools.dashboard()`](openloops.tools.md#openloops.tools.dashboard), so the number a
 caller reads back is the number the page printed.
 
 * **Return type:**
@@ -213,8 +213,8 @@ unquoted attribute, so they are the two that must be literals or already safe.
 
 The three envelopes as one self-contained HTML page. No network, no script.
 
-`owed` and `blocked` are the envelopes [`openloops.owed()`](openloops.html.md#openloops.owed) and
-[`openloops.blocked()`](openloops.html.md#openloops.blocked) return; `sessions` is the list [`openloops.ls()`](openloops.html.md#openloops.ls)
+`owed` and `blocked` are the envelopes [`openloops.owed()`](openloops.md#openloops.owed) and
+[`openloops.blocked()`](openloops.md#openloops.blocked) return; `sessions` is the list [`openloops.ls()`](openloops.md#openloops.ls)
 returns. All three may be empty mappings, and an envelope whose `listed` is
 `False` renders as `?` throughout rather than as zero.
 

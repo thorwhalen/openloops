@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
-    <script src="../../_static/documentation_options.js?v=8618f531"></script>
+    <script src="../../_static/documentation_options.js?v=bafade30"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -410,7 +410,7 @@ window.runMermaid = runMermaid;</script>
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.9" />
+  <meta name="docsearch:version" content="0.1.10" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -739,16 +739,24 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">   which checks earned that, because a clean board with no provenance is the same lie</span>
 <span class="sd">   told quietly.</span>
 
-<span class="sd">Everything printed goes through :class:`Sanitizer`, which is :func:`openloops.egress</span>
-<span class="sd">.scrub` plus HTML escaping plus a scheme allowlist on every link. A page that carries a</span>
+<span class="sd">Everything this module prints goes through :class:`Sanitizer`, which is</span>
+<span class="sd">:func:`openloops.egress.scrub` plus HTML escaping plus a scheme allowlist on every link.</span>
+<span class="sd">The one carve-out is the shared kit below: :func:`register` and :func:`rail` **escape</span>
+<span class="sd">nothing**. Every argument they take is markup, interpolated as given and some of it into</span>
+<span class="sd">an unquoted attribute, because that is what a markup builder is; a caller that passes</span>
+<span class="sd">anything it did not write itself puts it through :class:`Sanitizer` first. This module</span>
+<span class="sd">passes literals. A page that carries a</span>
 <span class="sd">repository name and an issue title is fine; one that carries a home path or a token is</span>
 <span class="sd">the failure ``openloops.egress`` exists to prevent, and this renderer scrubs its input</span>
 <span class="sd">rather than trusting it. A credential-shaped field is *withheld and counted*, never</span>
 <span class="sd">silently dropped — the count is printed in the footer.</span>
 
-<span class="sd">:data:`CSS` and :class:`Sanitizer` are public for sibling renderers — a tool that shows</span>
-<span class="sd">a different half of the same picture and wants to look like this page — so that the look</span>
-<span class="sd">and the egress rule stay in one place instead of being copied and drifting.</span>
+<span class="sd">:data:`CSS`, :class:`Sanitizer`, :func:`register` and :func:`rail` are public for</span>
+<span class="sd">sibling renderers — a tool that shows a different half of the same picture and wants to</span>
+<span class="sd">look like this page — so that the look, the egress rule and the markup the stylesheet</span>
+<span class="sd">dresses stay in one place instead of being copied and drifting. They are the shared kit:</span>
+<span class="sd">the stylesheet here is what makes ``register--needs`` a colour and ``rail`` a column, so</span>
+<span class="sd">a package that writes those class names by hand is one rename away from a broken page.</span>
 
 <span class="sd">    &gt;&gt;&gt; html = render_dashboard({}, {}, [], made_at='2026-01-01T00:00:00Z')</span>
 <span class="sd">    &gt;&gt;&gt; '&lt;title&gt;' in html and 'snapshot' in html</span>
@@ -774,6 +782,8 @@ window.runMermaid = runMermaid;</script>
     <span class="s2">"GAUGE_FULL_DAYS"</span><span class="p">,</span>
     <span class="s2">"Sanitizer"</span><span class="p">,</span>
     <span class="s2">"headline_counts"</span><span class="p">,</span>
+    <span class="s2">"rail"</span><span class="p">,</span>
+    <span class="s2">"register"</span><span class="p">,</span>
     <span class="s2">"render_dashboard"</span><span class="p">,</span>
     <span class="s2">"unchecked_count"</span><span class="p">,</span>
     <span class="s2">"unknown_count"</span><span class="p">,</span>
@@ -965,15 +975,43 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="sa">f</span><span class="s1">'&lt;p class="gauge gauge--</span><span class="si">{</span><span class="n">tone</span><span class="si">}</span><span class="s1">"&gt;&lt;span style="width:</span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">)</span><span class="si">}</span><span class="s1">%"&gt;&lt;/span&gt;&lt;/p&gt;'</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_rail</span><span class="p">(</span><span class="n">chip</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tone</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">days</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"d"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""The fixed left column of every row: what state it is in, and for how long."""</span>
-    <span class="n">figure</span> <span class="o">=</span> <span class="s2">"?"</span> <span class="k">if</span> <span class="n">days</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">days</span><span class="p">)</span>
+<div class="viewcode-block" id="rail">
+<a class="viewcode-back" href="../../_autosummary/openloops.dashboard.html#openloops.rail">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">rail</span><span class="p">(</span>
+    <span class="n">chip</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">tone</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">age</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"d"</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">extra</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The fixed left column of every row: what state it is in, and for how long.</span>
+
+<span class="sd">    Shared kit (see the module docstring): :data:`CSS` styles ``rail``, ``chip``,</span>
+<span class="sd">    ``chip--&lt;tone&gt;`` and ``age``, so a sibling renderer that builds this by hand breaks</span>
+<span class="sd">    the next time a class name here changes.</span>
+
+<span class="sd">    ``age`` is the figure beside the unit — a number, or ``None`` for the ``?`` that</span>
+<span class="sd">    means nobody knows. It is not required to be a day count: pass a string and a</span>
+<span class="sd">    ``unit`` of your own for a page whose durations run from seconds to days.</span>
+
+<span class="sd">    ``extra`` is further markup placed between the state chip and the age — a second</span>
+<span class="sd">    chip a sibling page needs and this one has no equivalent of.</span>
+
+<span class="sd">    Nothing here is escaped, ``extra`` least of all: see the module docstring.</span>
+
+<span class="sd">    &gt;&gt;&gt; rail("owed", "needs", 3)</span>
+<span class="sd">    '&lt;div class="rail"&gt;&lt;span class="chip chip--needs"&gt;owed&lt;/span&gt;&lt;span class="age"&gt;&lt;b&gt;3&lt;/b&gt;&lt;i&gt;d&lt;/i&gt;&lt;/span&gt;&lt;/div&gt;'</span>
+<span class="sd">    """</span>
+    <span class="n">figure</span> <span class="o">=</span> <span class="s2">"?"</span> <span class="k">if</span> <span class="n">age</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">age</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s1">'&lt;div class="rail"&gt;'</span>
         <span class="sa">f</span><span class="s1">'&lt;span class="chip chip--</span><span class="si">{</span><span class="n">tone</span><span class="si">}</span><span class="s1">"&gt;</span><span class="si">{</span><span class="n">chip</span><span class="si">}</span><span class="s1">&lt;/span&gt;'</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">extra</span><span class="si">}</span><span class="s2">"</span>
         <span class="sa">f</span><span class="s1">'&lt;span class="age"&gt;&lt;b&gt;</span><span class="si">{</span><span class="n">figure</span><span class="si">}</span><span class="s1">&lt;/b&gt;&lt;i&gt;</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s1">&lt;/i&gt;&lt;/span&gt;'</span>
         <span class="sa">f</span><span class="s2">"&lt;/div&gt;"</span>
-    <span class="p">)</span>
+    <span class="p">)</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_ref</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -996,7 +1034,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">evidence</span> <span class="o">=</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">_clip</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"evidence"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)))</span>
     <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
         <span class="sa">f</span><span class="s1">'&lt;li class="row row--</span><span class="si">{</span><span class="n">tone</span><span class="si">}</span><span class="s1">"&gt;'</span><span class="p">,</span>
-        <span class="n">_rail</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">tone</span><span class="p">,</span> <span class="n">days</span><span class="p">),</span>
+        <span class="n">rail</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">tone</span><span class="p">,</span> <span class="n">days</span><span class="p">),</span>
         <span class="s1">'&lt;div class="body"&gt;'</span><span class="p">,</span>
         <span class="sa">f</span><span class="s1">'&lt;p class="ask"&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">))</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span><span class="p">,</span>
         <span class="sa">f</span><span class="s1">'&lt;p class="where"&gt;</span><span class="si">{</span><span class="n">_ref</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span><span class="w"> </span><span class="n">row</span><span class="p">)</span><span class="si">}</span><span class="s1"> &lt;span class="sep"&gt;·&lt;/span&gt; opened '</span>
@@ -1022,7 +1060,7 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="s1">'&lt;li class="row row--free"&gt;'</span><span class="p">,</span>
-            <span class="n">_rail</span><span class="p">(</span><span class="s2">"free"</span><span class="p">,</span> <span class="s2">"free"</span><span class="p">,</span> <span class="n">free</span><span class="p">),</span>
+            <span class="n">rail</span><span class="p">(</span><span class="s2">"free"</span><span class="p">,</span> <span class="s2">"free"</span><span class="p">,</span> <span class="n">free</span><span class="p">),</span>
             <span class="s1">'&lt;div class="body"&gt;'</span><span class="p">,</span>
             <span class="sa">f</span><span class="s1">'&lt;p class="ask"&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">))</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span><span class="p">,</span>
             <span class="sa">f</span><span class="s1">'&lt;p class="where"&gt;</span><span class="si">{</span><span class="n">_ref</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span><span class="w"> </span><span class="n">row</span><span class="p">)</span><span class="si">}</span><span class="s1"> &lt;span class="sep"&gt;·&lt;/span&gt; open '</span>
@@ -1079,7 +1117,7 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="sa">f</span><span class="s1">'&lt;li class="row row--</span><span class="si">{</span><span class="n">tone</span><span class="si">}</span><span class="s1">"&gt;'</span><span class="p">,</span>
-            <span class="n">_rail</span><span class="p">(</span><span class="s2">"open"</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">low</span> <span class="k">else</span> <span class="s2">"open ?"</span><span class="p">,</span> <span class="n">tone</span><span class="p">,</span> <span class="n">days</span><span class="p">),</span>
+            <span class="n">rail</span><span class="p">(</span><span class="s2">"open"</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">low</span> <span class="k">else</span> <span class="s2">"open ?"</span><span class="p">,</span> <span class="n">tone</span><span class="p">,</span> <span class="n">days</span><span class="p">),</span>
             <span class="s1">'&lt;div class="body"&gt;'</span><span class="p">,</span>
             <span class="sa">f</span><span class="s1">'&lt;p class="ask"&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">heading</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span><span class="p">,</span>
             <span class="s1">'&lt;p class="where"&gt;'</span>
@@ -1102,17 +1140,74 @@ window.runMermaid = runMermaid;</script>
     <span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_register</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span> <span class="n">ident</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">figure</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tone</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rule</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">str</span>
+<div class="viewcode-block" id="register">
+<a class="viewcode-back" href="../../_autosummary/openloops.dashboard.html#openloops.register">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">ident</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">figure</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">tone</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">rule</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">folds</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">start_open</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">extra</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""One band: a heading, the count in the largest figure on the page, and its rule."""</span>
+<span class="w">    </span><span class="sd">"""One band: a heading, the count in the largest figure on the page, and its rule.</span>
+
+<span class="sd">    Shared kit (see the module docstring): :data:`CSS` styles ``register``,</span>
+<span class="sd">    ``register--&lt;tone&gt;`` and ``register-head``, laying the head out as ``auto 1fr`` —</span>
+<span class="sd">    the figure in the first column, the heading and the rule in the second.</span>
+
+<span class="sd">    ``folds`` renders the band as a ``&lt;details&gt;`` a person can close, ``start_open``</span>
+<span class="sd">    opening it anyway; both default off, which is the plain ``&lt;section&gt;`` this page has</span>
+<span class="sd">    always rendered. A ``&lt;summary&gt;`` may hold phrasing content and a heading only, so</span>
+<span class="sd">    the folding head carries the figure and the rule as ``&lt;span&gt;``s rather than</span>
+<span class="sd">    ``&lt;p&gt;``s. **That head needs placement rules this stylesheet does not yet carry**:</span>
+<span class="sd">    three flat children auto-place into the same grid as two, which puts the rule under</span>
+<span class="sd">    the figure, and ``display:grid`` on a ``&lt;summary&gt;`` costs it its marker. The caller</span>
+<span class="sd">    that folds today (crowsnest) supplies them; moving them here is issue 13.</span>
+<span class="sd">    ``start_open`` is ignored when ``folds`` is false — there is no disclosure to open —</span>
+<span class="sd">    because a caller decides ``folds`` from whether it has rows and passes both.</span>
+
+<span class="sd">    A band with nothing in it is not worth folding — there is nothing to hide — so that</span>
+<span class="sd">    decision belongs to the caller, which knows whether its body is rows.</span>
+
+<span class="sd">    ``extra`` is markup that heads the band's body. A ``&lt;summary&gt;`` may not hold</span>
+<span class="sd">    interactive content and what a caller puts here is usually a control, so in the</span>
+<span class="sd">    ``&lt;details&gt;`` it goes inside the body; in the ``&lt;section&gt;`` it stays in the head,</span>
+<span class="sd">    under the rule. That is above the head's hairline in one form and below it in the</span>
+<span class="sd">    other, which is how the caller that needs it already reads.</span>
+
+<span class="sd">    Nothing here is escaped: see the module docstring. ``ident`` and ``tone`` reach an</span>
+<span class="sd">    unquoted attribute, so they are the two that must be literals or already safe.</span>
+
+<span class="sd">    &gt;&gt;&gt; register(ident="x", name="Needs you", figure="2", tone="needs", rule="now", body="")</span>
+<span class="sd">    '&lt;section class="register register--needs" id="x"&gt;&lt;div class="register-head"&gt;&lt;p class="figure"&gt;2&lt;/p&gt;&lt;div&gt;&lt;h2&gt;Needs you&lt;/h2&gt;&lt;p class="rule"&gt;now&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/section&gt;'</span>
+<span class="sd">    &gt;&gt;&gt; register(ident="x", name="Quiet", figure="9", tone="done", rule="why", body="",</span>
+<span class="sd">    ...          folds=True, start_open=True)</span>
+<span class="sd">    '&lt;details class="register register--done" id="x" open&gt;&lt;summary class="register-head"&gt;&lt;span class="figure"&gt;9&lt;/span&gt;&lt;h2&gt;Quiet&lt;/h2&gt;&lt;span class="rule"&gt;why&lt;/span&gt;&lt;/summary&gt;&lt;/details&gt;'</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">folds</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">'&lt;details class="register register--</span><span class="si">{</span><span class="n">tone</span><span class="si">}</span><span class="s1">" id="</span><span class="si">{</span><span class="n">ident</span><span class="si">}</span><span class="s1">"'</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">' open'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">start_open</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">''</span><span class="si">}</span><span class="s2">&gt;"</span>
+            <span class="sa">f</span><span class="s1">'&lt;summary class="register-head"&gt;'</span>
+            <span class="sa">f</span><span class="s1">'&lt;span class="figure"&gt;</span><span class="si">{</span><span class="n">figure</span><span class="si">}</span><span class="s1">&lt;/span&gt;'</span>
+            <span class="sa">f</span><span class="s2">"&lt;h2&gt;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&lt;/h2&gt;"</span>
+            <span class="sa">f</span><span class="s1">'&lt;span class="rule"&gt;</span><span class="si">{</span><span class="n">rule</span><span class="si">}</span><span class="s1">&lt;/span&gt;'</span>
+            <span class="s2">"&lt;/summary&gt;"</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">extra</span><span class="si">}{</span><span class="n">body</span><span class="si">}</span><span class="s2">&lt;/details&gt;"</span>
+        <span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s1">'&lt;section class="register register--</span><span class="si">{</span><span class="n">tone</span><span class="si">}</span><span class="s1">" id="</span><span class="si">{</span><span class="n">ident</span><span class="si">}</span><span class="s1">"&gt;'</span>
         <span class="sa">f</span><span class="s1">'&lt;div class="register-head"&gt;'</span>
         <span class="sa">f</span><span class="s1">'&lt;p class="figure"&gt;</span><span class="si">{</span><span class="n">figure</span><span class="si">}</span><span class="s1">&lt;/p&gt;'</span>
-        <span class="sa">f</span><span class="s1">'&lt;div&gt;&lt;h2&gt;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&lt;/h2&gt;&lt;p class="rule"&gt;</span><span class="si">{</span><span class="n">rule</span><span class="si">}</span><span class="s1">&lt;/p&gt;&lt;/div&gt;'</span>
+        <span class="sa">f</span><span class="s1">'&lt;div&gt;&lt;h2&gt;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&lt;/h2&gt;&lt;p class="rule"&gt;</span><span class="si">{</span><span class="n">rule</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span><span class="si">{</span><span class="n">extra</span><span class="si">}</span><span class="s1">&lt;/div&gt;'</span>
         <span class="sa">f</span><span class="s2">"&lt;/div&gt;</span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="s2">&lt;/section&gt;"</span>
-    <span class="p">)</span>
+    <span class="p">)</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_empty</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -1617,7 +1712,7 @@ window.runMermaid = runMermaid;</script>
                 <span class="s2">"to do but close the issue. openloops will not close it for you.&lt;/p&gt;"</span>
                 <span class="sa">f</span><span class="s1">'&lt;ol class="ledger ledger--quiet"&gt;</span><span class="si">{</span><span class="n">done</span><span class="si">}</span><span class="s1">&lt;/ol&gt;'</span>
             <span class="p">)</span>
-    <span class="k">return</span> <span class="n">_register</span><span class="p">(</span>
+    <span class="k">return</span> <span class="n">register</span><span class="p">(</span>
         <span class="n">ident</span><span class="o">=</span><span class="s2">"needs"</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">"Needs you now"</span><span class="p">,</span>
         <span class="n">figure</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span>
@@ -1649,7 +1744,7 @@ window.runMermaid = runMermaid;</script>
                 <span class="s2">"foreign repository it is blocked on.&lt;/p&gt;"</span>
                 <span class="sa">f</span><span class="s1">'&lt;ul class="thins"&gt;</span><span class="si">{</span><span class="n">rows</span><span class="si">}</span><span class="s1">&lt;/ul&gt;'</span>
             <span class="p">)</span>
-    <span class="k">return</span> <span class="n">_register</span><span class="p">(</span>
+    <span class="k">return</span> <span class="n">register</span><span class="p">(</span>
         <span class="n">ident</span><span class="o">=</span><span class="s2">"free"</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">"Free to proceed"</span><span class="p">,</span>
         <span class="n">figure</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span>
@@ -1683,7 +1778,7 @@ window.runMermaid = runMermaid;</script>
                 <span class="sa">f</span><span class="s2">"Showing the </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">shown</span><span class="p">)</span><span class="si">}</span><span class="s2"> most recent of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">)</span><span class="si">}</span><span class="s2">. "</span>
                 <span class="s2">"Run &lt;code&gt;ol ls --limit 0&lt;/code&gt; for all of them."</span>
             <span class="p">)</span>
-    <span class="k">return</span> <span class="n">_register</span><span class="p">(</span>
+    <span class="k">return</span> <span class="n">register</span><span class="p">(</span>
         <span class="n">ident</span><span class="o">=</span><span class="s2">"flight"</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">"In flight"</span><span class="p">,</span>
         <span class="n">figure</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">)),</span>
@@ -1738,7 +1833,7 @@ window.runMermaid = runMermaid;</script>
             <span class="s2">"That is a claim, so here is what earned it:&lt;/p&gt;"</span>
             <span class="sa">f</span><span class="s1">'&lt;ul class="proof"&gt;</span><span class="si">{</span><span class="n">proof</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">"&lt;li&gt;Nothing was checked at all.&lt;/li&gt;"</span><span class="si">}</span><span class="s1">&lt;/ul&gt;'</span>
         <span class="p">)</span>
-    <span class="k">return</span> <span class="n">_register</span><span class="p">(</span>
+    <span class="k">return</span> <span class="n">register</span><span class="p">(</span>
         <span class="n">ident</span><span class="o">=</span><span class="s2">"unknown"</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">"Unknown"</span><span class="p">,</span>
         <span class="n">figure</span><span class="o">=</span><span class="n">_figure</span><span class="p">(</span><span class="n">unknown_count</span><span class="p">),</span>

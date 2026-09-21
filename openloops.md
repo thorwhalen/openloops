@@ -1,4 +1,4 @@
-> built 2026-09-15 11:20 UTC from 9624cba (main) · openloops 0.1.9. Details: build_info.json
+> built 2026-09-21 13:03 UTC from 19f2e32 (main) · openloops 0.1.10. Details: build_info.json
 
 # index.html.md
 
@@ -1384,16 +1384,24 @@ the package exists for:
    which checks earned that, because a clean board with no provenance is the same lie
    told quietly.
 
-Everything printed goes through [`Sanitizer`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.Sanitizer), which is `openloops.egress
-.scrub()` plus HTML escaping plus a scheme allowlist on every link. A page that carries a
+Everything this module prints goes through [`Sanitizer`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.Sanitizer), which is
+[`openloops.egress.scrub()`](_autosummary/openloops.egress.html.md#openloops.egress.scrub) plus HTML escaping plus a scheme allowlist on every link.
+The one carve-out is the shared kit below: [`register()`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.register) and [`rail()`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.rail) \*\*escape
+nothing\*\*. Every argument they take is markup, interpolated as given and some of it into
+an unquoted attribute, because that is what a markup builder is; a caller that passes
+anything it did not write itself puts it through [`Sanitizer`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.Sanitizer) first. This module
+passes literals. A page that carries a
 repository name and an issue title is fine; one that carries a home path or a token is
 the failure `openloops.egress` exists to prevent, and this renderer scrubs its input
 rather than trusting it. A credential-shaped field is *withheld and counted*, never
 silently dropped — the count is printed in the footer.
 
-`CSS` and [`Sanitizer`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.Sanitizer) are public for sibling renderers — a tool that shows
-a different half of the same picture and wants to look like this page — so that the look
-and the egress rule stay in one place instead of being copied and drifting.
+`CSS`, [`Sanitizer`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.Sanitizer), [`register()`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.register) and [`rail()`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.rail) are public for
+sibling renderers — a tool that shows a different half of the same picture and wants to
+look like this page — so that the look, the egress rule and the markup the stylesheet
+dresses stay in one place instead of being copied and drifting. They are the shared kit:
+the stylesheet here is what makes `register--needs` a colour and `rail` a column, so
+a package that writes those class names by hand is one rename away from a broken page.
 
 ```pycon
 >>> html = render_dashboard({}, {}, [], made_at='2026-01-01T00:00:00Z')
@@ -1410,11 +1418,13 @@ True
 
 ### Functions
 
-| [`headline_counts`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.headline_counts)(owed, blocked, sessions)      | The four figures across the top of the page.                          |
-|------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|
-| [`render_dashboard`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.render_dashboard)(owed, blocked, sessions, \*) | The three envelopes as one self-contained HTML page.                  |
-| [`unchecked_count`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.unchecked_count)(owed, blocked)                | How many OBLIGATIONS could not be checked against the world.          |
-| [`unknown_count`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.unknown_count)(owed, blocked, sessions)        | How many things read `?`, or `None` when even that cannot be counted. |
+| [`headline_counts`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.headline_counts)(owed, blocked, sessions)           | The four figures across the top of the page.                                    |
+|-----------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| [`rail`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.rail)(chip, tone, age[, unit, extra])               | The fixed left column of every row: what state it is in, and for how long.      |
+| [`register`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.register)(\*, ident, name, figure, tone, rule, ...) | One band: a heading, the count in the largest figure on the page, and its rule. |
+| [`render_dashboard`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.render_dashboard)(owed, blocked, sessions, \*)      | The three envelopes as one self-contained HTML page.                            |
+| [`unchecked_count`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.unchecked_count)(owed, blocked)                     | How many OBLIGATIONS could not be checked against the world.                    |
+| [`unknown_count`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.unknown_count)(owed, blocked, sessions)             | How many things read `?`, or `None` when even that cannot be counted.           |
 
 ### Classes
 
@@ -1486,6 +1496,73 @@ caller reads back is the number the page printed.
 >>> headline_counts({'listed': True, 'counts': {'open': 2}, 'rows': []},
 ...                 {'listed': False}, [])['free_to_proceed'] is None
 True
+```
+
+### openloops.dashboard.rail(chip, tone, age, unit='d', , extra='')
+
+The fixed left column of every row: what state it is in, and for how long.
+
+Shared kit (see the module docstring): `CSS` styles `rail`, `chip`,
+`chip--<tone>` and `age`, so a sibling renderer that builds this by hand breaks
+the next time a class name here changes.
+
+`age` is the figure beside the unit — a number, or `None` for the `?` that
+means nobody knows. It is not required to be a day count: pass a string and a
+`unit` of your own for a page whose durations run from seconds to days.
+
+`extra` is further markup placed between the state chip and the age — a second
+chip a sibling page needs and this one has no equivalent of.
+
+Nothing here is escaped, `extra` least of all: see the module docstring.
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+```pycon
+>>> rail("owed", "needs", 3)
+'<div class="rail"><span class="chip chip--needs">owed</span><span class="age"><b>3</b><i>d</i></span></div>'
+```
+
+### openloops.dashboard.register(, ident, name, figure, tone, rule, body, folds=False, start_open=False, extra='')
+
+One band: a heading, the count in the largest figure on the page, and its rule.
+
+Shared kit (see the module docstring): `CSS` styles `register`,
+`register--<tone>` and `register-head`, laying the head out as `auto 1fr` —
+the figure in the first column, the heading and the rule in the second.
+
+`folds` renders the band as a `<details>` a person can close, `start_open`
+opening it anyway; both default off, which is the plain `<section>` this page has
+always rendered. A `<summary>` may hold phrasing content and a heading only, so
+the folding head carries the figure and the rule as `<span>``s rather than
+``<p>``s. **That head needs placement rules this stylesheet does not yet carry**:
+three flat children auto-place into the same grid as two, which puts the rule under
+the figure, and ``display:grid` on a `<summary>` costs it its marker. The caller
+that folds today (crowsnest) supplies them; moving them here is issue 13.
+`start_open` is ignored when `folds` is false — there is no disclosure to open —
+because a caller decides `folds` from whether it has rows and passes both.
+
+A band with nothing in it is not worth folding — there is nothing to hide — so that
+decision belongs to the caller, which knows whether its body is rows.
+
+`extra` is markup that heads the band’s body. A `<summary>` may not hold
+interactive content and what a caller puts here is usually a control, so in the
+`<details>` it goes inside the body; in the `<section>` it stays in the head,
+under the rule. That is above the head’s hairline in one form and below it in the
+other, which is how the caller that needs it already reads.
+
+Nothing here is escaped: see the module docstring. `ident` and `tone` reach an
+unquoted attribute, so they are the two that must be literals or already safe.
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+```pycon
+>>> register(ident="x", name="Needs you", figure="2", tone="needs", rule="now", body="")
+'<section class="register register--needs" id="x"><div class="register-head"><p class="figure">2</p><div><h2>Needs you</h2><p class="rule">now</p></div></div></section>'
+>>> register(ident="x", name="Quiet", figure="9", tone="done", rule="why", body="",
+...          folds=True, start_open=True)
+'<details class="register register--done" id="x" open><summary class="register-head"><span class="figure">9</span><h2>Quiet</h2><span class="rule">why</span></summary></details>'
 ```
 
 ### openloops.dashboard.render_dashboard(owed, blocked, sessions, , made_at=None, source='', title='Open Loops Board', max_sessions=40, standalone=True, aliases=None)
@@ -4161,18 +4238,16 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-09-15 11:20 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/9624cba295e42ecbe8a3189ad4dcc9b57db59f23"><code>9624cba</code></a> on branch <code>main</code>, for **openloops 0.1.9** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-21 13:03 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/19f2e324356663345311a43cf048328971ead27f"><code>19f2e32</code></a> on branch <code>main</code>, for **openloops 0.1.10** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.1.9) is behind the latest release on PyPI (0.1.10): `pip install openloops` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/9624cba295e42ecbe8a3189ad4dcc9b57db59f23"><code>9624cba295e42ecbe8a3189ad4dcc9b57db59f23</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/19f2e324356663345311a43cf048328971ead27f"><code>19f2e324356663345311a43cf048328971ead27f</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -4183,15 +4258,15 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/34962648386">34962648386</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/35603042712">35603042712</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>9624cba295e42ecbe8a3189ad4dcc9b57db59f23</code> (in the history of the built commit) |
+| Event commit | <code>19f2e324356663345311a43cf048328971ead27f</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.10  |
+| epythet  | 0.2.12  |
 | Sphinx   | 9.1.0   |
 | docutils | 0.22.4  |
 | Python   | 3.12.14 |
@@ -4210,14 +4285,14 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.10/">0.1.10</a>, newer than the documented version (0.1.9).
+Latest release: <a href="https://pypi.org/project/openloops/0.1.10/">0.1.10</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 9624cba295e42ecbe8a3189ad4dcc9b57db59f23
-pip install "epythet==0.2.10"
+git checkout 19f2e324356663345311a43cf048328971ead27f
+pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 

@@ -5,19 +5,17 @@ orphan: true
 
 # About this build
 
-This documentation was built on **2026-09-15 11:20 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/9624cba295e42ecbe8a3189ad4dcc9b57db59f23"><code>9624cba</code></a> on branch <code>main</code>, for **openloops 0.1.9** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-21 13:03 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/19f2e324356663345311a43cf048328971ead27f"><code>19f2e32</code></a> on branch <code>main</code>, for **openloops 0.1.10** (from <code>pyproject.toml</code>).
 
-:::{warning}
-The documentation and the package may be misaligned:
-
-- The documented version (0.1.9) is behind the latest release on PyPI (0.1.10): `pip install openloops` gives newer code than these docs describe.
+:::{note}
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 :::
 
 ## Source
 
 | | |
 |---|---|
-| Commit | <a href="https://github.com/thorwhalen/openloops/commit/9624cba295e42ecbe8a3189ad4dcc9b57db59f23"><code>9624cba295e42ecbe8a3189ad4dcc9b57db59f23</code></a> |
+| Commit | <a href="https://github.com/thorwhalen/openloops/commit/19f2e324356663345311a43cf048328971ead27f"><code>19f2e324356663345311a43cf048328971ead27f</code></a> |
 | Branch | <code>main</code> |
 | Tags at this commit | none |
 | Working tree | clean |
@@ -28,15 +26,15 @@ The documentation and the package may be misaligned:
 | | |
 |---|---|
 | Repository | <code>thorwhalen/openloops</code> |
-| Run | <a href="https://github.com/thorwhalen/openloops/actions/runs/34962648386">34962648386</a> |
+| Run | <a href="https://github.com/thorwhalen/openloops/actions/runs/35603042712">35603042712</a> |
 | Ref | <code>refs/heads/main</code> |
-| Event commit | <code>9624cba295e42ecbe8a3189ad4dcc9b57db59f23</code> (in the history of the built commit) |
+| Event commit | <code>19f2e324356663345311a43cf048328971ead27f</code> (in the history of the built commit) |
 
 ## Tools
 
 | | |
 |---|---|
-| epythet | 0.2.10 |
+| epythet | 0.2.12 |
 | Sphinx | 9.1.0 |
 | docutils | 0.22.4 |
 | Python | 3.12.14 |
@@ -55,14 +53,14 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.10/">0.1.10</a>, newer than the documented version (0.1.9).
+Latest release: <a href="https://pypi.org/project/openloops/0.1.10/">0.1.10</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 9624cba295e42ecbe8a3189ad4dcc9b57db59f23
-pip install "epythet==0.2.10"
+git checkout 19f2e324356663345311a43cf048328971ead27f
+pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 
