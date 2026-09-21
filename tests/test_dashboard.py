@@ -16,6 +16,8 @@ from openloops import tools
 from openloops.dashboard import (
     DFLT_TITLE,
     headline_counts,
+    rail,
+    register,
     render_dashboard,
     unknown_count,
 )
@@ -467,3 +469,138 @@ def test_the_stylesheet_and_the_sanitizer_are_public_for_sibling_renderers():
     assert {"CSS", "Sanitizer"} <= set(dashboard.__all__)
     # And the public name is the one the page is actually rendered with.
     assert f"<style>{dashboard.CSS}</style>" in page()
+
+
+# --------------------------------------------------------------------------------
+# The shared kit: the markup a sibling renderer builds its page out of. Pinned, because
+# a change here is a change to another package's page and nothing there would fail.
+# --------------------------------------------------------------------------------
+
+
+def test_the_register_and_rail_builders_are_public_for_sibling_renderers():
+    from openloops import dashboard
+
+    assert {"register", "rail"} <= set(dashboard.__all__)
+
+
+def test_a_register_is_a_section_whose_head_is_the_figure_then_heading_and_rule():
+    assert register(
+        ident="needs",
+        name="Needs you now",
+        figure="2",
+        tone="needs",
+        rule="Why.",
+        body="<ol></ol>",
+    ) == (
+        '<section class="register register--needs" id="needs">'
+        '<div class="register-head">'
+        '<p class="figure">2</p>'
+        '<div><h2>Needs you now</h2><p class="rule">Why.</p></div>'
+        "</div><ol></ol></section>"
+    )
+
+
+def test_a_folding_register_is_a_details_whose_summary_carries_the_same_three_parts():
+    """crowsnest folds every register (its #86); the head must stay one shape.
+
+    A ``<summary>`` may hold phrasing content and a heading only, so the figure and the
+    rule are spans there rather than the paragraphs the section head uses.
+    """
+    assert register(
+        ident="quiet",
+        name="Quiet",
+        figure="9",
+        tone="flight",
+        rule="Why.",
+        body="<ol></ol>",
+        folds=True,
+    ) == (
+        '<details class="register register--flight" id="quiet">'
+        '<summary class="register-head">'
+        '<span class="figure">9</span>'
+        "<h2>Quiet</h2>"
+        '<span class="rule">Why.</span>'
+        "</summary><ol></ol></details>"
+    )
+    opened = register(
+        ident="quiet",
+        name="Quiet",
+        figure="9",
+        tone="flight",
+        rule="Why.",
+        body="",
+        folds=True,
+        start_open=True,
+    )
+    assert opened.startswith(
+        '<details class="register register--flight" id="quiet" open>'
+    )
+
+
+def test_extra_heads_the_body_in_the_details_and_the_head_in_the_section():
+    """A control belongs above the rows either way -- but never inside a ``<summary>``."""
+    control = '<button type="button">Seen above</button>'
+    section = register(
+        ident="x",
+        name="N",
+        figure="1",
+        tone="needs",
+        rule="r",
+        body="<ol></ol>",
+        extra=control,
+    )
+    assert f'<p class="rule">r</p>{control}</div></div><ol></ol>' in section
+    details = register(
+        ident="x",
+        name="N",
+        figure="1",
+        tone="needs",
+        rule="r",
+        body="<ol></ol>",
+        extra=control,
+        folds=True,
+    )
+    assert f"</summary>{control}<ol></ol>" in details
+    assert control not in details.split("</summary>")[0]
+
+
+def test_a_rail_is_the_state_chip_then_the_age_and_an_unknown_age_is_a_question_mark():
+    assert rail("open", "flight", 3) == (
+        '<div class="rail"><span class="chip chip--flight">open</span>'
+        '<span class="age"><b>3</b><i>d</i></span></div>'
+    )
+    assert "<b>?</b>" in rail("open", "flight", None)
+    # Not every sibling page counts in days: the figure may arrive already written.
+    assert "<b>40</b><i>s</i>" in rail("said", "needs", "40", "s")
+
+
+def test_a_rails_extra_chips_sit_between_the_state_and_the_age():
+    chip = '<span class="chip chip--reach">phone</span>'
+    assert rail("said", "needs", "2", "m", extra=chip) == (
+        '<div class="rail"><span class="chip chip--needs">said</span>'
+        f'{chip}<span class="age"><b>2</b><i>m</i></span></div>'
+    )
+
+
+def test_the_page_is_built_out_of_the_public_builders(monkeypatch):
+    """Not just exported: these very functions write the page this package renders.
+
+    Substring-matching the builders' output would pass against an inline copy emitting
+    the same bytes -- which is the drift the shared kit exists to prevent -- so the
+    functions are replaced and the page is checked for what the replacements wrote.
+    """
+    from openloops import dashboard
+
+    # The stub keeps the body, so the rows (and their rails) still reach the page.
+    monkeypatch.setattr(
+        dashboard, "register", lambda **kw: f"[REGISTER {kw['ident']}]{kw['body']}"
+    )
+    monkeypatch.setattr(dashboard, "rail", lambda *a, **kw: "[RAIL]")
+    html = page(owed=owed_envelope(obligation()))
+    assert "[REGISTER needs]" in html
+    assert "[RAIL]" in html
+    # Every register on the page, not just the first: no band builds its own head.
+    for ident in ("needs", "free", "flight", "unknown"):
+        assert f"[REGISTER {ident}]" in html, ident
+    # And no band wrote a head of its own: the stub is the only builder.
+    assert '<section class="register' not in html

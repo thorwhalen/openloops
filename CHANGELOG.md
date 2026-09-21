@@ -30,6 +30,15 @@ corresponds to a git version tag (which is also the release published to PyPI).
 - `openloops.dashboard.CSS` and `openloops.dashboard.Sanitizer` are public names, for
   sibling renderers that want to look like the board and scrub their input the same way.
   `_CSS` and `_Sanitizer` remain bound to the same objects for one release.
+- `openloops.dashboard.register` and `openloops.dashboard.rail` are public too — the
+  markup the stylesheet above dresses, so a sibling renderer builds a register and a
+  row's rail with the same function rather than a copy that drifts when a class name
+  changes here. `register` gained `folds=`/`start_open=` (the `<details>` head a page
+  that collapses its bands needs) and both gained an `extra=` slot for markup this page
+  has no equivalent of; every default reproduces what `ol dashboard` already rendered,
+  byte for byte. Neither escapes anything — every argument is markup, and a caller that
+  did not write it puts it through `Sanitizer` first. No `_register`/`_rail` alias is
+  kept: unlike `CSS` and `Sanitizer` they were never imported anywhere.
 
 ### Changed
 

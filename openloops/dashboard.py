@@ -26,16 +26,24 @@ the package exists for:
    which checks earned that, because a clean board with no provenance is the same lie
    told quietly.
 
-Everything printed goes through :class:`Sanitizer`, which is :func:`openloops.egress
-.scrub` plus HTML escaping plus a scheme allowlist on every link. A page that carries a
+Everything this module prints goes through :class:`Sanitizer`, which is
+:func:`openloops.egress.scrub` plus HTML escaping plus a scheme allowlist on every link.
+The one carve-out is the shared kit below: :func:`register` and :func:`rail` **escape
+nothing**. Every argument they take is markup, interpolated as given and some of it into
+an unquoted attribute, because that is what a markup builder is; a caller that passes
+anything it did not write itself puts it through :class:`Sanitizer` first. This module
+passes literals. A page that carries a
 repository name and an issue title is fine; one that carries a home path or a token is
 the failure ``openloops.egress`` exists to prevent, and this renderer scrubs its input
 rather than trusting it. A credential-shaped field is *withheld and counted*, never
 silently dropped — the count is printed in the footer.
 
-:data:`CSS` and :class:`Sanitizer` are public for sibling renderers — a tool that shows
-a different half of the same picture and wants to look like this page — so that the look
-and the egress rule stay in one place instead of being copied and drifting.
+:data:`CSS`, :class:`Sanitizer`, :func:`register` and :func:`rail` are public for
+sibling renderers — a tool that shows a different half of the same picture and wants to
+look like this page — so that the look, the egress rule and the markup the stylesheet
+dresses stay in one place instead of being copied and drifting. They are the shared kit:
+the stylesheet here is what makes ``register--needs`` a colour and ``rail`` a column, so
+a package that writes those class names by hand is one rename away from a broken page.
 
     >>> html = render_dashboard({}, {}, [], made_at='2026-01-01T00:00:00Z')
     >>> '<title>' in html and 'snapshot' in html
@@ -61,6 +69,8 @@ __all__ = [
     "GAUGE_FULL_DAYS",
     "Sanitizer",
     "headline_counts",
+    "rail",
+    "register",
     "render_dashboard",
     "unchecked_count",
     "unknown_count",
@@ -243,12 +253,37 @@ def _gauge(days: int | None, tone: str) -> str:
     return f'<p class="gauge gauge--{tone}"><span style="width:{max(2, width)}%"></span></p>'
 
 
-def _rail(chip: str, tone: str, days: int | None, unit: str = "d") -> str:
-    """The fixed left column of every row: what state it is in, and for how long."""
-    figure = "?" if days is None else str(days)
+def rail(
+    chip: str,
+    tone: str,
+    age: int | float | str | None,
+    unit: str = "d",
+    *,
+    extra: str = "",
+) -> str:
+    """The fixed left column of every row: what state it is in, and for how long.
+
+    Shared kit (see the module docstring): :data:`CSS` styles ``rail``, ``chip``,
+    ``chip--<tone>`` and ``age``, so a sibling renderer that builds this by hand breaks
+    the next time a class name here changes.
+
+    ``age`` is the figure beside the unit — a number, or ``None`` for the ``?`` that
+    means nobody knows. It is not required to be a day count: pass a string and a
+    ``unit`` of your own for a page whose durations run from seconds to days.
+
+    ``extra`` is further markup placed between the state chip and the age — a second
+    chip a sibling page needs and this one has no equivalent of.
+
+    Nothing here is escaped, ``extra`` least of all: see the module docstring.
+
+    >>> rail("owed", "needs", 3)
+    '<div class="rail"><span class="chip chip--needs">owed</span><span class="age"><b>3</b><i>d</i></span></div>'
+    """
+    figure = "?" if age is None else str(age)
     return (
         f'<div class="rail">'
         f'<span class="chip chip--{tone}">{chip}</span>'
+        f"{extra}"
         f'<span class="age"><b>{figure}</b><i>{unit}</i></span>'
         f"</div>"
     )
@@ -274,7 +309,7 @@ def _obligation_row(
     evidence = safe.text(_clip(str(row.get("evidence") or "")))
     lines = [
         f'<li class="row row--{tone}">',
-        _rail(chip, tone, days),
+        rail(chip, tone, days),
         '<div class="body">',
         f'<p class="ask">{safe.text(row.get("title"))}</p>',
         f'<p class="where">{_ref(safe, row)} <span class="sep">·</span> opened '
@@ -300,7 +335,7 @@ def _unblocked_row(safe: Sanitizer, row: Mapping[str, Any]) -> str:
     return "".join(
         [
             '<li class="row row--free">',
-            _rail("free", "free", free),
+            rail("free", "free", free),
             '<div class="body">',
             f'<p class="ask">{safe.text(row.get("title"))}</p>',
             f'<p class="where">{_ref(safe, row)} <span class="sep">·</span> open '
@@ -357,7 +392,7 @@ def _session_row(safe: Sanitizer, row: Mapping[str, Any], now: datetime | None) 
     return "".join(
         [
             f'<li class="row row--{tone}">',
-            _rail("open" if not low else "open ?", tone, days),
+            rail("open" if not low else "open ?", tone, days),
             '<div class="body">',
             f'<p class="ask">{safe.text(heading)}</p>',
             '<p class="where">'
@@ -380,15 +415,69 @@ def _session_row(safe: Sanitizer, row: Mapping[str, Any], now: datetime | None) 
     )
 
 
-def _register(
-    *, ident: str, name: str, figure: str, tone: str, rule: str, body: str
+def register(
+    *,
+    ident: str,
+    name: str,
+    figure: str,
+    tone: str,
+    rule: str,
+    body: str,
+    folds: bool = False,
+    start_open: bool = False,
+    extra: str = "",
 ) -> str:
-    """One band: a heading, the count in the largest figure on the page, and its rule."""
+    """One band: a heading, the count in the largest figure on the page, and its rule.
+
+    Shared kit (see the module docstring): :data:`CSS` styles ``register``,
+    ``register--<tone>`` and ``register-head``, laying the head out as ``auto 1fr`` —
+    the figure in the first column, the heading and the rule in the second.
+
+    ``folds`` renders the band as a ``<details>`` a person can close, ``start_open``
+    opening it anyway; both default off, which is the plain ``<section>`` this page has
+    always rendered. A ``<summary>`` may hold phrasing content and a heading only, so
+    the folding head carries the figure and the rule as ``<span>``s rather than
+    ``<p>``s. **That head needs placement rules this stylesheet does not yet carry**:
+    three flat children auto-place into the same grid as two, which puts the rule under
+    the figure, and ``display:grid`` on a ``<summary>`` costs it its marker. The caller
+    that folds today (crowsnest) supplies them; moving them here is issue 13.
+    ``start_open`` is ignored when ``folds`` is false — there is no disclosure to open —
+    because a caller decides ``folds`` from whether it has rows and passes both.
+
+    A band with nothing in it is not worth folding — there is nothing to hide — so that
+    decision belongs to the caller, which knows whether its body is rows.
+
+    ``extra`` is markup that heads the band's body. A ``<summary>`` may not hold
+    interactive content and what a caller puts here is usually a control, so in the
+    ``<details>`` it goes inside the body; in the ``<section>`` it stays in the head,
+    under the rule. That is above the head's hairline in one form and below it in the
+    other, which is how the caller that needs it already reads.
+
+    Nothing here is escaped: see the module docstring. ``ident`` and ``tone`` reach an
+    unquoted attribute, so they are the two that must be literals or already safe.
+
+    >>> register(ident="x", name="Needs you", figure="2", tone="needs", rule="now", body="")
+    '<section class="register register--needs" id="x"><div class="register-head"><p class="figure">2</p><div><h2>Needs you</h2><p class="rule">now</p></div></div></section>'
+    >>> register(ident="x", name="Quiet", figure="9", tone="done", rule="why", body="",
+    ...          folds=True, start_open=True)
+    '<details class="register register--done" id="x" open><summary class="register-head"><span class="figure">9</span><h2>Quiet</h2><span class="rule">why</span></summary></details>'
+    """
+    if folds:
+        return (
+            f'<details class="register register--{tone}" id="{ident}"'
+            f"{' open' if start_open else ''}>"
+            f'<summary class="register-head">'
+            f'<span class="figure">{figure}</span>'
+            f"<h2>{name}</h2>"
+            f'<span class="rule">{rule}</span>'
+            "</summary>"
+            f"{extra}{body}</details>"
+        )
     return (
         f'<section class="register register--{tone}" id="{ident}">'
         f'<div class="register-head">'
         f'<p class="figure">{figure}</p>'
-        f'<div><h2>{name}</h2><p class="rule">{rule}</p></div>'
+        f'<div><h2>{name}</h2><p class="rule">{rule}</p>{extra}</div>'
         f"</div>{body}</section>"
     )
 
@@ -883,7 +972,7 @@ def _needs_register(safe: Sanitizer, owed: Mapping[str, Any]) -> str:
                 "to do but close the issue. openloops will not close it for you.</p>"
                 f'<ol class="ledger ledger--quiet">{done}</ol>'
             )
-    return _register(
+    return register(
         ident="needs",
         name="Needs you now",
         figure=figure,
@@ -915,7 +1004,7 @@ def _free_register(safe: Sanitizer, blocked: Mapping[str, Any]) -> str:
                 "foreign repository it is blocked on.</p>"
                 f'<ul class="thins">{rows}</ul>'
             )
-    return _register(
+    return register(
         ident="free",
         name="Free to proceed",
         figure=figure,
@@ -949,7 +1038,7 @@ def _flight_register(
                 f"Showing the {len(shown)} most recent of {len(sessions)}. "
                 "Run <code>ol ls --limit 0</code> for all of them."
             )
-    return _register(
+    return register(
         ident="flight",
         name="In flight",
         figure=str(len(sessions)),
@@ -1004,7 +1093,7 @@ def _unknown_register(
             "That is a claim, so here is what earned it:</p>"
             f'<ul class="proof">{proof or "<li>Nothing was checked at all.</li>"}</ul>'
         )
-    return _register(
+    return register(
         ident="unknown",
         name="Unknown",
         figure=_figure(unknown_count),
