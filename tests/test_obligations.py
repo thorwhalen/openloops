@@ -617,6 +617,8 @@ def test_no_predicate_prose_with_a_code_span_reads_open_not_unknown(field):
         "**Verify:** Nonetheless, `test -f x`",
         "**Verify:** n/a until 2.0 ships; then `gh release view v2.0`",
         "**Verify:** none needed, `true` would pass",
+        "**Verify:** Not possible to regress: `pytest -q tests/test_x.py`",
+        "**Verify:** no predicate yet; later `gh api repos/a/b`",
     ],
 )
 def test_a_field_that_only_starts_like_none_is_not_run_and_reads_unknown(field):
@@ -631,19 +633,19 @@ def test_a_field_that_only_starts_like_none_is_not_run_and_reads_unknown(field):
 
 
 @pytest.mark.parametrize(
-    "field",
+    "field, state",
     [
-        '**Verify:** "none possible" `gh`',
-        "**Verify:** > none possible `gh`",
-        "**Verify:** \u201cnone possible\u201d, `true` proves nothing",
+        ('**Verify:** "none possible" `gh`', OPEN),
+        ("**Verify:** \u201cnone possible\u201d, `true` proves nothing", OPEN),
+        ("**Verify:** > none possible `gh`", UNKNOWN),
     ],
 )
-def test_a_quoted_or_blockquoted_none_possible_is_still_never_run(field):
+def test_a_quoted_or_blockquoted_none_possible_is_still_never_run(field, state):
     """`gh` alone exits 0: running it here would report a live obligation as done."""
     calls = []
     row = only([issue(body=field)], run_predicate=calls.append)
     assert calls == []
-    assert row["state"] == OPEN
+    assert row["state"] == state
 
 
 def test_a_quoted_example_of_the_format_is_not_the_predicate():

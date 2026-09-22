@@ -465,12 +465,12 @@ _NO_PREDICATE_PREFIXES = (
 #: marker, quotes. Stripping more only ever widens "do not run", which is the safe side.
 _FIELD_DECORATION = "*_ >\"'\u201c\u2018"
 
-#: The documented answer, unambiguously: a multi-word phrase, whatever follows it, or a
-#: bare ``none``/``n/a`` standing alone or followed by a separator. ``nonexistent``,
-#: ``none of the files remain`` and ``n/a until 2.0 ships`` are not this answer.
+#: The documented answer, unambiguously: one of the phrases standing alone or followed
+#: by a separator (``none possible — …``). ``nonexistent``, ``none of the files
+#: remain``, ``n/a until 2.0 ships`` and ``not possible to regress: …`` are not.
 _DOCUMENTED_NO_PREDICATE = re.compile(
-    r"(?:none possible|no predicate|not possible)\b"
-    r"|(?:none|n/a)(?=\s*(?:$|[-\u2014\u2013:;,.(*_!?]))"
+    r"(?:none possible|no predicate|not possible|none|n/a)"
+    r"(?=\s*(?:$|[-\u2014\u2013:;,.(*_!?\"'”’]))"
 )
 
 
