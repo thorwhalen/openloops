@@ -461,15 +461,19 @@ _NO_PREDICATE_PREFIXES = (
 )
 
 
-#: The bare "none" prefix is how an unrelated sentence starts too -- "None of the
-#: `gh pr checks` have completed yet" is a pending-state description, not a
-#: declaration that no predicate exists. `parse_verify` has tolerated that ambiguity
-#: on its own for cases with no code span (there is nothing else those could be), but
-#: `_verdict` may not lean on it to override the malformed-code-span check below: doing
-#: so downgrades that shape of field from a `?` a person reviews to a confidently
-#: wrong `open`, which is precisely the failure this module exists to prevent.
+#: Two of the five prefixes above also open an ordinary sentence that is not the
+#: documented declaration: bare "none" ("None of the `gh pr checks` have completed
+#: yet" -- a pending-state description) and bare "not possible" ("Not possible to
+#: reach the `gh` API right now -- retry once the outage clears" -- a *temporary*
+#: obstacle, not "no predicate can ever exist"). `parse_verify` has tolerated that
+#: ambiguity on its own for cases with no code span (there is nothing else those
+#: could be), but `_verdict` may not lean on either one to override the
+#: malformed-code-span check below: doing so downgrades that shape of field from a
+#: `?` a person reviews to a confidently wrong `open`, which is precisely the
+#: failure this module exists to prevent. "none possible", "n/a" and "no predicate"
+#: keep no comparable everyday reading and stay trusted unconditionally.
 _UNAMBIGUOUS_NO_PREDICATE_PREFIXES = tuple(
-    p for p in _NO_PREDICATE_PREFIXES if p != "none"
+    p for p in _NO_PREDICATE_PREFIXES if p not in ("none", "not possible")
 )
 
 
@@ -494,6 +498,10 @@ def _is_no_predicate(text: str, *, unambiguous_only: bool = False) -> bool:
     >>> _is_no_predicate("None of the tests pass yet.")
     True
     >>> _is_no_predicate("None of the tests pass yet.", unambiguous_only=True)
+    False
+    >>> _is_no_predicate("Not possible to check right now, retry later.")
+    True
+    >>> _is_no_predicate("Not possible to check right now, retry later.", unambiguous_only=True)
     False
     """
     prefixes = (
@@ -758,10 +766,12 @@ def _verdict(
             # again from the presence of a backtick (#7) reached the wrong answer for
             # exactly the rows most likely to carry one -- a "none possible" reason
             # explains itself by naming the commands that would have observed the ask
-            # if they could. ``unambiguous_only`` keeps this narrow: the bare "none"
-            # prefix also opens an ordinary pending-state sentence ("None of the
-            # checks have completed yet"), and trusting that unconditionally would
-            # trade a `?` a person reviews for a confidently wrong `open`.
+            # if they could. ``unambiguous_only`` keeps this narrow: bare "none" and
+            # bare "not possible" also open an ordinary sentence about a pending or
+            # temporary state ("None of the checks have completed yet", "Not possible
+            # to reach the API right now -- retry later"), and trusting either
+            # unconditionally would trade a `?` a person reviews for a confidently
+            # wrong `open`.
             return OPEN, verify_text
         if "`" in (verify_text or ""):
             # A field with a backtick but no complete code span, and not one of the

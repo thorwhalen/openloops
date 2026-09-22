@@ -613,21 +613,28 @@ def test_no_predicate_prose_with_a_code_span_reads_open_not_unknown(field):
     assert evidence == text
 
 
-def test_a_bare_none_prefix_with_a_code_span_still_reads_unknown():
+@pytest.mark.parametrize(
+    "field",
+    [
+        "**Verify:** None of the `gh pr checks` have completed yet.",
+        "**Verify:** Not possible to reach the `gh` API right now -- retry once the outage clears.",
+    ],
+)
+def test_a_bare_ambiguous_prefix_with_a_code_span_still_reads_unknown(field):
     """The narrow flip side of the fix above.
 
-    Bare "none" (unlike "none possible") also opens an ordinary sentence describing
-    a pending state, not a declaration that no predicate exists -- "None of the
-    `gh pr checks` have completed yet" is prose about a check in flight, not a
-    "nothing observes this" answer. `parse_verify` still classifies it as
-    command-less (there is nothing else a code-span-free command could be), but
-    `_verdict` must not trust that classification enough to override the malformed
-    check, or this exact shape of field goes from a `?` a person reviews to a
-    confidently wrong `open` with no predicate ever run.
+    Bare "none" and bare "not possible" (unlike "none possible") also open an
+    ordinary sentence describing a pending or temporary state, not a declaration
+    that no predicate exists -- "None of the `gh pr checks` have completed yet" is
+    prose about a check in flight, and "Not possible to reach the API right now"
+    is a transient obstacle, not a "nothing observes this, ever" answer.
+    `parse_verify` still classifies both as command-less (there is nothing else a
+    code-span-free command could be), but `_verdict` must not trust that
+    classification enough to override the malformed check, or this shape of field
+    goes from a `?` a person reviews to a confidently wrong `open` with no
+    predicate ever run.
     """
-    command, text = parse_verify(
-        "**Verify:** None of the `gh pr checks` have completed yet."
-    )
+    command, text = parse_verify(field)
     assert command == ""
     state, evidence = _verdict(
         command=command,
