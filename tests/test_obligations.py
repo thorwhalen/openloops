@@ -648,6 +648,72 @@ def test_a_bare_ambiguous_prefix_with_a_code_span_still_reads_unknown(field):
     assert "malformed" in evidence
 
 
+@pytest.mark.parametrize(
+    "field",
+    [
+        "**Verify:** none possible - no `gh` query observes a decision.",
+        "**Verify:** none possible - closest is `true`, which proves nothing.",
+        "**Verify:** None possible — a judgement call. Not even `gh api` helps.",
+        "**Verify:** n/a - `true` would pass and mean nothing",
+        # A lone backtick in the prose: still the documented form, not a typo.
+        "**Verify:** none possible - the flag is spelled `--dry-run",
+    ],
+)
+def test_no_predicate_prose_reads_open_through_the_whole_pipeline(field):
+    """openloops#7: the field was read and understood, so it is not ``?``.
+
+    ``parse_verify`` classifies it as having no predicate; the verdict used to
+    re-derive that from the raw text, see a backtick, and call it malformed.
+    """
+    calls = []
+    row = only([issue(body=field)], run_predicate=calls.append)
+    assert row["state"] == OPEN
+    assert row["predicate"] == ""
+    assert row["evidence"] == row["verify"], "the row says why, in the author's words"
+    assert "malformed" not in row["evidence"]
+    assert calls == [], "prose must never be handed to the evaluator"
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "**Verify:** nonexistent: `test ! -e legacy.py`",
+        "**Verify:** none of the old files remain: `! ls old/*.py`",
+        "**Verify:** nonempty output from `gh secret list --repo a/b`",
+        "**Verify:** Nonetheless, `test -f x`",
+        "**Verify:** n/a until 2.0 ships; then `gh release view v2.0`",
+        "**Verify:** none needed, `true` would pass",
+        "**Verify:** Not possible to regress: `pytest -q tests/test_x.py`",
+        "**Verify:** no predicate yet; later `gh api repos/a/b`",
+    ],
+)
+def test_a_field_that_only_starts_like_none_is_not_run_and_reads_unknown(field):
+    """Review of openloops#7: without a word boundary, these real predicates would
+    have become a quiet ``open``. Running them is not safe either (the last one would
+    discharge), so they are not run and read ``?`` -- the check did not happen."""
+    calls = []
+    row = only([issue(body=field)], run_predicate=calls.append)
+    assert row["state"] == UNKNOWN
+    assert "ambiguous" in row["evidence"] and "malformed" in row["evidence"]
+    assert calls == []
+
+
+@pytest.mark.parametrize(
+    "field, state",
+    [
+        ('**Verify:** "none possible" `gh`', OPEN),
+        ("**Verify:** \u201cnone possible\u201d, `true` proves nothing", OPEN),
+        ("**Verify:** > none possible `gh`", UNKNOWN),
+    ],
+)
+def test_a_quoted_or_blockquoted_none_possible_is_still_never_run(field, state):
+    """`gh` alone exits 0: running it here would report a live obligation as done."""
+    calls = []
+    row = only([issue(body=field)], run_predicate=calls.append)
+    assert calls == []
+    assert row["state"] == state
+
+
 def test_a_quoted_example_of_the_format_is_not_the_predicate():
     """An agent that pastes the spec into its own issue must not have the spec run."""
     body = (
