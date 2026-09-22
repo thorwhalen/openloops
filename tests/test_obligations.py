@@ -582,6 +582,65 @@ def test_no_predicate_prose_is_never_executed(field):
     assert text, "the prose is kept so the row can say why there is nothing to run"
 
 
+@pytest.mark.parametrize(
+    "field",
+    [
+        "**Verify:** none possible - no `gh` query observes a decision.",
+        "**Verify:** none possible - closest is `true`, which proves nothing.",
+        "**Verify:** None possible — a judgement call. Not even `gh api` helps.",
+        "**Verify:** n/a - `true` would pass and mean nothing",
+    ],
+)
+def test_no_predicate_prose_with_a_code_span_reads_open_not_unknown(field):
+    """Issue #7: `_verdict` used to re-derive "malformed" from a bare backtick,
+
+    disagreeing with `parse_verify`'s own settled judgement that this prose is the
+    documented "no predicate is possible" answer. The check *did* happen here --
+    the field was parsed and correctly classified as having no predicate -- so
+    reporting it `?` (unknown) rather than `open` claimed less was known than was.
+    """
+    command, text = parse_verify(field)
+    assert command == ""
+    state, evidence = _verdict(
+        command=command,
+        verify_text=text,
+        owner="acme",
+        trusted_owners=frozenset(TRUSTED),
+        verify=True,
+        run_predicate=shell_predicate,
+    )
+    assert state == OPEN
+    assert evidence == text
+
+
+def test_a_bare_none_prefix_with_a_code_span_still_reads_unknown():
+    """The narrow flip side of the fix above.
+
+    Bare "none" (unlike "none possible") also opens an ordinary sentence describing
+    a pending state, not a declaration that no predicate exists -- "None of the
+    `gh pr checks` have completed yet" is prose about a check in flight, not a
+    "nothing observes this" answer. `parse_verify` still classifies it as
+    command-less (there is nothing else a code-span-free command could be), but
+    `_verdict` must not trust that classification enough to override the malformed
+    check, or this exact shape of field goes from a `?` a person reviews to a
+    confidently wrong `open` with no predicate ever run.
+    """
+    command, text = parse_verify(
+        "**Verify:** None of the `gh pr checks` have completed yet."
+    )
+    assert command == ""
+    state, evidence = _verdict(
+        command=command,
+        verify_text=text,
+        owner="acme",
+        trusted_owners=frozenset(TRUSTED),
+        verify=True,
+        run_predicate=shell_predicate,
+    )
+    assert state == UNKNOWN
+    assert "malformed" in evidence
+
+
 def test_a_quoted_example_of_the_format_is_not_the_predicate():
     """An agent that pastes the spec into its own issue must not have the spec run."""
     body = (
