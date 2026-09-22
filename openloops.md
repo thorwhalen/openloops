@@ -1,4 +1,4 @@
-> built 2026-09-22 13:54 UTC from 1f6d61e (main) · openloops 0.1.12. Details: build_info.json
+> built 2026-09-22 14:18 UTC from e286d5f (main) · openloops 0.1.13. Details: build_info.json
 
 # index.html.md
 
@@ -4238,18 +4238,18 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-09-22 13:54 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/1f6d61e2989f3000c8437f810979b8caefaf773b"><code>1f6d61e</code></a> on branch <code>main</code>, for **openloops 0.1.12** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-22 14:18 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/e286d5fea17d3314da88ed73e5d0acdfe1e783c8"><code>e286d5f</code></a> on branch <code>main</code>, for **openloops 0.1.13** (from <code>pyproject.toml</code>).
 
 #### WARNING
 The documentation and the package may be misaligned:
 
-- The documented version (0.1.12) is behind the latest release on PyPI (0.1.13): `pip install openloops` gives newer code than these docs describe.
+- The documented version (0.1.13) is behind the latest release on PyPI (0.1.14): `pip install openloops` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/1f6d61e2989f3000c8437f810979b8caefaf773b"><code>1f6d61e2989f3000c8437f810979b8caefaf773b</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/e286d5fea17d3314da88ed73e5d0acdfe1e783c8"><code>e286d5fea17d3314da88ed73e5d0acdfe1e783c8</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -4260,9 +4260,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/35736408934">35736408934</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/35739103660">35739103660</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>1f6d61e2989f3000c8437f810979b8caefaf773b</code> (in the history of the built commit) |
+| Event commit | <code>e286d5fea17d3314da88ed73e5d0acdfe1e783c8</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -4287,13 +4287,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.13/">0.1.13</a>, newer than the documented version (0.1.12).
+Latest release: <a href="https://pypi.org/project/openloops/0.1.14/">0.1.14</a>, newer than the documented version (0.1.13).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 1f6d61e2989f3000c8437f810979b8caefaf773b
+git checkout e286d5fea17d3314da88ed73e5d0acdfe1e783c8
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
@@ -4346,6 +4346,12 @@ Subagents are Markdown files with a frontmatter (`name`, `description`, `tools`)
 Runs the openloops sweep (`ol`, `ol owed`, `ol blocked`) in a fresh context and returns a short synthesis of what needs the user’s attention, what is now free to proceed, and what is in flight — never the raw command output. Invoke whenever the user asks what needs their attention, what their agents left open, what they owe, what is blocked or newly unblocked, or for a catch-up across their sessions. Read-only: it never closes, reopens, relabels or comments on anything.
 
 Source: [`openloops/data/agents/openloops-sweep.md`](https://github.com/thorwhalen/openloops/tree/HEAD/openloops/data/agents/openloops-sweep.md); tools: `Bash`.
+
+## Instruction files
+
+Files agents read before working in this repository.
+
+- [`.claude/CLAUDE.md`](https://github.com/thorwhalen/openloops/tree/HEAD/.claude/CLAUDE.md): read by Claude Code
 
 ## Machine-readable documentation
 

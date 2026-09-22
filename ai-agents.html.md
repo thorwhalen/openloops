@@ -42,6 +42,12 @@ Runs the openloops sweep (`ol`, `ol owed`, `ol blocked`) in a fresh context and 
 
 Source: [`openloops/data/agents/openloops-sweep.md`](https://github.com/thorwhalen/openloops/tree/HEAD/openloops/data/agents/openloops-sweep.md); tools: `Bash`.
 
+## Instruction files
+
+Files agents read before working in this repository.
+
+- [`.claude/CLAUDE.md`](https://github.com/thorwhalen/openloops/tree/HEAD/.claude/CLAUDE.md): read by Claude Code
+
 ## Machine-readable documentation
 
 This site publishes the same documentation in forms that fit an agent’s context window:
