@@ -461,6 +461,57 @@ _NO_PREDICATE_PREFIXES = (
 )
 
 
+#: Two of the five prefixes above also open an ordinary sentence that is not the
+#: documented declaration: bare "none" ("None of the `gh pr checks` have completed
+#: yet" -- a pending-state description) and bare "not possible" ("Not possible to
+#: reach the `gh` API right now -- retry once the outage clears" -- a *temporary*
+#: obstacle, not "no predicate can ever exist"). `parse_verify` has tolerated that
+#: ambiguity on its own for cases with no code span (there is nothing else those
+#: could be), but `_verdict` may not lean on either one to override the
+#: malformed-code-span check below: doing so downgrades that shape of field from a
+#: `?` a person reviews to a confidently wrong `open`, which is precisely the
+#: failure this module exists to prevent. "none possible", "n/a" and "no predicate"
+#: keep no comparable everyday reading and stay trusted unconditionally.
+_UNAMBIGUOUS_NO_PREDICATE_PREFIXES = tuple(
+    p for p in _NO_PREDICATE_PREFIXES if p not in ("none", "not possible")
+)
+
+
+def _is_no_predicate(text: str, *, unambiguous_only: bool = False) -> bool:
+    """Whether ``text`` is the documented "no predicate is possible" answer.
+
+    The one place this question is asked from a character rather than derived from
+    :func:`parse_verify`'s own judgement is the bug in issue #7: a backtick in the
+    prose (naming ``gh`` or a flag that *would* have observed the ask, had one
+    existed) was read as a malformed code span even when the prefix already settled
+    the question. Both callers ask it the same way now, so they cannot disagree --
+    except that ``_verdict`` asks with ``unambiguous_only=True``, since only it needs
+    to decide whether the classification is confident enough to override a code span
+    that would otherwise read as a malformed predicate.
+
+    >>> _is_no_predicate("none possible - no `gh` query observes a decision.")
+    True
+    >>> _is_no_predicate("**none possible** -- nothing to check")
+    True
+    >>> _is_no_predicate("`test -f x`")
+    False
+    >>> _is_no_predicate("None of the tests pass yet.")
+    True
+    >>> _is_no_predicate("None of the tests pass yet.", unambiguous_only=True)
+    False
+    >>> _is_no_predicate("Not possible to check right now, retry later.")
+    True
+    >>> _is_no_predicate("Not possible to check right now, retry later.", unambiguous_only=True)
+    False
+    """
+    prefixes = (
+        _UNAMBIGUOUS_NO_PREDICATE_PREFIXES
+        if unambiguous_only
+        else _NO_PREDICATE_PREFIXES
+    )
+    return (text or "").lower().lstrip("*_ ").startswith(prefixes)
+
+
 def parse_verify(body: str) -> tuple[str, str]:
     """``(predicate, verify_text)`` for an issue body. Both are ``''`` when absent.
 
@@ -496,7 +547,7 @@ def parse_verify(body: str) -> tuple[str, str]:
     if match is None:
         return "", ""
     text = match.group("text").strip()
-    if text.lower().lstrip("*_ ").startswith(_NO_PREDICATE_PREFIXES):
+    if _is_no_predicate(text):
         return "", text
     span = _CODE_SPAN.search(text)
     command = span.group("code").strip() if span else ""
@@ -709,10 +760,24 @@ def _verdict(
     guessing; only an exit status decides between ``open`` and ``discharged``.
     """
     if not command:
+        if _is_no_predicate(verify_text, unambiguous_only=True):
+            # parse_verify already settled this: the documented "no predicate is
+            # possible" prose, however many backticks it names along the way. Asking
+            # again from the presence of a backtick (#7) reached the wrong answer for
+            # exactly the rows most likely to carry one -- a "none possible" reason
+            # explains itself by naming the commands that would have observed the ask
+            # if they could. ``unambiguous_only`` keeps this narrow: bare "none" and
+            # bare "not possible" also open an ordinary sentence about a pending or
+            # temporary state ("None of the checks have completed yet", "Not possible
+            # to reach the API right now -- retry later"), and trusting either
+            # unconditionally would trade a `?` a person reviews for a confidently
+            # wrong `open`.
+            return OPEN, verify_text
         if "`" in (verify_text or ""):
-            # A field with a backtick but no complete code span is a malformed
-            # predicate, not the documented "none possible" prose. Saying so is the
-            # difference between a `?` and a row that reads open for a typo.
+            # A field with a backtick but no complete code span, and not one of the
+            # unambiguous "no predicate" phrasings either, is a malformed predicate.
+            # Saying so is the difference between a `?` and a row that reads open
+            # for a typo.
             return UNKNOWN, _evidence("malformed verify field", verify_text)
         return OPEN, verify_text or "no verify predicate"
     if not verify:
