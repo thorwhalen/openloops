@@ -461,55 +461,61 @@ _NO_PREDICATE_PREFIXES = (
 )
 
 
-#: Two of the five prefixes above also open an ordinary sentence that is not the
-#: documented declaration: bare "none" ("None of the `gh pr checks` have completed
-#: yet" -- a pending-state description) and bare "not possible" ("Not possible to
-#: reach the `gh` API right now -- retry once the outage clears" -- a *temporary*
-#: obstacle, not "no predicate can ever exist"). `parse_verify` has tolerated that
-#: ambiguity on its own for cases with no code span (there is nothing else those
-#: could be), but `_verdict` may not lean on either one to override the
-#: malformed-code-span check below: doing so downgrades that shape of field from a
-#: `?` a person reviews to a confidently wrong `open`, which is precisely the
-#: failure this module exists to prevent. "none possible", "n/a" and "no predicate"
-#: keep no comparable everyday reading and stay trusted unconditionally.
-_UNAMBIGUOUS_NO_PREDICATE_PREFIXES = tuple(
-    p for p in _NO_PREDICATE_PREFIXES if p not in ("none", "not possible")
+#: Leading decoration stripped before the prefix test: markdown emphasis, a blockquote
+#: marker, quotes. Stripping more only ever widens "do not run", which is the safe side.
+_FIELD_DECORATION = "*_ >\"'\u201c\u2018"
+
+#: The documented answer, unambiguously: one of the phrases standing alone or followed
+#: by a separator (``none possible — …``). ``nonexistent``, ``none of the files
+#: remain``, ``n/a until 2.0 ships`` and ``not possible to regress: …`` are not.
+_DOCUMENTED_NO_PREDICATE = re.compile(
+    r"(?:none possible|no predicate|not possible|none|n/a)"
+    r"(?=\s*(?:$|[-\u2014\u2013:;,.(*_!?\"'”’]))"
 )
 
 
-def _is_no_predicate(text: str, *, unambiguous_only: bool = False) -> bool:
-    """Whether ``text`` is the documented "no predicate is possible" answer.
+def _field_start(verify_text: str) -> str:
+    return (verify_text or "").lower().lstrip(_FIELD_DECORATION)
 
-    The one place this question is asked from a character rather than derived from
-    :func:`parse_verify`'s own judgement is the bug in issue #7: a backtick in the
-    prose (naming ``gh`` or a flag that *would* have observed the ask, had one
-    existed) was read as a malformed code span even when the prefix already settled
-    the question. Both callers ask it the same way now, so they cannot disagree --
-    except that ``_verdict`` asks with ``unambiguous_only=True``, since only it needs
-    to decide whether the classification is confident enough to override a code span
-    that would otherwise read as a malformed predicate.
 
-    >>> _is_no_predicate("none possible - no `gh` query observes a decision.")
+def _refuses_execution(verify_text: str) -> bool:
+    """Whether a field starts with a no-predicate word, so nothing in it may be run.
+
+    Deliberately broad: a bare prefix test with no word boundary. Its only job is to
+    prevent the phantom discharge, and over-matching here costs a ``?``, never a false
+    ``done``. Whether the field is the *documented* answer is a separate, stricter
+    question -- :func:`_is_no_predicate`.
+
+    >>> _refuses_execution('none needed, `true` would pass')
     True
-    >>> _is_no_predicate("**none possible** -- nothing to check")
+    >>> _refuses_execution('> "none possible" `gh`')
     True
-    >>> _is_no_predicate("`test -f x`")
-    False
-    >>> _is_no_predicate("None of the tests pass yet.")
-    True
-    >>> _is_no_predicate("None of the tests pass yet.", unambiguous_only=True)
-    False
-    >>> _is_no_predicate("Not possible to check right now, retry later.")
-    True
-    >>> _is_no_predicate("Not possible to check right now, retry later.", unambiguous_only=True)
+    >>> _refuses_execution('`test -f x`')
     False
     """
-    prefixes = (
-        _UNAMBIGUOUS_NO_PREDICATE_PREFIXES
-        if unambiguous_only
-        else _NO_PREDICATE_PREFIXES
-    )
-    return (text or "").lower().lstrip("*_ ").startswith(prefixes)
+    return _field_start(verify_text).startswith(_NO_PREDICATE_PREFIXES)
+
+
+def _is_no_predicate(verify_text: str) -> bool:
+    """Whether a verify field is the documented "no predicate is possible" answer.
+
+    Such a field was read and understood, so it reads ``open`` with its prose as the
+    reason -- even when the prose contains a code span (openloops#7). A field that
+    merely *starts like* one (``nonexistent: `test ! -e x```) is not: nothing in it is
+    run (:func:`_refuses_execution`), and it reads ``?`` rather than a quiet ``open``.
+
+    >>> _is_no_predicate('none possible - no `gh` query observes a decision.')
+    True
+    >>> _is_no_predicate('**N/A**')
+    True
+    >>> _is_no_predicate('nonexistent: `test ! -e legacy.py`')
+    False
+    >>> _is_no_predicate('none of the old files remain: `! ls old/*.py`')
+    False
+    >>> _is_no_predicate('')
+    False
+    """
+    return bool(_DOCUMENTED_NO_PREDICATE.match(_field_start(verify_text)))
 
 
 def parse_verify(body: str) -> tuple[str, str]:
@@ -547,7 +553,7 @@ def parse_verify(body: str) -> tuple[str, str]:
     if match is None:
         return "", ""
     text = match.group("text").strip()
-    if _is_no_predicate(text):
+    if _refuses_execution(text):
         return "", text
     span = _CODE_SPAN.search(text)
     command = span.group("code").strip() if span else ""
@@ -760,26 +766,27 @@ def _verdict(
     guessing; only an exit status decides between ``open`` and ``discharged``.
     """
     if not command:
-        if _is_no_predicate(verify_text, unambiguous_only=True):
-            # parse_verify already settled this: the documented "no predicate is
-            # possible" prose, however many backticks it names along the way. Asking
-            # again from the presence of a backtick (#7) reached the wrong answer for
-            # exactly the rows most likely to carry one -- a "none possible" reason
-            # explains itself by naming the commands that would have observed the ask
-            # if they could. ``unambiguous_only`` keeps this narrow: bare "none" and
-            # bare "not possible" also open an ordinary sentence about a pending or
-            # temporary state ("None of the checks have completed yet", "Not possible
-            # to reach the API right now -- retry later"), and trusting either
-            # unconditionally would trade a `?` a person reviews for a confidently
-            # wrong `open`.
+        if _is_no_predicate(verify_text):
+            # The documented "none possible" answer: the field was read and understood
+            # to have no predicate, so the issue stands as filed. Its prose may name
+            # `gh` or a path -- that is explanation, not a malformed command
+            # (openloops#7), so it must win before the backtick test below.
             return OPEN, verify_text
-        if "`" in (verify_text or ""):
-            # A field with a backtick but no complete code span, and not one of the
-            # unambiguous "no predicate" phrasings either, is a malformed predicate.
-            # Saying so is the difference between a `?` and a row that reads open
-            # for a typo.
-            return UNKNOWN, _evidence("malformed verify field", verify_text)
-        return OPEN, verify_text or "no verify predicate"
+        if "`" not in (verify_text or ""):
+            return OPEN, verify_text or "no verify predicate"
+        if _refuses_execution(verify_text):
+            # Starts with a no-predicate word but is not the documented answer, and
+            # carries a code span: it may be a real predicate. Not run, and not a
+            # quiet `open` either.
+            return UNKNOWN, _evidence(
+                "malformed verify field (ambiguous): starts like 'none' but carries a "
+                "code span; not run",
+                verify_text,
+            )
+        # A field with a backtick but no complete code span is a malformed predicate.
+        # Saying so is the difference between a `?` and a row that reads open for a
+        # typo.
+        return UNKNOWN, _evidence("malformed verify field", verify_text)
     if not verify:
         return UNKNOWN, "not evaluated (verify=False)"
     if owner not in trusted_owners:
