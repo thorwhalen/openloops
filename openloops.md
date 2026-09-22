@@ -1,4 +1,4 @@
-> built 2026-09-21 13:03 UTC from 19f2e32 (main) · openloops 0.1.10. Details: build_info.json
+> built 2026-09-22 13:41 UTC from 8a81eea (main) · openloops 0.1.11. Details: build_info.json
 
 # index.html.md
 
@@ -1535,10 +1535,10 @@ the figure in the first column, the heading and the rule in the second.
 opening it anyway; both default off, which is the plain `<section>` this page has
 always rendered. A `<summary>` may hold phrasing content and a heading only, so
 the folding head carries the figure and the rule as `<span>``s rather than
-``<p>``s. **That head needs placement rules this stylesheet does not yet carry**:
-three flat children auto-place into the same grid as two, which puts the rule under
-the figure, and ``display:grid` on a `<summary>` costs it its marker. The caller
-that folds today (crowsnest) supplies them; moving them here is issue 13.
+``<p>``s. :data:`CSS` places those three flat children into the same ``auto 1fr`
+grid a plain section’s head uses (figure down column one across both rows, heading
+and rule down column two) and restores the disclosure affordance a
+`display:grid` summary would otherwise cost it (#13).
 `start_open` is ignored when `folds` is false — there is no disclosure to open —
 because a caller decides `folds` from whether it has rows and passes both.
 
@@ -4238,16 +4238,18 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-09-21 13:03 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/19f2e324356663345311a43cf048328971ead27f"><code>19f2e32</code></a> on branch <code>main</code>, for **openloops 0.1.10** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-22 13:41 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/8a81eea19bf52bb0365f78c0f194aed1926f5df6"><code>8a81eea</code></a> on branch <code>main</code>, for **openloops 0.1.11** (from <code>pyproject.toml</code>).
 
-#### NOTE
-Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
+#### WARNING
+The documentation and the package may be misaligned:
+
+- The documented version (0.1.11) is behind the latest release on PyPI (0.1.12): `pip install openloops` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/19f2e324356663345311a43cf048328971ead27f"><code>19f2e324356663345311a43cf048328971ead27f</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/8a81eea19bf52bb0365f78c0f194aed1926f5df6"><code>8a81eea19bf52bb0365f78c0f194aed1926f5df6</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -4258,9 +4260,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/35603042712">35603042712</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/35734982748">35734982748</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>19f2e324356663345311a43cf048328971ead27f</code> (in the history of the built commit) |
+| Event commit | <code>8a81eea19bf52bb0365f78c0f194aed1926f5df6</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -4285,13 +4287,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.10/">0.1.10</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.12/">0.1.12</a>, newer than the documented version (0.1.11).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 19f2e324356663345311a43cf048328971ead27f
+git checkout 8a81eea19bf52bb0365f78c0f194aed1926f5df6
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

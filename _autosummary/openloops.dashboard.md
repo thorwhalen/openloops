@@ -179,10 +179,10 @@ the figure in the first column, the heading and the rule in the second.
 opening it anyway; both default off, which is the plain `<section>` this page has
 always rendered. A `<summary>` may hold phrasing content and a heading only, so
 the folding head carries the figure and the rule as `<span>``s rather than
-``<p>``s. **That head needs placement rules this stylesheet does not yet carry**:
-three flat children auto-place into the same grid as two, which puts the rule under
-the figure, and ``display:grid` on a `<summary>` costs it its marker. The caller
-that folds today (crowsnest) supplies them; moving them here is issue 13.
+``<p>``s. :data:`CSS` places those three flat children into the same ``auto 1fr`
+grid a plain section’s head uses (figure down column one across both rows, heading
+and rule down column two) and restores the disclosure affordance a
+`display:grid` summary would otherwise cost it (#13).
 `start_open` is ignored when `folds` is false — there is no disclosure to open —
 because a caller decides `folds` from whether it has rows and passes both.
 

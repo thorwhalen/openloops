@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
-    <script src="../_static/documentation_options.js?v=bafade30"></script>
+    <script src="../_static/documentation_options.js?v=1e825a29"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -57,7 +57,7 @@
     <link rel="prev" title="openloops.blockers" href="openloops.blockers.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.10" />
+  <meta name="docsearch:version" content="0.1.11" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -611,10 +611,10 @@ the figure in the first column, the heading and the rule in the second.</p>
 opening it anyway; both default off, which is the plain <code class="docutils literal notranslate"><span class="pre">&lt;section&gt;</span></code> this page has
 always rendered. A <code class="docutils literal notranslate"><span class="pre">&lt;summary&gt;</span></code> may hold phrasing content and a heading only, so
 the folding head carries the figure and the rule as <code class="docutils literal notranslate"><span class="pre">&lt;span&gt;``s</span> <span class="pre">rather</span> <span class="pre">than</span>
-<span class="pre">``&lt;p&gt;``s.</span> <span class="pre">**That</span> <span class="pre">head</span> <span class="pre">needs</span> <span class="pre">placement</span> <span class="pre">rules</span> <span class="pre">this</span> <span class="pre">stylesheet</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">yet</span> <span class="pre">carry**:</span>
-<span class="pre">three</span> <span class="pre">flat</span> <span class="pre">children</span> <span class="pre">auto-place</span> <span class="pre">into</span> <span class="pre">the</span> <span class="pre">same</span> <span class="pre">grid</span> <span class="pre">as</span> <span class="pre">two,</span> <span class="pre">which</span> <span class="pre">puts</span> <span class="pre">the</span> <span class="pre">rule</span> <span class="pre">under</span>
-<span class="pre">the</span> <span class="pre">figure,</span> <span class="pre">and</span> <span class="pre">``display:grid</span></code> on a <code class="docutils literal notranslate"><span class="pre">&lt;summary&gt;</span></code> costs it its marker. The caller
-that folds today (crowsnest) supplies them; moving them here is issue 13.
+<span class="pre">``&lt;p&gt;``s.</span> <span class="pre">:data:`CSS`</span> <span class="pre">places</span> <span class="pre">those</span> <span class="pre">three</span> <span class="pre">flat</span> <span class="pre">children</span> <span class="pre">into</span> <span class="pre">the</span> <span class="pre">same</span> <span class="pre">``auto</span> <span class="pre">1fr</span></code>
+grid a plain section’s head uses (figure down column one across both rows, heading
+and rule down column two) and restores the disclosure affordance a
+<code class="docutils literal notranslate"><span class="pre">display:grid</span></code> summary would otherwise cost it (#13).
 <code class="docutils literal notranslate"><span class="pre">start_open</span></code> is ignored when <code class="docutils literal notranslate"><span class="pre">folds</span></code> is false — there is no disclosure to open —
 because a caller decides <code class="docutils literal notranslate"><span class="pre">folds</span></code> from whether it has rows and passes both.</p>
 <p>A band with nothing in it is not worth folding — there is nothing to hide — so that
