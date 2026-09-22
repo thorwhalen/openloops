@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
-    <script src="_static/documentation_options.js?v=8d02545a"></script>
+    <script src="_static/documentation_options.js?v=468bc497"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -56,7 +56,7 @@
     <link rel="next" title="API reference" href="api.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.13" />
+  <meta name="docsearch:version" content="0.1.14" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -537,9 +537,12 @@ instead of its own predicate.</p></li>
 <li><p><strong>A field that begins <code class="docutils literal notranslate"><span class="pre">none</span> <span class="pre">possible</span></code>, <code class="docutils literal notranslate"><span class="pre">none</span></code>, <code class="docutils literal notranslate"><span class="pre">n/a</span></code>, <code class="docutils literal notranslate"><span class="pre">no</span> <span class="pre">predicate</span></code> or <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">possible</span></code> yields no command, even if the prose that follows contains a code span.</strong>
 This matters: the natural way to write that sentence mentions <code class="docutils literal notranslate"><span class="pre">`gh`</span></code> or
 <code class="docutils literal notranslate"><span class="pre">`true`</span></code>, and both exit <code class="docutils literal notranslate"><span class="pre">0</span></code>, which would report a live obligation as done. Use it
-for genuine judgement calls.</p></li>
-<li><p>A field with a backtick but no closed code span is <em>malformed</em>, and reads <code class="docutils literal notranslate"><span class="pre">?</span></code> rather
-than <code class="docutils literal notranslate"><span class="pre">open</span></code> — a typo should not look like an answer.</p></li>
+for genuine judgement calls.
+Such a field reads <code class="docutils literal notranslate"><span class="pre">open</span></code>, with its prose as the reason. A field that merely <em>starts
+like</em> one — <code class="docutils literal notranslate"><span class="pre">nonexistent:</span> <span class="pre">…</span></code>, <code class="docutils literal notranslate"><span class="pre">none</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">files</span> <span class="pre">remain:</span> <span class="pre">…</span></code>, <code class="docutils literal notranslate"><span class="pre">n/a</span> <span class="pre">until</span> <span class="pre">…</span></code> — followed
+by a code span is ambiguous: nothing in it is run, and it reads <code class="docutils literal notranslate"><span class="pre">?</span></code>.</p></li>
+<li><p>Otherwise, a field with a backtick but no closed code span is <em>malformed</em>, and reads
+<code class="docutils literal notranslate"><span class="pre">?</span></code> rather than <code class="docutils literal notranslate"><span class="pre">open</span></code> — a typo should not look like an answer.</p></li>
 </ul>
 <p>What makes a good one:</p>
 <ul class="simple">
@@ -1148,7 +1151,7 @@ they are the two ways a tool like this becomes a liar.</p></li>
 </section>
 </section>
 
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-22 14:18 UTC from <a href="https://github.com/thorwhalen/openloops/commit/e286d5fea17d3314da88ed73e5d0acdfe1e783c8">e286d5f</a> (main) · openloops 0.1.13 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-22 14:34 UTC from <a href="https://github.com/thorwhalen/openloops/commit/43ff643ad1482a95a9c0e6e301a1e8dfec7969b1">43ff643</a> (main) · openloops 0.1.14 · <a href="about-this-build.html">about this build</a></p>
 
                 </article>
               

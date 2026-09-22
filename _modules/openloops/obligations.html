@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
-    <script src="../../_static/documentation_options.js?v=8d02545a"></script>
+    <script src="../../_static/documentation_options.js?v=468bc497"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -410,7 +410,7 @@ window.runMermaid = runMermaid;</script>
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.13" />
+  <meta name="docsearch:version" content="0.1.14" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -1192,55 +1192,61 @@ window.runMermaid = runMermaid;</script>
 <span class="p">)</span>
 
 
-<span class="c1">#: Two of the five prefixes above also open an ordinary sentence that is not the</span>
-<span class="c1">#: documented declaration: bare "none" ("None of the `gh pr checks` have completed</span>
-<span class="c1">#: yet" -- a pending-state description) and bare "not possible" ("Not possible to</span>
-<span class="c1">#: reach the `gh` API right now -- retry once the outage clears" -- a *temporary*</span>
-<span class="c1">#: obstacle, not "no predicate can ever exist"). `parse_verify` has tolerated that</span>
-<span class="c1">#: ambiguity on its own for cases with no code span (there is nothing else those</span>
-<span class="c1">#: could be), but `_verdict` may not lean on either one to override the</span>
-<span class="c1">#: malformed-code-span check below: doing so downgrades that shape of field from a</span>
-<span class="c1">#: `?` a person reviews to a confidently wrong `open`, which is precisely the</span>
-<span class="c1">#: failure this module exists to prevent. "none possible", "n/a" and "no predicate"</span>
-<span class="c1">#: keep no comparable everyday reading and stay trusted unconditionally.</span>
-<span class="n">_UNAMBIGUOUS_NO_PREDICATE_PREFIXES</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-    <span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">_NO_PREDICATE_PREFIXES</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"none"</span><span class="p">,</span> <span class="s2">"not possible"</span><span class="p">)</span>
+<span class="c1">#: Leading decoration stripped before the prefix test: markdown emphasis, a blockquote</span>
+<span class="c1">#: marker, quotes. Stripping more only ever widens "do not run", which is the safe side.</span>
+<span class="n">_FIELD_DECORATION</span> <span class="o">=</span> <span class="s2">"*_ &gt;</span><span class="se">\"</span><span class="s2">'</span><span class="se">\u201c\u2018</span><span class="s2">"</span>
+
+<span class="c1">#: The documented answer, unambiguously: one of the phrases standing alone or followed</span>
+<span class="c1">#: by a separator (``none possible — …``). ``nonexistent``, ``none of the files</span>
+<span class="c1">#: remain``, ``n/a until 2.0 ships`` and ``not possible to regress: …`` are not.</span>
+<span class="n">_DOCUMENTED_NO_PREDICATE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s2">"(?:none possible|no predicate|not possible|none|n/a)"</span>
+    <span class="sa">r</span><span class="s2">"(?=\s*(?:$|[-\u2014\u2013:;,.(*_!?</span><span class="se">\"</span><span class="s2">'”’]))"</span>
 <span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_is_no_predicate</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">unambiguous_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Whether ``text`` is the documented "no predicate is possible" answer.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_field_start</span><span class="p">(</span><span class="n">verify_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">verify_text</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="n">_FIELD_DECORATION</span><span class="p">)</span>
 
-<span class="sd">    The one place this question is asked from a character rather than derived from</span>
-<span class="sd">    :func:`parse_verify`'s own judgement is the bug in issue #7: a backtick in the</span>
-<span class="sd">    prose (naming ``gh`` or a flag that *would* have observed the ask, had one</span>
-<span class="sd">    existed) was read as a malformed code span even when the prefix already settled</span>
-<span class="sd">    the question. Both callers ask it the same way now, so they cannot disagree --</span>
-<span class="sd">    except that ``_verdict`` asks with ``unambiguous_only=True``, since only it needs</span>
-<span class="sd">    to decide whether the classification is confident enough to override a code span</span>
-<span class="sd">    that would otherwise read as a malformed predicate.</span>
 
-<span class="sd">    &gt;&gt;&gt; _is_no_predicate("none possible - no `gh` query observes a decision.")</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_refuses_execution</span><span class="p">(</span><span class="n">verify_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether a field starts with a no-predicate word, so nothing in it may be run.</span>
+
+<span class="sd">    Deliberately broad: a bare prefix test with no word boundary. Its only job is to</span>
+<span class="sd">    prevent the phantom discharge, and over-matching here costs a ``?``, never a false</span>
+<span class="sd">    ``done``. Whether the field is the *documented* answer is a separate, stricter</span>
+<span class="sd">    question -- :func:`_is_no_predicate`.</span>
+
+<span class="sd">    &gt;&gt;&gt; _refuses_execution('none needed, `true` would pass')</span>
 <span class="sd">    True</span>
-<span class="sd">    &gt;&gt;&gt; _is_no_predicate("**none possible** -- nothing to check")</span>
+<span class="sd">    &gt;&gt;&gt; _refuses_execution('&gt; "none possible" `gh`')</span>
 <span class="sd">    True</span>
-<span class="sd">    &gt;&gt;&gt; _is_no_predicate("`test -f x`")</span>
-<span class="sd">    False</span>
-<span class="sd">    &gt;&gt;&gt; _is_no_predicate("None of the tests pass yet.")</span>
-<span class="sd">    True</span>
-<span class="sd">    &gt;&gt;&gt; _is_no_predicate("None of the tests pass yet.", unambiguous_only=True)</span>
-<span class="sd">    False</span>
-<span class="sd">    &gt;&gt;&gt; _is_no_predicate("Not possible to check right now, retry later.")</span>
-<span class="sd">    True</span>
-<span class="sd">    &gt;&gt;&gt; _is_no_predicate("Not possible to check right now, retry later.", unambiguous_only=True)</span>
+<span class="sd">    &gt;&gt;&gt; _refuses_execution('`test -f x`')</span>
 <span class="sd">    False</span>
 <span class="sd">    """</span>
-    <span class="n">prefixes</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">_UNAMBIGUOUS_NO_PREDICATE_PREFIXES</span>
-        <span class="k">if</span> <span class="n">unambiguous_only</span>
-        <span class="k">else</span> <span class="n">_NO_PREDICATE_PREFIXES</span>
-    <span class="p">)</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">text</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">"*_ "</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefixes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_field_start</span><span class="p">(</span><span class="n">verify_text</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">_NO_PREDICATE_PREFIXES</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_no_predicate</span><span class="p">(</span><span class="n">verify_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether a verify field is the documented "no predicate is possible" answer.</span>
+
+<span class="sd">    Such a field was read and understood, so it reads ``open`` with its prose as the</span>
+<span class="sd">    reason -- even when the prose contains a code span (openloops#7). A field that</span>
+<span class="sd">    merely *starts like* one (``nonexistent: `test ! -e x```) is not: nothing in it is</span>
+<span class="sd">    run (:func:`_refuses_execution`), and it reads ``?`` rather than a quiet ``open``.</span>
+
+<span class="sd">    &gt;&gt;&gt; _is_no_predicate('none possible - no `gh` query observes a decision.')</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; _is_no_predicate('**N/A**')</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; _is_no_predicate('nonexistent: `test ! -e legacy.py`')</span>
+<span class="sd">    False</span>
+<span class="sd">    &gt;&gt;&gt; _is_no_predicate('none of the old files remain: `! ls old/*.py`')</span>
+<span class="sd">    False</span>
+<span class="sd">    &gt;&gt;&gt; _is_no_predicate('')</span>
+<span class="sd">    False</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">_DOCUMENTED_NO_PREDICATE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_field_start</span><span class="p">(</span><span class="n">verify_text</span><span class="p">)))</span>
 
 
 <div class="viewcode-block" id="parse_verify">
@@ -1280,7 +1286,7 @@ window.runMermaid = runMermaid;</script>
     <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">""</span>
     <span class="n">text</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"text"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">_is_no_predicate</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">_refuses_execution</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">""</span><span class="p">,</span> <span class="n">text</span>
     <span class="n">span</span> <span class="o">=</span> <span class="n">_CODE_SPAN</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
     <span class="n">command</span> <span class="o">=</span> <span class="n">span</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"code"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="n">span</span> <span class="k">else</span> <span class="s2">""</span>
@@ -1497,26 +1503,27 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    guessing; only an exit status decides between ``open`` and ``discharged``.</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">command</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">_is_no_predicate</span><span class="p">(</span><span class="n">verify_text</span><span class="p">,</span> <span class="n">unambiguous_only</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="c1"># parse_verify already settled this: the documented "no predicate is</span>
-            <span class="c1"># possible" prose, however many backticks it names along the way. Asking</span>
-            <span class="c1"># again from the presence of a backtick (#7) reached the wrong answer for</span>
-            <span class="c1"># exactly the rows most likely to carry one -- a "none possible" reason</span>
-            <span class="c1"># explains itself by naming the commands that would have observed the ask</span>
-            <span class="c1"># if they could. ``unambiguous_only`` keeps this narrow: bare "none" and</span>
-            <span class="c1"># bare "not possible" also open an ordinary sentence about a pending or</span>
-            <span class="c1"># temporary state ("None of the checks have completed yet", "Not possible</span>
-            <span class="c1"># to reach the API right now -- retry later"), and trusting either</span>
-            <span class="c1"># unconditionally would trade a `?` a person reviews for a confidently</span>
-            <span class="c1"># wrong `open`.</span>
+        <span class="k">if</span> <span class="n">_is_no_predicate</span><span class="p">(</span><span class="n">verify_text</span><span class="p">):</span>
+            <span class="c1"># The documented "none possible" answer: the field was read and understood</span>
+            <span class="c1"># to have no predicate, so the issue stands as filed. Its prose may name</span>
+            <span class="c1"># `gh` or a path -- that is explanation, not a malformed command</span>
+            <span class="c1"># (openloops#7), so it must win before the backtick test below.</span>
             <span class="k">return</span> <span class="n">OPEN</span><span class="p">,</span> <span class="n">verify_text</span>
-        <span class="k">if</span> <span class="s2">"`"</span> <span class="ow">in</span> <span class="p">(</span><span class="n">verify_text</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">):</span>
-            <span class="c1"># A field with a backtick but no complete code span, and not one of the</span>
-            <span class="c1"># unambiguous "no predicate" phrasings either, is a malformed predicate.</span>
-            <span class="c1"># Saying so is the difference between a `?` and a row that reads open</span>
-            <span class="c1"># for a typo.</span>
-            <span class="k">return</span> <span class="n">UNKNOWN</span><span class="p">,</span> <span class="n">_evidence</span><span class="p">(</span><span class="s2">"malformed verify field"</span><span class="p">,</span> <span class="n">verify_text</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">OPEN</span><span class="p">,</span> <span class="n">verify_text</span> <span class="ow">or</span> <span class="s2">"no verify predicate"</span>
+        <span class="k">if</span> <span class="s2">"`"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">verify_text</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">OPEN</span><span class="p">,</span> <span class="n">verify_text</span> <span class="ow">or</span> <span class="s2">"no verify predicate"</span>
+        <span class="k">if</span> <span class="n">_refuses_execution</span><span class="p">(</span><span class="n">verify_text</span><span class="p">):</span>
+            <span class="c1"># Starts with a no-predicate word but is not the documented answer, and</span>
+            <span class="c1"># carries a code span: it may be a real predicate. Not run, and not a</span>
+            <span class="c1"># quiet `open` either.</span>
+            <span class="k">return</span> <span class="n">UNKNOWN</span><span class="p">,</span> <span class="n">_evidence</span><span class="p">(</span>
+                <span class="s2">"malformed verify field (ambiguous): starts like 'none' but carries a "</span>
+                <span class="s2">"code span; not run"</span><span class="p">,</span>
+                <span class="n">verify_text</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="c1"># A field with a backtick but no complete code span is a malformed predicate.</span>
+        <span class="c1"># Saying so is the difference between a `?` and a row that reads open for a</span>
+        <span class="c1"># typo.</span>
+        <span class="k">return</span> <span class="n">UNKNOWN</span><span class="p">,</span> <span class="n">_evidence</span><span class="p">(</span><span class="s2">"malformed verify field"</span><span class="p">,</span> <span class="n">verify_text</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">verify</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">UNKNOWN</span><span class="p">,</span> <span class="s2">"not evaluated (verify=False)"</span>
     <span class="k">if</span> <span class="n">owner</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">trusted_owners</span><span class="p">:</span>

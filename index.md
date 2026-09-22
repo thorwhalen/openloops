@@ -210,8 +210,11 @@ The rules the parser actually applies, in the order they bite:
   This matters: the natural way to write that sentence mentions ``gh`` or
   ``true``, and both exit `0`, which would report a live obligation as done. Use it
   for genuine judgement calls.
-- A field with a backtick but no closed code span is *malformed*, and reads `?` rather
-  than `open` — a typo should not look like an answer.
+  Such a field reads `open`, with its prose as the reason. A field that merely *starts
+  like* one — `nonexistent: …`, `none of the files remain: …`, `n/a until …` — followed
+  by a code span is ambiguous: nothing in it is run, and it reads `?`.
+- Otherwise, a field with a backtick but no closed code span is *malformed*, and reads
+  `?` rather than `open` — a typo should not look like an answer.
 
 What makes a good one:
 
