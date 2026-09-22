@@ -437,10 +437,10 @@ def register(
     opening it anyway; both default off, which is the plain ``<section>`` this page has
     always rendered. A ``<summary>`` may hold phrasing content and a heading only, so
     the folding head carries the figure and the rule as ``<span>``s rather than
-    ``<p>``s. **That head needs placement rules this stylesheet does not yet carry**:
-    three flat children auto-place into the same grid as two, which puts the rule under
-    the figure, and ``display:grid`` on a ``<summary>`` costs it its marker. The caller
-    that folds today (crowsnest) supplies them; moving them here is issue 13.
+    ``<p>``s. :data:`CSS` places those three flat children into the same ``auto 1fr``
+    grid a plain section's head uses (figure down column one across both rows, heading
+    and rule down column two) and restores the disclosure affordance a
+    ``display:grid`` summary would otherwise cost it (#13).
     ``start_open`` is ignored when ``folds`` is false — there is no disclosure to open —
     because a caller decides ``folds`` from whether it has rows and passes both.
 
@@ -1257,6 +1257,26 @@ b,strong{font-weight:600}
 .register--unsure .figure{color:var(--unsure)}
 .register h2{font-size:clamp(1.35rem,3vw,1.75rem)}
 .rule{color:var(--ink-soft); font-size:0.92rem; max-width:44rem; margin-top:0.3rem}
+
+/* A folding register's <summary> carries the head's three children flat (a <summary>
+   may hold phrasing content and a heading only, never the wrapping <div> the plain
+   <section> uses) -- so the auto/1fr grid above needs placement rules for them: the
+   figure down column one across both rows, the heading and rule down column two, plus
+   the disclosure affordance a display:grid summary would otherwise lose (#13). */
+.register>summary{cursor:pointer; list-style:none; grid-template-rows:auto auto}
+.register>summary::-webkit-details-marker{display:none}
+.register>summary>.figure{grid-row:1/3}
+.register>summary>h2,.register>summary>.rule{grid-column:2}
+.register>summary>.rule{display:block}
+.register>summary h2::after{
+  content:""; display:inline-block; margin-left:0.5rem;
+  border:0.3rem solid transparent; border-left-color:var(--ink-soft);
+  transform:translateY(-0.05em);
+}
+.register[open]>summary h2::after{
+  border-left-color:transparent; border-top-color:var(--ink-soft);
+  transform:translateY(-0.25em);
+}
 .subhead{
   font-family:var(--mono); font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase;
   color:var(--ink-soft); margin-top:2rem; padding-bottom:0.5rem; border-bottom:1px solid var(--rule);
