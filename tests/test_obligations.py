@@ -608,6 +608,44 @@ def test_no_predicate_prose_with_a_code_span_reads_open_not_unknown(field):
     assert calls == [], "prose must never be handed to the evaluator"
 
 
+@pytest.mark.parametrize(
+    "field",
+    [
+        "**Verify:** nonexistent: `test ! -e legacy.py`",
+        "**Verify:** none of the old files remain: `! ls old/*.py`",
+        "**Verify:** nonempty output from `gh secret list --repo a/b`",
+        "**Verify:** Nonetheless, `test -f x`",
+        "**Verify:** n/a until 2.0 ships; then `gh release view v2.0`",
+        "**Verify:** none needed, `true` would pass",
+    ],
+)
+def test_a_field_that_only_starts_like_none_is_not_run_and_reads_unknown(field):
+    """Review of openloops#7: without a word boundary, these real predicates would
+    have become a quiet ``open``. Running them is not safe either (the last one would
+    discharge), so they are not run and read ``?`` -- the check did not happen."""
+    calls = []
+    row = only([issue(body=field)], run_predicate=calls.append)
+    assert row["state"] == UNKNOWN
+    assert "ambiguous" in row["evidence"]
+    assert calls == []
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        '**Verify:** "none possible" `gh`',
+        "**Verify:** > none possible `gh`",
+        "**Verify:** \u201cnone possible\u201d, `true` proves nothing",
+    ],
+)
+def test_a_quoted_or_blockquoted_none_possible_is_still_never_run(field):
+    """`gh` alone exits 0: running it here would report a live obligation as done."""
+    calls = []
+    row = only([issue(body=field)], run_predicate=calls.append)
+    assert calls == []
+    assert row["state"] == OPEN
+
+
 def test_a_quoted_example_of_the_format_is_not_the_predicate():
     """An agent that pastes the spec into its own issue must not have the spec run."""
     body = (

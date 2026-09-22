@@ -461,23 +461,61 @@ _NO_PREDICATE_PREFIXES = (
 )
 
 
+#: Leading decoration stripped before the prefix test: markdown emphasis, a blockquote
+#: marker, quotes. Stripping more only ever widens "do not run", which is the safe side.
+_FIELD_DECORATION = "*_ >\"'\u201c\u2018"
+
+#: The documented answer, unambiguously: a multi-word phrase, whatever follows it, or a
+#: bare ``none``/``n/a`` standing alone or followed by a separator. ``nonexistent``,
+#: ``none of the files remain`` and ``n/a until 2.0 ships`` are not this answer.
+_DOCUMENTED_NO_PREDICATE = re.compile(
+    r"(?:none possible|no predicate|not possible)\b"
+    r"|(?:none|n/a)(?=\s*(?:$|[-\u2014\u2013:;,.(*_!?]))"
+)
+
+
+def _field_start(verify_text: str) -> str:
+    return (verify_text or "").lower().lstrip(_FIELD_DECORATION)
+
+
+def _refuses_execution(verify_text: str) -> bool:
+    """Whether a field starts with a no-predicate word, so nothing in it may be run.
+
+    Deliberately broad: a bare prefix test with no word boundary. Its only job is to
+    prevent the phantom discharge, and over-matching here costs a ``?``, never a false
+    ``done``. Whether the field is the *documented* answer is a separate, stricter
+    question -- :func:`_is_no_predicate`.
+
+    >>> _refuses_execution('none needed, `true` would pass')
+    True
+    >>> _refuses_execution('> "none possible" `gh`')
+    True
+    >>> _refuses_execution('`test -f x`')
+    False
+    """
+    return _field_start(verify_text).startswith(_NO_PREDICATE_PREFIXES)
+
+
 def _is_no_predicate(verify_text: str) -> bool:
     """Whether a verify field is the documented "no predicate is possible" answer.
 
-    The one test both :func:`parse_verify` and the verdict use, so the two cannot reach
-    opposite conclusions about the same text (openloops#7). Code spans in the prose do
-    not matter -- the prefix decides.
+    Such a field was read and understood, so it reads ``open`` with its prose as the
+    reason -- even when the prose contains a code span (openloops#7). A field that
+    merely *starts like* one (``nonexistent: `test ! -e x```) is not: nothing in it is
+    run (:func:`_refuses_execution`), and it reads ``?`` rather than a quiet ``open``.
 
     >>> _is_no_predicate('none possible - no `gh` query observes a decision.')
     True
     >>> _is_no_predicate('**N/A**')
     True
-    >>> _is_no_predicate('`test -f x`')
+    >>> _is_no_predicate('nonexistent: `test ! -e legacy.py`')
+    False
+    >>> _is_no_predicate('none of the old files remain: `! ls old/*.py`')
     False
     >>> _is_no_predicate('')
     False
     """
-    return (verify_text or "").lower().lstrip("*_ ").startswith(_NO_PREDICATE_PREFIXES)
+    return bool(_DOCUMENTED_NO_PREDICATE.match(_field_start(verify_text)))
 
 
 def parse_verify(body: str) -> tuple[str, str]:
@@ -515,7 +553,7 @@ def parse_verify(body: str) -> tuple[str, str]:
     if match is None:
         return "", ""
     text = match.group("text").strip()
-    if _is_no_predicate(text):
+    if _refuses_execution(text):
         return "", text
     span = _CODE_SPAN.search(text)
     command = span.group("code").strip() if span else ""
@@ -734,12 +772,21 @@ def _verdict(
             # `gh` or a path -- that is explanation, not a malformed command
             # (openloops#7), so it must win before the backtick test below.
             return OPEN, verify_text
-        if "`" in (verify_text or ""):
-            # A field with a backtick but no complete code span is a malformed
-            # predicate. Saying so is the difference between a `?` and a row that
-            # reads open for a typo.
-            return UNKNOWN, _evidence("malformed verify field", verify_text)
-        return OPEN, verify_text or "no verify predicate"
+        if "`" not in (verify_text or ""):
+            return OPEN, verify_text or "no verify predicate"
+        if _refuses_execution(verify_text):
+            # Starts with a no-predicate word but is not the documented answer, and
+            # carries a code span: it may be a real predicate. Not run, and not a
+            # quiet `open` either.
+            return UNKNOWN, _evidence(
+                "ambiguous verify field: starts like 'none' but carries a code span; "
+                "not run",
+                verify_text,
+            )
+        # A field with a backtick but no complete code span is a malformed predicate.
+        # Saying so is the difference between a `?` and a row that reads open for a
+        # typo.
+        return UNKNOWN, _evidence("malformed verify field", verify_text)
     if not verify:
         return UNKNOWN, "not evaluated (verify=False)"
     if owner not in trusted_owners:
