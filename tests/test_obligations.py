@@ -582,6 +582,32 @@ def test_no_predicate_prose_is_never_executed(field):
     assert text, "the prose is kept so the row can say why there is nothing to run"
 
 
+@pytest.mark.parametrize(
+    "field",
+    [
+        "**Verify:** none possible - no `gh` query observes a decision.",
+        "**Verify:** none possible - closest is `true`, which proves nothing.",
+        "**Verify:** None possible — a judgement call. Not even `gh api` helps.",
+        "**Verify:** n/a - `true` would pass and mean nothing",
+        # A lone backtick in the prose: still the documented form, not a typo.
+        "**Verify:** none possible - the flag is spelled `--dry-run",
+    ],
+)
+def test_no_predicate_prose_with_a_code_span_reads_open_not_unknown(field):
+    """openloops#7: the field was read and understood, so it is not ``?``.
+
+    ``parse_verify`` classifies it as having no predicate; the verdict used to
+    re-derive that from the raw text, see a backtick, and call it malformed.
+    """
+    calls = []
+    row = only([issue(body=field)], run_predicate=calls.append)
+    assert row["state"] == OPEN
+    assert row["predicate"] == ""
+    assert row["evidence"] == row["verify"], "the row says why, in the author's words"
+    assert "malformed" not in row["evidence"]
+    assert calls == [], "prose must never be handed to the evaluator"
+
+
 def test_a_quoted_example_of_the_format_is_not_the_predicate():
     """An agent that pastes the spec into its own issue must not have the spec run."""
     body = (

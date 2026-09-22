@@ -461,6 +461,25 @@ _NO_PREDICATE_PREFIXES = (
 )
 
 
+def _is_no_predicate(verify_text: str) -> bool:
+    """Whether a verify field is the documented "no predicate is possible" answer.
+
+    The one test both :func:`parse_verify` and the verdict use, so the two cannot reach
+    opposite conclusions about the same text (openloops#7). Code spans in the prose do
+    not matter -- the prefix decides.
+
+    >>> _is_no_predicate('none possible - no `gh` query observes a decision.')
+    True
+    >>> _is_no_predicate('**N/A**')
+    True
+    >>> _is_no_predicate('`test -f x`')
+    False
+    >>> _is_no_predicate('')
+    False
+    """
+    return (verify_text or "").lower().lstrip("*_ ").startswith(_NO_PREDICATE_PREFIXES)
+
+
 def parse_verify(body: str) -> tuple[str, str]:
     """``(predicate, verify_text)`` for an issue body. Both are ``''`` when absent.
 
@@ -496,7 +515,7 @@ def parse_verify(body: str) -> tuple[str, str]:
     if match is None:
         return "", ""
     text = match.group("text").strip()
-    if text.lower().lstrip("*_ ").startswith(_NO_PREDICATE_PREFIXES):
+    if _is_no_predicate(text):
         return "", text
     span = _CODE_SPAN.search(text)
     command = span.group("code").strip() if span else ""
@@ -709,10 +728,16 @@ def _verdict(
     guessing; only an exit status decides between ``open`` and ``discharged``.
     """
     if not command:
+        if _is_no_predicate(verify_text):
+            # The documented "none possible" answer: the field was read and understood
+            # to have no predicate, so the issue stands as filed. Its prose may name
+            # `gh` or a path -- that is explanation, not a malformed command
+            # (openloops#7), so it must win before the backtick test below.
+            return OPEN, verify_text
         if "`" in (verify_text or ""):
             # A field with a backtick but no complete code span is a malformed
-            # predicate, not the documented "none possible" prose. Saying so is the
-            # difference between a `?` and a row that reads open for a typo.
+            # predicate. Saying so is the difference between a `?` and a row that
+            # reads open for a typo.
             return UNKNOWN, _evidence("malformed verify field", verify_text)
         return OPEN, verify_text or "no verify predicate"
     if not verify:
