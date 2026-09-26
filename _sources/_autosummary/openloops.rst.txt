@@ -8,6 +8,8 @@
 
    .. autosummary::
    
+      exchanges
+      question_sentences
       agents_dir
       asks_the_human
       blocked
@@ -41,6 +43,7 @@
 
    .. autosummary::
    
+      Exchange
       BlockedIssue
       Blocker
       ClaudeCodeTranscripts

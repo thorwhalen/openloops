@@ -1,4 +1,4 @@
-> built 2026-09-22 14:34 UTC from 43ff643 (main) · openloops 0.1.14. Details: build_info.json
+> built 2026-09-26 07:43 UTC from 87a40aa (main) · openloops 0.1.15. Details: build_info.json
 
 # index.html.md
 
@@ -688,6 +688,18 @@ has to be able to tell “nothing is owed” from “I could not find out”:
 ```
 
 Check `listed` before you read `counts`. That is the whole contract.
+
+What a person asked, and what came back, is read out of a transcript as facts, with no model:
+
+```python
+from openloops.exchanges import exchanges, load_records
+
+for e in exchanges(load_records(path)):  # one per prompt, in time order
+    if e.questions:  # the sentences of a person's prompt that ask something
+        print(e.questions, "->", e.reply[:80])  # the reply its turn ended with
+```
+
+`origin` says who started the turn: `human`, `peer` (another session’s message, `sender` names it) or `system` (a notification or a headless run). Only a human prompt is searched for questions, and requests phrased as questions (“can you fix it?”), tags, headings, quotes and code are skipped. Deciding what a doubtful sentence means, or finding an answer given in another session, is left to the consumer ([crowsnest](https://github.com/thorwhalen/crowsnest) does both).
 
 `openloops.tools` is the single dispatch list every surface goes through — the `ol`
 command today, an MCP server or an HTTP endpoint later. Operations go there, never
@@ -2048,8 +2060,10 @@ event log, no cross-repo links, no session model, and no write path of any kind.
 
 ### Functions
 
-| [`agents_dir`](_autosummary/openloops.html.md#openloops.agents_dir)()                                       | The bundled subagent definitions, inside the installed package.                                                       |
+| [`exchanges`](_autosummary/openloops.html.md#openloops.exchanges)(records, \*[, key])                      | Every prompt of a transcript's main thread, in order, each with its turn's reply.                                     |
 |-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| [`question_sentences`](_autosummary/openloops.html.md#openloops.question_sentences)(text)                           | The sentences of a person's prompt that ask something, in order, at most `MAX_QUESTIONS`.                             |
+| [`agents_dir`](_autosummary/openloops.html.md#openloops.agents_dir)()                                       | The bundled subagent definitions, inside the installed package.                                                       |
 | [`asks_the_human`](_autosummary/openloops.html.md#openloops.asks_the_human)(text, \*[, ask_cues, chars])        | The ask cues in the closing lines, if those lines put a question to the reader.                                       |
 | [`blocked`](_autosummary/openloops.html.md#openloops.blocked)(\*[, resolve, owners, repos, query, ...])  | Open issues that carry a blocker edge, with every edge resolved.                                                      |
 | [`classify`](_autosummary/openloops.html.md#openloops.classify)(session, \*[, ask_cues, defer_cues, ...]) | Read a session's loop state from its own last turn.                                                                   |
@@ -2080,16 +2094,17 @@ event log, no cross-repo links, no session model, and no write path of any kind.
 
 ### Classes
 
-| [`BlockedIssue`](_autosummary/openloops.html.md#openloops.BlockedIssue)(repo, number, title, url, ...)      | One open issue that carries blocker edges, with the verdict those edges imply.   |
-|---------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
-| [`Blocker`](_autosummary/openloops.html.md#openloops.Blocker)(repo, number[, state, url, closed_at])   | One edge: the issue, in whatever repository it lives, that blocks another.       |
-| [`ClaudeCodeTranscripts`](_autosummary/openloops.html.md#openloops.ClaudeCodeTranscripts)([root, since_days, ...])   | Claude Code's persisted sessions, as a `Mapping[str, Session]`.                  |
-| [`Digest`](_autosummary/openloops.html.md#openloops.Digest)(key, text, session_key, source, state)    | One rendered digest: its store key and its markdown text.                        |
-| [`Locator`](_autosummary/openloops.html.md#openloops.Locator)(type[, url, text, at])                   | A typed, human-readable pointer to something outside the digest.                 |
-| [`Obligation`](_autosummary/openloops.html.md#openloops.Obligation)(repo, number, title, url, ...[, ...]) | One open `manual-task` issue, with the verdict its own predicate returned.       |
-| [`PredicateOutcome`](_autosummary/openloops.html.md#openloops.PredicateOutcome)(status[, output])               | What evaluating one predicate produced.                                          |
-| [`Session`](_autosummary/openloops.html.md#openloops.Session)(key[, title, ai_title, cwd, ...])        | What one Claude Code session's persisted state says, parsed but not judged.      |
-| [`Verdict`](_autosummary/openloops.html.md#openloops.Verdict)(state, reason[, cues, at, confidence])   | A loop-state judgement, with the rule that produced it and the cues it saw.      |
+| [`Exchange`](_autosummary/openloops.html.md#openloops.Exchange)(session, uuid, origin, asked_at, prompt)   | One prompt a session received and the reply its turn ended with.               |
+|------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| [`BlockedIssue`](_autosummary/openloops.html.md#openloops.BlockedIssue)(repo, number, title, url, ...)         | One open issue that carries blocker edges, with the verdict those edges imply. |
+| [`Blocker`](_autosummary/openloops.html.md#openloops.Blocker)(repo, number[, state, url, closed_at])      | One edge: the issue, in whatever repository it lives, that blocks another.     |
+| [`ClaudeCodeTranscripts`](_autosummary/openloops.html.md#openloops.ClaudeCodeTranscripts)([root, since_days, ...])      | Claude Code's persisted sessions, as a `Mapping[str, Session]`.                |
+| [`Digest`](_autosummary/openloops.html.md#openloops.Digest)(key, text, session_key, source, state)       | One rendered digest: its store key and its markdown text.                      |
+| [`Locator`](_autosummary/openloops.html.md#openloops.Locator)(type[, url, text, at])                      | A typed, human-readable pointer to something outside the digest.               |
+| [`Obligation`](_autosummary/openloops.html.md#openloops.Obligation)(repo, number, title, url, ...[, ...])    | One open `manual-task` issue, with the verdict its own predicate returned.     |
+| [`PredicateOutcome`](_autosummary/openloops.html.md#openloops.PredicateOutcome)(status[, output])                  | What evaluating one predicate produced.                                        |
+| [`Session`](_autosummary/openloops.html.md#openloops.Session)(key[, title, ai_title, cwd, ...])           | What one Claude Code session's persisted state says, parsed but not judged.    |
+| [`Verdict`](_autosummary/openloops.html.md#openloops.Verdict)(state, reason[, cues, at, confidence])      | A loop-state judgement, with the rule that produced it and the cues it saw.    |
 
 ### Exceptions
 
@@ -2241,6 +2256,26 @@ JSON-ready form (without the markdown body).
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### *class* openloops.Exchange(session, uuid, origin, asked_at, prompt, reply='', replied_at='', sender='', questions=())
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+One prompt a session received and the reply its turn ended with.
+
+`uuid` is the prompt record’s own id, stable for the life of the transcript.
+`origin` is `HUMAN`, `PEER` (`sender` names the session) or
+`SYSTEM` (a notification, a headless `-p` run, or nothing typed).
+`reply` is the last assistant text before the next prompt, `''` while the turn
+is still running or ended without words. `questions` is filled for a human
+prompt only.
+
+#### as_dict()
+
+JSON-ready form.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)
 
 ### *exception* openloops.GhUnavailable
 
@@ -2570,6 +2605,28 @@ free.
 >>> del store['demo/open/s1.md']
 ```
 
+### openloops.exchanges(records, , key='')
+
+Every prompt of a transcript’s main thread, in order, each with its turn’s reply.
+
+Records are ordered by timestamp (a transcript’s lines are not always written in
+order), ties kept in file order. Sub-agent sidechains are left out: their “prompts”
+were written by the session, not to it.
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`Exchange`](_autosummary/openloops.html.md#openloops.Exchange), [`...`](https://docs.python.org/3/builtins/constants.html#Ellipsis)]
+
+```pycon
+>>> recs = [
+...     {"type": "user", "sessionId": "s", "uuid": "u1", "timestamp": "T1",
+...      "message": {"content": "Ship it. Is the cache still warm?"}},
+...     {"type": "assistant", "timestamp": "T2", "message": {"content": [
+...         {"type": "text", "text": "Shipped. Yes, warm for an hour."}]}},
+... ]
+>>> [(e.uuid, e.questions, e.reply) for e in exchanges(recs)]
+[('u1', ('Is the cache still warm?',), 'Shipped. Yes, warm for an hour.')]
+```
+
 ### openloops.gh_blocked_by(repo, number, , timeout=30.0)
 
 The default `blockers_source`: the blocker edges out of one issue.
@@ -2839,6 +2896,25 @@ is the difference between a row that reads `?` and one that silently reads open:
 ```pycon
 >>> parse_verify('**Verify:** `echo one &&' + chr(10) + 'echo two`')
 ('', '`echo one &&')
+```
+
+### openloops.question_sentences(text)
+
+The sentences of a person’s prompt that ask something, in order, at most
+`MAX_QUESTIONS`.
+
+A sentence asks when it ends with `?` or opens the way a question does (“why”,
+“is there”, “I wonder”), and is not a request phrased as one (“can you fix it?”).
+Code blocks, quoted lines and table rows are skipped.
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`...`](https://docs.python.org/3/builtins/constants.html#Ellipsis)]
+
+```pycon
+>>> question_sentences("Can you add a test? Could you explain why it failed?")
+('Could you explain why it failed?',)
+>>> question_sentences("> Why is it slow?\nok?\nwhy does the page load twice")
+('why does the page load twice',)
 ```
 
 ### openloops.render(session, verdict, , source)
@@ -4241,7 +4317,7 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-09-22 14:34 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/43ff643ad1482a95a9c0e6e301a1e8dfec7969b1"><code>43ff643</code></a> on branch <code>main</code>, for **openloops 0.1.14** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-26 07:43 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/87a40aa222cfd76f6bc862e9fbff3b45c5dfb48c"><code>87a40aa</code></a> on branch <code>main</code>, for **openloops 0.1.15** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -4250,7 +4326,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/43ff643ad1482a95a9c0e6e301a1e8dfec7969b1"><code>43ff643ad1482a95a9c0e6e301a1e8dfec7969b1</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/87a40aa222cfd76f6bc862e9fbff3b45c5dfb48c"><code>87a40aa222cfd76f6bc862e9fbff3b45c5dfb48c</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -4261,9 +4337,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/35741016009">35741016009</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/36227561665">36227561665</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>43ff643ad1482a95a9c0e6e301a1e8dfec7969b1</code> (in the history of the built commit) |
+| Event commit | <code>87a40aa222cfd76f6bc862e9fbff3b45c5dfb48c</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -4288,13 +4364,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.14/">0.1.14</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.15/">0.1.15</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 43ff643ad1482a95a9c0e6e301a1e8dfec7969b1
+git checkout 87a40aa222cfd76f6bc862e9fbff3b45c5dfb48c
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
