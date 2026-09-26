@@ -685,6 +685,18 @@ has to be able to tell "nothing is owed" from "I could not find out":
 
 Check `listed` before you read `counts`. That is the whole contract.
 
+What a person asked, and what came back, is read out of a transcript as facts, with no model:
+
+```python
+from openloops.exchanges import exchanges, load_records
+
+for e in exchanges(load_records(path)):  # one per prompt, in time order
+    if e.questions:  # the sentences of a person's prompt that ask something
+        print(e.questions, "->", e.reply[:80])  # the reply its turn ended with
+```
+
+`origin` says who started the turn: `human`, `peer` (another session's message, `sender` names it) or `system` (a notification or a headless run). Only a human prompt is searched for questions, and requests phrased as questions ("can you fix it?"), tags, headings, quotes and code are skipped. Deciding what a doubtful sentence means, or finding an answer given in another session, is left to the consumer ([crowsnest](https://github.com/thorwhalen/crowsnest) does both).
+
 `openloops.tools` is the single dispatch list every surface goes through — the `ol`
 command today, an MCP server or an HTTP endpoint later. Operations go there, never
 straight into the CLI, which is what stops two surfaces from drifting apart.

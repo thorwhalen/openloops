@@ -117,6 +117,7 @@ from openloops.blockers import (
 from openloops.dashboard import headline_counts, render_dashboard
 from openloops.digest import make_digest, render
 from openloops.egress import CredentialFound, scrub
+from openloops.exchanges import Exchange, exchanges, question_sentences
 from openloops.obligations import (
     DISCHARGED,
     OBLIGATION_FIELDS,
@@ -143,6 +144,9 @@ from openloops.tools import ls, show, status
 from openloops.transcripts import ClaudeCodeTranscripts, parse_session
 
 __all__ = [
+    "Exchange",
+    "exchanges",
+    "question_sentences",
     "ARCHIVE",
     "ASK_CUES",
     "BLOCKED",
