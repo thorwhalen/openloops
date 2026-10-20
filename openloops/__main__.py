@@ -429,11 +429,29 @@ def job_status():
     )
 
 
+def published(*, limit: int = 20, session: str = None):
+    """What your agents handed you lately: recent annals documents, with their sessions.
+
+    Reads `annals ls`; a missing annals prints why instead of an empty list, because
+    "nothing published" and "could not look" are different answers.
+    """
+    report = tools.published(limit=limit, session=session)
+    if not report["listed"]:
+        return f"(could not list documents: {report['error']})"
+    if not report["rows"]:
+        return "(no published documents)"
+    return "\n".join(
+        f"{r['when'][:16].replace('T', ' '):<17} {r['session'][:16]:<17}{r['title'][:50]:<52}{r['url']}"
+        for r in report["rows"]
+    )
+
+
 #: Every verb the CLI exposes, in the order `ol --help` lists them.
 _commands = [
     brief,
     owed,
     blocked,
+    published,
     dashboard,
     sync,
     ls,
