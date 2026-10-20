@@ -36,6 +36,7 @@ from openloops.obligations import (
     DFLT_PREDICATE_TIMEOUT,
     owed as _owed,
 )
+from openloops.publications import published as _published
 from openloops.store import (
     data_dir,
     default_source,
@@ -57,6 +58,7 @@ __all__ = [
     "owed",
     "blocked",
     "dashboard",
+    "published",
 ]
 
 #: The keys every :func:`ls` row carries, whatever the digest happens to record.
@@ -464,9 +466,28 @@ def dashboard(
     }
 
 
+def published(
+    *,
+    limit: int = 50,
+    session: str | None = None,
+    source: Any = None,
+) -> dict[str, Any]:
+    """What your agents handed you lately: recently published annals documents, per session.
+
+    The sibling of :func:`owed`, read from the documents sessions published with
+    `annals publish --session <name>`. Nothing is written. ``source`` is the seam: the
+    documents themselves, or a callable returning them; by default `annals ls` is run,
+    and when annals is absent the result says ``listed=False`` rather than listing nothing.
+
+    >>> published(source=[])['listed']
+    True
+    """
+    return _published(limit=limit, session=session, source=source)
+
+
 #: Single source of truth for what every surface exposes. The CLI dispatches this list;
 #: an MCP or HTTP adapter would reference the same names as strings.
-_dispatch_funcs = [sync, ls, show, status, owed, blocked, dashboard]
+_dispatch_funcs = [sync, ls, show, status, owed, blocked, dashboard, published]
 
 
 if __name__ == "__main__":

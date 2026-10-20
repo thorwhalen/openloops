@@ -9,6 +9,7 @@ corresponds to a git version tag (which is also the release published to PyPI).
 
 ### Added
 
+- `openloops.published()` and `ol published` — recently published annals documents per session (#22). Read through one seam, `source=`; without annals on PATH the report says `listed=False` instead of listing nothing.
 - `openloops.owed()` and `ol owed` — the obligation reader. Lists the open
   `manual-task` issues across the owners you configured, runs the `**Verify:**` shell
   predicate each issue body carries, and reports **three** states: `open` (no predicate,
