@@ -335,6 +335,7 @@ def dashboard(
     no_resolve: bool = False,
     fragment: bool = False,
     owners: str = None,
+    no_published: bool = False,
 ):
     """Render all three answers as one self-contained HTML page you can look at.
 
@@ -346,8 +347,12 @@ def dashboard(
     `--fragment` drops the document scaffold for a host that supplies its own `<head>`,
     which is what publishing it somewhere usually wants. `--sessions` bounds the
     in-flight register; the true total is printed either way.
+
+    A "Handed to you" register lists each session's recent annals documents (read with
+    `annals ls`, never published from here); `--no-published` leaves it off.
     """
     result = tools.dashboard(
+        published_report=False if no_published else None,
         verify=not no_verify,
         resolve=not no_resolve,
         candidate_limit=limit,

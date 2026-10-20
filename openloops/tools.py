@@ -36,6 +36,7 @@ from openloops.obligations import (
     DFLT_PREDICATE_TIMEOUT,
     owed as _owed,
 )
+from openloops.publications import DFLT_LIMIT as DFLT_PUBLISHED_LIMIT
 from openloops.publications import published as _published
 from openloops.store import (
     data_dir,
@@ -384,6 +385,8 @@ def dashboard(
     blocked_report: Mapping[str, Any] | None = None,
     sessions: list[dict[str, Any]] | None = None,
     digests_store: MutableMapping[str, str] | None = None,
+    published_report: Mapping[str, Any] | bool | None = None,
+    published_limit: int = DFLT_PUBLISHED_LIMIT,
 ) -> dict[str, Any]:
     """All three answers as one self-contained HTML page, for looking at rather than reading.
 
@@ -397,9 +400,11 @@ def dashboard(
     ``standalone=False`` returns the same page without the document scaffold, for a host
     that supplies its own ``<head>``.
 
-    Each of the three reads is a seam: pass ``owed_report=``, ``blocked_report=`` or
-    ``sessions=`` and that one is not performed. With all three passed this reaches no
-    network and needs no ``gh``, which is how the tests run.
+    Each read is a seam: pass ``owed_report=``, ``blocked_report=``, ``sessions=`` or
+    ``published_report=`` and that one is not performed. With all four passed this
+    reaches no network and needs no ``gh`` or ``annals``, which is how the tests run.
+    The "Handed to you" register (recent annals documents per session) comes from
+    :func:`published`; pass ``published_report=False`` to leave it off the page.
 
     ``counts`` comes back alongside the page and carries ``null`` — not ``0`` — for any
     figure that could not be established, so a caller reading the JSON is held to the
@@ -440,6 +445,12 @@ def dashboard(
         # say "40 of 154"; a pre-clipped list would let the page state a smaller number
         # than is really open, which is the same family of error as reporting a `?` as 0.
         sessions = ls(state=OPEN, limit=0, digests_store=digests_store)
+    if published_report is None:
+        published_report = _published(limit=published_limit)
+    elif published_report is False:
+        published_report = None
+    else:
+        published_report = dict(published_report)
     made_at = made_at or datetime.now(timezone.utc).isoformat()
     html = render_dashboard(
         owed_report,
@@ -450,6 +461,7 @@ def dashboard(
         title=title,
         max_sessions=max_sessions,
         standalone=standalone,
+        published=published_report,
     )
     written = ""
     if path:

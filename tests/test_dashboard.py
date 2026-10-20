@@ -42,6 +42,28 @@ def obligation(**over):
     return {**row, **over}
 
 
+def published_envelope(*rows, **over):
+    return {
+        "listed": True,
+        "error": "",
+        "rows": list(rows),
+        "by_session": {},
+        **over,
+    }
+
+
+def doc(session="sweep", title="Report", when="2026-01-30T10:00:00Z", **over):
+    return {
+        "id": "d1",
+        "title": title,
+        "session": session,
+        "when": when,
+        "kind": "md",
+        "url": "https://apps.thorwhalen.com/annals/d/d1",
+        **over,
+    }
+
+
 def owed_envelope(*rows, **over):
     counts = {"open": 0, "discharged": 0, "unknown": 0, "with_predicate": 0, "total": 0}
     for row in rows:
@@ -362,6 +384,7 @@ def test_the_tool_needs_no_network_when_all_three_seams_are_injected():
         blocked_report=blocked_envelope(blocked_row()),
         sessions=[session()],
         made_at=STAMP,
+        published_report=published_envelope(),
     )
     assert result["counts"] == {
         "needs_you": 1,
@@ -385,6 +408,7 @@ def test_the_tool_reports_null_rather_than_zero_for_what_it_could_not_read():
         blocked_report=blocked_envelope(),
         sessions=[],
         made_at=STAMP,
+        published_report=published_envelope(),
     )
     assert result["counts"]["needs_you"] is None
     assert result["counts"]["unknown"] is None
@@ -397,6 +421,7 @@ def test_the_tool_writes_where_it_is_told(tmp_path):
         blocked_report=blocked_envelope(),
         sessions=[session()],
         made_at=STAMP,
+        published_report=published_envelope(),
         path=str(target),
     )
     assert result["path"] == str(target)
@@ -412,6 +437,7 @@ def test_the_written_page_opens_as_its_own_document(tmp_path):
         blocked_report=blocked_envelope(),
         sessions=[],
         made_at=STAMP,
+        published_report=published_envelope(),
         path=str(target),
     )
     text = target.read_text(encoding="utf-8")
@@ -614,3 +640,59 @@ def test_an_obligation_row_links_its_published_document():
         Sanitizer(), {"title": "t", "documents": (link,)}, tone="open", chip="open"
     )
     assert f'href="{link}"' in html
+
+
+# --------------------------------------------------------------------------------
+# "Handed to you": recent annals documents per session (#24).
+# --------------------------------------------------------------------------------
+
+
+def test_published_documents_are_listed_per_session_newest_first_and_capped():
+    rows = [doc("a", f"Doc {i}", when=f"2026-01-{30 - i:02d}T00:00:00Z") for i in range(5)]
+    rows.append(doc("b", "Other"))
+    html = tools.dashboard(
+        owed_report=owed_envelope(),
+        blocked_report=blocked_envelope(),
+        sessions=[],
+        made_at=STAMP,
+        published_report=published_envelope(*rows),
+    )["html"]
+    assert "Handed to you" in html
+    assert html.index("Doc 0") < html.index("Doc 1") < html.index("Doc 2")
+    assert "Doc 3" not in html and "2 more" in html
+    assert "Other" in html and 'href="https://apps.thorwhalen.com/annals/d/d1"' in html
+
+
+def test_an_unlisted_published_report_is_unknown_not_empty():
+    html = tools.dashboard(
+        owed_report=owed_envelope(),
+        blocked_report=blocked_envelope(),
+        sessions=[],
+        made_at=STAMP,
+        published_report=published_envelope(listed=False, error="annals not installed"),
+    )["html"]
+    assert "annals not installed" in html and "No documents have been published" not in html
+
+
+def test_published_report_false_leaves_the_register_off():
+    html = tools.dashboard(
+        owed_report=owed_envelope(),
+        blocked_report=blocked_envelope(),
+        sessions=[],
+        made_at=STAMP,
+        published_report=False,
+    )["html"]
+    assert "Handed to you" not in html
+
+
+def test_published_titles_and_links_are_escaped_and_scheme_checked():
+    html = tools.dashboard(
+        owed_report=owed_envelope(),
+        blocked_report=blocked_envelope(),
+        sessions=[],
+        made_at=STAMP,
+        published_report=published_envelope(
+            doc("<b>s</b>", "<script>x</script>", url="javascript:alert(1)")
+        ),
+    )["html"]
+    assert "<script>x" not in html and "javascript:" not in html and "<b>s</b>" not in html

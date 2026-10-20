@@ -65,6 +65,7 @@ from openloops.obligations import DISCHARGED, UNKNOWN
 __all__ = [
     "CSS",
     "DFLT_MAX_SESSIONS",
+    "DFLT_PUBLISHED_PER_SESSION",
     "DFLT_TITLE",
     "GAUGE_FULL_DAYS",
     "Sanitizer",
@@ -82,6 +83,9 @@ DFLT_TITLE = "Open Loops Board"
 #: How many session rows are printed. The register states the true total either way; a
 #: page that showed all 150-odd would bury the two registers above it.
 DFLT_MAX_SESSIONS = 40
+
+#: How many documents each session shows in the "Handed to you" register.
+DFLT_PUBLISHED_PER_SESSION = 3
 
 #: How many low-confidence sessions the unknown register names one by one before it
 #: switches to counting them. Every one of them is still counted.
@@ -783,6 +787,8 @@ def render_dashboard(
     max_sessions: int = DFLT_MAX_SESSIONS,
     standalone: bool = True,
     aliases: Mapping[str, str] | None = None,
+    published: Mapping[str, Any] | None = None,
+    published_per_session: int = DFLT_PUBLISHED_PER_SESSION,
 ) -> str:
     """The three envelopes as one self-contained HTML page. No network, no script.
 
@@ -801,6 +807,12 @@ def render_dashboard(
     does — and the same page comes back as title, styles and content only.
 
     ``max_sessions`` bounds the in-flight register; the true total is stated either way.
+
+    ``published`` is the envelope :func:`openloops.published` returns. When given, a
+    "Handed to you" register lists each session's most recent documents
+    (``published_per_session`` of them, with the true total stated); an envelope that
+    never listed renders as unknown, not as "nothing published". When omitted the
+    register is left out, so the page is the one it always was.
 
     >>> page = render_dashboard(
     ...     {'listed': False, 'error': 'gh: not logged in', 'counts': {}},
@@ -833,6 +845,11 @@ def render_dashboard(
         _needs_register(safe, owed),
         _free_register(safe, blocked),
         _flight_register(safe, sessions, now, max_sessions=max_sessions),
+        (
+            _published_register(safe, published, per_session=published_per_session)
+            if published is not None
+            else ""
+        ),
         _unknown_register(safe, unknowns, counts["unknown"], owed, blocked, sessions),
         _footer(safe, stamp),
     ]
@@ -1057,6 +1074,63 @@ def _flight_register(
     )
 
 
+def _published_register(
+    safe: Sanitizer, published: Mapping[str, Any], *, per_session: int
+) -> str:
+    """Recent annals documents, a short column per session."""
+    published = dict(published)
+    if not published.get("listed"):
+        body = _cannot(
+            safe,
+            "ol published",
+            published.get("error"),
+            "no documents were published",
+        )
+        figure = "?"
+    else:
+        rows = list(published.get("rows") or [])
+        by_session: dict[str, list[Mapping[str, Any]]] = {}
+        for row in rows:  # rows arrive newest first
+            by_session.setdefault(str(row.get("session") or "(unattributed)"), []).append(row)
+        if not by_session:
+            body = _empty("No documents have been published by a session.")
+        else:
+            columns = []
+            for name, docs in by_session.items():
+                items = "".join(
+                    f"<li>{_doc_link(safe, d)}<span class=\"when\">"
+                    f"{safe.text(str(d.get('when') or '')[:10])}</span></li>"
+                    for d in docs[: max(0, per_session)]
+                )
+                more = (
+                    f'<li class="empty">{len(docs) - per_session} more</li>'
+                    if len(docs) > per_session
+                    else ""
+                )
+                columns.append(
+                    f'<section class="shelf"><h4>{safe.text(name)}'
+                    f" <b>{len(docs)}</b></h4><ul>{items}{more}</ul></section>"
+                )
+            body = f'<div class="shelves">{"".join(columns)}</div>'
+        figure = str(len(rows))
+    return register(
+        ident="published",
+        name="Handed to you",
+        figure=figure,
+        tone="flight",
+        rule="Documents your sessions published with <code>annals publish --session</code>, "
+        "newest first. Titles and links are what the session said it made; nothing here "
+        "was opened.",
+        body=body,
+    )
+
+
+def _doc_link(safe: Sanitizer, doc: Mapping[str, Any]) -> str:
+    title = safe.text(doc.get("title") or doc.get("id"))
+    url = safe.url(doc.get("url"))
+    return f'<a href="{url}">{title}</a>' if url else title
+
+
 def _project_tally(safe: Sanitizer, sessions: Sequence[Mapping[str, Any]]) -> str:
     """Where the open sessions actually are. A hundred rows do not answer that; this does."""
     counts: dict[str, int] = {}
@@ -1153,6 +1227,15 @@ def _footer(safe: Sanitizer, stamp: str) -> str:
 #: The dark palette, written once and injected into both blocks that can select it —
 #: the `prefers-color-scheme` one for the un-stamped default and the `data-theme` one
 #: for an explicit toggle. Two copies of a palette drift; one copy cannot.
+_PUBLISHED_CSS = """
+.shelves{display:flex;flex-wrap:wrap;gap:1rem}
+.shelf{flex:1 1 14rem;min-width:0}
+.shelf h4{margin:0 0 .3rem}
+.shelf ul{list-style:none;margin:0;padding:0}
+.shelf li{display:flex;justify-content:space-between;gap:.5rem}
+.shelf .when{opacity:.6;white-space:nowrap}
+"""
+
 _DARK_TOKENS = """
   --ground:#0e1211; --surface:#151b19; --sunk:#111615;
   --ink:#e4e8e3; --ink-soft:#94a29d; --rule:#29312e; --rule-soft:#1e2523;
@@ -1405,6 +1488,7 @@ b,strong{font-weight:600}
 }
 @media (prefers-reduced-motion:reduce){ *{transition:none !important; animation:none !important} }
 """
+    + _PUBLISHED_CSS
 )
 
 
