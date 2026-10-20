@@ -41,10 +41,10 @@ running”, this would be a session dashboard rather than a record of what sessi
 
 ### Classes
 
-| [`Utf8TextFiles`](#openloops.store.Utf8TextFiles)(\*args[, delete_func])   | `dol`'s text-file store with the encoding pinned rather than inherited.   |
-|-----------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| [`Utf8TextFiles`](#openloops.store.Utf8TextFiles)(\*args[, delete_func, ...])   | `dol`'s text-file store with the encoding pinned rather than inherited.   |
+|----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
 
-### *class* openloops.store.Utf8TextFiles(\*args, delete_func=None, \*\*kwargs)
+### *class* openloops.store.Utf8TextFiles(\*args, delete_func=None, write_open_kwargs=None, \*\*kwargs)
 
 Bases: `PrefixRelativizationMixin`, `Store`
 
@@ -101,9 +101,6 @@ can come from a listing this process did not produce — and a key containing `.
 would make a file-backed store write outside its own root while `sync` reported
 success. Validating here means every backend inherits the check.
 
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
-
 ```pycon
 >>> digest_key('mac', 'archive', 's1')
 'mac/archive/s1.md'
@@ -112,6 +109,9 @@ Traceback (most recent call last):
     ...
 ValueError: session key must be a single safe path segment, got '../../etc/passwd'
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### openloops.store.digests_store(rootdir=None)
 
@@ -122,9 +122,6 @@ a git-synced directory, an S3-backed store. The keys are what carry the layout, 
 a different backend gets the same `{source}/{state}/{session}.md` structure for
 free.
 
-* **Return type:**
-  [`MutableMapping`](https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
-
 ```pycon
 >>> store = digests_store(rootdir='/tmp/openloops-doctest-store')
 >>> store['demo/open/s1.md'] = '# hi'
@@ -132,6 +129,9 @@ free.
 ['demo/open/s1.md']
 >>> del store['demo/open/s1.md']
 ```
+
+* **Return type:**
+  [`MutableMapping`](https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ### openloops.store.load_sync_state(directory=None)
 
@@ -151,15 +151,15 @@ Both separators are accepted. A file-backed store hands keys back joined with th
 platform’s separator, so on Windows every key would fail to parse and every read
 path would quietly return nothing while `sync` reported digests written.
 
-* **Return type:**
-  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
-
 ```pycon
 >>> parse_digest_key('mac/archive/s1.md')
 ('mac', 'archive', 's1')
 >>> parse_digest_key('mac' + chr(92) + 'archive' + chr(92) + 's1.md')
 ('mac', 'archive', 's1')
 ```
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ### openloops.store.save_sync_state(state, directory=None)
 

@@ -30,20 +30,21 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d75fae25" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/epythet.css?v=93ea43a0" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=64cc4de3f052d77215f0"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="../_static/documentation_options.js?v=e2f3408e"></script>
+    <script src="../_static/documentation_options.js?v=d50bcae4"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -55,8 +56,9 @@
     <link rel="next" title="openloops.job" href="openloops.job.html" />
     <link rel="prev" title="openloops.digest" href="openloops.digest.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.15" />
+  <meta name="docsearch:version" content="0.1.16" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -481,7 +483,7 @@ One implementation, two configurations.</p>
 </div>
 <dl class="py data">
 <dt class="sig sig-object py" id="openloops.egress.CREDENTIAL_PATTERNS">
-<span class="sig-prename descclassname"><span class="pre">openloops.egress.</span></span><span class="sig-name descname"><span class="pre">CREDENTIAL_PATTERNS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/re.html#re.Pattern" title="(in Python v3.14)"><span class="pre">Pattern</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(('aws_access_key_id',</span> <span class="pre">re.compile('(?&lt;![A-Z0-9])(?:AKIA|ASIA)[0-9A-Z]{16}(?![A-Z0-9])')),</span> <span class="pre">('aws_secret_access_key',</span> <span class="pre">re.compile('(?i)aws_secret_access_key\\s*[:=]\\s*\\S{20,}',</span> <span class="pre">re.IGNORECASE)),</span> <span class="pre">('github_token',</span> <span class="pre">re.compile('\\bgh[pousr]_[A-Za-z0-9]{36,}\\b')),</span> <span class="pre">('github_pat',</span> <span class="pre">re.compile('\\bgithub_pat_[A-Za-z0-9_]{22,}\\b')),</span> <span class="pre">('gitlab_token',</span> <span class="pre">re.compile('\\bglpat-[A-Za-z0-9_\\-]{20,}\\b')),</span> <span class="pre">('anthropic_api_key',</span> <span class="pre">re.compile('\\bsk-ant-[A-Za-z0-9_\\-]{20,}\\b')),</span> <span class="pre">('openai_api_key',</span> <span class="pre">re.compile('\\bsk-(?!ant-)[A-Za-z0-9_\\-]{20,}\\b')),</span> <span class="pre">('stripe_key',</span> <span class="pre">re.compile('\\b[srp]k_(?:live|test)_[A-Za-z0-9]{16,}\\b')),</span> <span class="pre">('npm_token',</span> <span class="pre">re.compile('\\bnpm_[A-Za-z0-9]{30,}\\b')),</span> <span class="pre">('pypi_token',</span> <span class="pre">re.compile('\\bpypi-[A-Za-z0-9_\\-]{32,}')),</span> <span class="pre">('huggingface_token',</span> <span class="pre">re.compile('\\bhf_[A-Za-z0-9]{30,}\\b')),</span> <span class="pre">('sendgrid_key',</span> <span class="pre">re.compile('\\bSG\\.[A-Za-z0-9_\\-]{20,}\\.[A-Za-z0-9_\\-]{20,}\\b')),</span> <span class="pre">('slack_token',</span> <span class="pre">re.compile('\\bxox[baprs]-[A-Za-z0-9\\-]{10,}\\b')),</span> <span class="pre">('google_api_key',</span> <span class="pre">re.compile('\\bAIza[0-9A-Za-z_\\-]{35}\\b')),</span> <span class="pre">('google_oauth_refresh_token',</span> <span class="pre">re.compile('\\b1//0[A-Za-z0-9_\\-]{20,}\\b')),</span> <span class="pre">('json_web_token',</span> <span class="pre">re.compile('\\beyJ[A-Za-z0-9_\\-]{10,}\\.eyJ[A-Za-z0-9_\\-]{10,}\\.')),</span> <span class="pre">('private_key_block',</span> <span class="pre">re.compile('-----BEGIN</span> <span class="pre">[A-Z</span> <span class="pre">]*PRIVATE</span> <span class="pre">KEY-----')),</span> <span class="pre">('url_inline_password',</span> <span class="pre">re.compile('\\b[a-z][a-z0-9+.\\-]*://[^/\\s:&#64;]+:[^/\\s&#64;]{6,}&#64;')),</span> <span class="pre">('secret_assignment',</span> <span class="pre">re.compile('(?i)(?&lt;![A-Za-z0-9])(?:[A-Za-z0-9]+[_-])*(?:api[_-]?key|secret[_-]?\\w*|passwd|password|access[_-]?token|auth[_-]?token|token|credential\\w*)\\b\\s*[:=]\\s*[\'\\&quot;]?((?=[^\'\\&quot;\\s]*[A-Za-z])(?=[^\'\\&quot;,</span> <span class="pre">re.IGNORECASE)))</span></span><a class="headerlink" href="#openloops.egress.CREDENTIAL_PATTERNS" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openloops.egress.</span></span><span class="sig-name descname"><span class="pre">CREDENTIAL_PATTERNS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/re.html#re.Pattern" title="(in Python v3.15)"><span class="pre">Pattern</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(('aws_access_key_id',</span> <span class="pre">re.compile('(?&lt;![A-Z0-9])(?:AKIA|ASIA)[0-9A-Z]{16}(?![A-Z0-9])')),</span> <span class="pre">('aws_secret_access_key',</span> <span class="pre">re.compile('(?i)aws_secret_access_key\\s*[:=]\\s*\\S{20,}',</span> <span class="pre">re.IGNORECASE)),</span> <span class="pre">('github_token',</span> <span class="pre">re.compile('\\bgh[pousr]_[A-Za-z0-9]{36,}\\b')),</span> <span class="pre">('github_pat',</span> <span class="pre">re.compile('\\bgithub_pat_[A-Za-z0-9_]{22,}\\b')),</span> <span class="pre">('gitlab_token',</span> <span class="pre">re.compile('\\bglpat-[A-Za-z0-9_\\-]{20,}\\b')),</span> <span class="pre">('anthropic_api_key',</span> <span class="pre">re.compile('\\bsk-ant-[A-Za-z0-9_\\-]{20,}\\b')),</span> <span class="pre">('openai_api_key',</span> <span class="pre">re.compile('\\bsk-(?!ant-)[A-Za-z0-9_\\-]{20,}\\b')),</span> <span class="pre">('stripe_key',</span> <span class="pre">re.compile('\\b[srp]k_(?:live|test)_[A-Za-z0-9]{16,}\\b')),</span> <span class="pre">('npm_token',</span> <span class="pre">re.compile('\\bnpm_[A-Za-z0-9]{30,}\\b')),</span> <span class="pre">('pypi_token',</span> <span class="pre">re.compile('\\bpypi-[A-Za-z0-9_\\-]{32,}')),</span> <span class="pre">('huggingface_token',</span> <span class="pre">re.compile('\\bhf_[A-Za-z0-9]{30,}\\b')),</span> <span class="pre">('sendgrid_key',</span> <span class="pre">re.compile('\\bSG\\.[A-Za-z0-9_\\-]{20,}\\.[A-Za-z0-9_\\-]{20,}\\b')),</span> <span class="pre">('slack_token',</span> <span class="pre">re.compile('\\bxox[baprs]-[A-Za-z0-9\\-]{10,}\\b')),</span> <span class="pre">('google_api_key',</span> <span class="pre">re.compile('\\bAIza[0-9A-Za-z_\\-]{35}\\b')),</span> <span class="pre">('google_oauth_refresh_token',</span> <span class="pre">re.compile('\\b1//0[A-Za-z0-9_\\-]{20,}\\b')),</span> <span class="pre">('json_web_token',</span> <span class="pre">re.compile('\\beyJ[A-Za-z0-9_\\-]{10,}\\.eyJ[A-Za-z0-9_\\-]{10,}\\.')),</span> <span class="pre">('private_key_block',</span> <span class="pre">re.compile('-----BEGIN</span> <span class="pre">[A-Z</span> <span class="pre">]*PRIVATE</span> <span class="pre">KEY-----')),</span> <span class="pre">('url_inline_password',</span> <span class="pre">re.compile('\\b[a-z][a-z0-9+.\\-]*://[^/\\s:&#64;]+:[^/\\s&#64;]{6,}&#64;')),</span> <span class="pre">('secret_assignment',</span> <span class="pre">re.compile('(?i)(?&lt;![A-Za-z0-9])(?:[A-Za-z0-9]+[_-])*(?:api[_-]?key|secret[_-]?\\w*|passwd|password|access[_-]?token|auth[_-]?token|token|credential\\w*)\\b\\s*[:=]\\s*[\'\\&quot;]?((?=[^\'\\&quot;\\s]*[A-Za-z])(?=[^\'\\&quot;,</span> <span class="pre">re.IGNORECASE)))</span></span><a class="headerlink" href="#openloops.egress.CREDENTIAL_PATTERNS" title="Link to this definition">#</a></dt>
 <dd><p>Named credential patterns, checked in order. Most are well-known vendor prefixes,
 which give near-zero false positives; the assignment rule at the end is the only
 heuristic among them, and the URL rule catches the shape a prefix list cannot.</p>
@@ -490,7 +492,7 @@ heuristic among them, and the URL rule catches the shape a prefix list cannot.</
 <dl class="py exception">
 <dt class="sig sig-object py" id="openloops.egress.CredentialFound">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.egress.</span></span><span class="sig-name descname"><span class="pre">CredentialFound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/egress.html#CredentialFound"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.egress.CredentialFound" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a></p>
 <p>Raised when text about to be written matches a credential pattern.</p>
 <p>The message names the pattern class and the offset. It never contains the matched
 text: an exception that quotes a secret has moved the secret into a log file.</p>
@@ -510,17 +512,17 @@ corrupting the path and leaving half the other name behind.</p>
 <p>Separate from <a class="reference internal" href="#openloops.egress.rewrite_paths" title="openloops.egress.rewrite_paths"><code class="xref py py-func docutils literal notranslate"><span class="pre">rewrite_paths()</span></code></a> because auditing and scrubbing want different
 things: an audit must still be able to <em>see</em> a foreign home path in order to report
 it, which it could not if every caller had already rewritten one away.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">apply_aliases</span><span class="p">(</span><span class="s2">"/a/b/c and /a"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"/a"</span><span class="p">:</span> <span class="s2">"~"</span><span class="p">,</span> <span class="s2">"/a/b"</span><span class="p">:</span> <span class="s2">"$B"</span><span class="p">})</span>
 <span class="go">'$B/c and ~'</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">apply_aliases</span><span class="p">(</span><span class="s2">"/a2/x"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"/a"</span><span class="p">:</span> <span class="s2">"~"</span><span class="p">})</span>
 <span class="go">'/a2/x'</span>
 </pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -529,15 +531,15 @@ it, which it could not if every caller had already rewritten one away.</p>
 <dd><p>The rewrites applied when a caller supplies none: this machine’s home → <code class="docutils literal notranslate"><span class="pre">~</span></code>.</p>
 <p>Both spellings of it, because the encoded form appears in transcripts as often as
 the literal one.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">default_aliases</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
 <span class="go">['~']</span>
 </pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -547,11 +549,6 @@ the literal one.</p>
 <p>The example builds its path by concatenation and compares rather than printing,
 because this module’s own source is scanned by the rule it implements: a literal
 home-rooted path in a docstring would violate the thing being documented.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]</span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">home</span> <span class="o">=</span> <span class="s2">"/Us"</span> <span class="o">+</span> <span class="s2">"ers/someone"</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">find_absolute_paths</span><span class="p">(</span><span class="n">home</span> <span class="o">+</span> <span class="s2">"/x"</span><span class="p">,</span> <span class="n">aliases</span><span class="o">=</span><span class="p">{})]</span> <span class="o">==</span> <span class="p">[</span><span class="n">home</span><span class="p">]</span>
 <span class="go">True</span>
@@ -559,6 +556,11 @@ home-rooted path in a docstring would violate the thing being documented.</p>
 <span class="go">[]</span>
 </pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]</span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -566,17 +568,17 @@ home-rooted path in a docstring would violate the thing being documented.</p>
 <span class="sig-prename descclassname"><span class="pre">openloops.egress.</span></span><span class="sig-name descname"><span class="pre">find_credentials</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/egress.html#find_credentials"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.egress.find_credentials" title="Link to this definition">#</a></dt>
 <dd><p>Every credential-pattern hit, as <code class="docutils literal notranslate"><span class="pre">(pattern_name,</span> <span class="pre">offset)</span></code> pairs.</p>
 <p>The matched text is never returned — only where it is and what it looked like.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]</span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">find_credentials</span><span class="p">(</span><span class="s2">"nothing to see here"</span><span class="p">)</span>
 <span class="go">[]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">find_credentials</span><span class="p">(</span><span class="s2">"AKIA"</span> <span class="o">+</span> <span class="s2">"B"</span> <span class="o">*</span> <span class="mi">16</span><span class="p">)</span>
 <span class="go">[('aws_access_key_id', 0)]</span>
 </pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]</span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -587,17 +589,17 @@ home-rooted path in a docstring would violate the thing being documented.</p>
 names a runner’s; neither is covered by an alias derived from this process. They are
 rewritten to <code class="xref py py-data docutils literal notranslate"><span class="pre">FOREIGN_HOME</span></code>, which keeps the tail of the path and drops the
 part that identifies somebody.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rewrite_paths</span><span class="p">(</span><span class="s2">"/ro"</span> <span class="o">+</span> <span class="s2">"ot/py/x"</span><span class="p">,</span> <span class="n">aliases</span><span class="o">=</span><span class="p">{})</span>
 <span class="go">'~other/py/x'</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rewrite_paths</span><span class="p">(</span><span class="s2">"-Us"</span> <span class="o">+</span> <span class="s2">"ers-someone-proj"</span><span class="p">,</span> <span class="n">aliases</span><span class="o">=</span><span class="p">{})</span>
 <span class="go">'~other-proj'</span>
 </pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -608,15 +610,15 @@ part that identifies somebody.</p>
 <a class="reference internal" href="#openloops.egress.scrub" title="openloops.egress.scrub"><code class="xref py py-func docutils literal notranslate"><span class="pre">scrub()</span></code></a> is what production code calls; this is what the repository’s own egress
 test calls, because a test that stopped at the first violation would take one run per
 problem to converge.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">scan</span><span class="p">(</span><span class="s2">"all clear"</span><span class="p">)</span>
 <span class="go">[]</span>
 </pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -625,7 +627,7 @@ problem to converge.</p>
 <dd><p>Run <a class="reference internal" href="#openloops.egress.scan" title="openloops.egress.scan"><code class="xref py py-func docutils literal notranslate"><span class="pre">scan()</span></code></a> over each readable text file, accumulating every problem.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -639,15 +641,15 @@ exception so a failed run can say <em>which</em> input tripped, without quoting 
 <p>The path check runs on the <strong>output</strong>, not the input, because <code class="docutils literal notranslate"><span class="pre">aliases</span></code> is
 caller-supplied: a rewrite can in principle produce a home path as easily as remove
 one, and a postcondition that is only true of benign inputs is not a postcondition.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">scrub</span><span class="p">(</span><span class="s2">"built /nowhere/proj/x"</span><span class="p">,</span> <span class="n">aliases</span><span class="o">=</span><span class="p">{</span><span class="s2">"/nowhere/proj"</span><span class="p">:</span> <span class="s2">"$PROJ"</span><span class="p">})</span>
 <span class="go">'built $PROJ/x'</span>
 </pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -734,8 +736,8 @@ one, and a postcondition that is only true of benign inputs is not a postconditi
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -747,7 +749,7 @@ one, and a postcondition that is only true of benign inputs is not a postconditi
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.22.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
 </p></div>
       
     </div>

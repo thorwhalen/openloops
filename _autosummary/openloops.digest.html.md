@@ -41,9 +41,6 @@ Raises [`CredentialFound`](openloops.egress.html.md#openloops.egress.CredentialF
 credential pattern — deliberately, so the caller skips that session loudly rather
 than writing a secret into a store that may be synced.
 
-* **Return type:**
-  [`Digest`](openloops.base.html.md#openloops.base.Digest)
-
 ```pycon
 >>> from openloops.base import Session, Verdict
 >>> d = make_digest(Session(key='s1'), Verdict('open', 'why'), source='demo')
@@ -51,12 +48,12 @@ than writing a secret into a store that may be synced.
 'demo/open/s1.md'
 ```
 
+* **Return type:**
+  [`Digest`](openloops.base.html.md#openloops.base.Digest)
+
 ### openloops.digest.render(session, verdict, , source)
 
 The markdown for one digest. Pure, dated, and bounded.
-
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ```pycon
 >>> from openloops.base import Session, Verdict
@@ -71,3 +68,6 @@ True
 >>> render(s, verdict, source='demo') == text     # pure: same in, same out
 True
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)

@@ -30,20 +30,21 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d75fae25" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/epythet.css?v=93ea43a0" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=64cc4de3f052d77215f0"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="../_static/documentation_options.js?v=e2f3408e"></script>
+    <script src="../_static/documentation_options.js?v=d50bcae4"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -55,8 +56,9 @@
     <link rel="next" title="openloops.digest" href="openloops.digest.html" />
     <link rel="prev" title="openloops.blockers" href="openloops.blockers.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.15" />
+  <meta name="docsearch:version" content="0.1.16" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -514,7 +516,7 @@ bar stops being informative and the number beside it is doing all the work.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openloops.dashboard.Sanitizer">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.dashboard.</span></span><span class="sig-name descname"><span class="pre">Sanitizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/dashboard.html#Sanitizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.dashboard.Sanitizer" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Scrub, then escape. The single path from an envelope to the document.</p>
 <p>Two failures are possible and they are treated differently, exactly as
 <a class="reference internal" href="openloops.egress.html#module-openloops.egress" title="openloops.egress"><code class="xref py py-mod docutils literal notranslate"><span class="pre">openloops.egress</span></code></a> prescribes. A home path is <em>rewritten</em> — it is an identifier
@@ -539,7 +541,7 @@ losing a field.</p>
 <dd><p>One field, safe to place in the document.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -550,7 +552,7 @@ losing a field.</p>
 <dd><p>A link target, or <code class="docutils literal notranslate"><span class="pre">''</span></code> when it is not one this page will follow.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -563,16 +565,16 @@ losing a field.</p>
 <dd><p>The four figures across the top of the page. <code class="docutils literal notranslate"><span class="pre">None</span></code> is <code class="docutils literal notranslate"><span class="pre">?</span></code>, never a zero.</p>
 <p>Shared by the masthead and by <a class="reference internal" href="openloops.tools.html#openloops.tools.dashboard" title="openloops.tools.dashboard"><code class="xref py py-func docutils literal notranslate"><span class="pre">openloops.tools.dashboard()</span></code></a>, so the number a
 caller reads back is the number the page printed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">headline_counts</span><span class="p">({</span><span class="s1">'listed'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">'counts'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'open'</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="s1">'rows'</span><span class="p">:</span> <span class="p">[]},</span>
 <span class="gp">... </span>                <span class="p">{</span><span class="s1">'listed'</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span> <span class="p">[])[</span><span class="s1">'free_to_proceed'</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
 <span class="go">True</span>
 </pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span>]</span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -588,15 +590,15 @@ means nobody knows. It is not required to be a day count: pass a string and a
 <p><code class="docutils literal notranslate"><span class="pre">extra</span></code> is further markup placed between the state chip and the age — a second
 chip a sibling page needs and this one has no equivalent of.</p>
 <p>Nothing here is escaped, <code class="docutils literal notranslate"><span class="pre">extra</span></code> least of all: see the module docstring.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rail</span><span class="p">(</span><span class="s2">"owed"</span><span class="p">,</span> <span class="s2">"needs"</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <span class="go">'&lt;div class="rail"&gt;&lt;span class="chip chip--needs"&gt;owed&lt;/span&gt;&lt;span class="age"&gt;&lt;b&gt;3&lt;/b&gt;&lt;i&gt;d&lt;/i&gt;&lt;/span&gt;&lt;/div&gt;'</span>
 </pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -625,11 +627,6 @@ under the rule. That is above the head’s hairline in one form and below it in 
 other, which is how the caller that needs it already reads.</p>
 <p>Nothing here is escaped: see the module docstring. <code class="docutils literal notranslate"><span class="pre">ident</span></code> and <code class="docutils literal notranslate"><span class="pre">tone</span></code> reach an
 unquoted attribute, so they are the two that must be literals or already safe.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">register</span><span class="p">(</span><span class="n">ident</span><span class="o">=</span><span class="s2">"x"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Needs you"</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="s2">"2"</span><span class="p">,</span> <span class="n">tone</span><span class="o">=</span><span class="s2">"needs"</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="s2">"now"</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
 <span class="go">'&lt;section class="register register--needs" id="x"&gt;&lt;div class="register-head"&gt;&lt;p class="figure"&gt;2&lt;/p&gt;&lt;div&gt;&lt;h2&gt;Needs you&lt;/h2&gt;&lt;p class="rule"&gt;now&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/section&gt;'</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">register</span><span class="p">(</span><span class="n">ident</span><span class="o">=</span><span class="s2">"x"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Quiet"</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="s2">"9"</span><span class="p">,</span> <span class="n">tone</span><span class="o">=</span><span class="s2">"done"</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="s2">"why"</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
@@ -637,6 +634,11 @@ unquoted attribute, so they are the two that must be literals or already safe.</
 <span class="go">'&lt;details class="register register--done" id="x" open&gt;&lt;summary class="register-head"&gt;&lt;span class="figure"&gt;9&lt;/span&gt;&lt;h2&gt;Quiet&lt;/h2&gt;&lt;span class="rule"&gt;why&lt;/span&gt;&lt;/summary&gt;&lt;/details&gt;'</span>
 </pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -655,11 +657,6 @@ so because the whole claim of the page is <em>when</em>.</p>
 Pass <code class="docutils literal notranslate"><span class="pre">False</span></code> for a host that supplies its own <code class="docutils literal notranslate"><span class="pre">&lt;head&gt;</span></code> — a published artifact
 does — and the same page comes back as title, styles and content only.</p>
 <p><code class="docutils literal notranslate"><span class="pre">max_sessions</span></code> bounds the in-flight register; the true total is stated either way.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">page</span> <span class="o">=</span> <span class="n">render_dashboard</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="p">{</span><span class="s1">'listed'</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">'error'</span><span class="p">:</span> <span class="s1">'gh: not logged in'</span><span class="p">,</span> <span class="s1">'counts'</span><span class="p">:</span> <span class="p">{}},</span>
 <span class="gp">... </span>    <span class="p">{</span><span class="s1">'listed'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">'counts'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'unblocked'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'total'</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span> <span class="s1">'rows'</span><span class="p">:</span> <span class="p">[]},</span>
@@ -668,6 +665,11 @@ does — and the same page comes back as title, styles and content only.</p>
 <span class="go">True</span>
 </pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -680,11 +682,6 @@ timeout, a missing <code class="docutils literal notranslate"><span class="pre">
 something else entirely: the digest half checks nothing against the world by design,
 so it has nothing it was unable to check. Rolling forty of the second into the first
 reports a crisis of forty when the real number is one, and in the alarming direction.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">unchecked_count</span><span class="p">({</span><span class="s1">'listed'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">'rows'</span><span class="p">:</span> <span class="p">[{</span><span class="s1">'state'</span><span class="p">:</span> <span class="s1">'unknown'</span><span class="p">}]},</span>
 <span class="gp">... </span>                <span class="p">{</span><span class="s1">'listed'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">'rows'</span><span class="p">:</span> <span class="p">[]})</span>
 <span class="go">1</span>
@@ -692,6 +689,11 @@ reports a crisis of forty when the real number is one, and in the alarming direc
 <span class="go">True</span>
 </pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -705,11 +707,6 @@ against, and it is a lie a reader has no way to spot.</p>
 <p>It counts the rows that read <code class="docutils literal notranslate"><span class="pre">?</span></code>, not the entries in the list below: one entry
 can stand for forty sessions, and reporting <code class="docutils literal notranslate"><span class="pre">1</span></code> for those would be the tidier
 number rather than the true one.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">unknown_count</span><span class="p">({</span><span class="s1">'listed'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">'rows'</span><span class="p">:</span> <span class="p">[]},</span> <span class="p">{</span><span class="s1">'listed'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">'rows'</span><span class="p">:</span> <span class="p">[]},</span> <span class="p">[{}])</span>
 <span class="go">0</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">lows</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">'confidence'</span><span class="p">:</span> <span class="s1">'low'</span><span class="p">}]</span> <span class="o">*</span> <span class="mi">5</span>
@@ -719,6 +716,11 @@ number rather than the true one.</p>
 <span class="go">True</span>
 </pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -809,8 +811,8 @@ number rather than the true one.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -822,7 +824,7 @@ number rather than the true one.</p>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.22.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
 </p></div>
       
     </div>

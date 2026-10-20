@@ -168,7 +168,7 @@ Raised only by the listing path, and never propagated to a caller of [`owed()`](
 it becomes `listed: False` plus an `error`, which every surface must render as
 `?`. Turning it into an empty list would be the one unrecoverable bug here.
 
-### openloops.obligations.OBLIGATION_FIELDS *= ('repo', 'number', 'title', 'url', 'created', 'age_days', 'state', 'verify', 'predicate', 'evidence')*
+### openloops.obligations.OBLIGATION_FIELDS *= ('repo', 'number', 'title', 'url', 'created', 'age_days', 'state', 'verify', 'predicate', 'evidence', 'documents')*
 
 Every key on every row, whatever the issue happened to say. A row shape that varies
 by issue makes `row["predicate"]` a coin flip and makes a JSON schema a lie.
@@ -178,7 +178,7 @@ by issue makes `row["predicate"]` a coin flip and makes a JSON schema a lie.
 The three states, in the order a reader cares about them. `open` is
 [`openloops.base.OPEN`](openloops.base.html.md#openloops.base.OPEN): a loop that is still open is the same idea either way.
 
-### *class* openloops.obligations.Obligation(repo, number, title, url, created, age_days, state='open', verify='', predicate='', evidence='')
+### *class* openloops.obligations.Obligation(repo, number, title, url, created, age_days, state='open', verify='', predicate='', evidence='', documents=())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -229,9 +229,6 @@ how a count goes quietly wrong; and failing both, the login `gh` is authenticate
 as. The resolved list is reported back on every result, so a partial answer is a
 visible one rather than a silent one.
 
-* **Return type:**
-  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`...`](https://docs.python.org/3/builtins/constants.html#Ellipsis)]
-
 ```pycon
 >>> import os
 >>> os.environ['OPENLOOPS_OWNERS'] = 'acme, widgets co'
@@ -239,6 +236,9 @@ visible one rather than a silent one.
 ('acme', 'widgets', 'co')
 >>> del os.environ['OPENLOOPS_OWNERS']
 ```
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`...`](https://docs.python.org/3/builtins/constants.html#Ellipsis)]
 
 ### openloops.obligations.gh_issues(, owners, label='manual-task', state='open', limit=50, timeout=30.0)
 
@@ -276,9 +276,6 @@ to exit status substitutes). With both injected this reaches no network and need
 Returns one envelope, never a bare list, because a reader has to be able to tell
 “nothing is owed” from “I could not find out”:
 
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
-
 `listed`
 : `False` when the *listing itself* failed. Every surface must render that as
   `?`. The counts are zeros and they mean nothing.
@@ -311,6 +308,9 @@ A listing that could not run is not “nothing owed”:
 (False, 'gh: not logged in', 0)
 ```
 
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
 ### openloops.obligations.parse_verify(body)
 
 `(predicate, verify_text)` for an issue body. Both are `''` when absent.
@@ -318,9 +318,6 @@ A listing that could not run is not “nothing owed”:
 The predicate is the first code span in the field. Prose with no code span – the
 documented “no predicate is possible here” answer – yields no command, and the
 prose is kept so the row can say *why* rather than merely say nothing.
-
-* **Return type:**
-  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ```pycon
 >>> parse_verify('**Verify:** `test -f x`')
@@ -354,6 +351,9 @@ is the difference between a row that reads `?` and one that silently reads open:
 ('', '`echo one &&')
 ```
 
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
 ### openloops.obligations.shell_predicate(command, , timeout=20.0)
 
 The default `run_predicate`: run the command in a subshell, bounded in time.
@@ -361,9 +361,6 @@ The default `run_predicate`: run the command in a subshell, bounded in time.
 The exit status is the answer and nothing else is interpreted. Anything that is not
 an exit status — a timeout, a shell that would not start — comes back as
 `status=None`, which is `unknown`, which is `?`.
-
-* **Return type:**
-  [`PredicateOutcome`](#openloops.obligations.PredicateOutcome)
 
 ```pycon
 >>> shell_predicate('exit 0').status
@@ -373,3 +370,6 @@ an exit status — a timeout, a shell that would not start — comes back as
 >>> shell_predicate('   ').status is None
 True
 ```
+
+* **Return type:**
+  [`PredicateOutcome`](#openloops.obligations.PredicateOutcome)

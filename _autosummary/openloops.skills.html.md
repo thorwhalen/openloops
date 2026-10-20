@@ -107,14 +107,14 @@ place to update, and the one that gets forgotten.
 
 The agent host’s config directory: `target`, `CLAUDE_CONFIG_DIR`, or `~/.claude`.
 
-* **Return type:**
-  [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)
-
 ```pycon
 >>> import os
 >>> host_dir('/somewhere/else').name
 'else'
 ```
+
+* **Return type:**
+  [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)
 
 ### openloops.skills.install_skills(, target=None, only=None, copy=False, force=False, dry_run=False)
 
@@ -136,9 +136,6 @@ own capture skill, adapted to your own fleet, and a second one competing for the
 triggers is worse than either alone – so take the reader and the subagent and leave
 the capture skill out.
 
-* **Return type:**
-  dict[str, Any]
-
 ```pycon
 >>> plan = install_skills(target='/nonexistent/host', only=['openloops'], dry_run=True)
 >>> [row['name'] for row in plan['actions']]
@@ -152,6 +149,9 @@ the capture skill out.
 >>> sorted({row['action'] for row in plan['actions']})
 ['install']
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 ### openloops.skills.skills_dir()
 

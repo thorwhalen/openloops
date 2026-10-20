@@ -140,13 +140,13 @@ Where Claude Code keeps per-session transcripts.
 Resolution order: the *root* argument, then `CLAUDE_PROJECTS_DIR`, then
 `~/.claude/projects`.
 
-* **Return type:**
-  [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)
-
 ```pycon
 >>> claude_projects_dir('/tmp/x').name
 'x'
 ```
+
+* **Return type:**
+  [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)
 
 ### openloops.transcripts.parse_session(records, , key='')
 

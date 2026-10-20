@@ -65,15 +65,15 @@ completed, so it is reported alongside.
 
 The launchd property list, as text. Pure, so it can be tested on any platform.
 
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
-
 ```pycon
 >>> xml = plist_xml(label='x', program_args=['a'], env={'HOME': '/h'},
 ...                 interval=60, log_path=Path('/tmp/x.log'))
 >>> '<key>StartInterval</key>' in xml and '<integer>60</integer>' in xml
 True
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### openloops.job.uninstall(, label='openloops.sync')
 

@@ -133,14 +133,14 @@ The four figures across the top of the page. `None` is `?`, never a zero.
 Shared by the masthead and by [`openloops.tools.dashboard()`](openloops.tools.html.md#openloops.tools.dashboard), so the number a
 caller reads back is the number the page printed.
 
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`int`](https://docs.python.org/3/builtins/functions.html#int) | [`None`](https://docs.python.org/3/builtins/constants.html#None)]
-
 ```pycon
 >>> headline_counts({'listed': True, 'counts': {'open': 2}, 'rows': []},
 ...                 {'listed': False}, [])['free_to_proceed'] is None
 True
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`int`](https://docs.python.org/3/builtins/functions.html#int) | [`None`](https://docs.python.org/3/builtins/constants.html#None)]
 
 ### openloops.dashboard.rail(chip, tone, age, unit='d', , extra='')
 
@@ -159,13 +159,13 @@ chip a sibling page needs and this one has no equivalent of.
 
 Nothing here is escaped, `extra` least of all: see the module docstring.
 
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
-
 ```pycon
 >>> rail("owed", "needs", 3)
 '<div class="rail"><span class="chip chip--needs">owed</span><span class="age"><b>3</b><i>d</i></span></div>'
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### openloops.dashboard.register(, ident, name, figure, tone, rule, body, folds=False, start_open=False, extra='')
 
@@ -198,9 +198,6 @@ other, which is how the caller that needs it already reads.
 Nothing here is escaped: see the module docstring. `ident` and `tone` reach an
 unquoted attribute, so they are the two that must be literals or already safe.
 
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
-
 ```pycon
 >>> register(ident="x", name="Needs you", figure="2", tone="needs", rule="now", body="")
 '<section class="register register--needs" id="x"><div class="register-head"><p class="figure">2</p><div><h2>Needs you</h2><p class="rule">now</p></div></div></section>'
@@ -208,6 +205,9 @@ unquoted attribute, so they are the two that must be literals or already safe.
 ...          folds=True, start_open=True)
 '<details class="register register--done" id="x" open><summary class="register-head"><span class="figure">9</span><h2>Quiet</h2><span class="rule">why</span></summary></details>'
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### openloops.dashboard.render_dashboard(owed, blocked, sessions, , made_at=None, source='', title='Open Loops Board', max_sessions=40, standalone=True, aliases=None)
 
@@ -229,9 +229,6 @@ does — and the same page comes back as title, styles and content only.
 
 `max_sessions` bounds the in-flight register; the true total is stated either way.
 
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
-
 ```pycon
 >>> page = render_dashboard(
 ...     {'listed': False, 'error': 'gh: not logged in', 'counts': {}},
@@ -240,6 +237,9 @@ does — and the same page comes back as title, styles and content only.
 >>> 'gh: not logged in' in page and 'could not' in page
 True
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### openloops.dashboard.unchecked_count(owed, blocked)
 
@@ -252,9 +252,6 @@ something else entirely: the digest half checks nothing against the world by des
 so it has nothing it was unable to check. Rolling forty of the second into the first
 reports a crisis of forty when the real number is one, and in the alarming direction.
 
-* **Return type:**
-  [`int`](https://docs.python.org/3/builtins/functions.html#int) | [`None`](https://docs.python.org/3/builtins/constants.html#None)
-
 ```pycon
 >>> unchecked_count({'listed': True, 'rows': [{'state': 'unknown'}]},
 ...                 {'listed': True, 'rows': []})
@@ -262,6 +259,9 @@ reports a crisis of forty when the real number is one, and in the alarming direc
 >>> unchecked_count({'listed': False}, {'listed': True, 'rows': []}) is None
 True
 ```
+
+* **Return type:**
+  [`int`](https://docs.python.org/3/builtins/functions.html#int) | [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
 ### openloops.dashboard.unknown_count(owed, blocked, sessions)
 
@@ -276,9 +276,6 @@ It counts the rows that read `?`, not the entries in the list below: one entry
 can stand for forty sessions, and reporting `1` for those would be the tidier
 number rather than the true one.
 
-* **Return type:**
-  [`int`](https://docs.python.org/3/builtins/functions.html#int) | [`None`](https://docs.python.org/3/builtins/constants.html#None)
-
 ```pycon
 >>> unknown_count({'listed': True, 'rows': []}, {'listed': True, 'rows': []}, [{}])
 0
@@ -288,3 +285,6 @@ number rather than the true one.
 >>> unknown_count({'listed': False}, {'listed': True, 'rows': []}, [{}]) is None
 True
 ```
+
+* **Return type:**
+  [`int`](https://docs.python.org/3/builtins/functions.html#int) | [`None`](https://docs.python.org/3/builtins/constants.html#None)

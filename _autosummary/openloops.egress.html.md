@@ -91,15 +91,15 @@ Separate from [`rewrite_paths()`](#openloops.egress.rewrite_paths) because audit
 things: an audit must still be able to *see* a foreign home path in order to report
 it, which it could not if every caller had already rewritten one away.
 
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
-
 ```pycon
 >>> apply_aliases("/a/b/c and /a", {"/a": "~", "/a/b": "$B"})
 '$B/c and ~'
 >>> apply_aliases("/a2/x", {"/a": "~"})
 '/a2/x'
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### openloops.egress.default_aliases()
 
@@ -108,13 +108,13 @@ The rewrites applied when a caller supplies none: this machine’s home → `~`.
 Both spellings of it, because the encoded form appears in transcripts as often as
 the literal one.
 
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
-
 ```pycon
 >>> sorted(set(default_aliases().values()))
 ['~']
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ### openloops.egress.find_absolute_paths(text, aliases=None)
 
@@ -124,9 +124,6 @@ The example builds its path by concatenation and compares rather than printing,
 because this module’s own source is scanned by the rule it implements: a literal
 home-rooted path in a docstring would violate the thing being documented.
 
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`int`](https://docs.python.org/3/builtins/functions.html#int)]]
-
 ```pycon
 >>> home = "/Us" + "ers/someone"
 >>> [p for p, _ in find_absolute_paths(home + "/x", aliases={})] == [home]
@@ -135,14 +132,14 @@ True
 []
 ```
 
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`int`](https://docs.python.org/3/builtins/functions.html#int)]]
+
 ### openloops.egress.find_credentials(text)
 
 Every credential-pattern hit, as `(pattern_name, offset)` pairs.
 
 The matched text is never returned — only where it is and what it looked like.
-
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`int`](https://docs.python.org/3/builtins/functions.html#int)]]
 
 ```pycon
 >>> find_credentials("nothing to see here")
@@ -150,6 +147,9 @@ The matched text is never returned — only where it is and what it looked like.
 >>> find_credentials("AKIA" + "B" * 16)
 [('aws_access_key_id', 0)]
 ```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`int`](https://docs.python.org/3/builtins/functions.html#int)]]
 
 ### openloops.egress.rewrite_paths(text, aliases=None)
 
@@ -160,15 +160,15 @@ names a runner’s; neither is covered by an alias derived from this process. Th
 rewritten to `FOREIGN_HOME`, which keeps the tail of the path and drops the
 part that identifies somebody.
 
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
-
 ```pycon
 >>> rewrite_paths("/ro" + "ot/py/x", aliases={})
 '~other/py/x'
 >>> rewrite_paths("-Us" + "ers-someone-proj", aliases={})
 '~other-proj'
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### openloops.egress.scan(text, , aliases=None, where='')
 
@@ -179,13 +179,13 @@ Returns a list of human-readable problem descriptions, empty when the text is cl
 test calls, because a test that stopped at the first violation would take one run per
 problem to converge.
 
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
-
 ```pycon
 >>> scan("all clear")
 []
 ```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ### openloops.egress.scan_files(paths, , aliases=None)
 
@@ -205,10 +205,10 @@ The path check runs on the **output**, not the input, because `aliases` is
 caller-supplied: a rewrite can in principle produce a home path as easily as remove
 one, and a postcondition that is only true of benign inputs is not a postcondition.
 
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
-
 ```pycon
 >>> scrub("built /nowhere/proj/x", aliases={"/nowhere/proj": "$PROJ"})
 'built $PROJ/x'
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)

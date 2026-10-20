@@ -47,14 +47,14 @@ could be resolved). Nothing is ever closed, relabelled or written; see
 The result is an envelope rather than a list, because `listed=False` — discovery
 itself failed — must not be readable as “nothing is waiting”.
 
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
-
 ```pycon
 >>> report = blocked(issues_source=[], blockers_source={})
 >>> report['listed'], report['counts']['total']
 (True, 0)
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 ### openloops.tools.dashboard(, verify=True, resolve=True, owners=None, repos=None, limit=50, candidate_limit=50, max_sessions=40, title='Open Loops Board', standalone=True, path=None, made_at=None, owed_report=None, blocked_report=None, sessions=None, digests_store=None)
 
@@ -78,9 +78,6 @@ network and needs no `gh`, which is how the tests run.
 figure that could not be established, so a caller reading the JSON is held to the
 same three-state rule as a reader looking at the page.
 
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
-
 ```pycon
 >>> result = dashboard(owed_report={'listed': True, 'counts': {'open': 0}, 'rows': []},
 ...                    blocked_report={'listed': False, 'error': 'no gh'},
@@ -88,6 +85,9 @@ same three-state rule as a reader looking at the page.
 >>> result['counts']['free_to_proceed'] is None, result['counts']['unknown'] is None
 (True, True)
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 ### openloops.tools.ls(, state='open', source=None, project=None, confidence=None, limit=20, digests_store=None)
 
@@ -101,15 +101,15 @@ matter plus its key.
 and a good few of those are open only because nothing said otherwise. Filtering to
 `high` leaves the ones where the session itself said something.
 
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
-
 ```pycon
 >>> rows = ls(digests_store={'m/open/s1.md':
 ...     '---\nsession: s1\nstate: open\nlast_turn: T9\n---\n'})
 >>> rows[0]['session'], rows[0]['key']
 ('s1', 'm/open/s1.md')
 ```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
 
 ### openloops.tools.owed(, verify=True, owners=None, trusted_owners=None, label='manual-task', limit=50, timeout=30.0, predicate_timeout=20.0, issues_source=None, run_predicate=None)
 
@@ -125,14 +125,14 @@ predicate crosses, and `verify=False` for the way to read without executing.
 The result is an envelope rather than a list, because `listed=False` — the query
 itself failed — must not be readable as “nothing owed”.
 
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
-
 ```pycon
 >>> report = owed(issues_source=[], run_predicate=lambda command: 0)
 >>> report['listed'], report['counts']['total']
 (True, 0)
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 ### openloops.tools.show(session, , source=None, digests_store=None)
 
@@ -142,14 +142,14 @@ An exact id always wins over a prefix, so a session whose id happens to be a pre
 of another stays reachable. `source` narrows a store that several machines write
 into, where the same session can legitimately appear more than once.
 
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
-
 ```pycon
 >>> store = {'m/open/abcdef.md': '---\nsession: abcdef\n---\nbody'}
 >>> show('abc', digests_store=store)['key']
 'm/open/abcdef.md'
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 ### openloops.tools.status(, source=None, since_days=None, digests_store=None, transcript_source=None)
 

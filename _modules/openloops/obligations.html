@@ -27,20 +27,21 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/epythet.css?v=93ea43a0" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=64cc4de3f052d77215f0"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="../../_static/documentation_options.js?v=e2f3408e"></script>
+    <script src="../../_static/documentation_options.js?v=d50bcae4"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -408,8 +409,9 @@ window.runMermaid = runMermaid;</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.15" />
+  <meta name="docsearch:version" content="0.1.16" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -949,6 +951,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">verify</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="n">predicate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="n">evidence</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">documents</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
 
 <div class="viewcode-block" id="Obligation.as_dict">
 <a class="viewcode-back" href="../../_autosummary/openloops.obligations.html#openloops.Obligation.as_dict">[docs]</a>
@@ -1246,6 +1249,30 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    False</span>
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">_DOCUMENTED_NO_PREDICATE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_field_start</span><span class="p">(</span><span class="n">verify_text</span><span class="p">)))</span>
+
+
+<span class="c1">#: A link to a document published to the owner's annals (a page or a group).</span>
+<span class="n">DFLT_DOCUMENT_URL</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"https://apps\.thorwhalen\.com/annals/[^\s)&gt;\]</span><span class="se">\"</span><span class="s2">'`]+"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">document_links</span><span class="p">(</span>
+    <span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">pattern</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">Pattern</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DFLT_DOCUMENT_URL</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The published-document links an issue body names, in order, without repeats.</span>
+
+<span class="sd">    A locator, not a fetch: openloops stays read-only and does not need annals</span>
+<span class="sd">    installed to show where the explaining document lives.</span>
+
+<span class="sd">    &gt;&gt;&gt; document_links('See https://apps.thorwhalen.com/annals/d/abc12, and again '</span>
+<span class="sd">    ...                '(https://apps.thorwhalen.com/annals/d/abc12).')</span>
+<span class="sd">    ('https://apps.thorwhalen.com/annals/d/abc12',)</span>
+<span class="sd">    &gt;&gt;&gt; document_links('no link here')</span>
+<span class="sd">    ()</span>
+<span class="sd">    """</span>
+    <span class="n">seen</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">pattern</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">body</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">):</span>
+        <span class="n">seen</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">".,;:"</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">seen</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="parse_verify">
@@ -1719,6 +1746,7 @@ window.runMermaid = runMermaid;</script>
                 <span class="n">verify</span><span class="o">=</span><span class="n">verify_text</span><span class="p">,</span>
                 <span class="n">predicate</span><span class="o">=</span><span class="n">command</span><span class="p">,</span>
                 <span class="n">evidence</span><span class="o">=</span><span class="n">evidence</span><span class="p">,</span>
+                <span class="n">documents</span><span class="o">=</span><span class="n">document_links</span><span class="p">(</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="p">)</span>
 
@@ -1764,8 +1792,8 @@ window.runMermaid = runMermaid;</script>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1777,7 +1805,7 @@ window.runMermaid = runMermaid;</script>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.22.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
 </p></div>
       
     </div>

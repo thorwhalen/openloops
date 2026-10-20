@@ -349,7 +349,7 @@ JSON-ready form.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
-### *class* openloops.Obligation(repo, number, title, url, created, age_days, state='open', verify='', predicate='', evidence='')
+### *class* openloops.Obligation(repo, number, title, url, created, age_days, state='open', verify='', predicate='', evidence='', documents=())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -485,9 +485,6 @@ The ask cues in the closing lines, if those lines put a question to the reader.
 The primitive a retrospective measurement uses to ask “did this session end with a
 question directed at the human” — defined once, here, rather than twice.
 
-* **Return type:**
-  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`...`](https://docs.python.org/3/builtins/constants.html#Ellipsis)]
-
 ```pycon
 >>> asks_the_human('I fixed it. Want me to open the PR?')
 ('want me to',)
@@ -496,6 +493,9 @@ question directed at the human” — defined once, here, rather than twice.
 >>> asks_the_human('All done.')
 ()
 ```
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`...`](https://docs.python.org/3/builtins/constants.html#Ellipsis)]
 
 ### openloops.blocked(, resolve=True, owners=None, repos=(), query='is:blocked', limit=50, timeout=30.0, now=None, issues_source=None, blockers_source=None)
 
@@ -522,9 +522,6 @@ substitutes). With both injected this reaches no network and needs no `gh`.
 
 Returns one envelope, never a bare list, because a reader has to be able to tell
 “nothing is waiting” from “I could not find out”:
-
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 `listed`
 : `False` when *discovery itself* failed. Every surface must render that as
@@ -560,12 +557,12 @@ Discovery that could not run is not “nothing is waiting”:
 (False, 'gh: not logged in', 0)
 ```
 
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
 ### openloops.classify(session, , ask_cues=('want me to', 'do you want', 'would you like', 'shall i', 'should i', 'let me know', 'say the word', 'your call', 'up to you', 'over to you', 'which would you', 'tell me which', "if you'd prefer", 'if you would prefer', 'needs your input', 'needs your review', 'needs your decision', 'needs your go-ahead', 'needs your call'), defer_cues=('still open', 'still owed', 'still outstanding', 'still pending', 'next step', 'next session', 'left off', 'waiting for you', 'waiting on', 'blocked on', 'blocked by', 'handoff', 'hand-off', 'pick it up', 'pick this up', 'pick that up', 'i left it', 'not yet done', 'not yet merged', 'not yet posted', 'open question', 'unresolved', 'i could not', "i couldn't", 'was unable to', 'were unable to', 'did not finish', "didn't finish", 'needs a human', 'needs you', 'still needs', "you'll need to", 'you will need to', 'requires you to'), close_cues=('nothing half-finished', 'nothing pending', 'nothing is pending', 'nothing left', 'nothing is blocking', 'nothing blocking', 'nothing to clean', 'nothing else outstanding', 'nothing outstanding', 'nothing further', 'no next action', 'no further action', 'no action needed', 'safe to close', 'safe to exit', "you're all set", 'you are all set', 'all done', 'everything is done', 'everything is green', 'everything is verified', 'not unfinished business', 'ready to close'), chars=1200)
 
 Read a session’s loop state from its own last turn.
-
-* **Return type:**
-  [`Verdict`](openloops.base.html.md#openloops.base.Verdict)
 
 ```pycon
 >>> from openloops.base import Session
@@ -575,6 +572,9 @@ Read a session’s loop state from its own last turn.
 >>> v.state, v.cues, v.confidence
 ('open', ('blocked on',), 'high')
 ```
+
+* **Return type:**
+  [`Verdict`](openloops.base.html.md#openloops.base.Verdict)
 
 ### openloops.data_dir()
 
@@ -613,9 +613,6 @@ can come from a listing this process did not produce — and a key containing `.
 would make a file-backed store write outside its own root while `sync` reported
 success. Validating here means every backend inherits the check.
 
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
-
 ```pycon
 >>> digest_key('mac', 'archive', 's1')
 'mac/archive/s1.md'
@@ -624,6 +621,9 @@ Traceback (most recent call last):
     ...
 ValueError: session key must be a single safe path segment, got '../../etc/passwd'
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### openloops.digests_store(rootdir=None)
 
@@ -634,9 +634,6 @@ a git-synced directory, an S3-backed store. The keys are what carry the layout, 
 a different backend gets the same `{source}/{state}/{session}.md` structure for
 free.
 
-* **Return type:**
-  [`MutableMapping`](https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
-
 ```pycon
 >>> store = digests_store(rootdir='/tmp/openloops-doctest-store')
 >>> store['demo/open/s1.md'] = '# hi'
@@ -645,6 +642,9 @@ free.
 >>> del store['demo/open/s1.md']
 ```
 
+* **Return type:**
+  [`MutableMapping`](https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
 ### openloops.exchanges(records, , key='')
 
 Every prompt of a transcript’s main thread, in order, each with its turn’s reply.
@@ -652,9 +652,6 @@ Every prompt of a transcript’s main thread, in order, each with its turn’s r
 Records are ordered by timestamp (a transcript’s lines are not always written in
 order), ties kept in file order. Sub-agent sidechains are left out: their “prompts”
 were written by the session, not to it.
-
-* **Return type:**
-  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`Exchange`](#openloops.Exchange), [`...`](https://docs.python.org/3/builtins/constants.html#Ellipsis)]
 
 ```pycon
 >>> recs = [
@@ -666,6 +663,9 @@ were written by the session, not to it.
 >>> [(e.uuid, e.questions, e.reply) for e in exchanges(recs)]
 [('u1', ('Is the cache still warm?',), 'Shipped. Yes, warm for an hour.')]
 ```
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`Exchange`](#openloops.Exchange), [`...`](https://docs.python.org/3/builtins/constants.html#Ellipsis)]
 
 ### openloops.gh_blocked_by(repo, number, , timeout=30.0)
 
@@ -716,14 +716,14 @@ The four figures across the top of the page. `None` is `?`, never a zero.
 Shared by the masthead and by [`openloops.tools.dashboard()`](openloops.tools.html.md#openloops.tools.dashboard), so the number a
 caller reads back is the number the page printed.
 
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`int`](https://docs.python.org/3/builtins/functions.html#int) | [`None`](https://docs.python.org/3/builtins/constants.html#None)]
-
 ```pycon
 >>> headline_counts({'listed': True, 'counts': {'open': 2}, 'rows': []},
 ...                 {'listed': False}, [])['free_to_proceed'] is None
 True
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`int`](https://docs.python.org/3/builtins/functions.html#int) | [`None`](https://docs.python.org/3/builtins/constants.html#None)]
 
 ### openloops.install_skills(, target=None, only=None, copy=False, force=False, dry_run=False)
 
@@ -745,9 +745,6 @@ own capture skill, adapted to your own fleet, and a second one competing for the
 triggers is worse than either alone – so take the reader and the subagent and leave
 the capture skill out.
 
-* **Return type:**
-  dict[str, Any]
-
 ```pycon
 >>> plan = install_skills(target='/nonexistent/host', only=['openloops'], dry_run=True)
 >>> [row['name'] for row in plan['actions']]
@@ -762,6 +759,9 @@ the capture skill out.
 ['install']
 ```
 
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
 ### openloops.ls(, state='open', source=None, project=None, confidence=None, limit=20, digests_store=None)
 
 The digests in the store, newest last-turn first.
@@ -774,15 +774,15 @@ matter plus its key.
 and a good few of those are open only because nothing said otherwise. Filtering to
 `high` leaves the ones where the session itself said something.
 
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
-
 ```pycon
 >>> rows = ls(digests_store={'m/open/s1.md':
 ...     '---\nsession: s1\nstate: open\nlast_turn: T9\n---\n'})
 >>> rows[0]['session'], rows[0]['key']
 ('s1', 'm/open/s1.md')
 ```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
 
 ### openloops.make_digest(session, verdict, , source, aliases=None)
 
@@ -792,15 +792,15 @@ Raises [`CredentialFound`](openloops.egress.html.md#openloops.egress.CredentialF
 credential pattern — deliberately, so the caller skips that session loudly rather
 than writing a secret into a store that may be synced.
 
-* **Return type:**
-  [`Digest`](openloops.base.html.md#openloops.base.Digest)
-
 ```pycon
 >>> from openloops.base import Session, Verdict
 >>> d = make_digest(Session(key='s1'), Verdict('open', 'why'), source='demo')
 >>> d.key
 'demo/open/s1.md'
 ```
+
+* **Return type:**
+  [`Digest`](openloops.base.html.md#openloops.base.Digest)
 
 ### openloops.owed(, verify=True, owners=None, trusted_owners=None, label='manual-task', limit=50, timeout=30.0, predicate_timeout=20.0, now=None, issues_source=None, run_predicate=None)
 
@@ -822,9 +822,6 @@ to exit status substitutes). With both injected this reaches no network and need
 
 Returns one envelope, never a bare list, because a reader has to be able to tell
 “nothing is owed” from “I could not find out”:
-
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 `listed`
 : `False` when the *listing itself* failed. Every surface must render that as
@@ -857,6 +854,9 @@ A listing that could not run is not “nothing owed”:
 >>> report['listed'], report['error'], report['counts']['total']
 (False, 'gh: not logged in', 0)
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 ### openloops.parse_session(records, , key='')
 
@@ -903,9 +903,6 @@ The predicate is the first code span in the field. Prose with no code span – t
 documented “no predicate is possible here” answer – yields no command, and the
 prose is kept so the row can say *why* rather than merely say nothing.
 
-* **Return type:**
-  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
-
 ```pycon
 >>> parse_verify('**Verify:** `test -f x`')
 ('test -f x', '`test -f x`')
@@ -938,6 +935,9 @@ is the difference between a row that reads `?` and one that silently reads open:
 ('', '`echo one &&')
 ```
 
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
 ### openloops.question_sentences(text)
 
 The sentences of a person’s prompt that ask something, in order, at most
@@ -947,9 +947,6 @@ A sentence asks when it ends with `?` or opens the way a question does (“why�
 “is there”, “I wonder”), and is not a request phrased as one (“can you fix it?”).
 Code blocks, quoted lines and table rows are skipped.
 
-* **Return type:**
-  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`...`](https://docs.python.org/3/builtins/constants.html#Ellipsis)]
-
 ```pycon
 >>> question_sentences("Can you add a test? Could you explain why it failed?")
 ('Could you explain why it failed?',)
@@ -957,12 +954,12 @@ Code blocks, quoted lines and table rows are skipped.
 ('why does the page load twice',)
 ```
 
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`...`](https://docs.python.org/3/builtins/constants.html#Ellipsis)]
+
 ### openloops.render(session, verdict, , source)
 
 The markdown for one digest. Pure, dated, and bounded.
-
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ```pycon
 >>> from openloops.base import Session, Verdict
@@ -977,6 +974,9 @@ True
 >>> render(s, verdict, source='demo') == text     # pure: same in, same out
 True
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### openloops.render_dashboard(owed, blocked, sessions, , made_at=None, source='', title='Open Loops Board', max_sessions=40, standalone=True, aliases=None)
 
@@ -998,9 +998,6 @@ does — and the same page comes back as title, styles and content only.
 
 `max_sessions` bounds the in-flight register; the true total is stated either way.
 
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
-
 ```pycon
 >>> page = render_dashboard(
 ...     {'listed': False, 'error': 'gh: not logged in', 'counts': {}},
@@ -1009,6 +1006,9 @@ does — and the same page comes back as title, styles and content only.
 >>> 'gh: not logged in' in page and 'could not' in page
 True
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### openloops.retained(store, sessions, , source=None)
 
@@ -1019,13 +1019,13 @@ garbage-collects transcripts, and a digest outlives the thing it was derived fro
 [`sync()`](#openloops.sync) never removes them, and they are the one part of the store that a
 from-scratch rebuild does not reproduce.
 
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
-
 ```pycon
 >>> retained({'m/open/a.md': '', 'm/open/b.md': ''}, {'a': None})
 ['m/open/b.md']
 ```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ### openloops.scrub(text, , aliases=None, where='')
 
@@ -1038,13 +1038,13 @@ The path check runs on the **output**, not the input, because `aliases` is
 caller-supplied: a rewrite can in principle produce a home path as easily as remove
 one, and a postcondition that is only true of benign inputs is not a postcondition.
 
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
-
 ```pycon
 >>> scrub("built /nowhere/proj/x", aliases={"/nowhere/proj": "$PROJ"})
 'built $PROJ/x'
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### openloops.shell_predicate(command, , timeout=20.0)
 
@@ -1053,9 +1053,6 @@ The default `run_predicate`: run the command in a subshell, bounded in time.
 The exit status is the answer and nothing else is interpreted. Anything that is not
 an exit status — a timeout, a shell that would not start — comes back as
 `status=None`, which is `unknown`, which is `?`.
-
-* **Return type:**
-  [`PredicateOutcome`](openloops.obligations.html.md#openloops.obligations.PredicateOutcome)
 
 ```pycon
 >>> shell_predicate('exit 0').status
@@ -1066,6 +1063,9 @@ an exit status — a timeout, a shell that would not start — comes back as
 True
 ```
 
+* **Return type:**
+  [`PredicateOutcome`](openloops.obligations.html.md#openloops.obligations.PredicateOutcome)
+
 ### openloops.show(session, , source=None, digests_store=None)
 
 One digest in full, found by session id or by a unique prefix of one.
@@ -1074,14 +1074,14 @@ An exact id always wins over a prefix, so a session whose id happens to be a pre
 of another stays reachable. `source` narrows a store that several machines write
 into, where the same session can legitimately appear more than once.
 
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
-
 ```pycon
 >>> store = {'m/open/abcdef.md': '---\nsession: abcdef\n---\nbody'}
 >>> show('abc', digests_store=store)['key']
 'm/open/abcdef.md'
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 ### openloops.skills_dir()
 
@@ -1122,9 +1122,6 @@ Bring the digest store up to date with the sessions, and say what changed.
 `force` ignores the cache and re-derives everything; the result must be identical,
 which is what makes it safe to suggest when someone suspects a stale digest.
 
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
-
 ```pycon
 >>> from openloops.base import STATES, Session
 >>> sessions = {'s1': Session(key='s1',
@@ -1138,6 +1135,9 @@ which is what makes it safe to suggest when someone suspects a stale digest.
 ...      state_dir='/tmp/openloops-doctest-state', force=True)['written']
 0
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 ### Modules
 

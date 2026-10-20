@@ -303,9 +303,6 @@ substitutes). With both injected this reaches no network and needs no `gh`.
 Returns one envelope, never a bare list, because a reader has to be able to tell
 “nothing is waiting” from “I could not find out”:
 
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
-
 `listed`
 : `False` when *discovery itself* failed. Every surface must render that as
   `?`. The counts are zeros and they mean nothing.
@@ -339,6 +336,9 @@ Discovery that could not run is not “nothing is waiting”:
 >>> report['listed'], report['error'], report['counts']['total']
 (False, 'gh: not logged in', 0)
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 ### openloops.blockers.gh_blocked_by(repo, number, , timeout=30.0)
 
