@@ -225,6 +225,13 @@ name.** A reopening with no preferred option hands the human the question *and* 
 `Verify:` here is normally `none possible — a judgement call`; if the decision record
 carries a `status` field, the predicate is that it no longer reads `questioned`.
 
+**A supporting document goes through annals.** If the human needs to read something to
+decide (a report, a diff summary, a screenshot), publish it with
+`annals publish <path> --session <your session name>` and put the printed
+`https://apps.thorwhalen.com/annals/...` link in the body. `ol owed` and `ol dashboard`
+show every such link under the row, so the human goes from "you owe a decision" straight
+to the document. Never publish anything that falls under the egress rules in step 6.
+
 ### 5. Write the verify predicate
 
 This is the field that stops the issue from becoming a lie, and the field `ol owed` runs.

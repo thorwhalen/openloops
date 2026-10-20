@@ -604,3 +604,13 @@ def test_the_page_is_built_out_of_the_public_builders(monkeypatch):
         assert f"[REGISTER {ident}]" in html, ident
     # And no band wrote a head of its own: the stub is the only builder.
     assert '<section class="register' not in html
+
+
+def test_an_obligation_row_links_its_published_document():
+    from openloops.dashboard import Sanitizer, _obligation_row
+
+    link = "https://apps.thorwhalen.com/annals/d/abc12"
+    html = _obligation_row(
+        Sanitizer(), {"title": "t", "documents": (link,)}, tone="open", chip="open"
+    )
+    assert f'href="{link}"' in html

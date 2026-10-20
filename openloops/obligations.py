@@ -229,6 +229,7 @@ class Obligation:
     verify: str = ""
     predicate: str = ""
     evidence: str = ""
+    documents: tuple[str, ...] = ()
 
     def as_dict(self) -> dict[str, Any]:
         """JSON-ready form."""
@@ -516,6 +517,30 @@ def _is_no_predicate(verify_text: str) -> bool:
     False
     """
     return bool(_DOCUMENTED_NO_PREDICATE.match(_field_start(verify_text)))
+
+
+#: A link to a document published to the owner's annals (a page or a group).
+DFLT_DOCUMENT_URL = re.compile(r"https://apps\.thorwhalen\.com/annals/[^\s)>\]\"'`]+")
+
+
+def document_links(
+    body: str, *, pattern: re.Pattern[str] = DFLT_DOCUMENT_URL
+) -> tuple[str, ...]:
+    """The published-document links an issue body names, in order, without repeats.
+
+    A locator, not a fetch: openloops stays read-only and does not need annals
+    installed to show where the explaining document lives.
+
+    >>> document_links('See https://apps.thorwhalen.com/annals/d/abc12, and again '
+    ...                '(https://apps.thorwhalen.com/annals/d/abc12).')
+    ('https://apps.thorwhalen.com/annals/d/abc12',)
+    >>> document_links('no link here')
+    ()
+    """
+    seen: dict[str, None] = {}
+    for match in pattern.finditer(body or ""):
+        seen.setdefault(match.group(0).rstrip(".,;:"), None)
+    return tuple(seen)
 
 
 def parse_verify(body: str) -> tuple[str, str]:
@@ -981,6 +1006,7 @@ def owed(
                 verify=verify_text,
                 predicate=command,
                 evidence=evidence,
+                documents=document_links(issue.get("body") or ""),
             )
         )
 
