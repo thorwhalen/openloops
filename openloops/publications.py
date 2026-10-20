@@ -60,7 +60,9 @@ def _annals_ls(limit: int, timeout: float) -> list[dict]:
         raise AnnalsUnavailable(f"could not run `annals`: {exc}") from None
     if done.returncode != 0:
         lines = [x.strip() for x in (done.stderr or "").splitlines() if x.strip()]
-        raise AnnalsUnavailable(lines[0] if lines else f"`annals ls` exited {done.returncode}")
+        raise AnnalsUnavailable(
+            lines[0] if lines else f"`annals ls` exited {done.returncode}"
+        )
     try:
         docs = json.loads(done.stdout)["docs"]
     except (ValueError, KeyError, TypeError):
@@ -84,7 +86,9 @@ def published(
     *,
     limit: int = DFLT_LIMIT,
     session: str | None = None,
-    source: Iterable[Mapping[str, Any]] | Callable[[], Iterable[Mapping[str, Any]]] | None = None,
+    source: Iterable[Mapping[str, Any]]
+    | Callable[[], Iterable[Mapping[str, Any]]]
+    | None = None,
     base_url: str = DFLT_DOCUMENT_BASE,
     timeout: float = DFLT_TIMEOUT,
 ) -> dict[str, Any]:
