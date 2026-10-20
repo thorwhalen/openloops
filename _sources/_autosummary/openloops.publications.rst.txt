@@ -1,0 +1,20 @@
+openloops.publications
+======================
+
+.. automodule:: openloops.publications
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      DFLT_DOCUMENT_BASE
+      DFLT_LIMIT
+      DFLT_TIMEOUT
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      published
+   

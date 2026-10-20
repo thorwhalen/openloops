@@ -1,4 +1,4 @@
-> built 2026-10-20 11:12 UTC from d459625 (main) · openloops 0.1.16. Details: build_info.json
+> built 2026-10-20 11:44 UTC from 79c97a4 (main) · openloops 0.1.17. Details: build_info.json
 
 # index.html.md
 
@@ -305,11 +305,12 @@ agents are doing, the section at the top is the one you want.
 
 ### Which command answers which question
 
-| You want to know                                            | Run          | Needs `gh`?   |
-|-------------------------------------------------------------|--------------|---------------|
-| What did my sessions leave open?                            | `ol`         | no            |
-| What do I still owe my agents?                              | `ol owed`    | yes           |
-| What is waiting on another repo — and what is not any more? | `ol blocked` | yes           |
+| You want to know                                            | Run            | Needs `gh`?   |
+|-------------------------------------------------------------|----------------|---------------|
+| What did my sessions leave open?                            | `ol`           | no            |
+| What do I still owe my agents?                              | `ol owed`      | yes           |
+| What is waiting on another repo — and what is not any more? | `ol blocked`   | yes           |
+| What did my agents hand me lately?                          | `ol published` | yes           |
 
 Everything else is a variation on those:
 
@@ -3101,18 +3102,19 @@ which is what makes it safe to suggest when someone suspects a stale digest.
 
 ### Modules
 
-| [`base`](_autosummary/openloops.base.html.md#module-openloops.base)               | Data structures shared across openloops: what a session is, and what a digest is.       |
-|-------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| [`blockers`](_autosummary/openloops.blockers.html.md#module-openloops.blockers)       | The other kind of open loop: the one that points at a repository, not at a person.      |
-| [`dashboard`](_autosummary/openloops.dashboard.html.md#module-openloops.dashboard)     | One page you can look at instead of reading three command outputs.                      |
-| [`digest`](_autosummary/openloops.digest.html.md#module-openloops.digest)           | Rendering one session into one dated markdown digest.                                   |
-| [`egress`](_autosummary/openloops.egress.html.md#module-openloops.egress)           | The egress choke point: nothing leaves openloops carrying a home path or a secret.      |
-| [`job`](_autosummary/openloops.job.html.md#module-openloops.job)                 | The periodic job: launchd runs `ol sync`, writes, and exits.                            |
-| [`obligations`](_autosummary/openloops.obligations.html.md#module-openloops.obligations) | What you still owe your agents — re-checked against the world before it is shown.       |
-| [`skills`](_autosummary/openloops.skills.html.md#module-openloops.skills)           | The agent-facing surface: two skills, one subagent, and the command that installs them. |
-| [`store`](_autosummary/openloops.store.html.md#module-openloops.store)             | Where digests live, and where the change-detection cache lives — two different things.  |
-| [`tools`](_autosummary/openloops.tools.html.md#module-openloops.tools)             | The package's single list of operations: plain functions, JSON-ready dicts.             |
-| [`transcripts`](_autosummary/openloops.transcripts.html.md#module-openloops.transcripts) | The default `transcript_source`: a direct reader of Claude Code's on-disk state.        |
+| [`base`](_autosummary/openloops.base.html.md#module-openloops.base)                 | Data structures shared across openloops: what a session is, and what a digest is.       |
+|---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| [`blockers`](_autosummary/openloops.blockers.html.md#module-openloops.blockers)         | The other kind of open loop: the one that points at a repository, not at a person.      |
+| [`dashboard`](_autosummary/openloops.dashboard.html.md#module-openloops.dashboard)       | One page you can look at instead of reading three command outputs.                      |
+| [`digest`](_autosummary/openloops.digest.html.md#module-openloops.digest)             | Rendering one session into one dated markdown digest.                                   |
+| [`egress`](_autosummary/openloops.egress.html.md#module-openloops.egress)             | The egress choke point: nothing leaves openloops carrying a home path or a secret.      |
+| [`job`](_autosummary/openloops.job.html.md#module-openloops.job)                   | The periodic job: launchd runs `ol sync`, writes, and exits.                            |
+| [`obligations`](_autosummary/openloops.obligations.html.md#module-openloops.obligations)   | What you still owe your agents — re-checked against the world before it is shown.       |
+| [`publications`](_autosummary/openloops.publications.html.md#module-openloops.publications) | What your agents handed you lately: recently published annals documents, per session.   |
+| [`skills`](_autosummary/openloops.skills.html.md#module-openloops.skills)             | The agent-facing surface: two skills, one subagent, and the command that installs them. |
+| [`store`](_autosummary/openloops.store.html.md#module-openloops.store)               | Where digests live, and where the change-detection cache lives — two different things.  |
+| [`tools`](_autosummary/openloops.tools.html.md#module-openloops.tools)               | The package's single list of operations: plain functions, JSON-ready dicts.             |
+| [`transcripts`](_autosummary/openloops.transcripts.html.md#module-openloops.transcripts)   | The default `transcript_source`: a direct reader of Claude Code's on-disk state.        |
 
 
 # _autosummary/openloops.job.html.md
@@ -3581,6 +3583,65 @@ True
   [`PredicateOutcome`](_autosummary/openloops.obligations.html.md#openloops.obligations.PredicateOutcome)
 
 
+# _autosummary/openloops.publications.html.md
+
+# openloops.publications
+
+What your agents handed you lately: recently published annals documents, per session.
+
+openloops answers “what do I owe?”; this answers its sibling, “what did my agents hand
+me?”, from the documents sessions published with `annals publish --session <name>`.
+It is read-only and does not depend on annals being installed: the list of documents
+comes through one seam, `source=`, which is either the documents themselves (the
+`docs` of `annals ls`) or a zero-argument callable returning them. The default seam
+runs `annals ls` and says so, as an unlisted report, when annals is absent – an
+empty list would read as “nothing was published”.
+
+```pycon
+>>> docs = [{'id': 'a1', 'title': 'Report', 'created': '2026-01-02T00:00:00Z',
+...          'source': {'session': 'sweep'}}]
+>>> report = published(source=docs)
+>>> report['listed'], report['rows'][0]['session'], report['rows'][0]['url']
+(True, 'sweep', 'https://apps.thorwhalen.com/annals/d/a1')
+```
+
+### Module Attributes
+
+| [`DFLT_DOCUMENT_BASE`](_autosummary/openloops.publications.html.md#openloops.publications.DFLT_DOCUMENT_BASE)   | Where a published document's page lives (the prefix of `DFLT_DOCUMENT_URL` in [`openloops.obligations`](_autosummary/openloops.obligations.html.md#module-openloops.obligations)).   |
+|-----------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`DFLT_LIMIT`](_autosummary/openloops.publications.html.md#openloops.publications.DFLT_LIMIT)           | How many recent documents to read.                                                                                                                                                    |
+| [`DFLT_TIMEOUT`](_autosummary/openloops.publications.html.md#openloops.publications.DFLT_TIMEOUT)         | Seconds to wait for `annals ls`.                                                                                                                                                      |
+
+### Functions
+
+| [`published`](_autosummary/openloops.publications.html.md#openloops.publications.published)(\*[, limit, session, source, ...])   | Recently published documents, newest first, each with its session and link.   |
+|-------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+
+### openloops.publications.DFLT_DOCUMENT_BASE *= 'https://apps.thorwhalen.com/annals/d/'*
+
+Where a published document’s page lives (the prefix of `DFLT_DOCUMENT_URL` in
+[`openloops.obligations`](_autosummary/openloops.obligations.html.md#module-openloops.obligations)).
+
+### openloops.publications.DFLT_LIMIT *= 50*
+
+How many recent documents to read.
+
+### openloops.publications.DFLT_TIMEOUT *= 20.0*
+
+Seconds to wait for `annals ls`.
+
+### openloops.publications.published(, limit=50, session=None, source=None, base_url='https://apps.thorwhalen.com/annals/d/', timeout=20.0)
+
+Recently published documents, newest first, each with its session and link.
+
+`session` keeps one session’s documents. The result is an envelope:
+`listed=False` with an `error` means the documents could not be read, which
+must not be mistaken for “none were published”.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+
 # _autosummary/openloops.skills.html.md
 
 # openloops.skills
@@ -3969,6 +4030,7 @@ two surfaces is a sign that there are two implementations, and there is one here
 | [`owed`](_autosummary/openloops.tools.html.md#openloops.tools.owed)(\*[, verify, owners, trusted_owners, ...])   | What you still owe your agents, with each obligation re-checked against the world.     |
 | [`blocked`](_autosummary/openloops.tools.html.md#openloops.tools.blocked)(\*[, resolve, owners, repos, query, ...]) | What your repositories are waiting on — and what is no longer waiting.                 |
 | [`dashboard`](_autosummary/openloops.tools.html.md#openloops.tools.dashboard)(\*[, verify, resolve, owners, ...])     | All three answers as one self-contained HTML page, for looking at rather than reading. |
+| [`published`](_autosummary/openloops.tools.html.md#openloops.tools.published)(\*[, limit, session, source])           | What your agents handed you lately: recently published annals documents, per session.  |
 
 ### openloops.tools.ROW_FIELDS *= ('session', 'source', 'state', 'title', 'ai_title', 'project', 'branches', 'started', 'ended', 'last_turn', 'turns', 'model', 'confidence', 'verified')*
 
@@ -4072,6 +4134,23 @@ itself failed — must not be readable as “nothing owed”.
 >>> report = owed(issues_source=[], run_predicate=lambda command: 0)
 >>> report['listed'], report['counts']['total']
 (True, 0)
+```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.tools.published(, limit=50, session=None, source=None)
+
+What your agents handed you lately: recently published annals documents, per session.
+
+The sibling of [`owed()`](_autosummary/openloops.tools.html.md#openloops.tools.owed), read from the documents sessions published with
+`annals publish --session <name>`. Nothing is written. `source` is the seam: the
+documents themselves, or a callable returning them; by default `annals ls` is run,
+and when annals is absent the result says `listed=False` rather than listing nothing.
+
+```pycon
+>>> published(source=[])['listed']
+True
 ```
 
 * **Return type:**
@@ -4317,18 +4396,18 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-10-20 11:12 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/d459625a38c1d98a3d4ab0ab169a67a4665f8d71"><code>d459625</code></a> on branch <code>main</code>, for **openloops 0.1.16** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 11:44 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/79c97a477a5ce0e369cc7e243c04b5b58e16a91e"><code>79c97a4</code></a> on branch <code>main</code>, for **openloops 0.1.17** (from <code>pyproject.toml</code>).
 
 #### WARNING
 The documentation and the package may be misaligned:
 
-- The documented version (0.1.16) is behind the latest release on PyPI (0.1.17): `pip install openloops` gives newer code than these docs describe.
+- The documented version (0.1.17) is behind the latest release on PyPI (0.1.18): `pip install openloops` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/d459625a38c1d98a3d4ab0ab169a67a4665f8d71"><code>d459625a38c1d98a3d4ab0ab169a67a4665f8d71</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/79c97a477a5ce0e369cc7e243c04b5b58e16a91e"><code>79c97a477a5ce0e369cc7e243c04b5b58e16a91e</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -4339,9 +4418,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/39413142530">39413142530</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/39416844418">39416844418</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>d459625a38c1d98a3d4ab0ab169a67a4665f8d71</code> (in the history of the built commit) |
+| Event commit | <code>79c97a477a5ce0e369cc7e243c04b5b58e16a91e</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -4366,13 +4445,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.17/">0.1.17</a>, newer than the documented version (0.1.16).
+Latest release: <a href="https://pypi.org/project/openloops/0.1.18/">0.1.18</a>, newer than the documented version (0.1.17).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout d459625a38c1d98a3d4ab0ab169a67a4665f8d71
+git checkout 79c97a477a5ce0e369cc7e243c04b5b58e16a91e
 pip install "epythet==0.2.19"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

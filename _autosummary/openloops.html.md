@@ -1141,15 +1141,16 @@ which is what makes it safe to suggest when someone suspects a stale digest.
 
 ### Modules
 
-| [`base`](openloops.base.html.md#module-openloops.base)               | Data structures shared across openloops: what a session is, and what a digest is.       |
-|-------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| [`blockers`](openloops.blockers.html.md#module-openloops.blockers)       | The other kind of open loop: the one that points at a repository, not at a person.      |
-| [`dashboard`](openloops.dashboard.html.md#module-openloops.dashboard)     | One page you can look at instead of reading three command outputs.                      |
-| [`digest`](openloops.digest.html.md#module-openloops.digest)           | Rendering one session into one dated markdown digest.                                   |
-| [`egress`](openloops.egress.html.md#module-openloops.egress)           | The egress choke point: nothing leaves openloops carrying a home path or a secret.      |
-| [`job`](openloops.job.html.md#module-openloops.job)                 | The periodic job: launchd runs `ol sync`, writes, and exits.                            |
-| [`obligations`](openloops.obligations.html.md#module-openloops.obligations) | What you still owe your agents — re-checked against the world before it is shown.       |
-| [`skills`](openloops.skills.html.md#module-openloops.skills)           | The agent-facing surface: two skills, one subagent, and the command that installs them. |
-| [`store`](openloops.store.html.md#module-openloops.store)             | Where digests live, and where the change-detection cache lives — two different things.  |
-| [`tools`](openloops.tools.html.md#module-openloops.tools)             | The package's single list of operations: plain functions, JSON-ready dicts.             |
-| [`transcripts`](openloops.transcripts.html.md#module-openloops.transcripts) | The default `transcript_source`: a direct reader of Claude Code's on-disk state.        |
+| [`base`](openloops.base.html.md#module-openloops.base)                 | Data structures shared across openloops: what a session is, and what a digest is.       |
+|---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| [`blockers`](openloops.blockers.html.md#module-openloops.blockers)         | The other kind of open loop: the one that points at a repository, not at a person.      |
+| [`dashboard`](openloops.dashboard.html.md#module-openloops.dashboard)       | One page you can look at instead of reading three command outputs.                      |
+| [`digest`](openloops.digest.html.md#module-openloops.digest)             | Rendering one session into one dated markdown digest.                                   |
+| [`egress`](openloops.egress.html.md#module-openloops.egress)             | The egress choke point: nothing leaves openloops carrying a home path or a secret.      |
+| [`job`](openloops.job.html.md#module-openloops.job)                   | The periodic job: launchd runs `ol sync`, writes, and exits.                            |
+| [`obligations`](openloops.obligations.html.md#module-openloops.obligations)   | What you still owe your agents — re-checked against the world before it is shown.       |
+| [`publications`](openloops.publications.html.md#module-openloops.publications) | What your agents handed you lately: recently published annals documents, per session.   |
+| [`skills`](openloops.skills.html.md#module-openloops.skills)             | The agent-facing surface: two skills, one subagent, and the command that installs them. |
+| [`store`](openloops.store.html.md#module-openloops.store)               | Where digests live, and where the change-detection cache lives — two different things.  |
+| [`tools`](openloops.tools.html.md#module-openloops.tools)               | The package's single list of operations: plain functions, JSON-ready dicts.             |
+| [`transcripts`](openloops.transcripts.html.md#module-openloops.transcripts)   | The default `transcript_source`: a direct reader of Claude Code's on-disk state.        |

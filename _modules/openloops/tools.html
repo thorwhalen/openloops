@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="../../_static/documentation_options.js?v=d50bcae4"></script>
+    <script src="../../_static/documentation_options.js?v=71734efd"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.16" />
+  <meta name="docsearch:version" content="0.1.17" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -750,6 +750,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">DFLT_PREDICATE_TIMEOUT</span><span class="p">,</span>
     <span class="n">owed</span> <span class="k">as</span> <span class="n">_owed</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.publications</span><span class="w"> </span><span class="kn">import</span> <span class="n">published</span> <span class="k">as</span> <span class="n">_published</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops.store</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">data_dir</span><span class="p">,</span>
     <span class="n">default_source</span><span class="p">,</span>
@@ -771,6 +772,7 @@ window.runMermaid = runMermaid;</script>
     <span class="s2">"owed"</span><span class="p">,</span>
     <span class="s2">"blocked"</span><span class="p">,</span>
     <span class="s2">"dashboard"</span><span class="p">,</span>
+    <span class="s2">"published"</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="c1">#: The keys every :func:`ls` row carries, whatever the digest happens to record.</span>
@@ -1199,9 +1201,31 @@ window.runMermaid = runMermaid;</script>
 
 
 
+<div class="viewcode-block" id="published">
+<a class="viewcode-back" href="../../_autosummary/openloops.tools.html#openloops.published">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">published</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+    <span class="n">session</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">source</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""What your agents handed you lately: recently published annals documents, per session.</span>
+
+<span class="sd">    The sibling of :func:`owed`, read from the documents sessions published with</span>
+<span class="sd">    `annals publish --session &lt;name&gt;`. Nothing is written. ``source`` is the seam: the</span>
+<span class="sd">    documents themselves, or a callable returning them; by default `annals ls` is run,</span>
+<span class="sd">    and when annals is absent the result says ``listed=False`` rather than listing nothing.</span>
+
+<span class="sd">    &gt;&gt;&gt; published(source=[])['listed']</span>
+<span class="sd">    True</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">_published</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span> <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span></div>
+
+
+
 <span class="c1">#: Single source of truth for what every surface exposes. The CLI dispatches this list;</span>
 <span class="c1">#: an MCP or HTTP adapter would reference the same names as strings.</span>
-<span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">sync</span><span class="p">,</span> <span class="n">ls</span><span class="p">,</span> <span class="n">show</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">owed</span><span class="p">,</span> <span class="n">blocked</span><span class="p">,</span> <span class="n">dashboard</span><span class="p">]</span>
+<span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">sync</span><span class="p">,</span> <span class="n">ls</span><span class="p">,</span> <span class="n">show</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">owed</span><span class="p">,</span> <span class="n">blocked</span><span class="p">,</span> <span class="n">dashboard</span><span class="p">,</span> <span class="n">published</span><span class="p">]</span>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>

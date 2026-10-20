@@ -26,6 +26,7 @@ two surfaces is a sign that there are two implementations, and there is one here
 | [`owed`](#openloops.tools.owed)(\*[, verify, owners, trusted_owners, ...])   | What you still owe your agents, with each obligation re-checked against the world.     |
 | [`blocked`](#openloops.tools.blocked)(\*[, resolve, owners, repos, query, ...]) | What your repositories are waiting on — and what is no longer waiting.                 |
 | [`dashboard`](#openloops.tools.dashboard)(\*[, verify, resolve, owners, ...])     | All three answers as one self-contained HTML page, for looking at rather than reading. |
+| [`published`](#openloops.tools.published)(\*[, limit, session, source])           | What your agents handed you lately: recently published annals documents, per session.  |
 
 ### openloops.tools.ROW_FIELDS *= ('session', 'source', 'state', 'title', 'ai_title', 'project', 'branches', 'started', 'ended', 'last_turn', 'turns', 'model', 'confidence', 'verified')*
 
@@ -129,6 +130,23 @@ itself failed — must not be readable as “nothing owed”.
 >>> report = owed(issues_source=[], run_predicate=lambda command: 0)
 >>> report['listed'], report['counts']['total']
 (True, 0)
+```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.tools.published(, limit=50, session=None, source=None)
+
+What your agents handed you lately: recently published annals documents, per session.
+
+The sibling of [`owed()`](#openloops.tools.owed), read from the documents sessions published with
+`annals publish --session <name>`. Nothing is written. `source` is the seam: the
+documents themselves, or a callable returning them; by default `annals ls` is run,
+and when annals is absent the result says `listed=False` rather than listing nothing.
+
+```pycon
+>>> published(source=[])['listed']
+True
 ```
 
 * **Return type:**

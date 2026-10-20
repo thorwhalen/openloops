@@ -74,6 +74,7 @@
    egress
    job
    obligations
+   publications
    skills
    store
    tools

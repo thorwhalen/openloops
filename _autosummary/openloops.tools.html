@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="../_static/documentation_options.js?v=d50bcae4"></script>
+    <script src="../_static/documentation_options.js?v=71734efd"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.16" />
+  <meta name="docsearch:version" content="0.1.17" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -327,6 +327,7 @@
 <li class="toctree-l2"><a class="reference internal" href="openloops.egress.html">openloops.egress</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.job.html">openloops.job</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.obligations.html">openloops.obligations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.publications.html">openloops.publications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.skills.html">openloops.skills</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.store.html">openloops.store</a></li>
 <li class="toctree-l2 current active"><a aria-current="page" class="current reference internal" href="#">openloops.tools</a></li>
@@ -438,6 +439,9 @@ two surfaces is a sign that there are two implementations, and there is one here
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#openloops.tools.dashboard" title="openloops.tools.dashboard"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dashboard</span></code></a>(*[, verify, resolve, owners, ...])</p></td>
 <td><p>All three answers as one self-contained HTML page, for looking at rather than reading.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.tools.published" title="openloops.tools.published"><code class="xref py py-obj docutils literal notranslate"><span class="pre">published</span></code></a>(*[, limit, session, source])</p></td>
+<td><p>What your agents handed you lately: recently published annals documents, per session.</p></td>
 </tr>
 </tbody>
 </table>
@@ -554,6 +558,25 @@ itself failed — must not be readable as “nothing owed”.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="openloops.tools.published">
+<span class="sig-prename descclassname"><span class="pre">openloops.tools.</span></span><span class="sig-name descname"><span class="pre">published</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/tools.html#published"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.tools.published" title="Link to this definition">#</a></dt>
+<dd><p>What your agents handed you lately: recently published annals documents, per session.</p>
+<p>The sibling of <a class="reference internal" href="#openloops.tools.owed" title="openloops.tools.owed"><code class="xref py py-func docutils literal notranslate"><span class="pre">owed()</span></code></a>, read from the documents sessions published with
+<code class="code docutils literal notranslate"><span class="pre">annals</span> <span class="pre">publish</span> <span class="pre">--session</span> <span class="pre">&lt;name&gt;</span></code>. Nothing is written. <code class="docutils literal notranslate"><span class="pre">source</span></code> is the seam: the
+documents themselves, or a callable returning them; by default <code class="code docutils literal notranslate"><span class="pre">annals</span> <span class="pre">ls</span></code> is run,
+and when annals is absent the result says <code class="docutils literal notranslate"><span class="pre">listed=False</span></code> rather than listing nothing.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">published</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="p">[])[</span><span class="s1">'listed'</span><span class="p">]</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="openloops.tools.show">
 <span class="sig-prename descclassname"><span class="pre">openloops.tools.</span></span><span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digests_store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/tools.html#show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.tools.show" title="Link to this definition">#</a></dt>
 <dd><p>One digest in full, found by session id or by a unique prefix of one.</p>
@@ -657,6 +680,7 @@ the cache alone writes the fixture’s revisions into the caller’s real one.</
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.tools.dashboard"><code class="docutils literal notranslate"><span class="pre">dashboard()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.tools.ls"><code class="docutils literal notranslate"><span class="pre">ls()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.tools.owed"><code class="docutils literal notranslate"><span class="pre">owed()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.tools.published"><code class="docutils literal notranslate"><span class="pre">published()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.tools.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.tools.status"><code class="docutils literal notranslate"><span class="pre">status()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.tools.sync"><code class="docutils literal notranslate"><span class="pre">sync()</span></code></a></li>

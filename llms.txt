@@ -15,12 +15,13 @@
 - [openloops.egress](_autosummary/openloops.egress.html.md): The egress choke point: nothing leaves openloops carrying a home path or a secret.
 - [openloops.job](_autosummary/openloops.job.html.md): The periodic job: launchd runs &#96;ol sync&#96;, writes, and exits. No daemon.
 - [openloops.obligations](_autosummary/openloops.obligations.html.md): What you still owe your agents — re-checked against the world before it is shown.
+- [openloops.publications](_autosummary/openloops.publications.html.md): What your agents handed you lately: recently published annals documents, per session.
 - [openloops.skills](_autosummary/openloops.skills.html.md): The agent-facing surface: two skills, one subagent, and the command that installs them.
 - [openloops.store](_autosummary/openloops.store.html.md): Where digests live, and where the change-detection cache lives — two different things.
 - [openloops.tools](_autosummary/openloops.tools.html.md): The package’s single list of operations: plain functions, JSON-ready dicts.
 - [openloops.transcripts](_autosummary/openloops.transcripts.html.md): The default &#96;transcript_source&#96;: a direct reader of Claude Code’s on-disk state.
 - [For AI agents](ai-agents.html.md): &#96;openloops&#96; ships artifacts for coding agents alongside its code. This page lists
-- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-20 11:12 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
+- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-20 11:44 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
 
 ## Optional
 

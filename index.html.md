@@ -301,11 +301,12 @@ agents are doing, the section at the top is the one you want.
 
 ### Which command answers which question
 
-| You want to know                                            | Run          | Needs `gh`?   |
-|-------------------------------------------------------------|--------------|---------------|
-| What did my sessions leave open?                            | `ol`         | no            |
-| What do I still owe my agents?                              | `ol owed`    | yes           |
-| What is waiting on another repo — and what is not any more? | `ol blocked` | yes           |
+| You want to know                                            | Run            | Needs `gh`?   |
+|-------------------------------------------------------------|----------------|---------------|
+| What did my sessions leave open?                            | `ol`           | no            |
+| What do I still owe my agents?                              | `ol owed`      | yes           |
+| What is waiting on another repo — and what is not any more? | `ol blocked`   | yes           |
+| What did my agents hand me lately?                          | `ol published` | yes           |
 
 Everything else is a variation on those:
 

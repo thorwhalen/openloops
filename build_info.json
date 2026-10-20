@@ -1,32 +1,32 @@
 {
   "schema_version": 1,
-  "built_at": "2026-10-20T11:12:50Z",
+  "built_at": "2026-10-20T11:44:04Z",
   "package": {
     "name": "openloops",
-    "version": "0.1.16",
+    "version": "0.1.17",
     "display_name": "openloops",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "d459625a38c1d98a3d4ab0ab169a67a4665f8d71",
-    "short_commit": "d459625",
+    "commit": "79c97a477a5ce0e369cc7e243c04b5b58e16a91e",
+    "short_commit": "79c97a4",
     "branch": "main",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/thorwhalen/openloops",
-    "commit_url": "https://github.com/thorwhalen/openloops/commit/d459625a38c1d98a3d4ab0ab169a67a4665f8d71",
+    "commit_url": "https://github.com/thorwhalen/openloops/commit/79c97a477a5ce0e369cc7e243c04b5b58e16a91e",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "thorwhalen/openloops",
-    "sha": "d459625a38c1d98a3d4ab0ab169a67a4665f8d71",
+    "sha": "79c97a477a5ce0e369cc7e243c04b5b58e16a91e",
     "sha_in_history": true,
     "ref": "refs/heads/main",
     "ref_name": "main",
-    "run_id": "39413142530",
-    "run_url": "https://github.com/thorwhalen/openloops/actions/runs/39413142530",
+    "run_id": "39416844418",
+    "run_url": "https://github.com/thorwhalen/openloops/actions/runs/39416844418",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -55,21 +55,21 @@
     "docs_dir": "docsrc"
   },
   "site": {
-    "modules_documented": 12,
-    "objects_documented": 182
+    "modules_documented": 13,
+    "objects_documented": 187
   },
   "pypi": {
     "checked": true,
-    "latest": "0.1.17",
+    "latest": "0.1.18",
     "relation": "behind",
     "error": null
   },
-  "reproduce": "git clone https://github.com/thorwhalen/openloops && cd openloops\ngit checkout d459625a38c1d98a3d4ab0ab169a67a4665f8d71\npip install \"epythet==0.2.19\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/thorwhalen/openloops && cd openloops\ngit checkout 79c97a477a5ce0e369cc7e243c04b5b58e16a91e\npip install \"epythet==0.2.19\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
     "aligned": false,
     "notes": [
-      "The documented version (0.1.16) is behind the latest release on PyPI (0.1.17): `pip install openloops` gives newer code than these docs describe."
+      "The documented version (0.1.17) is behind the latest release on PyPI (0.1.18): `pip install openloops` gives newer code than these docs describe."
     ]
   }
 }
