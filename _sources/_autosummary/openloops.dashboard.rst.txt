@@ -10,6 +10,7 @@ openloops.dashboard
    
       DFLT_TITLE
       DFLT_MAX_SESSIONS
+      DFLT_PUBLISHED_PER_SESSION
       GAUGE_FULL_DAYS
    
    .. rubric:: Functions

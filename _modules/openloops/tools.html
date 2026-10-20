@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="../../_static/documentation_options.js?v=71734efd"></script>
+    <script src="../../_static/documentation_options.js?v=9969ed3f"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.17" />
+  <meta name="docsearch:version" content="0.1.18" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -750,6 +750,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">DFLT_PREDICATE_TIMEOUT</span><span class="p">,</span>
     <span class="n">owed</span> <span class="k">as</span> <span class="n">_owed</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.publications</span><span class="w"> </span><span class="kn">import</span> <span class="n">DFLT_LIMIT</span> <span class="k">as</span> <span class="n">DFLT_PUBLISHED_LIMIT</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops.publications</span><span class="w"> </span><span class="kn">import</span> <span class="n">published</span> <span class="k">as</span> <span class="n">_published</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops.store</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">data_dir</span><span class="p">,</span>
@@ -1118,6 +1119,8 @@ window.runMermaid = runMermaid;</script>
     <span class="n">blocked_report</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sessions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">digests_store</span><span class="p">:</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">published_report</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">published_limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_PUBLISHED_LIMIT</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""All three answers as one self-contained HTML page, for looking at rather than reading.</span>
 
@@ -1131,9 +1134,11 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ``standalone=False`` returns the same page without the document scaffold, for a host</span>
 <span class="sd">    that supplies its own ``&lt;head&gt;``.</span>
 
-<span class="sd">    Each of the three reads is a seam: pass ``owed_report=``, ``blocked_report=`` or</span>
-<span class="sd">    ``sessions=`` and that one is not performed. With all three passed this reaches no</span>
-<span class="sd">    network and needs no ``gh``, which is how the tests run.</span>
+<span class="sd">    Each read is a seam: pass ``owed_report=``, ``blocked_report=``, ``sessions=`` or</span>
+<span class="sd">    ``published_report=`` and that one is not performed. With all four passed this</span>
+<span class="sd">    reaches no network and needs no ``gh`` or ``annals``, which is how the tests run.</span>
+<span class="sd">    The "Handed to you" register (recent annals documents per session) comes from</span>
+<span class="sd">    :func:`published`; pass ``published_report=False`` to leave it off the page.</span>
 
 <span class="sd">    ``counts`` comes back alongside the page and carries ``null`` — not ``0`` — for any</span>
 <span class="sd">    figure that could not be established, so a caller reading the JSON is held to the</span>
@@ -1174,6 +1179,12 @@ window.runMermaid = runMermaid;</script>
         <span class="c1"># say "40 of 154"; a pre-clipped list would let the page state a smaller number</span>
         <span class="c1"># than is really open, which is the same family of error as reporting a `?` as 0.</span>
         <span class="n">sessions</span> <span class="o">=</span> <span class="n">ls</span><span class="p">(</span><span class="n">state</span><span class="o">=</span><span class="n">OPEN</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">digests_store</span><span class="o">=</span><span class="n">digests_store</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">published_report</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">published_report</span> <span class="o">=</span> <span class="n">_published</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="n">published_limit</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">published_report</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">published_report</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">published_report</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">published_report</span><span class="p">)</span>
     <span class="n">made_at</span> <span class="o">=</span> <span class="n">made_at</span> <span class="ow">or</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
     <span class="n">html</span> <span class="o">=</span> <span class="n">render_dashboard</span><span class="p">(</span>
         <span class="n">owed_report</span><span class="p">,</span>
@@ -1184,6 +1195,7 @@ window.runMermaid = runMermaid;</script>
         <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
         <span class="n">max_sessions</span><span class="o">=</span><span class="n">max_sessions</span><span class="p">,</span>
         <span class="n">standalone</span><span class="o">=</span><span class="n">standalone</span><span class="p">,</span>
+        <span class="n">published</span><span class="o">=</span><span class="n">published_report</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">written</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="k">if</span> <span class="n">path</span><span class="p">:</span>

@@ -57,7 +57,7 @@ itself failed — must not be readable as “nothing is waiting”.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.tools.dashboard(, verify=True, resolve=True, owners=None, repos=None, limit=50, candidate_limit=50, max_sessions=40, title='Open Loops Board', standalone=True, path=None, made_at=None, owed_report=None, blocked_report=None, sessions=None, digests_store=None)
+### openloops.tools.dashboard(, verify=True, resolve=True, owners=None, repos=None, limit=50, candidate_limit=50, max_sessions=40, title='Open Loops Board', standalone=True, path=None, made_at=None, owed_report=None, blocked_report=None, sessions=None, digests_store=None, published_report=None, published_limit=50)
 
 All three answers as one self-contained HTML page, for looking at rather than reading.
 
@@ -71,9 +71,11 @@ to GitHub, here or anywhere in openloops.
 `standalone=False` returns the same page without the document scaffold, for a host
 that supplies its own `<head>`.
 
-Each of the three reads is a seam: pass `owed_report=`, `blocked_report=` or
-`sessions=` and that one is not performed. With all three passed this reaches no
-network and needs no `gh`, which is how the tests run.
+Each read is a seam: pass `owed_report=`, `blocked_report=`, `sessions=` or
+`published_report=` and that one is not performed. With all four passed this
+reaches no network and needs no `gh` or `annals`, which is how the tests run.
+The “Handed to you” register (recent annals documents per session) comes from
+[`published()`](#openloops.tools.published); pass `published_report=False` to leave it off the page.
 
 `counts` comes back alongside the page and carries `null` — not `0` — for any
 figure that could not be established, so a caller reading the JSON is held to the

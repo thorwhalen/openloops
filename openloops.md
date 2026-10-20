@@ -1,4 +1,4 @@
-> built 2026-10-20 11:44 UTC from 79c97a4 (main) · openloops 0.1.17. Details: build_info.json
+> built 2026-10-20 12:48 UTC from 232b353 (main) · openloops 0.1.18. Details: build_info.json
 
 # index.html.md
 
@@ -1427,10 +1427,11 @@ True
 
 ### Module Attributes
 
-| [`DFLT_TITLE`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.DFLT_TITLE)        | What the page is called — in the tab, in a gallery, and in its own masthead.   |
-|--------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| [`DFLT_MAX_SESSIONS`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.DFLT_MAX_SESSIONS) | How many session rows are printed.                                             |
-| [`GAUGE_FULL_DAYS`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.GAUGE_FULL_DAYS)   | Where the age gauge tops out.                                                  |
+| [`DFLT_TITLE`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.DFLT_TITLE)                 | What the page is called — in the tab, in a gallery, and in its own masthead.   |
+|-----------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| [`DFLT_MAX_SESSIONS`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.DFLT_MAX_SESSIONS)          | How many session rows are printed.                                             |
+| [`DFLT_PUBLISHED_PER_SESSION`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.DFLT_PUBLISHED_PER_SESSION) | How many documents each session shows in the "Handed to you" register.         |
+| [`GAUGE_FULL_DAYS`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.GAUGE_FULL_DAYS)            | Where the age gauge tops out.                                                  |
 
 ### Functions
 
@@ -1451,6 +1452,10 @@ True
 
 How many session rows are printed. The register states the true total either way; a
 page that showed all 150-odd would bury the two registers above it.
+
+### openloops.dashboard.DFLT_PUBLISHED_PER_SESSION *= 3*
+
+How many documents each session shows in the “Handed to you” register.
 
 ### openloops.dashboard.DFLT_TITLE *= 'Open Loops Board'*
 
@@ -1581,7 +1586,7 @@ unquoted attribute, so they are the two that must be literals or already safe.
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
-### openloops.dashboard.render_dashboard(owed, blocked, sessions, , made_at=None, source='', title='Open Loops Board', max_sessions=40, standalone=True, aliases=None)
+### openloops.dashboard.render_dashboard(owed, blocked, sessions, , made_at=None, source='', title='Open Loops Board', max_sessions=40, standalone=True, aliases=None, published=None, published_per_session=3)
 
 The three envelopes as one self-contained HTML page. No network, no script.
 
@@ -1600,6 +1605,12 @@ Pass `False` for a host that supplies its own `<head>` — a published artifact
 does — and the same page comes back as title, styles and content only.
 
 `max_sessions` bounds the in-flight register; the true total is stated either way.
+
+`published` is the envelope `openloops.published()` returns. When given, a
+“Handed to you” register lists each session’s most recent documents
+(`published_per_session` of them, with the true total stated); an envelope that
+never listed renders as unknown, not as “nothing published”. When omitted the
+register is left out, so the page is the one it always was.
 
 ```pycon
 >>> page = render_dashboard(
@@ -2939,7 +2950,7 @@ True
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
-### openloops.render_dashboard(owed, blocked, sessions, , made_at=None, source='', title='Open Loops Board', max_sessions=40, standalone=True, aliases=None)
+### openloops.render_dashboard(owed, blocked, sessions, , made_at=None, source='', title='Open Loops Board', max_sessions=40, standalone=True, aliases=None, published=None, published_per_session=3)
 
 The three envelopes as one self-contained HTML page. No network, no script.
 
@@ -2958,6 +2969,12 @@ Pass `False` for a host that supplies its own `<head>` — a published artifact
 does — and the same page comes back as title, styles and content only.
 
 `max_sessions` bounds the in-flight register; the true total is stated either way.
+
+`published` is the envelope `openloops.published()` returns. When given, a
+“Handed to you” register lists each session’s most recent documents
+(`published_per_session` of them, with the true total stated); an envelope that
+never listed renders as unknown, not as “nothing published”. When omitted the
+register is left out, so the page is the one it always was.
 
 ```pycon
 >>> page = render_dashboard(
@@ -4061,7 +4078,7 @@ itself failed — must not be readable as “nothing is waiting”.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.tools.dashboard(, verify=True, resolve=True, owners=None, repos=None, limit=50, candidate_limit=50, max_sessions=40, title='Open Loops Board', standalone=True, path=None, made_at=None, owed_report=None, blocked_report=None, sessions=None, digests_store=None)
+### openloops.tools.dashboard(, verify=True, resolve=True, owners=None, repos=None, limit=50, candidate_limit=50, max_sessions=40, title='Open Loops Board', standalone=True, path=None, made_at=None, owed_report=None, blocked_report=None, sessions=None, digests_store=None, published_report=None, published_limit=50)
 
 All three answers as one self-contained HTML page, for looking at rather than reading.
 
@@ -4075,9 +4092,11 @@ to GitHub, here or anywhere in openloops.
 `standalone=False` returns the same page without the document scaffold, for a host
 that supplies its own `<head>`.
 
-Each of the three reads is a seam: pass `owed_report=`, `blocked_report=` or
-`sessions=` and that one is not performed. With all three passed this reaches no
-network and needs no `gh`, which is how the tests run.
+Each read is a seam: pass `owed_report=`, `blocked_report=`, `sessions=` or
+`published_report=` and that one is not performed. With all four passed this
+reaches no network and needs no `gh` or `annals`, which is how the tests run.
+The “Handed to you” register (recent annals documents per session) comes from
+[`published()`](_autosummary/openloops.tools.html.md#openloops.tools.published); pass `published_report=False` to leave it off the page.
 
 `counts` comes back alongside the page and carries `null` — not `0` — for any
 figure that could not be established, so a caller reading the JSON is held to the
@@ -4396,18 +4415,16 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-10-20 11:44 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/79c97a477a5ce0e369cc7e243c04b5b58e16a91e"><code>79c97a4</code></a> on branch <code>main</code>, for **openloops 0.1.17** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 12:48 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/232b353279ae976d9b0cde77eeacbc7d26d12172"><code>232b353</code></a> on branch <code>main</code>, for **openloops 0.1.18** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.1.17) is behind the latest release on PyPI (0.1.18): `pip install openloops` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/79c97a477a5ce0e369cc7e243c04b5b58e16a91e"><code>79c97a477a5ce0e369cc7e243c04b5b58e16a91e</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/232b353279ae976d9b0cde77eeacbc7d26d12172"><code>232b353279ae976d9b0cde77eeacbc7d26d12172</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -4418,15 +4435,15 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/39416844418">39416844418</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/39424896801">39424896801</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>79c97a477a5ce0e369cc7e243c04b5b58e16a91e</code> (in the history of the built commit) |
+| Event commit | <code>232b353279ae976d9b0cde77eeacbc7d26d12172</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.19  |
+| epythet  | 0.2.20  |
 | Sphinx   | 9.1.1   |
 | docutils | 0.22.4  |
 | Python   | 3.12.15 |
@@ -4445,14 +4462,14 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.18/">0.1.18</a>, newer than the documented version (0.1.17).
+Latest release: <a href="https://pypi.org/project/openloops/0.1.18/">0.1.18</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 79c97a477a5ce0e369cc7e243c04b5b58e16a91e
-pip install "epythet==0.2.19"
+git checkout 232b353279ae976d9b0cde77eeacbc7d26d12172
+pip install "epythet==0.2.20"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 

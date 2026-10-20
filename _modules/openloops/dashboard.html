@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="../../_static/documentation_options.js?v=71734efd"></script>
+    <script src="../../_static/documentation_options.js?v=9969ed3f"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.17" />
+  <meta name="docsearch:version" content="0.1.18" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -779,6 +779,7 @@ window.runMermaid = runMermaid;</script>
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">"CSS"</span><span class="p">,</span>
     <span class="s2">"DFLT_MAX_SESSIONS"</span><span class="p">,</span>
+    <span class="s2">"DFLT_PUBLISHED_PER_SESSION"</span><span class="p">,</span>
     <span class="s2">"DFLT_TITLE"</span><span class="p">,</span>
     <span class="s2">"GAUGE_FULL_DAYS"</span><span class="p">,</span>
     <span class="s2">"Sanitizer"</span><span class="p">,</span>
@@ -796,6 +797,9 @@ window.runMermaid = runMermaid;</script>
 <span class="c1">#: How many session rows are printed. The register states the true total either way; a</span>
 <span class="c1">#: page that showed all 150-odd would bury the two registers above it.</span>
 <span class="n">DFLT_MAX_SESSIONS</span> <span class="o">=</span> <span class="mi">40</span>
+
+<span class="c1">#: How many documents each session shows in the "Handed to you" register.</span>
+<span class="n">DFLT_PUBLISHED_PER_SESSION</span> <span class="o">=</span> <span class="mi">3</span>
 
 <span class="c1">#: How many low-confidence sessions the unknown register names one by one before it</span>
 <span class="c1">#: switches to counting them. Every one of them is still counted.</span>
@@ -1523,6 +1527,8 @@ window.runMermaid = runMermaid;</script>
     <span class="n">max_sessions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_MAX_SESSIONS</span><span class="p">,</span>
     <span class="n">standalone</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">aliases</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">published</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">published_per_session</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_PUBLISHED_PER_SESSION</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""The three envelopes as one self-contained HTML page. No network, no script.</span>
 
@@ -1541,6 +1547,12 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    does — and the same page comes back as title, styles and content only.</span>
 
 <span class="sd">    ``max_sessions`` bounds the in-flight register; the true total is stated either way.</span>
+
+<span class="sd">    ``published`` is the envelope :func:`openloops.published` returns. When given, a</span>
+<span class="sd">    "Handed to you" register lists each session's most recent documents</span>
+<span class="sd">    (``published_per_session`` of them, with the true total stated); an envelope that</span>
+<span class="sd">    never listed renders as unknown, not as "nothing published". When omitted the</span>
+<span class="sd">    register is left out, so the page is the one it always was.</span>
 
 <span class="sd">    &gt;&gt;&gt; page = render_dashboard(</span>
 <span class="sd">    ...     {'listed': False, 'error': 'gh: not logged in', 'counts': {}},</span>
@@ -1573,6 +1585,11 @@ window.runMermaid = runMermaid;</script>
         <span class="n">_needs_register</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">owed</span><span class="p">),</span>
         <span class="n">_free_register</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">blocked</span><span class="p">),</span>
         <span class="n">_flight_register</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span> <span class="n">now</span><span class="p">,</span> <span class="n">max_sessions</span><span class="o">=</span><span class="n">max_sessions</span><span class="p">),</span>
+        <span class="p">(</span>
+            <span class="n">_published_register</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">published</span><span class="p">,</span> <span class="n">per_session</span><span class="o">=</span><span class="n">published_per_session</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">published</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="s2">""</span>
+        <span class="p">),</span>
         <span class="n">_unknown_register</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">unknowns</span><span class="p">,</span> <span class="n">counts</span><span class="p">[</span><span class="s2">"unknown"</span><span class="p">],</span> <span class="n">owed</span><span class="p">,</span> <span class="n">blocked</span><span class="p">,</span> <span class="n">sessions</span><span class="p">),</span>
         <span class="n">_footer</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span> <span class="n">stamp</span><span class="p">),</span>
     <span class="p">]</span>
@@ -1798,6 +1815,63 @@ window.runMermaid = runMermaid;</script>
     <span class="p">)</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_published_register</span><span class="p">(</span>
+    <span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span> <span class="n">published</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">per_session</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Recent annals documents, a short column per session."""</span>
+    <span class="n">published</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">published</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">published</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">):</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">_cannot</span><span class="p">(</span>
+            <span class="n">safe</span><span class="p">,</span>
+            <span class="s2">"ol published"</span><span class="p">,</span>
+            <span class="n">published</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"error"</span><span class="p">),</span>
+            <span class="s2">"no documents were published"</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">figure</span> <span class="o">=</span> <span class="s2">"?"</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">published</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"rows"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span>
+        <span class="n">by_session</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>  <span class="c1"># rows arrive newest first</span>
+            <span class="n">by_session</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"session"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"(unattributed)"</span><span class="p">),</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">by_session</span><span class="p">:</span>
+            <span class="n">body</span> <span class="o">=</span> <span class="n">_empty</span><span class="p">(</span><span class="s2">"No documents have been published by a session."</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">docs</span> <span class="ow">in</span> <span class="n">by_session</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">items</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"&lt;li&gt;</span><span class="si">{</span><span class="n">_doc_link</span><span class="p">(</span><span class="n">safe</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;span class=</span><span class="se">\"</span><span class="s2">when</span><span class="se">\"</span><span class="s2">&gt;"</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'when'</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">''</span><span class="p">)[:</span><span class="mi">10</span><span class="p">])</span><span class="si">}</span><span class="s2">&lt;/span&gt;&lt;/li&gt;"</span>
+                    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">[:</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">per_session</span><span class="p">)]</span>
+                <span class="p">)</span>
+                <span class="n">more</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'&lt;li class="empty"&gt;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">per_session</span><span class="si">}</span><span class="s1"> more&lt;/li&gt;'</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">per_session</span>
+                    <span class="k">else</span> <span class="s2">""</span>
+                <span class="p">)</span>
+                <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'&lt;section class="shelf"&gt;&lt;h4&gt;</span><span class="si">{</span><span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span>
+                    <span class="sa">f</span><span class="s2">" &lt;b&gt;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/b&gt;&lt;/h4&gt;&lt;ul&gt;</span><span class="si">{</span><span class="n">items</span><span class="si">}{</span><span class="n">more</span><span class="si">}</span><span class="s2">&lt;/ul&gt;&lt;/section&gt;"</span>
+                <span class="p">)</span>
+            <span class="n">body</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'&lt;div class="shelves"&gt;</span><span class="si">{</span><span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/div&gt;'</span>
+        <span class="n">figure</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">register</span><span class="p">(</span>
+        <span class="n">ident</span><span class="o">=</span><span class="s2">"published"</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"Handed to you"</span><span class="p">,</span>
+        <span class="n">figure</span><span class="o">=</span><span class="n">figure</span><span class="p">,</span>
+        <span class="n">tone</span><span class="o">=</span><span class="s2">"flight"</span><span class="p">,</span>
+        <span class="n">rule</span><span class="o">=</span><span class="s2">"Documents your sessions published with &lt;code&gt;annals publish --session&lt;/code&gt;, "</span>
+        <span class="s2">"newest first. Titles and links are what the session said it made; nothing here "</span>
+        <span class="s2">"was opened."</span><span class="p">,</span>
+        <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_doc_link</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span> <span class="n">doc</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">safe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"id"</span><span class="p">))</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">safe</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"url"</span><span class="p">))</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'&lt;a href="</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s1">"&gt;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s1">&lt;/a&gt;'</span> <span class="k">if</span> <span class="n">url</span> <span class="k">else</span> <span class="n">title</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_project_tally</span><span class="p">(</span><span class="n">safe</span><span class="p">:</span> <span class="n">Sanitizer</span><span class="p">,</span> <span class="n">sessions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Where the open sessions actually are. A hundred rows do not answer that; this does."""</span>
     <span class="n">counts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1894,6 +1968,15 @@ window.runMermaid = runMermaid;</script>
 <span class="c1">#: The dark palette, written once and injected into both blocks that can select it —</span>
 <span class="c1">#: the `prefers-color-scheme` one for the un-stamped default and the `data-theme` one</span>
 <span class="c1">#: for an explicit toggle. Two copies of a palette drift; one copy cannot.</span>
+<span class="n">_PUBLISHED_CSS</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">.shelves{display:flex;flex-wrap:wrap;gap:1rem}</span>
+<span class="s2">.shelf{flex:1 1 14rem;min-width:0}</span>
+<span class="s2">.shelf h4{margin:0 0 .3rem}</span>
+<span class="s2">.shelf ul{list-style:none;margin:0;padding:0}</span>
+<span class="s2">.shelf li{display:flex;justify-content:space-between;gap:.5rem}</span>
+<span class="s2">.shelf .when{opacity:.6;white-space:nowrap}</span>
+<span class="s2">"""</span>
+
 <span class="n">_DARK_TOKENS</span> <span class="o">=</span> <span class="s2">"""</span>
 <span class="s2">  --ground:#0e1211; --surface:#151b19; --sunk:#111615;</span>
 <span class="s2">  --ink:#e4e8e3; --ink-soft:#94a29d; --rule:#29312e; --rule-soft:#1e2523;</span>
@@ -2146,6 +2229,7 @@ window.runMermaid = runMermaid;</script>
 <span class="s2">}</span>
 <span class="s2">@media (prefers-reduced-motion:reduce){ *{transition:none !important; animation:none !important} }</span>
 <span class="s2">"""</span>
+    <span class="o">+</span> <span class="n">_PUBLISHED_CSS</span>
 <span class="p">)</span>
 
 

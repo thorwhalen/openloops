@@ -978,7 +978,7 @@ True
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
-### openloops.render_dashboard(owed, blocked, sessions, , made_at=None, source='', title='Open Loops Board', max_sessions=40, standalone=True, aliases=None)
+### openloops.render_dashboard(owed, blocked, sessions, , made_at=None, source='', title='Open Loops Board', max_sessions=40, standalone=True, aliases=None, published=None, published_per_session=3)
 
 The three envelopes as one self-contained HTML page. No network, no script.
 
@@ -997,6 +997,12 @@ Pass `False` for a host that supplies its own `<head>` — a published artifact
 does — and the same page comes back as title, styles and content only.
 
 `max_sessions` bounds the in-flight register; the true total is stated either way.
+
+`published` is the envelope `openloops.published()` returns. When given, a
+“Handed to you” register lists each session’s most recent documents
+(`published_per_session` of them, with the true total stated); an envelope that
+never listed renders as unknown, not as “nothing published”. When omitted the
+register is left out, so the page is the one it always was.
 
 ```pycon
 >>> page = render_dashboard(

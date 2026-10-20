@@ -55,10 +55,11 @@ True
 
 ### Module Attributes
 
-| [`DFLT_TITLE`](#openloops.dashboard.DFLT_TITLE)        | What the page is called — in the tab, in a gallery, and in its own masthead.   |
-|--------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| [`DFLT_MAX_SESSIONS`](#openloops.dashboard.DFLT_MAX_SESSIONS) | How many session rows are printed.                                             |
-| [`GAUGE_FULL_DAYS`](#openloops.dashboard.GAUGE_FULL_DAYS)   | Where the age gauge tops out.                                                  |
+| [`DFLT_TITLE`](#openloops.dashboard.DFLT_TITLE)                 | What the page is called — in the tab, in a gallery, and in its own masthead.   |
+|-----------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| [`DFLT_MAX_SESSIONS`](#openloops.dashboard.DFLT_MAX_SESSIONS)          | How many session rows are printed.                                             |
+| [`DFLT_PUBLISHED_PER_SESSION`](#openloops.dashboard.DFLT_PUBLISHED_PER_SESSION) | How many documents each session shows in the "Handed to you" register.         |
+| [`GAUGE_FULL_DAYS`](#openloops.dashboard.GAUGE_FULL_DAYS)            | Where the age gauge tops out.                                                  |
 
 ### Functions
 
@@ -79,6 +80,10 @@ True
 
 How many session rows are printed. The register states the true total either way; a
 page that showed all 150-odd would bury the two registers above it.
+
+### openloops.dashboard.DFLT_PUBLISHED_PER_SESSION *= 3*
+
+How many documents each session shows in the “Handed to you” register.
 
 ### openloops.dashboard.DFLT_TITLE *= 'Open Loops Board'*
 
@@ -209,7 +214,7 @@ unquoted attribute, so they are the two that must be literals or already safe.
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
-### openloops.dashboard.render_dashboard(owed, blocked, sessions, , made_at=None, source='', title='Open Loops Board', max_sessions=40, standalone=True, aliases=None)
+### openloops.dashboard.render_dashboard(owed, blocked, sessions, , made_at=None, source='', title='Open Loops Board', max_sessions=40, standalone=True, aliases=None, published=None, published_per_session=3)
 
 The three envelopes as one self-contained HTML page. No network, no script.
 
@@ -228,6 +233,12 @@ Pass `False` for a host that supplies its own `<head>` — a published artifact
 does — and the same page comes back as title, styles and content only.
 
 `max_sessions` bounds the in-flight register; the true total is stated either way.
+
+`published` is the envelope `openloops.published()` returns. When given, a
+“Handed to you” register lists each session’s most recent documents
+(`published_per_session` of them, with the true total stated); an envelope that
+never listed renders as unknown, not as “nothing published”. When omitted the
+register is left out, so the page is the one it always was.
 
 ```pycon
 >>> page = render_dashboard(
