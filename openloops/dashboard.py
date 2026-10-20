@@ -322,6 +322,13 @@ def _obligation_row(
         lines.append(
             f'<p class="line"><span class="tag">said</span><code>{evidence}</code></p>'
         )
+    for link in row.get("documents") or ():
+        href = safe.url(link)
+        if href:
+            lines.append(
+                f'<p class="line"><span class="tag">doc</span>'
+                f'<a class="ref" href="{href}">{href}</a></p>'
+            )
     lines += ["</div>", _gauge(days, tone), "</li>"]
     return "".join(lines)
 

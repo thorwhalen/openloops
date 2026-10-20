@@ -190,6 +190,8 @@ def _owed_report(report: dict) -> str:
         lines.append(f"          verify: {row['predicate'] or '(none)'}")
         if row["evidence"]:
             lines.append(f"                  -> {row['evidence']}")
+        for link in row.get("documents") or ():
+            lines.append(f"          doc: {link}")
     if not report["rows"]:
         lines.append("(nothing owed)")
     return "\n".join(lines)

@@ -771,3 +771,13 @@ def test_every_shell_s_way_of_saying_it_could_not_run_reads_unknown(status, stde
     tool prints a confident count it never earned.
     """
     assert not_an_answer(status, stderr) != ""
+
+
+def test_annals_links_in_the_body_are_carried_once_each():
+    link = "https://apps.thorwhalen.com/annals/d/abc12"
+    row = only([issue(body=f"**Ask:** read {link}, then {link}.\n")])
+    assert row["documents"] == (link,)
+
+
+def test_a_body_without_a_document_link_carries_none():
+    assert only([issue()])["documents"] == ()
