@@ -1091,14 +1091,16 @@ def _published_register(
         rows = list(published.get("rows") or [])
         by_session: dict[str, list[Mapping[str, Any]]] = {}
         for row in rows:  # rows arrive newest first
-            by_session.setdefault(str(row.get("session") or "(unattributed)"), []).append(row)
+            by_session.setdefault(
+                str(row.get("session") or "(unattributed)"), []
+            ).append(row)
         if not by_session:
             body = _empty("No documents have been published by a session.")
         else:
             columns = []
             for name, docs in by_session.items():
                 items = "".join(
-                    f"<li>{_doc_link(safe, d)}<span class=\"when\">"
+                    f'<li>{_doc_link(safe, d)}<span class="when">'
                     f"{safe.text(str(d.get('when') or '')[:10])}</span></li>"
                     for d in docs[: max(0, per_session)]
                 )
