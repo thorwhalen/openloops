@@ -51,8 +51,14 @@ from openloops.store import board_docs_store
 
 __all__ = ["IMPORT_FLAG", "file_lock", "mk_app"]
 
-#: Private and changing: never cached by a browser or a proxy.
-NO_STORE = {"Cache-Control": "no-store"}
+#: Private and changing: never cached by a browser or a proxy. Never framed either (a
+#: page on the same site could otherwise trick taps on "done"), never content-sniffed.
+NO_STORE = {
+    "Cache-Control": "no-store",
+    "Content-Security-Policy": "frame-ancestors 'none'",
+    "X-Frame-Options": "DENY",
+    "X-Content-Type-Options": "nosniff",
+}
 #: Its presence in the store root allows imports; see the module docstring.
 IMPORT_FLAG = ".import-open"
 _LOCK_NAME = ".lock"
