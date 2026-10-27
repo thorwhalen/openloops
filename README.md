@@ -26,12 +26,14 @@ ol install-skills            # link the skills and the subagent into ~/.claude
 
 ```
 installed into ~/.claude
-  method: symlink   install: 3   ok: 0   conflict: 0
+  method: symlink   install: 4   ok: 0   conflict: 0
 
 install  skill  openloops                 not present
                   -> ~/.claude/skills/openloops
 install  skill  openloops-needs-human     not present
                   -> ~/.claude/skills/openloops-needs-human
+install  skill  openloops-phone-board     not present
+                  -> ~/.claude/skills/openloops-phone-board
 install  agent  openloops-sweep           not present
                   -> ~/.claude/agents/openloops-sweep.md
 ```
