@@ -358,7 +358,9 @@ def test_the_page_is_byte_stable_for_a_given_moment():
 def test_every_open_tag_is_closed():
     html = page(
         owed=owed_envelope(obligation(), obligation(number=8, state="discharged")),
-        blocked=blocked_envelope(blocked_row(), blocked_row(number=27, state="blocked")),
+        blocked=blocked_envelope(
+            blocked_row(), blocked_row(number=27, state="blocked")
+        ),
         sessions=[session(), session(session="b" * 16, confidence="low")],
     )
     body = re.search(r"<main\b.*</main>", html, re.S).group(0)
@@ -366,7 +368,9 @@ def test_every_open_tag_is_closed():
     stack: list[str] = []
     for closing, name in re.findall(r"<(/?)([a-z0-9]+)", body):
         if closing:
-            assert stack and stack[-1] == name, f"{name} closed out of order: {stack[-3:]}"
+            assert stack and stack[-1] == name, (
+                f"{name} closed out of order: {stack[-3:]}"
+            )
             stack.pop()
         elif name not in void:
             stack.append(name)
@@ -453,7 +457,12 @@ def test_the_cli_verb_prints_a_page_and_a_written_summary(tmp_path, monkeypatch)
         "path": str(tmp_path / "b.html"),
         "bytes": 16,
         "made_at": STAMP,
-        "counts": {"needs_you": None, "free_to_proceed": 2, "in_flight": 0, "unknown": None},
+        "counts": {
+            "needs_you": None,
+            "free_to_proceed": 2,
+            "in_flight": 0,
+            "unknown": None,
+        },
     }
     monkeypatch.setattr(tools, "dashboard", lambda **kw: canned)
     assert cli.dashboard() == "<title>x</title>"
@@ -648,7 +657,9 @@ def test_an_obligation_row_links_its_published_document():
 
 
 def test_published_documents_are_listed_per_session_newest_first_and_capped():
-    rows = [doc("a", f"Doc {i}", when=f"2026-01-{30 - i:02d}T00:00:00Z") for i in range(5)]
+    rows = [
+        doc("a", f"Doc {i}", when=f"2026-01-{30 - i:02d}T00:00:00Z") for i in range(5)
+    ]
     rows.append(doc("b", "Other"))
     html = tools.dashboard(
         owed_report=owed_envelope(),
@@ -671,7 +682,10 @@ def test_an_unlisted_published_report_is_unknown_not_empty():
         made_at=STAMP,
         published_report=published_envelope(listed=False, error="annals not installed"),
     )["html"]
-    assert "annals not installed" in html and "No documents have been published" not in html
+    assert (
+        "annals not installed" in html
+        and "No documents have been published" not in html
+    )
 
 
 def test_published_report_false_leaves_the_register_off():
@@ -695,4 +709,6 @@ def test_published_titles_and_links_are_escaped_and_scheme_checked():
             doc("<b>s</b>", "<script>x</script>", url="javascript:alert(1)")
         ),
     )["html"]
-    assert "<script>x" not in html and "javascript:" not in html and "<b>s</b>" not in html
+    assert (
+        "<script>x" not in html and "javascript:" not in html and "<b>s</b>" not in html
+    )

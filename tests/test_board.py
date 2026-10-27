@@ -53,7 +53,7 @@ def test_extras_overlay_a_run_and_absorb_another():
     }
     runs = board.group_runs(tasks, extras=extras)
     assert [r["key"] for r in runs] == ["npm-trusted-publisher"]
-    assert runs[0]["ids"] == ["a/n#1", "a/n#2", "a/f#3", "a/f#4"]
+    assert runs[0]["ids"] == ["a/f#3", "a/f#4", "a/n#1", "a/n#2"]
     assert runs[0]["prompt"] == "do it" and runs[0]["packages"] == [{"pkg": "x"}]
 
 
@@ -171,3 +171,26 @@ def test_tools_board_gather_writes_its_envelope_when_asked(tmp_path):
         owners=["acme"], run_gh=lambda args, *, timeout: "[]", out=str(out)
     )
     assert report["path"] == str(out) and json.loads(out.read_text())["listed"] is True
+
+
+def test_a_donor_too_small_for_its_own_run_is_still_absorbed_once():
+    tasks = [_t(f"a/n#{i}", pattern="npm-trusted-publisher") for i in (1, 2)]
+    tasks += [_t("a/f#3", pattern="npm-first-publish")]
+    extras = {
+        "npm-trusted-publisher": {"absorb": ["npm-first-publish", "npm-first-publish"]}
+    }
+    runs = board.group_runs(tasks, extras=extras)
+    assert [(r["key"], r["ids"]) for r in runs] == [
+        ("npm-trusted-publisher", ["a/f#3", "a/n#1", "a/n#2"])
+    ]
+
+
+def test_sloppy_minutes_from_a_classifier_do_not_break_the_sort(tmp_path):
+    records = [
+        _t("a/x#1", minutes="5"),
+        _t("a/y#2", minutes="soon"),
+        _t("a/z#3", minutes=None),
+    ]
+    result = board.build_board(records, tmp_path)
+    written = json.loads((tmp_path / "tasks.json").read_text())
+    assert result["tasks"] == 3 and {t["minutes"] for t in written} == {5, None}

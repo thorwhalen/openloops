@@ -158,9 +158,16 @@ class Task:
         """
         known = {f.name for f in fields(cls)}
         values = {k: v for k, v in record.items() if k in known}
-        if not values.get("id"):
-            values["id"] = _id_of(values.get("url") or "")
+        # A GitHub URL decides the id, so a heuristic record and a brief's record for
+        # the same item always share a key, whichever of the two fields each one set.
+        url = values.get("url") or ""
+        values["id"] = (
+            _id_of(url) if _GITHUB_ITEM.match(url) else values.get("id") or url
+        )
+        for name in ("title", "ask"):
+            values[name] = str(values.get(name) or "")
         task = cls(**values)
+        task.minutes = _int_or_none(task.minutes)
         if task.tier not in TIERS:
             task.tier = "session"
         if task.pattern not in PATTERNS:
@@ -182,13 +189,24 @@ class Task:
 TASK_FIELDS = tuple(f.name for f in fields(Task))
 
 
+_GITHUB_ITEM = re.compile(r"https://github\.com/([^/]+/[^/]+)/(?:issues|pull)/(\d+)")
+
+
+def _int_or_none(value: Any) -> int | None:
+    """Minutes as an int: ``"5"`` and ``5.0`` are 5, anything unparseable is ``None``."""
+    try:
+        return int(float(value))
+    except (TypeError, ValueError):
+        return None
+
+
 def _id_of(url: str) -> str:
     """``owner/repo#N`` from an issue or PR URL; the URL itself when it is not one.
 
     >>> _id_of('https://github.com/acme/widget/pull/12')
     'acme/widget#12'
     """
-    m = re.match(r"https://github\.com/([^/]+/[^/]+)/(?:issues|pull)/(\d+)", url or "")
+    m = _GITHUB_ITEM.match(url or "")
     return f"{m[1]}#{m[2]}" if m else url
 
 
@@ -262,17 +280,26 @@ def gather(
     unknown = [name for name in searches if name not in DFLT_SEARCHES]
     if unknown:
         raise ValueError(f"unknown search {unknown}; known: {sorted(DFLT_SEARCHES)}")
-    excluded = set(exclude_owners)
-    globs = (
-        tuple(exclude_repos)
-        if exclude_repos is not None
-        else _split(os.environ.get(EXCLUDE_ENV_VAR))
+    # GitHub names are case-insensitive, so every comparison here is too: an exclusion
+    # that misses `Acme/w` because it was written `acme/*` leaks that repo onto a board.
+    excluded = {o.lower() for o in exclude_owners}
+    globs = tuple(
+        g.lower()
+        for g in (
+            exclude_repos
+            if exclude_repos is not None
+            else _split(os.environ.get(EXCLUDE_ENV_VAR))
+        )
     )
     try:
         resolved = tuple(owners) if owners else configured_owners(timeout=timeout)
     except GhUnavailable as exc:
         return _envelope([], owners=(), errors=[str(exc)], saturated=[], queries=[])
-    resolved = tuple(o for o in resolved if o not in excluded)
+    unique: dict[str, str] = {}
+    for owner in resolved:
+        if owner.lower() not in excluded:
+            unique.setdefault(owner.lower(), owner)
+    resolved = tuple(unique.values())
 
     queries: list[tuple[str, str, list[str]]] = []
     for owner in resolved:
@@ -345,8 +372,9 @@ def gather(
             candidate = _candidate(row, src=name)
             if not candidate["url"] or candidate["url"] in seen:
                 continue
-            if candidate["repo"].split("/")[0] in excluded or any(
-                fnmatch.fnmatch(candidate["repo"], g) for g in globs
+            repo = candidate["repo"].lower()
+            if repo.split("/")[0] in excluded or any(
+                fnmatch.fnmatchcase(repo, g) for g in globs
             ):
                 continue
             seen[candidate["url"]] = candidate
@@ -703,9 +731,10 @@ def classify(
 def merge_records(*sources: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
     """Records from several sources, one per item, later sources winning.
 
-    Keyed by URL (by ``id`` for an item without one). A later record replaces the
-    earlier one whole, except that an empty ``created`` is filled from it: the
-    classifier brief reads threads, the gatherer knows dates.
+    Keyed by ``id`` (derived from the URL for a GitHub item, so the two sources agree);
+    a record with no id and no URL is dropped. A later record replaces the
+    earlier one whole, except that an empty ``url`` or ``created`` is filled from it:
+    the classifier brief reads threads, the gatherer knows dates.
 
     >>> heuristic = [{'id': 'a/b#1', 'url': 'u1', 'tier': 'browser', 'created': '2026-01-02'}]
     >>> enriched = [{'id': 'a/b#1', 'url': 'u1', 'tier': 'tap', 'ask': 'Say yes'}]
@@ -716,10 +745,13 @@ def merge_records(*sources: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]
     for source in sources:
         for record in source:
             task = Task.from_mapping(record).as_dict()
-            key = task["url"] or task["id"]
+            key = task["id"]
+            if not key:
+                continue
             earlier = merged.get(key)
-            if earlier and not task["created"]:
-                task["created"] = earlier["created"]
+            for name in ("url", "created"):
+                if earlier and not task[name]:
+                    task[name] = earlier[name]
             merged[key] = task
     return list(merged.values())
 
@@ -727,12 +759,17 @@ def merge_records(*sources: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]
 def load_records(paths: Iterable[str | Path]) -> list[dict[str, Any]]:
     """The records in JSON files (each a list, or an envelope with ``candidates``).
 
-    Globs are expanded, in sorted order, so ``out_*.json`` reads a batch directory.
+    Globs are expanded, in sorted order, so ``out_*.json`` reads a batch directory. A
+    glob that matches nothing raises: the batches a subagent failed to write must not
+    quietly turn into a board built from the heuristic alone.
     """
     found: list[dict[str, Any]] = []
     for raw in paths:
         raw = str(raw)
-        for path in sorted(glob.glob(raw)) if glob.has_magic(raw) else [raw]:
+        matched = sorted(glob.glob(raw)) if glob.has_magic(raw) else [raw]
+        if not matched:
+            raise FileNotFoundError(f"no file matches {raw!r}")
+        for path in matched:
             data = json.loads(Path(path).read_text(encoding="utf-8"))
             if isinstance(data, Mapping):
                 data = data.get("candidates") or data.get("records") or []

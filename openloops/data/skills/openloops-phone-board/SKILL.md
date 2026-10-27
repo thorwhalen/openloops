@@ -43,7 +43,7 @@ ol board-build WORK/board WORK/records.json -c WORK/candidates.json \
   --session <this session's name> --read-only-orgs <orgs never to comment in> --machine <default machine>
 ```
 
-Writes `index.html`, `kit.html`, `tasks.json`, `runs.json`, `board.json`. Runs come from the packaged run specs; `--run-specs FILE` replaces them and `--run-extras FILE` overlays per-run additions (a JSON object keyed by run: `title`, `why`, `steps`, `prompt`, `machine`, a `packages` table, and `absorb: ["npm-first-publish"]` to fold another run into this one). Edit `kit.html` in the output if the owner needs deployment-specific advice; it is the page's "Phone kit" tab.
+Writes `index.html`, `kit.html`, `tasks.json`, `runs.json`, `board.json`. Always pass `--read-only-orgs` for every organisation agents must never write to: the page hides closing for those orgs (and for all orgs if `board.json` fails to load), and the receiver unions this list with the one the owner gave it directly. Runs come from the packaged run specs; `--run-specs FILE` replaces them and `--run-extras FILE` overlays per-run additions (a JSON object keyed by run: `title`, `why`, `steps`, `prompt`, `machine`, a `packages` table, and `absorb: ["npm-first-publish"]` to fold another run into this one). Edit `kit.html` in the output if the owner needs deployment-specific advice; it is the page's "Phone kit" tab.
 
 ## 4. Publish and receive
 
@@ -55,4 +55,4 @@ Writes `index.html`, `kit.html`, `tasks.json`, `runs.json`, `board.json`. Runs c
 
 ## Rebuilding
 
-Rerun stages 1 to 3 into the same `WORK/board` and republish. Task ids are stable (`owner/repo#N`), so events already in the store keep pointing at the right cards.
+Rerun stages 1 to 3 into the same `WORK/board` and republish. The receiver trusts only these files, never the store, for where an action happens and what a run dispatches; an event for a task that a rebuild removed is refused. Task ids are stable (`owner/repo#N`), so events already in the store keep pointing at the right cards.

@@ -34,8 +34,9 @@ def three_sessions(projects_dir):
 
 def test_a_first_sync_writes_one_digest_per_session(projects_dir):
     store = {}
-    result = sync(transcript_source=three_sessions(projects_dir),
-                  digests_store=store, source="m")
+    result = sync(
+        transcript_source=three_sessions(projects_dir), digests_store=store, source="m"
+    )
     assert result["written"] == 3
     assert sorted(store) == ["m/archive/s1.md", "m/open/s2.md", "m/open/s3.md"]
 
@@ -84,8 +85,9 @@ def test_a_reclassified_session_moves_rather_than_duplicating():
     assert sorted(store) == ["m/open/s1.md"]
 
     closed = Session(key="s1", last_assistant_text="Merged. Nothing is pending.")
-    result = sync(transcript_source={"s1": closed}, digests_store=store, source="m",
-                  force=True)
+    result = sync(
+        transcript_source={"s1": closed}, digests_store=store, source="m", force=True
+    )
     assert sorted(store) == ["m/archive/s1.md"]
     assert result["moved"] == 1
 
@@ -103,8 +105,9 @@ def test_a_credential_skips_one_session_loudly_and_writes_nothing_for_it():
     leaked = Session(key="bad", last_assistant_text="token " + "gh" + "p_" + "A" * 36)
     fine = Session(key="ok", last_assistant_text="Merged. Nothing is pending.")
     store = {}
-    result = sync(transcript_source={"bad": leaked, "ok": fine},
-                  digests_store=store, source="m")
+    result = sync(
+        transcript_source={"bad": leaked, "ok": fine}, digests_store=store, source="m"
+    )
     assert sorted(store) == ["m/archive/ok.md"]
     assert [e["session"] for e in result["errors"]] == ["bad"]
     assert "bad" not in load_sync_state()
@@ -118,7 +121,9 @@ def test_a_skipped_session_is_retried_on_the_next_run():
     leaked = Session(key="bad", last_assistant_text="token " + "gh" + "p_" + "A" * 36)
     store = {}
     for _ in range(2):
-        result = sync(transcript_source={"bad": leaked}, digests_store=store, source="m")
+        result = sync(
+            transcript_source={"bad": leaked}, digests_store=store, source="m"
+        )
         assert len(result["errors"]) == 1
 
 
@@ -137,10 +142,23 @@ def test_digests_outlive_their_transcripts_and_are_counted_separately(projects_d
 
 def test_the_report_names_every_number_it_claims():
     line = sync_report_lines(
-        {"source": "m", "scanned": 3, "written": 1, "unchanged": 2, "moved": 0,
-         "digests": 9, "errors": []}
+        {
+            "source": "m",
+            "scanned": 3,
+            "written": 1,
+            "unchanged": 2,
+            "moved": 0,
+            "digests": 9,
+            "errors": [],
+        }
     )[0]
-    for fragment in ("m:", "3 sessions", "1 digest written", "2 unchanged", "9 digests"):
+    for fragment in (
+        "m:",
+        "3 sessions",
+        "1 digest written",
+        "2 unchanged",
+        "9 digests",
+    ):
         assert fragment in line
 
 
@@ -150,7 +168,9 @@ def test_sync_works_with_no_claude_directory_at_all(isolated_dirs):
     assert result["scanned"] == 0 and result["errors"] == []
 
 
-def test_an_emptied_transcript_never_destroys_the_digest_it_already_produced(projects_dir):
+def test_an_emptied_transcript_never_destroys_the_digest_it_already_produced(
+    projects_dir,
+):
     """A retention device losing the only surviving record is its worst failure mode.
 
     Truncation is the easy trigger and involves no error at all: the file reads as zero
@@ -164,8 +184,12 @@ def test_an_emptied_transcript_never_destroys_the_digest_it_already_produced(pro
     assert "Fixed and merged" in good
 
     source.path_of("s1").write_text("")
-    result = sync(transcript_source=ClaudeCodeTranscripts(), digests_store=store,
-                  source="m", force=True)
+    result = sync(
+        transcript_source=ClaudeCodeTranscripts(),
+        digests_store=store,
+        source="m",
+        force=True,
+    )
 
     assert store.get("m/archive/s1.md") == good, "the good digest must stand"
     assert [e["session"] for e in result["errors"]] == ["s1"]
@@ -181,8 +205,12 @@ def test_an_unreadable_transcript_is_reported_not_swallowed(projects_dir):
     path = source.path_of("s1")
     path.chmod(0o000)
     try:
-        result = sync(transcript_source=ClaudeCodeTranscripts(), digests_store={},
-                      source="m", force=True)
+        result = sync(
+            transcript_source=ClaudeCodeTranscripts(),
+            digests_store={},
+            source="m",
+            force=True,
+        )
     finally:
         path.chmod(0o644)
     assert [e["session"] for e in result["errors"]] == ["s1"]

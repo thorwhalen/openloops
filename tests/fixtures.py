@@ -29,7 +29,9 @@ def user(text: str, *, at: str, cwd: str = "/w/demo", branch: str = "main", **ex
     }
 
 
-def assistant(text: str = "", *, at: str, model: str = "test-model", blocks=None, **extra):
+def assistant(
+    text: str = "", *, at: str, model: str = "test-model", blocks=None, **extra
+):
     content = list(blocks) if blocks is not None else []
     if text:
         content.append({"type": "text", "text": text})
@@ -55,7 +57,9 @@ def tool_result(tool_id: str, *, at: str, **extra):
         "timestamp": at,
         "message": {
             "role": "user",
-            "content": [{"type": "tool_result", "tool_use_id": tool_id, "content": "ok"}],
+            "content": [
+                {"type": "tool_result", "tool_use_id": tool_id, "content": "ok"}
+            ],
         },
         **extra,
     }
@@ -129,7 +133,9 @@ def closed_session(session: str = "s1") -> list[dict]:
         custom_title("demo", session=session),
         ai_title("Fix the widget and ship it", session=session),
         user("fix the widget", at=stamp(1, 9), session=session),
-        assistant("Fixed and merged. Nothing is pending.", at=stamp(1, 10), session=session),
+        assistant(
+            "Fixed and merged. Nothing is pending.", at=stamp(1, 10), session=session
+        ),
     ]
 
 
@@ -154,7 +160,9 @@ def interrupted_session(session: str = "s3") -> list[dict]:
     ]
 
 
-def write_transcripts(root: Path, sessions: dict[str, list[dict]], *, project="-w-demo"):
+def write_transcripts(
+    root: Path, sessions: dict[str, list[dict]], *, project="-w-demo"
+):
     """Lay out sessions the way Claude Code does: one JSONL per session id."""
     proj = Path(root) / project
     proj.mkdir(parents=True, exist_ok=True)

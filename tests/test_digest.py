@@ -53,7 +53,12 @@ def test_every_section_heading_carries_a_date():
 
 def test_it_never_says_anything_is_currently_true():
     text = render(full_session(), Verdict("open", "x"), source="m").lower()
-    for forbidden in ("still open", "still needs", "is waiting for you", "remains open"):
+    for forbidden in (
+        "still open",
+        "still needs",
+        "is waiting for you",
+        "remains open",
+    ):
         assert forbidden not in text
 
 
@@ -72,7 +77,9 @@ def test_a_default_verdict_says_so_in_the_body():
 
 
 def test_the_verdicts_cues_are_shown_so_a_reader_can_disagree():
-    text = render(full_session(), Verdict("archive", "why", ("safe to close",)), source="m")
+    text = render(
+        full_session(), Verdict("archive", "why", ("safe to close",)), source="m"
+    )
     assert "`safe to close`" in text
 
 
@@ -80,12 +87,16 @@ def test_a_stale_recap_is_labelled_as_predating_the_last_turn():
     stale = full_session(recap_at="2026-01-01T10:00:00Z")
     fresh = full_session(recap_at="2026-01-01T11:30:00Z")
     assert "before* the closing turn" in render(stale, Verdict("open", "x"), source="m")
-    assert "before* the closing turn" not in render(fresh, Verdict("open", "x"), source="m")
+    assert "before* the closing turn" not in render(
+        fresh, Verdict("open", "x"), source="m"
+    )
 
 
 def test_sections_are_clipped_deterministically():
     long_text = "x" * (SECTION_LIMITS["last_assistant_text"] + 500)
-    text = render(full_session(last_assistant_text=long_text), Verdict("open", "x"), source="m")
+    text = render(
+        full_session(last_assistant_text=long_text), Verdict("open", "x"), source="m"
+    )
     assert "clipped at" in text
     assert len(text) < len(long_text) + 4000
 
@@ -113,14 +124,17 @@ def test_make_digest_rewrites_paths_and_raises_on_credentials():
     from pathlib import Path
 
     home_text = f"I edited {Path.home()}/proj/x.py"
-    digest = make_digest(full_session(last_assistant_text=home_text),
-                         Verdict("open", "x"), source="m")
+    digest = make_digest(
+        full_session(last_assistant_text=home_text), Verdict("open", "x"), source="m"
+    )
     assert "~/proj/x.py" in digest.text
     assert str(Path.home()) not in digest.text
 
     leaked = "the token is " + "gh" + "p_" + "A" * 36
     with pytest.raises(CredentialFound):
-        make_digest(full_session(last_assistant_text=leaked), Verdict("open", "x"), source="m")
+        make_digest(
+            full_session(last_assistant_text=leaked), Verdict("open", "x"), source="m"
+        )
 
 
 def test_a_long_closing_turn_keeps_the_lines_the_verdict_was_read_from():

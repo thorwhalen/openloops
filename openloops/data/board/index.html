@@ -127,7 +127,9 @@ const TIER_LABEL = { tap: "Tap", browser: "Browser", session: "Session", physica
 const TIMES = [{ k: "2", label: "≤ 2 min", max: 2 }, { k: "5", label: "≤ 5 min", max: 5 }, { k: "15", label: "≤ 15 min", max: 15 }];
 const SHOWS = [{ k: "todo", label: "To do" }, { k: "maybe", label: "Maybe done" }, { k: "snoozed", label: "Snoozed" }, { k: "done", label: "Done" }, { k: "skipped", label: "Skipped" }];
 /* Deployment settings come from board.json, written by `ol board build` next to this page. */
-let SESSION = "the board session", READ_ONLY_ORGS = [], RUN_MACHINE = null;
+let SESSION = "the board session", READ_ONLY_ORGS = [], RUN_MACHINE = null, CONFIG_OK = false;
+/* Fails closed: until board.json has loaded, every org counts as read-only, so no close button can appear for an org that should never be written to. */
+const readOnly = org => !CONFIG_OK || READ_ONLY_ORGS.includes(String(org || "").toLowerCase());
 const RETRY_MS = 15000, DRAFT_MS = 1000, MAX_INFLIGHT = 4, TAP_GUARD_MS = 400;
 const RECEIPT = { processing: "Claude is on it", posted: "On GitHub", dispatched: "Sent to a worker", recorded: "Recorded", queued: "Queued, no worker yet", failed: "Failed", cancelled: "Cancelled by your undo" };
 const FINAL = new Set(["posted", "dispatched", "recorded", "cancelled"]);
@@ -345,7 +347,7 @@ function noteBox(key, taskId, label) {
 function card(t) {
   const st = stOf(t), d = derived(t.id), key = docId(t.id), w = canWrite();
   const open = t.links?.[0]?.url || t.url;
-  const isIssue = t.kind === "issue", cosmo = READ_ONLY_ORGS.includes(t.org);
+  const isIssue = t.kind === "issue", readOnlyOrg = readOnly(t.org);
   const kids = [
     el("div", { class: "meta" },
       el("span", { class: "tier " + t.tier }, TIER_LABEL[t.tier] || t.tier), el("span", {}, `${t.minutes ?? "?"} min`), el("span", {}, t.id),
@@ -375,11 +377,11 @@ function card(t) {
     el("button", { class: "btn", onclick: () => copy(`${SESSION}: tell me about ${t.id}: what it asks, the trade-offs, and your recommendation.`, "Question copied: paste it into the session") }, "Ask")));
   kids.push(el("div", { class: "sub" },
     el("button", { class: "btn", disabled: !w, onclick: () => act(t, "note") }, "Post note only"),
-    isIssue && !cosmo && !isOn ? el("button", { class: "btn warn", disabled: !w, onclick: () => act(t, "done_close") }, "Done & close issue") : null,
+    isIssue && !readOnlyOrg && !isOn ? el("button", { class: "btn warn", disabled: !w, onclick: () => act(t, "done_close") }, "Done & close issue") : null,
     st === "snoozed" ? el("button", { class: "btn", disabled: !w, onclick: () => undo(t) }, "Unsnooze") : null,
     !isOn ? el("button", { class: "btn", disabled: !w, onclick: () => act(t, "snooze", { until: new Date(Date.now() + 86400e3).toISOString() }) }, "Snooze 1 day") : null,
     !isOn ? el("button", { class: "btn", disabled: !w, onclick: () => act(t, "snooze", { until: new Date(Date.now() + 7 * 86400e3).toISOString() }) }, "Snooze 1 week") : null));
-  if (cosmo) kids.push(el("p", { class: "small" }, t.org + ": Claude never comments there. Your choices are recorded on the board only."));
+  if (readOnlyOrg) kids.push(el("p", { class: "small" }, CONFIG_OK ? t.org + ": Claude never comments there. Your choices are recorded on the board only." : "Board settings did not load, so closing is off. Reload the page."));
   return el("article", { class: "card" + (st === "done" ? " is-done" : "") + (acted.has(t.id) ? " acted" : "") }, kids);
 }
 
@@ -420,7 +422,7 @@ function viewRuns(m) {
     const started = Object.values(allEvents()).some(e => e.action === "run" && e.run === r.key);
     let bulk = null;
     if (r.key === "cleanup") {
-      const targets = items.filter(t => t.kind === "issue" && !READ_ONLY_ORGS.includes(t.org) && stOf(t) === "maybe");
+      const targets = items.filter(t => t.kind === "issue" && !readOnly(t.org) && stOf(t) === "maybe");
       const isArmed = armed.cleanup && Date.now() - armed.cleanup < 6000;
       bulk = el("div", { class: "sub" }, el("button", { class: "btn warn", disabled: !w || !targets.length,
         onclick: () => {
@@ -487,12 +489,15 @@ function subscribe(path, onDocs, attempt = 0) {
 
 async function boot() {
   try {
-    const [t, r, k, c] = await Promise.all([fetch("tasks.json").then(x => x.json()), fetch("runs.json").then(x => x.json()), fetch("kit.html").then(x => x.text()), fetch("board.json").then(x => x.ok ? x.json() : {}).catch(() => ({}))]);
+    const [t, r, k, c] = await Promise.all([fetch("tasks.json").then(x => x.json()), fetch("runs.json").then(x => x.json()), fetch("kit.html").then(x => x.text()), fetch("board.json").then(x => x.ok ? x.json() : null).catch(() => null)]);
     TASKS = t.filter(x => x.status !== "not-for-user"); RUNS = r; KIT = k;
-    if (c.session) SESSION = c.session;
-    if (Array.isArray(c.read_only_orgs)) READ_ONLY_ORGS = c.read_only_orgs;
-    if (c.machine) RUN_MACHINE = c.machine;
-    if (c.title) { document.title = c.title; $("h1").textContent = c.title }
+    if (c && Array.isArray(c.read_only_orgs)) {
+      CONFIG_OK = true;
+      READ_ONLY_ORGS = c.read_only_orgs.map(o => String(o).toLowerCase());
+      if (c.session) SESSION = c.session;
+      if (c.machine) RUN_MACHINE = c.machine;
+      if (c.title) { document.title = c.title; $("h1").textContent = c.title }
+    }
   } catch { $("#main").replaceChildren(el("p", { class: "empty" }, "The task list did not load. Reload the page.")) }
   render();
   db = window.claude?.use ? await window.claude.use("db").catch(() => null) : null;

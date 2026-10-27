@@ -139,6 +139,7 @@ def test_unknown_never_collapses_into_a_count_of_nothing_waiting():
     A run that could not resolve anything must not read the same as a run that found
     every loop already harvested.
     """
+
     def unreachable(repo, number):
         raise GhUnavailable("no network")
 
@@ -242,9 +243,7 @@ def test_a_blocked_row_claims_no_free_time():
 
 
 def test_age_is_whole_days_from_created_at_and_a_bad_stamp_is_not_a_crash():
-    row = only(
-        [candidate(12, created="nonsense")], {"acme/widget#12": [edge()]}
-    )
+    row = only([candidate(12, created="nonsense")], {"acme/widget#12": [edge()]})
     assert row["age_days"] == 0
 
 
@@ -404,7 +403,9 @@ def test_naming_repositories_never_asks_gh_for_the_owner_list(monkeypatch):
     assert result["repos"] == ["acme/widget"]
 
 
-def test_the_fleet_wide_discovery_is_a_filtered_search_never_an_enumeration(monkeypatch):
+def test_the_fleet_wide_discovery_is_a_filtered_search_never_an_enumeration(
+    monkeypatch,
+):
     seen = {}
 
     def fake_gh(args, *, timeout):
@@ -431,15 +432,35 @@ def test_the_per_repo_path_reads_the_dependency_counts_and_skips_pull_requests(
     """The exact enumeration. GitHub already returns the counts on every listed row,
     so one request per repository names every issue with a blocker."""
     listing = [
-        {"number": 1, "title": "no deps", "created_at": NOW_TEXT,
-         "html_url": "u1", "issue_dependencies_summary": {"total_blocked_by": 0}},
-        {"number": 2, "title": "blocked", "created_at": NOW_TEXT,
-         "html_url": "u2", "issue_dependencies_summary": {"total_blocked_by": 1}},
-        {"number": 3, "title": "a pull request", "created_at": NOW_TEXT,
-         "html_url": "u3", "pull_request": {"url": "p"},
-         "issue_dependencies_summary": {"total_blocked_by": 1}},
-        {"number": 4, "title": "no summary at all", "created_at": NOW_TEXT,
-         "html_url": "u4", "issue_dependencies_summary": None},
+        {
+            "number": 1,
+            "title": "no deps",
+            "created_at": NOW_TEXT,
+            "html_url": "u1",
+            "issue_dependencies_summary": {"total_blocked_by": 0},
+        },
+        {
+            "number": 2,
+            "title": "blocked",
+            "created_at": NOW_TEXT,
+            "html_url": "u2",
+            "issue_dependencies_summary": {"total_blocked_by": 1},
+        },
+        {
+            "number": 3,
+            "title": "a pull request",
+            "created_at": NOW_TEXT,
+            "html_url": "u3",
+            "pull_request": {"url": "p"},
+            "issue_dependencies_summary": {"total_blocked_by": 1},
+        },
+        {
+            "number": 4,
+            "title": "no summary at all",
+            "created_at": NOW_TEXT,
+            "html_url": "u4",
+            "issue_dependencies_summary": None,
+        },
     ]
     seen = {}
 
@@ -453,13 +474,20 @@ def test_the_per_repo_path_reads_the_dependency_counts_and_skips_pull_requests(
     assert rows[0]["repository"] == {"nameWithOwner": "acme/widget"}
     assert seen["args"][0] == "api"
     assert "--paginate" in seen["args"]
-    assert "search" not in seen["args"], "the audit path must not touch the search index"
+    assert "search" not in seen["args"], (
+        "the audit path must not touch the search index"
+    )
 
 
 def test_the_per_repo_path_stops_at_the_cap_rather_than_reading_on(monkeypatch):
     listing = [
-        {"number": n, "title": "t", "created_at": NOW_TEXT, "html_url": "u",
-         "issue_dependencies_summary": {"total_blocked_by": 1}}
+        {
+            "number": n,
+            "title": "t",
+            "created_at": NOW_TEXT,
+            "html_url": "u",
+            "issue_dependencies_summary": {"total_blocked_by": 1},
+        }
         for n in range(10)
     ]
     monkeypatch.setattr(
@@ -497,7 +525,9 @@ def test_a_payload_that_is_not_a_list_is_unknown_rather_than_believed(monkeypatc
         gh_blocked_by("acme/widget", 12)
 
 
-def test_with_no_gh_on_the_machine_the_default_path_answers_a_question_mark(monkeypatch):
+def test_with_no_gh_on_the_machine_the_default_path_answers_a_question_mark(
+    monkeypatch,
+):
     """The whole path on its defaults, on a machine with nothing installed."""
     monkeypatch.setattr("openloops.obligations.shutil.which", lambda name: None)
     result = blocked()
@@ -559,23 +589,60 @@ def canned(**kwargs) -> dict:
         },
         "rows": [
             {
-                "repo": "acme/widget", "number": 1, "title": "free now",
-                "url": "u", "created": "", "age_days": 30, "state": UNBLOCKED,
-                "blockers": [{"repo": "acme/engine", "number": 15, "state": "closed",
-                              "url": "", "closed_at": "", "ref": "acme/engine#15 [closed]"}],
-                "cross_repo": True, "unblocked_days": 12, "evidence": "every blocker is closed",
+                "repo": "acme/widget",
+                "number": 1,
+                "title": "free now",
+                "url": "u",
+                "created": "",
+                "age_days": 30,
+                "state": UNBLOCKED,
+                "blockers": [
+                    {
+                        "repo": "acme/engine",
+                        "number": 15,
+                        "state": "closed",
+                        "url": "",
+                        "closed_at": "",
+                        "ref": "acme/engine#15 [closed]",
+                    }
+                ],
+                "cross_repo": True,
+                "unblocked_days": 12,
+                "evidence": "every blocker is closed",
             },
             {
-                "repo": "acme/widget", "number": 2, "title": "still waiting",
-                "url": "u", "created": "", "age_days": 20, "state": BLOCKED,
-                "blockers": [{"repo": "acme/parser", "number": 7, "state": "open",
-                              "url": "", "closed_at": "", "ref": "acme/parser#7 [open]"}],
-                "cross_repo": True, "unblocked_days": 0, "evidence": "1 of 1 blockers still open",
+                "repo": "acme/widget",
+                "number": 2,
+                "title": "still waiting",
+                "url": "u",
+                "created": "",
+                "age_days": 20,
+                "state": BLOCKED,
+                "blockers": [
+                    {
+                        "repo": "acme/parser",
+                        "number": 7,
+                        "state": "open",
+                        "url": "",
+                        "closed_at": "",
+                        "ref": "acme/parser#7 [open]",
+                    }
+                ],
+                "cross_repo": True,
+                "unblocked_days": 0,
+                "evidence": "1 of 1 blockers still open",
             },
             {
-                "repo": "acme/widget", "number": 3, "title": "could not tell",
-                "url": "u", "created": "", "age_days": 10, "state": UNKNOWN,
-                "blockers": [], "cross_repo": False, "unblocked_days": 0,
+                "repo": "acme/widget",
+                "number": 3,
+                "title": "could not tell",
+                "url": "u",
+                "created": "",
+                "age_days": 10,
+                "state": UNKNOWN,
+                "blockers": [],
+                "cross_repo": False,
+                "unblocked_days": 0,
                 "evidence": "the blocker edges could not be read: no network",
             },
         ],
@@ -657,8 +724,13 @@ def test_nothing_waiting_is_a_sentence_not_an_empty_screen(monkeypatch, capsys):
         lambda **kwargs: canned(
             rows=[],
             counts={
-                UNBLOCKED: 0, BLOCKED: 0, UNKNOWN: 0, "cross_repo": 0,
-                "candidates": 0, "without_edges": 0, "total": 0,
+                UNBLOCKED: 0,
+                BLOCKED: 0,
+                UNKNOWN: 0,
+                "cross_repo": 0,
+                "candidates": 0,
+                "without_edges": 0,
+                "total": 0,
             },
         ),
     )

@@ -150,11 +150,18 @@ def group_runs(
                 else task.get("pattern") or "other"
             ].append(task)
 
+    # Absorb before the min_items filter, so a donor too small for a run of its own
+    # still lands in the run that absorbs it rather than nowhere.
+    for key, extra in extras.items():
+        for other in (extra or {}).get("absorb", ()):
+            if other != key:
+                by_key[key] += by_key.pop(other, [])
+
     runs = []
     for spec in specs:
+        unique = {t["id"]: t for t in by_key.get(spec["key"], [])}
         items = sorted(
-            by_key.get(spec["key"], []),
-            key=lambda t: (t.get("pattern_key") or "", t["id"]),
+            unique.values(), key=lambda t: (t.get("pattern_key") or "", t["id"])
         )
         if len(items) < spec.get("min_items", DFLT_MIN_ITEMS):
             continue
@@ -175,16 +182,12 @@ def group_runs(
             }
         )
 
-    absorbed = set()
     for run in runs:
-        extra = dict(extras.get(run["key"]) or {})
-        for other in extra.pop("absorb", ()):
-            for donor in runs:
-                if donor["key"] == other and donor is not run:
-                    run["ids"] += donor["ids"]
-                    absorbed.add(other)
+        extra = {
+            k: v for k, v in (extras.get(run["key"]) or {}).items() if k != "absorb"
+        }
         run.update(extra)
-    return [r for r in runs if r["key"] not in absorbed]
+    return runs
 
 
 def build_board(

@@ -262,3 +262,23 @@ def test_load_records_reads_a_gather_envelope(tmp_path):
     path = tmp_path / "cands.json"
     path.write_text(json.dumps({"listed": True, "candidates": [{"url": "u"}]}))
     assert tasks.load_records([path]) == [{"url": "u"}]
+
+
+def test_exclusions_and_owners_compare_case_insensitively():
+    gh = FakeGh({("Acme", "label"): [_row("Acme/w", 1), _row("Acme/keep", 2)]})
+    report = tasks.gather(owners=["Acme", "acme"], exclude_repos=["acme/w"], run_gh=gh)
+    assert [c["id"] for c in report["candidates"]] == ["Acme/keep#2"]
+    assert len(gh.calls) == 1, "one owner in two spellings is queried once"
+
+
+def test_an_enriched_record_without_a_url_still_merges_with_its_heuristic_twin():
+    heuristic = tasks.classify([_cand("Decide the name")])
+    merged = tasks.merge_records(heuristic, [{"id": "acme/widget#1", "ask": "Pick B"}])
+    assert len(merged) == 1 and merged[0]["ask"] == "Pick B"
+    assert tasks.merge_records([{"title": "no id, no url"}]) == []
+    assert tasks.Task.from_mapping({"id": "a/b#1", "title": None}).title == ""
+
+
+def test_a_batch_glob_that_matches_nothing_is_an_error(tmp_path):
+    with pytest.raises(FileNotFoundError):
+        tasks.load_records([str(tmp_path / "out_*.json")])
