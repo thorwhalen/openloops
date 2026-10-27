@@ -49,7 +49,10 @@ Issues = "https://github.com/thorwhalen/openloops/issues"
 Changelog = "https://github.com/thorwhalen/openloops/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
-dev = ["pytest>=7.0", "pytest-cov>=4.0", "ruff>=0.1.0"]
+# `ol board-*` never needs these; `openloops.board_server` (a self-hosted board's web
+# app) does, and nothing else imports it.
+server = ["fastapi"]
+dev = ["pytest>=7.0", "pytest-cov>=4.0", "ruff>=0.1.0", "fastapi", "httpx"]
 
 # The agent-facing surface ships *inside* the package: `openloops/data/skills/` and
 # `openloops/data/agents/` are markdown, not code, and a wheel is the only channel that

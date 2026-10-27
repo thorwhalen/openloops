@@ -57,6 +57,8 @@ __all__ = [
 ]
 
 DFLT_TITLE = "Phone Task Board"
+#: Where the page keeps its state: the claude.ai Artifact store, or a self-hosted API.
+STORES = ("artifact", "http")
 #: Statuses that put an item in the clean-up run rather than in its pattern's run.
 CLEANUP_STATUSES = ("likely-done", "stale")
 CLEANUP_KEY = "cleanup"
@@ -201,6 +203,9 @@ def build_board(
     session: str | None = None,
     read_only_orgs: Sequence[str] = (),
     machine: str | None = None,
+    store: str = "artifact",
+    api: str | None = None,
+    moved_to: str | None = None,
 ) -> dict[str, Any]:
     """Write the board's five files into ``out_dir`` and say what went in.
 
@@ -208,7 +213,19 @@ def build_board(
     page names it in the prompts it copies); ``read_only_orgs`` are organisations whose
     items the page never offers to close or comment on; ``machine`` is the default
     machine named by a run's "have an agent start this run".
+
+    ``store`` picks where the page keeps its state: ``artifact`` (the claude.ai
+    Artifact ``db`` capability) or ``http`` (a self-hosted board store API at ``api``,
+    same origin as the page, served by anything wrapping :mod:`openloops.board_store`).
+    ``moved_to`` (an ``https://`` URL) builds the page as a forwarding notice: it
+    flushes what a phone already queued and takes no new taps.
     """
+    if store not in STORES:
+        raise ValueError(f"store must be one of {STORES}, not {store!r}")
+    if store == "http" and not api:
+        raise ValueError("store 'http' needs the board store API's address (api=)")
+    if moved_to and not str(moved_to).startswith("https://"):
+        raise ValueError(f"moved_to must be an https:// URL, not {moved_to!r}")
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     tasks = sort_tasks(
@@ -220,6 +237,8 @@ def build_board(
         "session": session,
         "read_only_orgs": list(read_only_orgs),
         "machine": machine,
+        "store": {"kind": store, **({"api": api} if store == "http" else {})},
+        **({"moved_to": moved_to} if moved_to else {}),
     }
 
     def dump(name, data):

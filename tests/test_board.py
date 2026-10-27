@@ -111,6 +111,7 @@ def test_build_writes_the_five_files_sorted_and_dated(tmp_path):
         "session": "desk",
         "read_only_orgs": ["ro-org"],
         "machine": "box",
+        "store": {"kind": "artifact"},
     }
     assert result["tasks"] == 2 and result["counts"]["tier"] == {"tap": 1, "session": 1}
 
@@ -194,3 +195,35 @@ def test_sloppy_minutes_from_a_classifier_do_not_break_the_sort(tmp_path):
     result = board.build_board(records, tmp_path)
     written = json.loads((tmp_path / "tasks.json").read_text())
     assert result["tasks"] == 3 and {t["minutes"] for t in written} == {5, None}
+
+
+def test_an_http_board_names_its_api_and_a_moved_board_its_new_home(tmp_path):
+    board.build_board([], tmp_path / "h", store="http", api="api")
+    assert json.loads((tmp_path / "h" / "board.json").read_text())["store"] == {
+        "kind": "http",
+        "api": "api",
+    }
+    board.build_board([], tmp_path / "m", moved_to="https://example.org/board/")
+    assert (
+        json.loads((tmp_path / "m" / "board.json").read_text())["moved_to"]
+        == "https://example.org/board/"
+    )
+
+
+def test_store_options_are_checked_before_anything_is_written(tmp_path):
+    import pytest
+
+    for kwargs in (
+        {"store": "s3"},
+        {"store": "http"},
+        {"moved_to": "javascript:alert(1)"},
+    ):
+        with pytest.raises(ValueError):
+            board.build_board([], tmp_path / "x", **kwargs)
+    assert not (tmp_path / "x").exists()
+
+
+def test_the_page_has_both_store_adapters_and_the_forwarding_notice():
+    page = (board.board_dir() / "index.html").read_text(encoding="utf-8")
+    assert "function httpStore(" in page and 'window.claude.use("db")' in page
+    assert "MOVED_TO" in page and 'credentials: "same-origin"' in page

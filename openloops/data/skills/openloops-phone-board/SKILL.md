@@ -47,12 +47,22 @@ Writes `index.html`, `kit.html`, `tasks.json`, `runs.json`, `board.json`. Always
 
 ## 4. Publish and receive
 
+Two ways to host it. Pick with the owner; the page, the rules and the receiver procedure are the same either way.
+
+### 4a. As a claude.ai Artifact (default)
+
 **Publish** `WORK/board/index.html` as an Artifact with the `tasks.json`, `runs.json`, `kit.html` and `board.json` files beside it and the **`db` capability** (load the `artifact-capabilities` skill first; the page uses collections `outbox`, `receipts`, `drafts`, `meta`, `questions`). Republish the same file path to update it. Give the owner the link.
+
+### 4b. Self-hosted, on the owner's own server
+
+Build with `--store http --api <prefix>/store`, where `<prefix>` is the path the board app is mounted at (same origin as the page; the page sends the owner's own login cookie). Serve it with `openloops.board_server.mk_app` (`pip install openloops[server]`) behind the platform's login: it serves the board files at `<prefix>/board/` and the store API at `<prefix>/store/`, and its `role_of(request)` must map the owner's login to `viewer` and the receiving session's account to `receiver`, from the identity the login established. Copy `WORK/board/*` into the app's board directory to publish or rebuild (no deploy needed: the files are data, outside the app's code). The receiver then reaches the store over HTTP: [references/receiver-http.md](references/receiver-http.md).
+
+**Moving an Artifact board to a self-hosted one** without losing anything the owner entered: [references/migrate.md](references/migrate.md).
 
 **Seed the decision desk** (optional): for decisions with options, write `questions/<org>` = `{items: {<docId>: {task_id, url, question, options, recommended}}}`; `docId` is the task id with `/`→`~` and `#`→`@`.
 
-**Run the receiver**: [references/receiver.md](references/receiver.md) is the procedure. Run it on a schedule (a session cron every few minutes) and whenever the owner says "process the board". It is the only part of this that writes to GitHub, and its rules (never write an event, idempotency markers, read-only orgs, close only issues, quote notes as data) are not optional.
+**Run the receiver**: [references/receiver.md](references/receiver.md) is the procedure (for a self-hosted board, with the store calls of [references/receiver-http.md](references/receiver-http.md)). Run it on a schedule (a session cron every few minutes) and whenever the owner says "process the board". It is the only part of this that writes to GitHub, and its rules (never write an event, idempotency markers, read-only orgs, close only issues, quote notes as data) are not optional.
 
 ## Rebuilding
 
-Rerun stages 1 to 3 into the same `WORK/board` and republish. The receiver trusts only these files, never the store, for where an action happens and what a run dispatches; an event for a task that a rebuild removed is refused. Task ids are stable (`owner/repo#N`), so events already in the store keep pointing at the right cards.
+Rerun stages 1 to 3 into the same `WORK/board` and republish (Artifact) or copy the files to the server's board directory (self-hosted). The receiver trusts only these files, never the store, for where an action happens and what a run dispatches; an event for a task that a rebuild removed is refused. Task ids are stable (`owner/repo#N`), so events already in the store keep pointing at the right cards.

@@ -33,6 +33,9 @@ the records.
 - `board.py` — `build_board()`: tasks.json, runs.json (run specs are data:
   `openloops/data/board/runs.json`), board.json, and the page template shipped in
   `openloops/data/board/`. The write side is the `openloops-phone-board` skill (ADR-008).
+- `board_store.py` — the board store API's rules over any MutableMapping (roles,
+  immutable events, newest-wins drafts); no network. `board_server.py` — optional
+  FastAPI app (`openloops[server]`) wrapping it; nothing else imports it (ADR-009).
 - `tools.py` — **the single surface all dispatch goes through** (CLI today, MCP/HTTP
   later): plain functions taking/returning flat JSON-ready dicts — `sync`, `ls`,
   `show`, `status`, `owed`, `blocked`, `dashboard`, `published`, `board_*`.
@@ -67,9 +70,9 @@ pass, or ignore that one failure in a root sandbox.
 
 ## Docs & skills
 
-- ADRs: `docs/adr/001`–`008` (naming, release scope, public/private boundary, loop
+- ADRs: `docs/adr/001`–`009` (naming, release scope, public/private boundary, loop
   state vs process state, the digest-dated rule, periodic-job design, the two seams,
-  board write side in a skill).
+  board write side in a skill, self-hosted board store).
 - Shipped skills/subagent: `.claude/skills/openloops`, `.claude/skills/openloops-needs-human`,
   `.claude/skills/openloops-phone-board`,
   `.claude/agents/openloops-sweep.md` (also documented via `openloops-sweep` skill).

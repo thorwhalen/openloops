@@ -520,11 +520,16 @@ def board_build(
     session: str = None,
     read_only_orgs: str = None,
     machine: str = None,
+    store: str = "artifact",
+    api: str = None,
+    moved_to: str = None,
 ):
     """Build the phone task board (page + tasks.json + runs.json) into OUT_DIR from RECORDS.
 
-    Publish the directory as an Artifact with the `db` capability; the
-    `openloops-phone-board` skill covers publishing and the receiving side.
+    Publish the directory as an Artifact with the `db` capability, or with
+    `--store http --api <base>` serve it yourself beside a board store API (see
+    `openloops.board_store`). `--moved-to URL` builds a page that forwards to a new
+    board. The `openloops-phone-board` skill covers publishing and the receiving side.
     """
     result = tools.board_build(
         records=list(records),
@@ -536,6 +541,9 @@ def board_build(
         session=session,
         read_only_orgs=_words(read_only_orgs),
         machine=machine,
+        store=store,
+        api=api,
+        moved_to=moved_to,
     )
     runs = ", ".join(f"{r['key']} {r['items']}" for r in result["runs"]) or "none"
     return f"wrote {result['tasks']} tasks to {result['out_dir']}\n  runs: {runs}"

@@ -127,7 +127,7 @@ const TIER_LABEL = { tap: "Tap", browser: "Browser", session: "Session", physica
 const TIMES = [{ k: "2", label: "≤ 2 min", max: 2 }, { k: "5", label: "≤ 5 min", max: 5 }, { k: "15", label: "≤ 15 min", max: 15 }];
 const SHOWS = [{ k: "todo", label: "To do" }, { k: "maybe", label: "Maybe done" }, { k: "snoozed", label: "Snoozed" }, { k: "done", label: "Done" }, { k: "skipped", label: "Skipped" }];
 /* Deployment settings come from board.json, written by `ol board build` next to this page. */
-let SESSION = "the board session", READ_ONLY_ORGS = [], RUN_MACHINE = null, CONFIG_OK = false;
+let SESSION = "the board session", READ_ONLY_ORGS = [], RUN_MACHINE = null, CONFIG_OK = false, MOVED_TO = null;
 /* Fails closed: until board.json has loaded, every org counts as read-only, so no close button can appear for an org that should never be written to. */
 const readOnly = org => !CONFIG_OK || READ_ONLY_ORGS.includes(String(org || "").toLowerCase());
 const RETRY_MS = 15000, DRAFT_MS = 1000, MAX_INFLIGHT = 4, TAP_GUARD_MS = 400;
@@ -158,8 +158,41 @@ addEventListener("storage", e => {
 function savePending() { const disk = load("pending3", {}); for (const p of Object.keys(disk)) if (!(p in pending) && !confirmed.has(p)) pending[p] = disk[p]; return save("pending3", pending) }
 const confirmed = new Set();
 
+/* ---------- the store seam ----------
+   The page needs two calls from a store: doc(path).set(body) -> Promise, and
+   collection(name).onSnapshot(onNext, onError). The default is the claude.ai Artifact
+   `db` capability. board.json `store: {kind: "http", api, poll_ms}` swaps in httpStore,
+   which speaks the openloops board store API (openloops.board_store) on the same
+   origin, with the viewer's own login cookie. Error codes map onto the db ones, so the
+   code below cannot tell the two apart. */
+function httpStore(api, { pollMs = 5000 } = {}) {
+  const base = String(api).replace(/\/+$/, "");
+  const CODES = { 400: "invalid_argument", 409: "invalid_argument", 412: "invalid_argument", 413: "quota_exceeded", 401: "not_granted", 403: "not_granted" };
+  const fail = r => { const e = new Error("store said " + r.status); e.code = CODES[r.status] || "unavailable"; throw e };
+  const call = (path, init = {}) => fetch(base + "/" + path.split("/").map(encodeURIComponent).join("/"),
+    { credentials: "same-origin", cache: "no-store", ...init, headers: { "Content-Type": "application/json", ...(init.headers || {}) } })
+    .then(r => r.status === 304 ? null : r.ok ? r.json().then(j => (j.__etag = r.headers.get("ETag"), j)) : fail(r), () => fail({ status: 0 }));
+  return {
+    doc: path => ({ set: body => call(path, { method: "PUT", body: JSON.stringify(body) }) }),
+    collection: name => ({
+      onSnapshot(onNext, onError) {
+        let stopped = false, timer = null, etag = null;
+        // A poll that changed nothing costs a 304 and no render: the listing's ETag is sent back.
+        const tick = () => call(name, etag ? { headers: { "If-None-Match": etag } } : {}).then(j => {
+          if (stopped) return;
+          if (j) { etag = j.__etag || null; onNext({ docs: (j.docs || []).map(d => ({ id: d.id, data: () => d.data })), metadata: { fromCache: false } }) }
+          timer = setTimeout(tick, pollMs);
+        }, e => { if (!stopped) { stopped = true; onError(e) } });
+        tick();
+        return () => { stopped = true; clearTimeout(timer) };
+      }
+    })
+  };
+}
+
 /* ---------- writes ---------- */
-function canWrite() { return !!db && server.loaded && !(server.schema && server.schema > SCHEMA) }
+/* A board that moved (board.json `moved_to`) still flushes what this phone already queued, but takes no new taps. */
+function canWrite() { return !MOVED_TO && !!db && server.loaded && !(server.schema && server.schema > SCHEMA) }
 function put(path, body) { pending[path] = body; savePending(); flush() }
 function flush() {
   syncLine();
@@ -286,7 +319,8 @@ function syncLine() {
   const unsent = Object.entries(drafts).filter(([, d]) => d.text?.trim()).length;
   const s = $("#sync"); s.replaceChildren();
   const b = $("#banner"); b.hidden = true; b.className = "banner";
-  if (!db && dbState !== "connecting") { b.hidden = false; b.className = "blocker"; b.textContent = "This view cannot save to the board. Your taps would stay on this phone only, so the buttons are off. Reload the page; if this stays, open the board in your phone's browser." }
+  if (MOVED_TO) { b.hidden = false; b.className = "blocker"; b.replaceChildren("This board has moved. Nothing you tap here is saved any more: ", el("a", { href: MOVED_TO, rel: "noopener" }, "open the new board")) }
+  else if (!db && dbState !== "connecting") { b.hidden = false; b.className = "blocker"; b.textContent = "This view cannot save to the board. Your taps would stay on this phone only, so the buttons are off. Reload the page; if this stays, open the board in your phone's browser." }
   else if (server.schema && server.schema > SCHEMA) { b.hidden = false; b.className = "blocker"; b.textContent = "A newer version of this board is out. Reload the page before tapping anything." }
   if (!storageOk) s.append(el("span", { class: "err" }, "This browser blocks local storage."));
   if (dbState === "connecting") s.append(el("span", { class: "bad" }, "Connecting…"));
@@ -488,8 +522,10 @@ function subscribe(path, onDocs, attempt = 0) {
 }
 
 async function boot() {
+  let c = null;
   try {
-    const [t, r, k, c] = await Promise.all([fetch("tasks.json").then(x => x.json()), fetch("runs.json").then(x => x.json()), fetch("kit.html").then(x => x.text()), fetch("board.json").then(x => x.ok ? x.json() : null).catch(() => null)]);
+    const [t, r, k, c_] = await Promise.all([fetch("tasks.json").then(x => x.json()), fetch("runs.json").then(x => x.json()), fetch("kit.html").then(x => x.text()), fetch("board.json").then(x => x.ok ? x.json() : null).catch(() => null)]);
+    c = c_;
     TASKS = t.filter(x => x.status !== "not-for-user"); RUNS = r; KIT = k;
     if (c && Array.isArray(c.read_only_orgs)) {
       CONFIG_OK = true;
@@ -498,9 +534,12 @@ async function boot() {
       if (c.machine) RUN_MACHINE = c.machine;
       if (c.title) { document.title = c.title; $("h1").textContent = c.title }
     }
+    if (c && /^https:\/\//.test(c.moved_to || "")) MOVED_TO = c.moved_to;
   } catch { $("#main").replaceChildren(el("p", { class: "empty" }, "The task list did not load. Reload the page.")) }
   render();
-  db = window.claude?.use ? await window.claude.use("db").catch(() => null) : null;
+  const store = c?.store;
+  if (store?.kind === "http" && store.api) db = httpStore(store.api, { pollMs: store.poll_ms || undefined });
+  else db = window.claude?.use ? await window.claude.use("db").catch(() => null) : null;
   dbState = db ? "ok" : "lost";
   render();
   if (!db) return;

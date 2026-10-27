@@ -43,6 +43,7 @@ __all__ = [
     "state_dir",
     "default_source",
     "digests_store",
+    "board_docs_store",
     "digest_key",
     "parse_digest_key",
     "load_sync_state",
@@ -180,6 +181,17 @@ def digests_store(rootdir: str | Path | None = None) -> MutableMapping[str, str]
     # For a store of session digests that is an undeclared second copy of every
     # superseded one, outside the store, indefinitely — and reclassifying a session from
     # `open` to `archive` produces those daily.
+    return _posix_keys(_DigestFiles(str(root), delete_func=os.remove))
+
+
+def board_docs_store(rootdir: str | Path) -> MutableMapping[str, str]:
+    """A self-hosted board's documents as UTF-8 JSON files: ``<collection>/<id>.json``.
+
+    The same configured file store as the digests (UTF-8 pinned, POSIX keys, real
+    deletes); :mod:`openloops.board_server` serialises access to it with a file lock.
+    """
+    root = Path(rootdir).expanduser()
+    root.mkdir(parents=True, exist_ok=True)
     return _posix_keys(_DigestFiles(str(root), delete_func=os.remove))
 
 
