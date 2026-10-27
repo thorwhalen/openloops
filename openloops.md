@@ -1,4 +1,4 @@
-> built 2026-10-27 06:59 UTC from d3772b4 (main) · openloops 0.1.20. Details: build_info.json
+> built 2026-10-27 07:08 UTC from e3badd5 (main) · openloops 0.1.21. Details: build_info.json
 
 # index.html.md
 
@@ -5104,18 +5104,18 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-10-27 06:59 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/d3772b4da372118cb0cb8e79a3b0243bb091189c"><code>d3772b4</code></a> on branch <code>main</code>, for **openloops 0.1.20** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-27 07:08 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/e3badd59613c3e5d4bc5c9f768faf36c3fb57e3d"><code>e3badd5</code></a> on branch <code>main</code>, for **openloops 0.1.21** (from <code>pyproject.toml</code>).
 
 #### WARNING
 The documentation and the package may be misaligned:
 
-- The documented version (0.1.20) is behind the latest release on PyPI (0.1.21): `pip install openloops` gives newer code than these docs describe.
+- The documented version (0.1.21) is behind the latest release on PyPI (0.1.22): `pip install openloops` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/d3772b4da372118cb0cb8e79a3b0243bb091189c"><code>d3772b4da372118cb0cb8e79a3b0243bb091189c</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/e3badd59613c3e5d4bc5c9f768faf36c3fb57e3d"><code>e3badd59613c3e5d4bc5c9f768faf36c3fb57e3d</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -5126,9 +5126,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/40464180112">40464180112</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/40465169616">40465169616</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>d3772b4da372118cb0cb8e79a3b0243bb091189c</code> (in the history of the built commit) |
+| Event commit | <code>e3badd59613c3e5d4bc5c9f768faf36c3fb57e3d</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -5153,13 +5153,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.21/">0.1.21</a>, newer than the documented version (0.1.20).
+Latest release: <a href="https://pypi.org/project/openloops/0.1.22/">0.1.22</a>, newer than the documented version (0.1.21).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout d3772b4da372118cb0cb8e79a3b0243bb091189c
+git checkout e3badd59613c3e5d4bc5c9f768faf36c3fb57e3d
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
