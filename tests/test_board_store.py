@@ -231,3 +231,12 @@ def test_a_pinned_draft_that_loses_is_told_and_if_match_star_means_exists():
         _status(lambda: put_doc({}, "receipts", "r", {}, role="receiver", if_match="*"))
         == 412
     )
+
+
+def test_a_truncated_event_file_is_repaired_by_the_retry():
+    store = {"outbox/e1.json": '{"action": "do'}
+    assert (
+        put_doc(store, "outbox", "e1", {"action": "done"}, role="viewer")["created"]
+        is False
+    )
+    assert get_doc(store, "outbox", "e1")["data"] == {"action": "done"}

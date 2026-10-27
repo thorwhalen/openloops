@@ -183,3 +183,19 @@ def test_a_weakened_etag_still_gets_a_304(client):
         ).status_code
         == 304
     )
+
+
+def test_a_write_by_another_worker_invalidates_the_cached_listing(client, tmp_path):
+    from openloops.board_store import put_doc
+    from openloops.store import board_docs_store
+
+    client.put("/board-store/outbox/e1", json={"a": 1}, headers=OWNER)
+    assert len(client.get("/board-store/outbox", headers=OWNER).json()["docs"]) == 1
+    # Another process writes straight to the store and raises the generation, as the
+    # app's own write path does; the cached listing must not survive it.
+    put_doc(
+        board_docs_store(tmp_path / "store"), "outbox", "e2", {"a": 2}, role="viewer"
+    )
+    gen = tmp_path / "store" / ".gen-outbox"
+    gen.write_text(str(int(gen.read_text()) + 1))
+    assert len(client.get("/board-store/outbox", headers=OWNER).json()["docs"]) == 2

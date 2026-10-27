@@ -223,6 +223,7 @@ class AtomicTextFiles(MutableMapping):
                 handle.flush()
                 os.fsync(handle.fileno())
             os.replace(tmp, path)
+            _fsync_dir(path.parent)
         except BaseException:
             with contextlib.suppress(FileNotFoundError):
                 os.remove(tmp)
@@ -241,6 +242,20 @@ class AtomicTextFiles(MutableMapping):
 
     def __len__(self) -> int:
         return sum(1 for _ in self)
+
+
+def _fsync_dir(directory: Path) -> None:
+    """Make a rename durable: on POSIX the directory entry is only safe once synced."""
+    try:
+        fd = os.open(directory, os.O_RDONLY)
+    except OSError:  # pragma: no cover - Windows cannot open a directory
+        return
+    try:
+        os.fsync(fd)
+    except OSError:  # pragma: no cover - some filesystems refuse
+        pass
+    finally:
+        os.close(fd)
 
 
 def board_docs_store(rootdir: str | Path) -> MutableMapping[str, str]:

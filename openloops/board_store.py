@@ -169,6 +169,14 @@ def _read(store: Mapping[str, Any], key: str) -> str | None:
     return raw.decode("utf-8") if isinstance(raw, (bytes, bytearray)) else str(raw)
 
 
+def _is_json(text: str) -> bool:
+    try:
+        json.loads(text)
+    except ValueError:
+        return False
+    return True
+
+
 def _loads_or_empty(text: str) -> dict[str, Any]:
     try:
         value = json.loads(text)
@@ -253,7 +261,11 @@ def put_doc(
     if collection == "outbox" and current is not None:
         if current == text:
             return {"id": doc_id, "version": _version(text), "created": False}
-        raise BoardStoreError(409, f"outbox/{doc_id} exists and events never change")
+        # An unreadable file (a write cut short) is not an event: a retry repairs it.
+        if _is_json(current):
+            raise BoardStoreError(
+                409, f"outbox/{doc_id} exists and events never change"
+            )
     if if_none_match and current is not None:
         raise BoardStoreError(412, f"{collection}/{doc_id} already exists")
     if if_match is not None and (

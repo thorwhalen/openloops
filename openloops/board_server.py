@@ -105,8 +105,10 @@ def mk_app(
     # Interactive API docs would answer without a role: off.
     app = FastAPI(title=title, docs_url=None, redoc_url=None, openapi_url=None)
     # Every poll lists every collection; re-reading every file each time is the cost
-    # that grows. A listing is reused until its directory changes (an atomic write is a
-    # rename, which updates the directory's mtime), in any worker.
+    # that grows. A listing is reused until its collection's generation changes: a
+    # counter in a dotfile that every write raises inside the exclusive lock, so every
+    # worker sees it (a directory mtime would not do: coarse kernel clocks can give two
+    # writes one stamp).
     listings: dict[str, tuple[Any, dict, str]] = {}
 
     def require_role(request: Request) -> str:
@@ -120,20 +122,27 @@ def mk_app(
             {"error": exc.message}, status_code=exc.status, headers=NO_STORE
         )
 
-    def stamp(collection: str):
+    def generation(collection: str) -> str:
         try:
-            info = (root / collection).stat()
+            return (root / f".gen-{collection}").read_text(encoding="utf-8")
         except FileNotFoundError:
-            return None
-        return (info.st_mtime_ns, info.st_ino)
+            return "0"
+
+    def bump(collection: str) -> None:
+        path = root / f".gen-{collection}"
+        store_tmp = path.with_name(path.name + ".tmp")
+        store_tmp.write_text(
+            str(int(generation(collection) or 0) + 1), encoding="utf-8"
+        )
+        store_tmp.replace(path)
 
     def listing_of(collection: str) -> tuple[dict, str]:
         if collection not in COLLECTIONS:
             raise BoardStoreError(404, f"no collection {collection!r}")
         with file_lock(lock_path, shared=True):
-            now = stamp(collection)
+            now = generation(collection)
             cached = listings.get(collection)
-            if cached and now is not None and cached[0] == now:
+            if cached and cached[0] == now:
                 return cached[1], cached[2]
             listing = list_docs(store, collection)
         tag = _etag("".join(d["id"] + d["version"] for d in listing["docs"]))
@@ -142,7 +151,7 @@ def mk_app(
 
     def write(collection, doc_id, data, role, if_match, if_none_match):
         with file_lock(lock_path):
-            return put_doc(
+            result = put_doc(
                 store,
                 collection,
                 doc_id,
@@ -153,6 +162,8 @@ def mk_app(
                 max_bytes=max_bytes,
                 allow_import=(root / IMPORT_FLAG).exists(),
             )
+            bump(collection)
+            return result
 
     @app.get("/board")
     def board_redirect(request: Request):
