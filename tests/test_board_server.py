@@ -199,3 +199,11 @@ def test_a_write_by_another_worker_invalidates_the_cached_listing(client, tmp_pa
     gen = tmp_path / "store" / ".gen-outbox"
     gen.write_text(str(int(gen.read_text()) + 1))
     assert len(client.get("/board-store/outbox", headers=OWNER).json()["docs"]) == 2
+
+
+def test_board_responses_refuse_framing_and_sniffing(client):
+    for path in ("/board/", "/board/tasks.json", "/board-store/outbox"):
+        headers = client.get(path, headers=OWNER).headers
+        assert headers["content-security-policy"] == "frame-ancestors 'none'"
+        assert headers["x-frame-options"] == "DENY"
+        assert headers["x-content-type-options"] == "nosniff"
