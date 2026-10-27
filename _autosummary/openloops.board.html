@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="../_static/documentation_options.js?v=842aa08f"></script>
+    <script src="../_static/documentation_options.js?v=20522496"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.22" />
+  <meta name="docsearch:version" content="0.1.23" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -426,27 +426,51 @@ data anywhere near the repository: where the board lives is the caller’s choic
 <p class="rubric">Functions</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.board.board_dir" title="openloops.board.board_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">board_dir</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.board.as_document" title="openloops.board.as_document"><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_document</span></code></a>(fragment)</p></td>
+<td><p>The page as a full HTML document, for hosting outside a claude.ai Artifact.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.board.board_dir" title="openloops.board.board_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">board_dir</span></code></a>()</p></td>
 <td><p>Where the page template and the default run specs ship, inside the package.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#openloops.board.build_board" title="openloops.board.build_board"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_board</span></code></a>(records, out_dir, *[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.board.build_board" title="openloops.board.build_board"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_board</span></code></a>(records, out_dir, *[, ...])</p></td>
 <td><p>Write the board's five files into <code class="docutils literal notranslate"><span class="pre">out_dir</span></code> and say what went in.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.board.group_runs" title="openloops.board.group_runs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_runs</span></code></a>(tasks, *[, specs, extras])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.board.group_runs" title="openloops.board.group_runs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_runs</span></code></a>(tasks, *[, specs, extras])</p></td>
 <td><p>Repeated chores grouped into runs, ordered as the specs are.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#openloops.board.join_created" title="openloops.board.join_created"><code class="xref py py-obj docutils literal notranslate"><span class="pre">join_created</span></code></a>(tasks, candidates)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.board.join_created" title="openloops.board.join_created"><code class="xref py py-obj docutils literal notranslate"><span class="pre">join_created</span></code></a>(tasks, candidates)</p></td>
 <td><p>Fill each record's missing <code class="docutils literal notranslate"><span class="pre">created</span></code> from the gathered candidate with its URL.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.board.run_specs" title="openloops.board.run_specs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_specs</span></code></a>([path])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.board.run_specs" title="openloops.board.run_specs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_specs</span></code></a>([path])</p></td>
 <td><p>The run specs: one per pattern, in display order.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#openloops.board.sort_tasks" title="openloops.board.sort_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_tasks</span></code></a>(tasks)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.board.sort_tasks" title="openloops.board.sort_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_tasks</span></code></a>(tasks)</p></td>
 <td><p>Cheapest first: by tier, then by minutes per thing the item unblocks.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.board.as_document">
+<span class="sig-prename descclassname"><span class="pre">openloops.board.</span></span><span class="sig-name descname"><span class="pre">as_document</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fragment</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/board.html#as_document"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.board.as_document" title="Link to this definition">#</a></dt>
+<dd><p>The page as a full HTML document, for hosting outside a claude.ai Artifact.</p>
+<p>The page template is a fragment, because the Artifact host supplies the document
+skeleton; anywhere else the skeleton has to be in the file. The page’s own styles
+come after this reset, so its dark theme still wins.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">as_document</span><span class="p">(</span><span class="s1">'&lt;title&gt;t&lt;/title&gt;&lt;p&gt;hi&lt;/p&gt;'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'&lt;!doctype html&gt;'</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">'name="viewport"'</span> <span class="ow">in</span> <span class="n">doc</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">as_document</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span> <span class="o">==</span> <span class="n">doc</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="openloops.board.board_dir">
 <span class="sig-prename descclassname"><span class="pre">openloops.board.</span></span><span class="sig-name descname"><span class="pre">board_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/board.html#board_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.board.board_dir" title="Link to this definition">#</a></dt>
@@ -591,6 +615,7 @@ into this one, and those runs disappear: two chores done in one session run.</p>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.board.as_document"><code class="docutils literal notranslate"><span class="pre">as_document()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.board.board_dir"><code class="docutils literal notranslate"><span class="pre">board_dir()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.board.build_board"><code class="docutils literal notranslate"><span class="pre">build_board()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.board.group_runs"><code class="docutils literal notranslate"><span class="pre">group_runs()</span></code></a></li>

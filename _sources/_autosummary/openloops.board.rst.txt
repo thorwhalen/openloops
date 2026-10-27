@@ -8,6 +8,7 @@ openloops.board
 
    .. autosummary::
    
+      as_document
       board_dir
       build_board
       group_runs

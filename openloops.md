@@ -1,4 +1,4 @@
-> built 2026-10-27 07:23 UTC from 17c622a (main) · openloops 0.1.22. Details: build_info.json
+> built 2026-10-27 08:12 UTC from bd18fa9 (main) · openloops 0.1.23. Details: build_info.json
 
 # index.html.md
 
@@ -1418,13 +1418,33 @@ data anywhere near the repository: where the board lives is the caller’s choic
 
 ### Functions
 
-| [`board_dir`](_autosummary/openloops.board.html.md#openloops.board.board_dir)()                              | Where the page template and the default run specs ship, inside the package.    |
+| [`as_document`](_autosummary/openloops.board.html.md#openloops.board.as_document)(fragment)                    | The page as a full HTML document, for hosting outside a claude.ai Artifact.    |
 |-------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| [`board_dir`](_autosummary/openloops.board.html.md#openloops.board.board_dir)()                              | Where the page template and the default run specs ship, inside the package.    |
 | [`build_board`](_autosummary/openloops.board.html.md#openloops.board.build_board)(records, out_dir, \*[, ...]) | Write the board's five files into `out_dir` and say what went in.              |
 | [`group_runs`](_autosummary/openloops.board.html.md#openloops.board.group_runs)(tasks, \*[, specs, extras])   | Repeated chores grouped into runs, ordered as the specs are.                   |
 | [`join_created`](_autosummary/openloops.board.html.md#openloops.board.join_created)(tasks, candidates)          | Fill each record's missing `created` from the gathered candidate with its URL. |
 | [`run_specs`](_autosummary/openloops.board.html.md#openloops.board.run_specs)([path])                        | The run specs: one per pattern, in display order.                              |
 | [`sort_tasks`](_autosummary/openloops.board.html.md#openloops.board.sort_tasks)(tasks)                        | Cheapest first: by tier, then by minutes per thing the item unblocks.          |
+
+### openloops.board.as_document(fragment)
+
+The page as a full HTML document, for hosting outside a claude.ai Artifact.
+
+The page template is a fragment, because the Artifact host supplies the document
+skeleton; anywhere else the skeleton has to be in the file. The page’s own styles
+come after this reset, so its dark theme still wins.
+
+```pycon
+>>> doc = as_document('<title>t</title><p>hi</p>')
+>>> doc.startswith('<!doctype html>') and 'name="viewport"' in doc
+True
+>>> as_document(doc) == doc
+True
+```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### openloops.board.board_dir()
 
@@ -5104,7 +5124,7 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-10-27 07:23 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/17c622a96956bc2330020dc4a2a3efbf7a015c3b"><code>17c622a</code></a> on branch <code>main</code>, for **openloops 0.1.22** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-27 08:12 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/bd18fa995112d0658a1207ee158a73e3d0459ea1"><code>bd18fa9</code></a> on branch <code>main</code>, for **openloops 0.1.23** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -5113,7 +5133,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/17c622a96956bc2330020dc4a2a3efbf7a015c3b"><code>17c622a96956bc2330020dc4a2a3efbf7a015c3b</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/bd18fa995112d0658a1207ee158a73e3d0459ea1"><code>bd18fa995112d0658a1207ee158a73e3d0459ea1</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -5124,9 +5144,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/40466617585">40466617585</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/40471751027">40471751027</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>17c622a96956bc2330020dc4a2a3efbf7a015c3b</code> (in the history of the built commit) |
+| Event commit | <code>bd18fa995112d0658a1207ee158a73e3d0459ea1</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -5151,13 +5171,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.22/">0.1.22</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.23/">0.1.23</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 17c622a96956bc2330020dc4a2a3efbf7a015c3b
+git checkout bd18fa995112d0658a1207ee158a73e3d0459ea1
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

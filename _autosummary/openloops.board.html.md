@@ -27,13 +27,33 @@ data anywhere near the repository: where the board lives is the caller’s choic
 
 ### Functions
 
-| [`board_dir`](#openloops.board.board_dir)()                              | Where the page template and the default run specs ship, inside the package.    |
+| [`as_document`](#openloops.board.as_document)(fragment)                    | The page as a full HTML document, for hosting outside a claude.ai Artifact.    |
 |-------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| [`board_dir`](#openloops.board.board_dir)()                              | Where the page template and the default run specs ship, inside the package.    |
 | [`build_board`](#openloops.board.build_board)(records, out_dir, \*[, ...]) | Write the board's five files into `out_dir` and say what went in.              |
 | [`group_runs`](#openloops.board.group_runs)(tasks, \*[, specs, extras])   | Repeated chores grouped into runs, ordered as the specs are.                   |
 | [`join_created`](#openloops.board.join_created)(tasks, candidates)          | Fill each record's missing `created` from the gathered candidate with its URL. |
 | [`run_specs`](#openloops.board.run_specs)([path])                        | The run specs: one per pattern, in display order.                              |
 | [`sort_tasks`](#openloops.board.sort_tasks)(tasks)                        | Cheapest first: by tier, then by minutes per thing the item unblocks.          |
+
+### openloops.board.as_document(fragment)
+
+The page as a full HTML document, for hosting outside a claude.ai Artifact.
+
+The page template is a fragment, because the Artifact host supplies the document
+skeleton; anywhere else the skeleton has to be in the file. The page’s own styles
+come after this reset, so its dark theme still wins.
+
+```pycon
+>>> doc = as_document('<title>t</title><p>hi</p>')
+>>> doc.startswith('<!doctype html>') and 'name="viewport"' in doc
+True
+>>> as_document(doc) == doc
+True
+```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### openloops.board.board_dir()
 
