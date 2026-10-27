@@ -9,6 +9,8 @@
 - [openloops.base](openloops.base.html.md): Data structures shared across openloops: what a session is, and what a digest is.
 - [openloops.blockers](openloops.blockers.html.md): The other kind of open loop: the one that points at a repository, not at a person.
 - [openloops.board](openloops.board.html.md): The phone task board: task records in, a static page and its data files out.
+- [openloops.board_server](openloops.board_server.html.md): An optional web app for a self-hosted phone board: the page, its files, its store API.
+- [openloops.board_store](openloops.board_store.html.md): The board store’s rules, for a self-hosted phone board: who may write what, and how.
 - [openloops.dashboard](openloops.dashboard.html.md): One page you can look at instead of reading three command outputs.
 - [openloops.digest](openloops.digest.html.md): Rendering one session into one dated markdown digest. No model, no network.
 - [openloops.egress](openloops.egress.html.md): The egress choke point: nothing leaves openloops carrying a home path or a secret.

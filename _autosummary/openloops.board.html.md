@@ -42,7 +42,7 @@ Where the page template and the default run specs ship, inside the package.
 * **Return type:**
   [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)
 
-### openloops.board.build_board(records, out_dir, , candidates=(), specs=None, extras=None, title='Phone Task Board', session=None, read_only_orgs=(), machine=None)
+### openloops.board.build_board(records, out_dir, , candidates=(), specs=None, extras=None, title='Phone Task Board', session=None, read_only_orgs=(), machine=None, store='artifact', api=None, moved_to=None)
 
 Write the board’s five files into `out_dir` and say what went in.
 
@@ -50,6 +50,12 @@ Write the board’s five files into `out_dir` and say what went in.
 page names it in the prompts it copies); `read_only_orgs` are organisations whose
 items the page never offers to close or comment on; `machine` is the default
 machine named by a run’s “have an agent start this run”.
+
+`store` picks where the page keeps its state: `artifact` (the claude.ai
+Artifact `db` capability) or `http` (a self-hosted board store API at `api`,
+same origin as the page, served by anything wrapping [`openloops.board_store`](openloops.board_store.html.md#module-openloops.board_store)).
+`moved_to` (an `https://` URL) builds the page as a forwarding notice: it
+flushes what a phone already queued and takes no new taps.
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]

@@ -1,0 +1,28 @@
+openloops.board\_store
+======================
+
+.. automodule:: openloops.board_store
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      WRITERS
+      IMPORT_WRITERS
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_doc
+      list_docs
+      parse_body
+      put_doc
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+   
+      BoardStoreError
+   

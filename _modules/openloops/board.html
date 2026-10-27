@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="../../_static/documentation_options.js?v=3d116926"></script>
+    <script src="../../_static/documentation_options.js?v=17aaaefc"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.19" />
+  <meta name="docsearch:version" content="0.1.20" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -771,6 +771,8 @@ window.runMermaid = runMermaid;</script>
 <span class="p">]</span>
 
 <span class="n">DFLT_TITLE</span> <span class="o">=</span> <span class="s2">"Phone Task Board"</span>
+<span class="c1">#: Where the page keeps its state: the claude.ai Artifact store, or a self-hosted API.</span>
+<span class="n">STORES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"artifact"</span><span class="p">,</span> <span class="s2">"http"</span><span class="p">)</span>
 <span class="c1">#: Statuses that put an item in the clean-up run rather than in its pattern's run.</span>
 <span class="n">CLEANUP_STATUSES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"likely-done"</span><span class="p">,</span> <span class="s2">"stale"</span><span class="p">)</span>
 <span class="n">CLEANUP_KEY</span> <span class="o">=</span> <span class="s2">"cleanup"</span>
@@ -932,6 +934,9 @@ window.runMermaid = runMermaid;</script>
     <span class="n">session</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">read_only_orgs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
     <span class="n">machine</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"artifact"</span><span class="p">,</span>
+    <span class="n">api</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">moved_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Write the board's five files into ``out_dir`` and say what went in.</span>
 
@@ -939,7 +944,19 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    page names it in the prompts it copies); ``read_only_orgs`` are organisations whose</span>
 <span class="sd">    items the page never offers to close or comment on; ``machine`` is the default</span>
 <span class="sd">    machine named by a run's "have an agent start this run".</span>
+
+<span class="sd">    ``store`` picks where the page keeps its state: ``artifact`` (the claude.ai</span>
+<span class="sd">    Artifact ``db`` capability) or ``http`` (a self-hosted board store API at ``api``,</span>
+<span class="sd">    same origin as the page, served by anything wrapping :mod:`openloops.board_store`).</span>
+<span class="sd">    ``moved_to`` (an ``https://`` URL) builds the page as a forwarding notice: it</span>
+<span class="sd">    flushes what a phone already queued and takes no new taps.</span>
 <span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">store</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">STORES</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"store must be one of </span><span class="si">{</span><span class="n">STORES</span><span class="si">}</span><span class="s2">, not </span><span class="si">{</span><span class="n">store</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">store</span> <span class="o">==</span> <span class="s2">"http"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">api</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"store 'http' needs the board store API's address (api=)"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">moved_to</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">(</span><span class="n">moved_to</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"https://"</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"moved_to must be an https:// URL, not </span><span class="si">{</span><span class="n">moved_to</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span>
     <span class="n">out</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">tasks</span> <span class="o">=</span> <span class="n">sort_tasks</span><span class="p">(</span>
@@ -951,6 +968,8 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"session"</span><span class="p">:</span> <span class="n">session</span><span class="p">,</span>
         <span class="s2">"read_only_orgs"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">read_only_orgs</span><span class="p">),</span>
         <span class="s2">"machine"</span><span class="p">:</span> <span class="n">machine</span><span class="p">,</span>
+        <span class="s2">"store"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"kind"</span><span class="p">:</span> <span class="n">store</span><span class="p">,</span> <span class="o">**</span><span class="p">({</span><span class="s2">"api"</span><span class="p">:</span> <span class="n">api</span><span class="p">}</span> <span class="k">if</span> <span class="n">store</span> <span class="o">==</span> <span class="s2">"http"</span> <span class="k">else</span> <span class="p">{})},</span>
+        <span class="o">**</span><span class="p">({</span><span class="s2">"moved_to"</span><span class="p">:</span> <span class="n">moved_to</span><span class="p">}</span> <span class="k">if</span> <span class="n">moved_to</span> <span class="k">else</span> <span class="p">{}),</span>
     <span class="p">}</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">dump</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>

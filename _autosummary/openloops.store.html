@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="../_static/documentation_options.js?v=3d116926"></script>
+    <script src="../_static/documentation_options.js?v=17aaaefc"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.19" />
+  <meta name="docsearch:version" content="0.1.20" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -323,6 +323,8 @@
 <li class="toctree-l2"><a class="reference internal" href="openloops.base.html">openloops.base</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.blockers.html">openloops.blockers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.board.html">openloops.board</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.board_server.html">openloops.board_server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.board_store.html">openloops.board_store</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.dashboard.html">openloops.dashboard</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.digest.html">openloops.digest</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.egress.html">openloops.egress</a></li>
@@ -437,19 +439,22 @@ running”, this would be a session dashboard rather than a record of what sessi
 <tr class="row-even"><td><p><a class="reference internal" href="#openloops.store.digests_store" title="openloops.store.digests_store"><code class="xref py py-obj docutils literal notranslate"><span class="pre">digests_store</span></code></a>([rootdir])</p></td>
 <td><p>The default <code class="docutils literal notranslate"><span class="pre">digests_store</span></code>: markdown files under the data root.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.store.digest_key" title="openloops.store.digest_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">digest_key</span></code></a>(source, state, session_key)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.store.board_docs_store" title="openloops.store.board_docs_store"><code class="xref py py-obj docutils literal notranslate"><span class="pre">board_docs_store</span></code></a>(rootdir)</p></td>
+<td><p>A self-hosted board's documents: <code class="docutils literal notranslate"><span class="pre">&lt;root&gt;/&lt;collection&gt;/&lt;id&gt;.json</span></code>, written atomically.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.store.digest_key" title="openloops.store.digest_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">digest_key</span></code></a>(source, state, session_key)</p></td>
 <td><p>The store key for one session's digest.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#openloops.store.parse_digest_key" title="openloops.store.parse_digest_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_digest_key</span></code></a>(key)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.store.parse_digest_key" title="openloops.store.parse_digest_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_digest_key</span></code></a>(key)</p></td>
 <td><p>Split a store key back into <code class="docutils literal notranslate"><span class="pre">(source,</span> <span class="pre">state,</span> <span class="pre">session_key)</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.store.load_sync_state" title="openloops.store.load_sync_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_sync_state</span></code></a>([directory])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.store.load_sync_state" title="openloops.store.load_sync_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_sync_state</span></code></a>([directory])</p></td>
 <td><p>Session id → the transcript revision last read.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#openloops.store.save_sync_state" title="openloops.store.save_sync_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_sync_state</span></code></a>(state[, directory])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.store.save_sync_state" title="openloops.store.save_sync_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_sync_state</span></code></a>(state[, directory])</p></td>
 <td><p>Write the mtime cache, creating its directory.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.store.sync_state_path" title="openloops.store.sync_state_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sync_state_path</span></code></a>([directory])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.store.sync_state_path" title="openloops.store.sync_state_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sync_state_path</span></code></a>([directory])</p></td>
 <td><p>Where the mtime cache lives.</p></td>
 </tr>
 </tbody>
@@ -461,9 +466,26 @@ running”, this would be a session dashboard rather than a record of what sessi
 <tr class="row-odd"><td><p><a class="reference internal" href="#openloops.store.Utf8TextFiles" title="openloops.store.Utf8TextFiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Utf8TextFiles</span></code></a>(*args[, delete_func, ...])</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">dol</span></code>'s text-file store with the encoding pinned rather than inherited.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.store.AtomicTextFiles" title="openloops.store.AtomicTextFiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AtomicTextFiles</span></code></a>(root)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&lt;root&gt;/&lt;key&gt;</span></code> text files, each write atomic: temp file, <code class="docutils literal notranslate"><span class="pre">fsync</span></code>, rename.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
+<dl class="py class">
+<dt class="sig sig-object py" id="openloops.store.AtomicTextFiles">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.store.</span></span><span class="sig-name descname"><span class="pre">AtomicTextFiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/store.html#AtomicTextFiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.store.AtomicTextFiles" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutableMapping</span></code></a></p>
+<p><code class="docutils literal notranslate"><span class="pre">&lt;root&gt;/&lt;key&gt;</span></code> text files, each write atomic: temp file, <code class="docutils literal notranslate"><span class="pre">fsync</span></code>, rename.</p>
+<p>A self-hosted board’s store is read by every poll while it is written, by several
+server processes. A plain <code class="docutils literal notranslate"><span class="pre">open(path,</span> <span class="pre">&quot;w&quot;)</span></code> leaves a truncated file behind when a
+worker is killed mid-write or the disk fills, and readers can see a half-written one;
+a rename never shows either. Keys are POSIX relative paths (<code class="docutils literal notranslate"><span class="pre">outbox/e1.json</span></code>);
+a key that would leave <code class="docutils literal notranslate"><span class="pre">root</span></code> is refused.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="openloops.store.Utf8TextFiles">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.store.</span></span><span class="sig-name descname"><span class="pre">Utf8TextFiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delete_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_open_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/store.html#Utf8TextFiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.store.Utf8TextFiles" title="Link to this definition">#</a></dt>
@@ -486,6 +508,24 @@ read back. Pinning UTF-8 is the whole fix.</p>
 <dd><p><code class="docutils literal notranslate"><span class="pre">validate_key</span></code> on the inner key – see <code class="docutils literal notranslate"><span class="pre">mk_relative_path_store</span></code>.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.store.board_docs_store">
+<span class="sig-prename descclassname"><span class="pre">openloops.store.</span></span><span class="sig-name descname"><span class="pre">board_docs_store</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rootdir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/store.html#board_docs_store"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.store.board_docs_store" title="Link to this definition">#</a></dt>
+<dd><p>A self-hosted board’s documents: <code class="docutils literal notranslate"><span class="pre">&lt;root&gt;/&lt;collection&gt;/&lt;id&gt;.json</span></code>, written atomically.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span> <span class="o">=</span> <span class="n">board_docs_store</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span><span class="p">[</span><span class="s1">'outbox/e1.json'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'</span><span class="si">{}</span><span class="s1">'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">store</span><span class="p">),</span> <span class="n">store</span><span class="p">[</span><span class="s1">'outbox/e1.json'</span><span class="p">]</span>
+<span class="go">(['outbox/e1.json'], '{}')</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutableMapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -683,11 +723,13 @@ it elsewhere means “clear the cache” can never be mistyped into “delete th
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.store.AtomicTextFiles"><code class="docutils literal notranslate"><span class="pre">AtomicTextFiles</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.store.Utf8TextFiles"><code class="docutils literal notranslate"><span class="pre">Utf8TextFiles</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.store.Utf8TextFiles.is_valid_key"><code class="docutils literal notranslate"><span class="pre">Utf8TextFiles.is_valid_key()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.store.Utf8TextFiles.validate_key"><code class="docutils literal notranslate"><span class="pre">Utf8TextFiles.validate_key()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.store.board_docs_store"><code class="docutils literal notranslate"><span class="pre">board_docs_store()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.store.data_dir"><code class="docutils literal notranslate"><span class="pre">data_dir()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.store.default_source"><code class="docutils literal notranslate"><span class="pre">default_source()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.store.digest_key"><code class="docutils literal notranslate"><span class="pre">digest_key()</span></code></a></li>

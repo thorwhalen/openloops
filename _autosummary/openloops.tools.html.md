@@ -60,7 +60,7 @@ itself failed — must not be readable as “nothing is waiting”.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.tools.board_build(, records, out_dir, candidates=None, run_specs=None, run_extras=None, title='Phone Task Board', session=None, read_only_orgs=None, machine=None)
+### openloops.tools.board_build(, records, out_dir, candidates=None, run_specs=None, run_extras=None, title='Phone Task Board', session=None, read_only_orgs=None, machine=None, store='artifact', api=None, moved_to=None)
 
 Write the phone task board (page, `tasks.json`, `runs.json`) into `out_dir`.
 
@@ -68,6 +68,8 @@ Write the phone task board (page, `tasks.json`, `runs.json`) into `out_dir`.
 creation dates; `run_specs` replaces the packaged run specs and `run_extras` (a
 JSON object keyed by run) overlays deployment-specific prompts and tables. Writes
 only into `out_dir`; publishing and the receiving side are the skill’s job.
+`store='http'` with `api` wires the page to a self-hosted board store API
+instead of the claude.ai Artifact store; `moved_to` builds a forwarding page.
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]

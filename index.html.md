@@ -621,6 +621,8 @@ Every open item across your owners that asks something of you (the `manual-task`
 
 The taps on the page become GitHub comments, closed issues and dispatched workers only through a Claude session following the `openloops-phone-board` skill. openloops code never does it ([ADR-008]()).
 
+**On your own website.** `ol board-build --store http --api /your/prefix/board-store` wires the page to a small document-store API instead of the Artifact store. `pip install openloops[server]` adds `openloops.board_server.mk_app`, a FastAPI app serving the board files and that API under the store rules of `openloops.board_store` (events immutable, drafts newest-wins, receipts written only by the receiver, which never writes events outside a migration import). It authenticates nobody: put it behind your own login and map each identity to `viewer` (you) or `receiver` (the receiving session’s account) in its `role_of` ([ADR-009]()).
+
 ## Turning it off
 
 Nothing here runs unless you type it, or an agent you installed a skill for does. There

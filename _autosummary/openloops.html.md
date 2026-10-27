@@ -1151,6 +1151,8 @@ which is what makes it safe to suggest when someone suspects a stale digest.
 |---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
 | [`blockers`](openloops.blockers.html.md#module-openloops.blockers)         | The other kind of open loop: the one that points at a repository, not at a person.      |
 | [`board`](openloops.board.html.md#module-openloops.board)               | The phone task board: task records in, a static page and its data files out.            |
+| [`board_server`](openloops.board_server.html.md#module-openloops.board_server) | An optional web app for a self-hosted phone board: the page, its files, its store API.  |
+| [`board_store`](openloops.board_store.html.md#module-openloops.board_store)   | The board store's rules, for a self-hosted phone board: who may write what, and how.    |
 | [`dashboard`](openloops.dashboard.html.md#module-openloops.dashboard)       | One page you can look at instead of reading three command outputs.                      |
 | [`digest`](openloops.digest.html.md#module-openloops.digest)             | Rendering one session into one dated markdown digest.                                   |
 | [`egress`](openloops.egress.html.md#module-openloops.egress)             | The egress choke point: nothing leaves openloops carrying a home path or a secret.      |

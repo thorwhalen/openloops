@@ -70,6 +70,8 @@
    base
    blockers
    board
+   board_server
+   board_store
    dashboard
    digest
    egress

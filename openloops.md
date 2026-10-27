@@ -1,4 +1,4 @@
-> built 2026-10-27 06:00 UTC from b13bada (main) · openloops 0.1.19. Details: build_info.json
+> built 2026-10-27 06:59 UTC from d3772b4 (main) · openloops 0.1.20. Details: build_info.json
 
 # index.html.md
 
@@ -624,6 +624,8 @@ Every open item across your owners that asks something of you (the `manual-task`
 `board-gather` queries each owner separately with no 50-row cap and reports a query that hits the search API’s ceiling as `saturated` rather than truncating it; `--exclude-repos 'org/*'` (or `OPENLOOPS_EXCLUDE_REPOS`) keeps repositories off the board. `board-classify` is a deterministic heuristic with no model; `--enriched 'batches/out_*.json'` lays records written by the shipped classifier brief over it. `board-build` writes only into the directory you name: the board holds titles from your repositories, so keep it out of any repo.
 
 The taps on the page become GitHub comments, closed issues and dispatched workers only through a Claude session following the `openloops-phone-board` skill. openloops code never does it ([ADR-008]()).
+
+**On your own website.** `ol board-build --store http --api /your/prefix/board-store` wires the page to a small document-store API instead of the Artifact store. `pip install openloops[server]` adds `openloops.board_server.mk_app`, a FastAPI app serving the board files and that API under the store rules of `openloops.board_store` (events immutable, drafts newest-wins, receipts written only by the receiver, which never writes events outside a migration import). It authenticates nobody: put it behind your own login and map each identity to `viewer` (you) or `receiver` (the receiving session’s account) in its `role_of` ([ADR-009]()).
 
 ## Turning it off
 
@@ -1431,7 +1433,7 @@ Where the page template and the default run specs ship, inside the package.
 * **Return type:**
   [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)
 
-### openloops.board.build_board(records, out_dir, , candidates=(), specs=None, extras=None, title='Phone Task Board', session=None, read_only_orgs=(), machine=None)
+### openloops.board.build_board(records, out_dir, , candidates=(), specs=None, extras=None, title='Phone Task Board', session=None, read_only_orgs=(), machine=None, store='artifact', api=None, moved_to=None)
 
 Write the board’s five files into `out_dir` and say what went in.
 
@@ -1439,6 +1441,12 @@ Write the board’s five files into `out_dir` and say what went in.
 page names it in the prompts it copies); `read_only_orgs` are organisations whose
 items the page never offers to close or comment on; `machine` is the default
 machine named by a run’s “have an agent start this run”.
+
+`store` picks where the page keeps its state: `artifact` (the claude.ai
+Artifact `db` capability) or `http` (a self-hosted board store API at `api`,
+same origin as the page, served by anything wrapping [`openloops.board_store`](_autosummary/openloops.board_store.html.md#module-openloops.board_store)).
+`moved_to` (an `https://` URL) builds the page as a forwarding notice: it
+flushes what a phone already queued and takes no new taps.
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
@@ -1496,6 +1504,200 @@ Cheapest first: by tier, then by minutes per thing the item unblocks.
 
 * **Return type:**
   [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
+
+
+# _autosummary/openloops.board_server.html.md
+
+# openloops.board_server
+
+An optional web app for a self-hosted phone board: the page, its files, its store API.
+
+`pip install openloops[server]` adds FastAPI; nothing else in openloops imports this
+module, so the core still never reaches the network. [`mk_app()`](_autosummary/openloops.board_server.html.md#openloops.board_server.mk_app) returns a FastAPI
+app with two route groups:
+
+- `GET /board/` and `GET /board/{file}`: the board directory written by
+  `ol board-build --store http --api <prefix>/board-store` (`index.html`, `tasks.json`,
+  `runs.json`, `board.json`, `kit.html`, nothing else).
+- `/board-store/...`: the board store API of [`openloops.board_store`](_autosummary/openloops.board_store.html.md#module-openloops.board_store). Not
+  `/store`: a host may already own that path (enlace_auth mounts its own per-user
+  store at `/api/<app>/store`), and the page sends no CSRF token, so the API must sit
+  where the host exempts an app’s own routes from CSRF.
+
+**It does not authenticate anyone.** It asks `role_of(request)` for `"viewer"` (the
+owner’s browser) or `"receiver"` (the receiving session) and refuses every request,
+reads included, for which it gets anything else. Put it behind your platform’s login
+and derive the role from the identity that login established, never from anything the
+client sends. The board’s task titles come from private repositories.
+
+**Imports** (moving a board here, see the skill’s `migrate.md`) are possible only
+while a file named `.import-open` exists in `store_root`: create it on the server
+for the migration, delete it after. The receiver’s credentials cannot open it.
+
+> app = mk_app(
+> : board_dir=”~/.local/share/openloops/board”,
+>   store_root=”~/.local/share/openloops/board-store”,
+>   role_of=lambda request: “viewer” if request.state.user_email == OWNER else None,
+
+> )
+
+### Module Attributes
+
+| [`IMPORT_FLAG`](_autosummary/openloops.board_server.html.md#openloops.board_server.IMPORT_FLAG)   | Its presence in the store root allows imports; see the module docstring.   |
+|----------------------------------------------------------------|----------------------------------------------------------------------------|
+
+### Functions
+
+| [`file_lock`](_autosummary/openloops.board_server.html.md#openloops.board_server.file_lock)(path, \*[, shared])                     | A lock on `path` across processes (POSIX `flock`): shared to read, else exclusive.   |
+|----------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| [`mk_app`](_autosummary/openloops.board_server.html.md#openloops.board_server.mk_app)(\*, board_dir, store_root, role_of[, ...]) | The board's FastAPI app.                                                             |
+
+### openloops.board_server.IMPORT_FLAG *= '.import-open'*
+
+Its presence in the store root allows imports; see the module docstring.
+
+### openloops.board_server.file_lock(path, , shared=False)
+
+A lock on `path` across processes (POSIX `flock`): shared to read, else exclusive.
+
+A web server usually runs several worker processes; without this, two of them can
+both see an event as absent and both “create” it. Where `fcntl` is missing the
+lock is process-local only, which is right for a single-process server.
+
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`None`](https://docs.python.org/3/builtins/constants.html#None)]
+
+### openloops.board_server.mk_app(, board_dir, store_root, role_of, max_bytes=65536, title='openloops board')
+
+The board’s FastAPI app. `role_of` is the only authorisation it has.
+
+
+# _autosummary/openloops.board_store.html.md
+
+# openloops.board_store
+
+The board store’s rules, for a self-hosted phone board: who may write what, and how.
+
+The phone board page (`openloops/data/board/index.html`) keeps its state in a small
+document store: collections of JSON documents. On claude.ai that store is the
+Artifact `db` capability. On your own server it is whatever serves the \*\*board store
+API\*\* below, and this module is that API’s logic, written once so every server that
+hosts a board enforces the same rules:
+
+The rules ([`WRITERS`](_autosummary/openloops.board_store.html.md#openloops.board_store.WRITERS), [`put_doc()`](_autosummary/openloops.board_store.html.md#openloops.board_store.put_doc)) are the page’s persistence model, enforced
+rather than trusted:
+
+- `outbox` events are **immutable**: the first write creates, an identical retry is
+  a no-op success, anything else is 409. Only the page (role `viewer`) creates them.
+- `drafts` are newest-wins by their own `at`: an older write is acknowledged and
+  ignored, so a slow phone cannot overwrite a newer note.
+- `receipts`, `meta`, `questions` (and the legacy `state`/`answers`) are
+  written only by the receiving session (role `receiver`), never by the page.
+- **Imports** (moving a board here: `allow_import=True`) additionally let the
+  `receiver` create `outbox` events and write `drafts`. Off by default, and meant
+  to be on only while a migration runs: otherwise the receiver’s credentials would be
+  as powerful as the owner’s taps, since the receiver acts on events.
+
+**Roles are the server’s job, not this module’s.** A server maps each request to
+`viewer` (the owner’s browser login) or `receiver` (the receiving session’s account)
+and refuses everything else before calling in here. Like the rest of openloops this
+module never reaches the network: it reads and writes a `MutableMapping` (a `dict`,
+a files store, anything with the same interface).
+
+```pycon
+>>> store = {}
+>>> put_doc(store, 'outbox', 'e1', {'action': 'done'}, role='viewer')['created']
+True
+>>> put_doc(store, 'outbox', 'e1', {'action': 'done'}, role='viewer')['created']
+False
+>>> put_doc(store, 'outbox', 'e1', {'action': 'undo'}, role='viewer')
+Traceback (most recent call last):
+  ...
+openloops.board_store.BoardStoreError: 409: outbox/e1 exists and events never change
+>>> put_doc(store, 'receipts', 'e1', {'status': 'posted'}, role='viewer')
+Traceback (most recent call last):
+  ...
+openloops.board_store.BoardStoreError: 403: role 'viewer' may not write receipts
+>>> [d['id'] for d in list_docs(store, 'outbox')['docs']]
+['e1']
+```
+
+### Module Attributes
+
+| [`WRITERS`](_autosummary/openloops.board_store.html.md#openloops.board_store.WRITERS)        | Who may write each collection.                                           |
+|-----------------------------------------------------------------|--------------------------------------------------------------------------|
+| [`IMPORT_WRITERS`](_autosummary/openloops.board_store.html.md#openloops.board_store.IMPORT_WRITERS) | What an import may additionally write, and by whom (see `allow_import`). |
+
+### Functions
+
+| [`get_doc`](_autosummary/openloops.board_store.html.md#openloops.board_store.get_doc)(store, collection, doc_id)                 | One document, or a 404 [`BoardStoreError`](_autosummary/openloops.board_store.html.md#openloops.board_store.BoardStoreError).   |
+|-----------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| [`list_docs`](_autosummary/openloops.board_store.html.md#openloops.board_store.list_docs)(store, collection, \*[, max_docs])       | Every document of `collection`, sorted by id.                                              |
+| [`parse_body`](_autosummary/openloops.board_store.html.md#openloops.board_store.parse_body)(raw)                                    | A request body as JSON, refusing `NaN`/`Infinity`, which JSON does not have.               |
+| [`put_doc`](_autosummary/openloops.board_store.html.md#openloops.board_store.put_doc)(store, collection, doc_id, data, \*, role) | Write one document under the collection's rules; return its id and version.                |
+
+### Exceptions
+
+| [`BoardStoreError`](_autosummary/openloops.board_store.html.md#openloops.board_store.BoardStoreError)(status, message)   | A refused request, carrying the HTTP status a server should answer with.   |
+|-------------------------------------------------------------------------------------|----------------------------------------------------------------------------|
+
+### *exception* openloops.board_store.BoardStoreError(status, message)
+
+Bases: [`Exception`](https://docs.python.org/3/builtins/exceptions.html#Exception)
+
+A refused request, carrying the HTTP status a server should answer with.
+
+### openloops.board_store.IMPORT_WRITERS *: [Mapping](https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), [frozenset](https://docs.python.org/3/builtins/stdtypes.html#frozenset)[[str](https://docs.python.org/3/builtins/stdtypes.html#str)]]* *= {'drafts': frozenset({'receiver'}), 'outbox': frozenset({'receiver'})}*
+
+What an import may additionally write, and by whom (see `allow_import`).
+
+### openloops.board_store.WRITERS *: [Mapping](https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), [frozenset](https://docs.python.org/3/builtins/stdtypes.html#frozenset)[[str](https://docs.python.org/3/builtins/stdtypes.html#str)]]* *= {'answers': frozenset({'receiver'}), 'drafts': frozenset({'viewer'}), 'meta': frozenset({'receiver'}), 'outbox': frozenset({'viewer'}), 'questions': frozenset({'receiver'}), 'receipts': frozenset({'receiver'}), 'state': frozenset({'receiver'})}*
+
+Who may write each collection. Every role may read every collection.
+
+### openloops.board_store.get_doc(store, collection, doc_id)
+
+One document, or a 404 [`BoardStoreError`](_autosummary/openloops.board_store.html.md#openloops.board_store.BoardStoreError).
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.board_store.list_docs(store, collection, , max_docs=20000)
+
+Every document of `collection`, sorted by id.
+
+A file that is not valid JSON (a hand edit, a write cut short by a store that does
+not write atomically) is counted in `skipped` rather than failing the listing.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.board_store.parse_body(raw)
+
+A request body as JSON, refusing `NaN`/`Infinity`, which JSON does not have.
+
+```pycon
+>>> parse_body(b'{"a": 1}')
+{'a': 1}
+>>> parse_body(b'{"a": NaN}')
+Traceback (most recent call last):
+  ...
+openloops.board_store.BoardStoreError: 400: body is not JSON
+```
+
+* **Return type:**
+  [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)
+
+### openloops.board_store.put_doc(store, collection, doc_id, data, , role, if_match=None, if_none_match=False, max_bytes=65536, allow_import=False)
+
+Write one document under the collection’s rules; return its id and version.
+
+`created` is `False` for an idempotent repeat of an event and for an unpinned
+draft older than the one stored, both of which change nothing. A *pinned* draft
+write that loses to a newer one is a 412, so a caller who pinned learns it lost.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 
 # _autosummary/openloops.dashboard.html.md
@@ -3253,6 +3455,8 @@ which is what makes it safe to suggest when someone suspects a stale digest.
 |---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
 | [`blockers`](_autosummary/openloops.blockers.html.md#module-openloops.blockers)         | The other kind of open loop: the one that points at a repository, not at a person.      |
 | [`board`](_autosummary/openloops.board.html.md#module-openloops.board)               | The phone task board: task records in, a static page and its data files out.            |
+| [`board_server`](_autosummary/openloops.board_server.html.md#module-openloops.board_server) | An optional web app for a self-hosted phone board: the page, its files, its store API.  |
+| [`board_store`](_autosummary/openloops.board_store.html.md#module-openloops.board_store)   | The board store's rules, for a self-hosted phone board: who may write what, and how.    |
 | [`dashboard`](_autosummary/openloops.dashboard.html.md#module-openloops.dashboard)       | One page you can look at instead of reading three command outputs.                      |
 | [`digest`](_autosummary/openloops.digest.html.md#module-openloops.digest)             | Rendering one session into one dated markdown digest.                                   |
 | [`egress`](_autosummary/openloops.egress.html.md#module-openloops.egress)             | The egress choke point: nothing leaves openloops carrying a home path or a secret.      |
@@ -3991,21 +4195,35 @@ running”, this would be a session dashboard rather than a record of what sessi
 
 ### Functions
 
-| [`data_dir`](_autosummary/openloops.store.html.md#openloops.store.data_dir)()                             | The project's data root.                                         |
-|-----------------------------------------------------------------------------------------|------------------------------------------------------------------|
-| [`state_dir`](_autosummary/openloops.store.html.md#openloops.store.state_dir)()                            | Where per-machine caches and job logs go.                        |
-| [`default_source`](_autosummary/openloops.store.html.md#openloops.store.default_source)([directory])            | This machine's label for its digest folder.                      |
-| [`digests_store`](_autosummary/openloops.store.html.md#openloops.store.digests_store)([rootdir])               | The default `digests_store`: markdown files under the data root. |
-| [`digest_key`](_autosummary/openloops.store.html.md#openloops.store.digest_key)(source, state, session_key) | The store key for one session's digest.                          |
-| [`parse_digest_key`](_autosummary/openloops.store.html.md#openloops.store.parse_digest_key)(key)                  | Split a store key back into `(source, state, session_key)`.      |
-| [`load_sync_state`](_autosummary/openloops.store.html.md#openloops.store.load_sync_state)([directory])           | Session id → the transcript revision last read.                  |
-| [`save_sync_state`](_autosummary/openloops.store.html.md#openloops.store.save_sync_state)(state[, directory])    | Write the mtime cache, creating its directory.                   |
-| [`sync_state_path`](_autosummary/openloops.store.html.md#openloops.store.sync_state_path)([directory])           | Where the mtime cache lives.                                     |
+| [`data_dir`](_autosummary/openloops.store.html.md#openloops.store.data_dir)()                             | The project's data root.                                                              |
+|-----------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| [`state_dir`](_autosummary/openloops.store.html.md#openloops.store.state_dir)()                            | Where per-machine caches and job logs go.                                             |
+| [`default_source`](_autosummary/openloops.store.html.md#openloops.store.default_source)([directory])            | This machine's label for its digest folder.                                           |
+| [`digests_store`](_autosummary/openloops.store.html.md#openloops.store.digests_store)([rootdir])               | The default `digests_store`: markdown files under the data root.                      |
+| [`board_docs_store`](_autosummary/openloops.store.html.md#openloops.store.board_docs_store)(rootdir)              | A self-hosted board's documents: `<root>/<collection>/<id>.json`, written atomically. |
+| [`digest_key`](_autosummary/openloops.store.html.md#openloops.store.digest_key)(source, state, session_key) | The store key for one session's digest.                                               |
+| [`parse_digest_key`](_autosummary/openloops.store.html.md#openloops.store.parse_digest_key)(key)                  | Split a store key back into `(source, state, session_key)`.                           |
+| [`load_sync_state`](_autosummary/openloops.store.html.md#openloops.store.load_sync_state)([directory])           | Session id → the transcript revision last read.                                       |
+| [`save_sync_state`](_autosummary/openloops.store.html.md#openloops.store.save_sync_state)(state[, directory])    | Write the mtime cache, creating its directory.                                        |
+| [`sync_state_path`](_autosummary/openloops.store.html.md#openloops.store.sync_state_path)([directory])           | Where the mtime cache lives.                                                          |
 
 ### Classes
 
 | [`Utf8TextFiles`](_autosummary/openloops.store.html.md#openloops.store.Utf8TextFiles)(\*args[, delete_func, ...])   | `dol`'s text-file store with the encoding pinned rather than inherited.   |
 |----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| [`AtomicTextFiles`](_autosummary/openloops.store.html.md#openloops.store.AtomicTextFiles)(root)                       | `<root>/<key>` text files, each write atomic: temp file, `fsync`, rename. |
+
+### *class* openloops.store.AtomicTextFiles(root)
+
+Bases: [`MutableMapping`](https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping)
+
+`<root>/<key>` text files, each write atomic: temp file, `fsync`, rename.
+
+A self-hosted board’s store is read by every poll while it is written, by several
+server processes. A plain `open(path, "w")` leaves a truncated file behind when a
+worker is killed mid-write or the disk fills, and readers can see a half-written one;
+a rename never shows either. Keys are POSIX relative paths (`outbox/e1.json`);
+a key that would leave `root` is refused.
 
 ### *class* openloops.store.Utf8TextFiles(\*args, delete_func=None, write_open_kwargs=None, \*\*kwargs)
 
@@ -4026,6 +4244,21 @@ read back. Pinning UTF-8 is the whole fix.
 #### validate_key(k, \*args, \_\_name='validate_key', \*\*kwargs)
 
 `validate_key` on the inner key – see `mk_relative_path_store`.
+
+### openloops.store.board_docs_store(rootdir)
+
+A self-hosted board’s documents: `<root>/<collection>/<id>.json`, written atomically.
+
+```pycon
+>>> import tempfile
+>>> store = board_docs_store(tempfile.mkdtemp())
+>>> store['outbox/e1.json'] = '{}'
+>>> list(store), store['outbox/e1.json']
+(['outbox/e1.json'], '{}')
+```
+
+* **Return type:**
+  [`MutableMapping`](https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ### openloops.store.data_dir()
 
@@ -4493,7 +4726,7 @@ itself failed — must not be readable as “nothing is waiting”.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.tools.board_build(, records, out_dir, candidates=None, run_specs=None, run_extras=None, title='Phone Task Board', session=None, read_only_orgs=None, machine=None)
+### openloops.tools.board_build(, records, out_dir, candidates=None, run_specs=None, run_extras=None, title='Phone Task Board', session=None, read_only_orgs=None, machine=None, store='artifact', api=None, moved_to=None)
 
 Write the phone task board (page, `tasks.json`, `runs.json`) into `out_dir`.
 
@@ -4501,6 +4734,8 @@ Write the phone task board (page, `tasks.json`, `runs.json`) into `out_dir`.
 creation dates; `run_specs` replaces the packaged run specs and `run_extras` (a
 JSON object keyed by run) overlays deployment-specific prompts and tables. Writes
 only into `out_dir`; publishing and the receiving side are the skill’s job.
+`store='http'` with `api` wires the page to a self-hosted board store API
+instead of the claude.ai Artifact store; `moved_to` builds a forwarding page.
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
@@ -4869,16 +5104,18 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-10-27 06:00 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/b13badae3ccab2a87bb8c0858c067e8950497efd"><code>b13bada</code></a> on branch <code>main</code>, for **openloops 0.1.19** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-27 06:59 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/d3772b4da372118cb0cb8e79a3b0243bb091189c"><code>d3772b4</code></a> on branch <code>main</code>, for **openloops 0.1.20** (from <code>pyproject.toml</code>).
 
-#### NOTE
-Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
+#### WARNING
+The documentation and the package may be misaligned:
+
+- The documented version (0.1.20) is behind the latest release on PyPI (0.1.21): `pip install openloops` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/b13badae3ccab2a87bb8c0858c067e8950497efd"><code>b13badae3ccab2a87bb8c0858c067e8950497efd</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/d3772b4da372118cb0cb8e79a3b0243bb091189c"><code>d3772b4da372118cb0cb8e79a3b0243bb091189c</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -4889,9 +5126,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/40458399989">40458399989</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/40464180112">40464180112</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>b13badae3ccab2a87bb8c0858c067e8950497efd</code> (in the history of the built commit) |
+| Event commit | <code>d3772b4da372118cb0cb8e79a3b0243bb091189c</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -4916,13 +5153,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.19/">0.1.19</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.21/">0.1.21</a>, newer than the documented version (0.1.20).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout b13badae3ccab2a87bb8c0858c067e8950497efd
+git checkout d3772b4da372118cb0cb8e79a3b0243bb091189c
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

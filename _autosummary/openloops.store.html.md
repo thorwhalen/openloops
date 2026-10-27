@@ -28,21 +28,35 @@ running”, this would be a session dashboard rather than a record of what sessi
 
 ### Functions
 
-| [`data_dir`](#openloops.store.data_dir)()                             | The project's data root.                                         |
-|-----------------------------------------------------------------------------------------|------------------------------------------------------------------|
-| [`state_dir`](#openloops.store.state_dir)()                            | Where per-machine caches and job logs go.                        |
-| [`default_source`](#openloops.store.default_source)([directory])            | This machine's label for its digest folder.                      |
-| [`digests_store`](#openloops.store.digests_store)([rootdir])               | The default `digests_store`: markdown files under the data root. |
-| [`digest_key`](#openloops.store.digest_key)(source, state, session_key) | The store key for one session's digest.                          |
-| [`parse_digest_key`](#openloops.store.parse_digest_key)(key)                  | Split a store key back into `(source, state, session_key)`.      |
-| [`load_sync_state`](#openloops.store.load_sync_state)([directory])           | Session id → the transcript revision last read.                  |
-| [`save_sync_state`](#openloops.store.save_sync_state)(state[, directory])    | Write the mtime cache, creating its directory.                   |
-| [`sync_state_path`](#openloops.store.sync_state_path)([directory])           | Where the mtime cache lives.                                     |
+| [`data_dir`](#openloops.store.data_dir)()                             | The project's data root.                                                              |
+|-----------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| [`state_dir`](#openloops.store.state_dir)()                            | Where per-machine caches and job logs go.                                             |
+| [`default_source`](#openloops.store.default_source)([directory])            | This machine's label for its digest folder.                                           |
+| [`digests_store`](#openloops.store.digests_store)([rootdir])               | The default `digests_store`: markdown files under the data root.                      |
+| [`board_docs_store`](#openloops.store.board_docs_store)(rootdir)              | A self-hosted board's documents: `<root>/<collection>/<id>.json`, written atomically. |
+| [`digest_key`](#openloops.store.digest_key)(source, state, session_key) | The store key for one session's digest.                                               |
+| [`parse_digest_key`](#openloops.store.parse_digest_key)(key)                  | Split a store key back into `(source, state, session_key)`.                           |
+| [`load_sync_state`](#openloops.store.load_sync_state)([directory])           | Session id → the transcript revision last read.                                       |
+| [`save_sync_state`](#openloops.store.save_sync_state)(state[, directory])    | Write the mtime cache, creating its directory.                                        |
+| [`sync_state_path`](#openloops.store.sync_state_path)([directory])           | Where the mtime cache lives.                                                          |
 
 ### Classes
 
 | [`Utf8TextFiles`](#openloops.store.Utf8TextFiles)(\*args[, delete_func, ...])   | `dol`'s text-file store with the encoding pinned rather than inherited.   |
 |----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| [`AtomicTextFiles`](#openloops.store.AtomicTextFiles)(root)                       | `<root>/<key>` text files, each write atomic: temp file, `fsync`, rename. |
+
+### *class* openloops.store.AtomicTextFiles(root)
+
+Bases: [`MutableMapping`](https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping)
+
+`<root>/<key>` text files, each write atomic: temp file, `fsync`, rename.
+
+A self-hosted board’s store is read by every poll while it is written, by several
+server processes. A plain `open(path, "w")` leaves a truncated file behind when a
+worker is killed mid-write or the disk fills, and readers can see a half-written one;
+a rename never shows either. Keys are POSIX relative paths (`outbox/e1.json`);
+a key that would leave `root` is refused.
 
 ### *class* openloops.store.Utf8TextFiles(\*args, delete_func=None, write_open_kwargs=None, \*\*kwargs)
 
@@ -63,6 +77,21 @@ read back. Pinning UTF-8 is the whole fix.
 #### validate_key(k, \*args, \_\_name='validate_key', \*\*kwargs)
 
 `validate_key` on the inner key – see `mk_relative_path_store`.
+
+### openloops.store.board_docs_store(rootdir)
+
+A self-hosted board’s documents: `<root>/<collection>/<id>.json`, written atomically.
+
+```pycon
+>>> import tempfile
+>>> store = board_docs_store(tempfile.mkdtemp())
+>>> store['outbox/e1.json'] = '{}'
+>>> list(store), store['outbox/e1.json']
+(['outbox/e1.json'], '{}')
+```
+
+* **Return type:**
+  [`MutableMapping`](https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ### openloops.store.data_dir()
 

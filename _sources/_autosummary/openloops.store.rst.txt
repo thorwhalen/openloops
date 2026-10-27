@@ -12,6 +12,7 @@ openloops.store
       state_dir
       default_source
       digests_store
+      board_docs_store
       digest_key
       parse_digest_key
       load_sync_state
@@ -23,4 +24,5 @@ openloops.store
    .. autosummary::
    
       Utf8TextFiles
+      AtomicTextFiles
    
