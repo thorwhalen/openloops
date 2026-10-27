@@ -1,0 +1,30 @@
+<h2>What happens to your choices</h2>
+<ol>
+<li><b>Saved at once, twice.</b> Every tap and every keystroke in a note is written to this phone first, then to the board's shared store, and retried until the store confirms it. The line under the title says "All saved ✓" once nothing is waiting. If it says otherwise, keep the page open; "Copy unsaved" gives you the pending actions as text to paste into the session.</li>
+<li><b>Nothing is overwritten.</b> Each tap is a separate, permanent record. Undo adds a new record rather than erasing the old one, and Claude never rewrites what you sent. Your card keeps its place after a tap until you switch filters, so the next tap cannot land on a different task.</li>
+<li><b>Queued for Claude.</b> Each Done, Skip, answer, "Post note only" or "Have an agent do it" adds an entry to an outbox. The card shows its receipt: "Saved · waiting for Claude", then "On GitHub ↗" (a link to the comment), or "Sent to a worker".</li>
+<li><b>Recorded on GitHub.</b> The board's Claude session checks the outbox every few minutes ("Claude checked N min ago" under the title). It posts your answer or note as a comment on the issue, and closes the issue only when you press "Done &amp; close issue". It never comments in an organisation marked read-only.</li>
+<li><b>Done by a worker.</b> Decisions and "Have an agent do it" go to one worker session per repository, a few at a time, and only while the machine has spare memory. The rest wait in the queue for the next check.</li>
+<li><b>Notes are drafts until you press a button.</b> A typed note is saved but not posted on its own. It goes out with the next Done, Skip, answer or "Post note only".</li>
+</ol>
+<p class="small">The session also copies the whole store to disk on every check, so a lost artifact would not lose your answers.</p>
+
+<h2>Shrinking the pile</h2>
+<ul>
+<li><b>Items that look done or obsolete</b> are gathered in Runs → "Close what is already done": skim, Skip any you want kept, then close the rest in one go.</li>
+<li><b>Decisions</b> are on the Decide tab as single taps: ★ accept the recommendation, pick another option, or "You decide".</li>
+<li><b>Repeated chores</b> (the same web form for many packages, server chores, API keys) are grouped on the Runs tab, so they become one sitting or one session prompt instead of many.</li>
+<li><b>Listening, recording and device tests</b> are one headphones sitting: filter on the Physical tier.</li>
+</ul>
+
+<h2>What helps on the phone</h2>
+<ul>
+<li><b>GitHub Mobile</b> covers the "tap" tier: comment on an issue, close it, review a PR, approve and merge. It does <b>not</b> open repository settings (secrets, Pages, environments); use the phone browser for those, with the desktop site if a page is cramped.</li>
+<li><b>A Claude app with Remote Control</b> is the "session" tier: paste a card's prompt into the session on the machine it names.</li>
+<li><b>A passkey</b> for package registries and consoles signs you in on the phone without a password manager round trip.</li>
+</ul>
+
+<h2>Back at a desk</h2>
+<ul>
+<li>The <b>Mac only</b> filter is the desk-day list. Every card keeps its links and prompt, so nothing has to be rediscovered.</li>
+</ul>

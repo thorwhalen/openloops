@@ -12,6 +12,8 @@ two surfaces is a sign that there are two implementations, and there is one here
 
 from __future__ import annotations
 
+import json
+
 from collections.abc import Mapping, MutableMapping
 from datetime import datetime, timezone
 from pathlib import Path
@@ -36,6 +38,8 @@ from openloops.obligations import (
     DFLT_PREDICATE_TIMEOUT,
     owed as _owed,
 )
+from openloops import board as _board
+from openloops import tasks as _tasks
 from openloops.publications import DFLT_LIMIT as DFLT_PUBLISHED_LIMIT
 from openloops.publications import published as _published
 from openloops.store import (
@@ -60,6 +64,9 @@ __all__ = [
     "blocked",
     "dashboard",
     "published",
+    "board_gather",
+    "board_classify",
+    "board_build",
 ]
 
 #: The keys every :func:`ls` row carries, whatever the digest happens to record.
@@ -497,9 +504,130 @@ def published(
     return _published(limit=limit, session=session, source=source)
 
 
+def _write_json(path: str | None, data: Any) -> str | None:
+    if not path:
+        return None
+    target = Path(path).expanduser()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+    return str(target)
+
+
+def board_gather(
+    *,
+    owners: list[str] | None = None,
+    exclude_owners: list[str] | None = None,
+    exclude_repos: list[str] | None = None,
+    label: str = DFLT_LABEL,
+    searches: list[str] | None = None,
+    review_prs: bool = False,
+    limit: int = _tasks.DFLT_GATHER_LIMIT,
+    timeout: float = DFLT_LIST_TIMEOUT,
+    out: str | None = None,
+    run_gh: Any = None,
+) -> dict[str, Any]:
+    """Every open item that asks something of you, across owners: the board's input.
+
+    Sweeps the ``label`` (``manual-task``) per owner with no 50-row cap, plus the named
+    ``searches`` (``decide``, ``needs-user``) and, with ``review_prs``, the PRs waiting
+    on your review. ``out`` also writes the envelope there as JSON. Read-only.
+
+    >>> board_gather(owners=['acme'], run_gh=lambda args, *, timeout: '[]')['listed']
+    True
+    """
+    report = _tasks.gather(
+        owners=owners,
+        exclude_owners=exclude_owners or (),
+        exclude_repos=exclude_repos,
+        label=label,
+        searches=searches or (),
+        review_prs=review_prs,
+        limit=limit,
+        timeout=timeout,
+        run_gh=run_gh,
+    )
+    report["path"] = _write_json(out, report)
+    return report
+
+
+def board_classify(
+    *,
+    candidates: list[str],
+    enriched: list[str] | None = None,
+    out: str | None = None,
+) -> dict[str, Any]:
+    """Task records: the heuristic classifier over gathered candidates, overlaid by richer ones.
+
+    ``candidates`` are JSON files from :func:`board_gather`; ``enriched`` are record
+    files written by the classifier brief (globs allowed), which win over the heuristic
+    record for the same item. ``out`` writes the merged records there.
+    """
+    gathered = _tasks.load_records(candidates)
+    records = _tasks.merge_records(
+        _tasks.classify(gathered), _tasks.load_records(enriched or [])
+    )
+    tiers: dict[str, int] = {}
+    for record in records:
+        tiers[record["tier"]] = tiers.get(record["tier"], 0) + 1
+    return {
+        "records": records,
+        "counts": {"total": len(records), "candidates": len(gathered), **tiers},
+        "path": _write_json(out, records),
+    }
+
+
+def board_build(
+    *,
+    records: list[str],
+    out_dir: str,
+    candidates: list[str] | None = None,
+    run_specs: str | None = None,
+    run_extras: str | None = None,
+    title: str = _board.DFLT_TITLE,
+    session: str | None = None,
+    read_only_orgs: list[str] | None = None,
+    machine: str | None = None,
+) -> dict[str, Any]:
+    """Write the phone task board (page, ``tasks.json``, ``runs.json``) into ``out_dir``.
+
+    ``records`` are task-record JSON files (globs allowed); ``candidates`` supply the
+    creation dates; ``run_specs`` replaces the packaged run specs and ``run_extras`` (a
+    JSON object keyed by run) overlays deployment-specific prompts and tables. Writes
+    only into ``out_dir``; publishing and the receiving side are the skill's job.
+    """
+    extras = (
+        json.loads(Path(run_extras).expanduser().read_text(encoding="utf-8"))
+        if run_extras
+        else None
+    )
+    return _board.build_board(
+        _tasks.merge_records(_tasks.load_records(records)),
+        Path(out_dir).expanduser(),
+        candidates=_tasks.load_records(candidates or []),
+        specs=_board.run_specs(run_specs) if run_specs else None,
+        extras=extras,
+        title=title,
+        session=session,
+        read_only_orgs=read_only_orgs or (),
+        machine=machine,
+    )
+
+
 #: Single source of truth for what every surface exposes. The CLI dispatches this list;
 #: an MCP or HTTP adapter would reference the same names as strings.
-_dispatch_funcs = [sync, ls, show, status, owed, blocked, dashboard, published]
+_dispatch_funcs = [
+    sync,
+    ls,
+    show,
+    status,
+    owed,
+    blocked,
+    dashboard,
+    published,
+    board_gather,
+    board_classify,
+    board_build,
+]
 
 
 if __name__ == "__main__":

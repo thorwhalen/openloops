@@ -1,0 +1,124 @@
+[
+ {
+  "key": "cleanup",
+  "title": "Close what is already done or obsolete",
+  "tier": "tap",
+  "min_items": 1,
+  "why": "These look done in a comment, superseded, or moot. Skim the list, Skip any you want to keep, then close the rest with the button below; each gets a one-line comment saying why.",
+  "steps": []
+ },
+ {
+  "key": "npm-trusted-publisher",
+  "title": "npm: add a trusted publisher to each package",
+  "why": "One form per package, identical except for the repo and workflow file. Do them back to back.",
+  "steps": [
+   "Open the package's settings link below and sign in with your passkey once.",
+   "Under Trusted publishing, choose GitHub Actions. Fill owner, repository and workflow file name (the card says which). Leave environment empty unless the card names one.",
+   "Save. Then under Publishing access choose 'Require two-factor authentication and disallow tokens' and save.",
+   "A new configuration expires unless a publish uses it soon, so tell the session which packages you did; it can trigger their publish workflows."
+  ]
+ },
+ {
+  "key": "npm-first-publish",
+  "title": "npm: first publish of new packages",
+  "why": "A package must exist on npm before a trusted publisher can be attached, so its first version needs your login. A session does the work; your phone only approves.",
+  "steps": [
+   "Send the card's prompt (or one prompt naming all of them) to a session.",
+   "The session runs npm login --auth-type=web, then npm publish --auth-type=web for each package. Each prints a link: open it on the phone and approve with your passkey.",
+   "Then add the trusted publisher for each new package (the run above)."
+  ]
+ },
+ {
+  "key": "npm-scope",
+  "title": "npm: claim scopes and orgs",
+  "why": "Each is a short web form.",
+  "steps": [
+   "Open the link, create or claim the org, add yourself as owner."
+  ]
+ },
+ {
+  "key": "pypi-trusted-publisher",
+  "title": "PyPI: add trusted publishers",
+  "why": "One form per project. Existing projects use the project's Publishing settings; new ones use a pending publisher on your account page.",
+  "steps": [
+   "Open the link.",
+   "Add a GitHub publisher: owner, repository, workflow file name, environment if the card names one.",
+   "Save, then mark Done."
+  ]
+ },
+ {
+  "key": "pypi-release",
+  "title": "PyPI: releases waiting on you",
+  "why": "Mostly a go-ahead plus a session run.",
+  "steps": []
+ },
+ {
+  "key": "api-key",
+  "title": "Create API keys and accounts",
+  "why": "Each needs you in a browser for a minute; a session then stores the key and runs the check. Never paste a key into GitHub or this board; paste it only into the session.",
+  "steps": [
+   "Open the console link and create the key.",
+   "Copy the card's prompt into a session on the machine it names, then paste the key when the session asks."
+  ]
+ },
+ {
+  "key": "live-check",
+  "title": "One-off live checks with a real key",
+  "why": "A session runs these. Many only need a key already on the machine.",
+  "steps": []
+ },
+ {
+  "key": "github-settings",
+  "title": "GitHub settings",
+  "why": "Repo settings are not in GitHub Mobile: use the phone browser and request the desktop site if a page is cramped.",
+  "steps": []
+ },
+ {
+  "key": "server-chore",
+  "title": "Server chores for a session",
+  "why": "Paste each prompt into a session on the machine it names. They can go in one message.",
+  "steps": []
+ },
+ {
+  "key": "merge-bot-pr",
+  "title": "Dependency bump PRs",
+  "why": "Green ones only. Major bumps can break the app; skim the PR's checks first.",
+  "steps": []
+ },
+ {
+  "key": "review-pr",
+  "title": "PRs waiting on your review",
+  "why": "GitHub Mobile: Files changed, then Review changes, then Approve, then merge.",
+  "steps": []
+ },
+ {
+  "key": "record",
+  "title": "Record yourself",
+  "why": "Batch these into one sitting with headphones.",
+  "steps": []
+ },
+ {
+  "key": "listen-look",
+  "title": "Listen or look and judge",
+  "why": "Batch these into one sitting with headphones.",
+  "steps": []
+ },
+ {
+  "key": "device-test",
+  "title": "Try it on a device",
+  "why": "Batch these into one sitting.",
+  "steps": []
+ },
+ {
+  "key": "purchase",
+  "title": "Purchases and paid plans",
+  "why": "Each needs a payment decision.",
+  "steps": []
+ },
+ {
+  "key": "mac-only",
+  "title": "Mac day",
+  "why": "Out of bounds from the phone. Every card keeps its links and prompt so nothing needs rediscovering.",
+  "steps": []
+ }
+]

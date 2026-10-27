@@ -32,7 +32,14 @@ NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 #: The spec's top-level keys. Anything else — notably a bare ``audience:`` — is rejected
 #: by ``gh skill publish``, and the failure is at publish time rather than at load time.
-SPEC_KEYS = {"name", "description", "license", "compatibility", "metadata", "allowed-tools"}
+SPEC_KEYS = {
+    "name",
+    "description",
+    "license",
+    "compatibility",
+    "metadata",
+    "allowed-tools",
+}
 
 #: The spec's own limit on the field a model reads before deciding to open the skill.
 MAX_DESCRIPTION = 1024
@@ -86,6 +93,7 @@ def test_bundled_lists_the_read_skill_the_capture_skill_and_the_subagent():
     assert found == {
         ("skill", "openloops"),
         ("skill", "openloops-needs-human"),
+        ("skill", "openloops-phone-board"),
         ("agent", "openloops-sweep"),
     }
 
@@ -98,7 +106,9 @@ def test_every_skill_is_spec_clean(path):
     # The description is the whole trigger surface — the only thing a model sees before
     # deciding to open the file — and it is also the field with a hard limit.
     assert 0 < len(header["description"]) <= MAX_DESCRIPTION
-    assert set(header) <= SPEC_KEYS, f"non-spec top-level keys: {set(header) - SPEC_KEYS}"
+    assert set(header) <= SPEC_KEYS, (
+        f"non-spec top-level keys: {set(header) - SPEC_KEYS}"
+    )
     assert "audience" in header.get("metadata", ""), "audience belongs under metadata:"
 
 
@@ -140,9 +150,9 @@ def test_the_capture_skill_still_names_what_owed_keys_on():
     back, and the only thing joining them is the spelling of a label and a field name.
     Changing either in code without changing the skill breaks the loop silently.
     """
-    text = (
-        skills.skills_dir() / "openloops-needs-human" / "SKILL.md"
-    ).read_text(encoding="utf-8")
+    text = (skills.skills_dir() / "openloops-needs-human" / "SKILL.md").read_text(
+        encoding="utf-8"
+    )
     assert DFLT_LABEL in text
     assert "**Verify:**" in text
     assert "none possible" in text, "the documented wording for an unverifiable ask"
@@ -155,7 +165,7 @@ def test_the_capture_skill_still_names_what_owed_keys_on():
 def test_a_dry_run_says_what_it_would_do_and_does_none_of_it(tmp_path):
     host = tmp_path / "host"
     plan = skills.install_skills(target=host, dry_run=True)
-    assert plan["dry_run"] and plan["counts"]["install"] == 3
+    assert plan["dry_run"] and plan["counts"]["install"] == 4
     assert not host.exists(), "a dry run must not create the host directory"
     assert all(Path(row["source"]).exists() for row in plan["actions"])
 
@@ -163,12 +173,12 @@ def test_a_dry_run_says_what_it_would_do_and_does_none_of_it(tmp_path):
 def test_installing_twice_is_installing_once(tmp_path):
     host = tmp_path / "host"
     first = skills.install_skills(target=host)
-    assert first["counts"] == {"install": 3, "ok": 0, "conflict": 0}
+    assert first["counts"] == {"install": 4, "ok": 0, "conflict": 0}
     for row in first["actions"]:
         assert Path(row["destination"]).exists()
 
     second = skills.install_skills(target=host)
-    assert second["counts"] == {"install": 0, "ok": 3, "conflict": 0}
+    assert second["counts"] == {"install": 0, "ok": 4, "conflict": 0}
 
 
 def test_copying_twice_is_also_installing_once(tmp_path):
@@ -179,11 +189,11 @@ def test_copying_twice_is_also_installing_once(tmp_path):
     """
     host = tmp_path / "host"
     first = skills.install_skills(target=host, copy=True)
-    assert first["method"] == "copy" and first["counts"]["install"] == 3
+    assert first["method"] == "copy" and first["counts"]["install"] == 4
     installed = host / "skills" / "openloops" / "SKILL.md"
     assert not installed.is_symlink() and installed.read_text(encoding="utf-8")
 
-    assert skills.install_skills(target=host, copy=True)["counts"]["ok"] == 3
+    assert skills.install_skills(target=host, copy=True)["counts"]["ok"] == 4
 
 
 def test_nothing_that_is_already_there_is_ever_overwritten(tmp_path):
@@ -194,7 +204,7 @@ def test_nothing_that_is_already_there_is_ever_overwritten(tmp_path):
     (mine / "SKILL.md").write_text("mine, not yours", encoding="utf-8")
 
     plan = skills.install_skills(target=host)
-    assert plan["counts"] == {"install": 2, "ok": 0, "conflict": 1}
+    assert plan["counts"] == {"install": 3, "ok": 0, "conflict": 1}
     assert (mine / "SKILL.md").read_text(encoding="utf-8") == "mine, not yours"
 
     forced = skills.install_skills(target=host, force=True)
@@ -225,7 +235,9 @@ def test_every_row_carries_the_reason_for_its_own_verdict(tmp_path):
     assert {row["action"] for row in plan["actions"]} <= {"install", "ok", "conflict"}
 
 
-def test_the_host_directory_is_the_target_then_the_env_var_then_the_default(monkeypatch):
+def test_the_host_directory_is_the_target_then_the_env_var_then_the_default(
+    monkeypatch,
+):
     monkeypatch.delenv(skills.HOST_ENV_VAR, raising=False)
     assert skills.host_dir() == Path("~/.claude").expanduser()
     monkeypatch.setenv(skills.HOST_ENV_VAR, str(Path("~", "elsewhere")))
@@ -276,6 +288,20 @@ def test_the_wheel_actually_carries_the_skills(tmp_path):
     for asset in skills.bundled():
         relative = asset.source.relative_to(Path(skills.__file__).parent.parent)
         expected = relative.as_posix() + ("/SKILL.md" if asset.kind == "skill" else "")
+        assert expected in names, f"{expected} is missing from the wheel"
+    # The board page and its run specs, and the skill's reference files: a board that
+    # builds from source and ships without its page is the same silent failure.
+    from openloops import board
+
+    package_root = Path(skills.__file__).parent.parent
+    shipped = [
+        board.board_dir() / name for name in (*board.TEMPLATE_FILES, "runs.json")
+    ]
+    shipped += sorted(
+        (skills.skills_dir() / "openloops-phone-board" / "references").glob("*.md")
+    )
+    for path in shipped:
+        expected = path.relative_to(package_root).as_posix()
         assert expected in names, f"{expected} is missing from the wheel"
 
 

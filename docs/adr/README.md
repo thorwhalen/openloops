@@ -14,6 +14,7 @@ session identifiers that motivated it are not, and never will be — see
 | [ADR-005](005-a-digest-is-dated-never-current.md) | A digest is dated, never current | accepted |
 | [ADR-006](006-a-periodic-job-not-a-daemon.md) | A periodic job, not a daemon | accepted |
 | [ADR-007](007-the-two-seams.md) | The two seams, and what is deliberately not one | accepted |
+| [ADR-008](008-the-board-write-side-lives-in-a-skill.md) | The phone board's write side lives in a skill, not in code | accepted |
 
 ## Where these came from
 
