@@ -8,6 +8,7 @@
 - [openloops](openloops.html.md): What your Claude Code sessions were doing — kept after the transcripts are gone.
 - [openloops.base](openloops.base.html.md): Data structures shared across openloops: what a session is, and what a digest is.
 - [openloops.blockers](openloops.blockers.html.md): The other kind of open loop: the one that points at a repository, not at a person.
+- [openloops.board](openloops.board.html.md): The phone task board: task records in, a static page and its data files out.
 - [openloops.dashboard](openloops.dashboard.html.md): One page you can look at instead of reading three command outputs.
 - [openloops.digest](openloops.digest.html.md): Rendering one session into one dated markdown digest. No model, no network.
 - [openloops.egress](openloops.egress.html.md): The egress choke point: nothing leaves openloops carrying a home path or a secret.
@@ -16,6 +17,7 @@
 - [openloops.publications](openloops.publications.html.md): What your agents handed you lately: recently published annals documents, per session.
 - [openloops.skills](openloops.skills.html.md): The agent-facing surface: two skills, one subagent, and the command that installs them.
 - [openloops.store](openloops.store.html.md): Where digests live, and where the change-detection cache lives — two different things.
+- [openloops.tasks](openloops.tasks.html.md): Everything you could act on, as one list of task records: gather, classify, merge.
 - [openloops.tools](openloops.tools.html.md): The package’s single list of operations: plain functions, JSON-ready dicts.
 - [openloops.transcripts](openloops.transcripts.html.md): The default &#96;transcript_source&#96;: a direct reader of Claude Code’s on-disk state.
 

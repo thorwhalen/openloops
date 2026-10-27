@@ -1,4 +1,4 @@
-> built 2026-10-20 12:48 UTC from 232b353 (main) · openloops 0.1.18. Details: build_info.json
+> built 2026-10-27 06:00 UTC from b13bada (main) · openloops 0.1.19. Details: build_info.json
 
 # index.html.md
 
@@ -32,12 +32,14 @@ ol install-skills            # link the skills and the subagent into ~/.claude
 
 ```default
 installed into ~/.claude
-  method: symlink   install: 3   ok: 0   conflict: 0
+  method: symlink   install: 4   ok: 0   conflict: 0
 
 install  skill  openloops                 not present
                   -> ~/.claude/skills/openloops
 install  skill  openloops-needs-human     not present
                   -> ~/.claude/skills/openloops-needs-human
+install  skill  openloops-phone-board     not present
+                  -> ~/.claude/skills/openloops-phone-board
 install  agent  openloops-sweep           not present
                   -> ~/.claude/agents/openloops-sweep.md
 ```
@@ -101,6 +103,7 @@ and tell you when it looks too narrow. More on the resolution order below.
 |-------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `openloops`             | skill    | **the read side.** Teaches an agent which of the three commands answers which question, how to synthesise the three into one page, and — most of all — never to round a `?` into a clean answer. |
 | `openloops-needs-human` | skill    | **the capture side.** Teaches an agent to file a `manual-task` issue, with a re-checkable predicate, at the moment it gets blocked on you. Without it, `ol owed` has nothing to read.            |
+| `openloops-phone-board` | skill    | **the phone board.** Gather, classify, build and publish the task board, and the receiver procedure that turns its taps into comments, closes and dispatched workers.                            |
 | `openloops-sweep`       | subagent | the same sweep, run in a fresh context, returning a page instead of three screens. For the session you keep open all day.                                                                        |
 
 `~/.claude` is Claude Code’s config directory, and `CLAUDE_CONFIG_DIR` is honoured if
@@ -110,7 +113,7 @@ except where they get installed.
 
 **Re-running it changes nothing.** Each asset is a symlink into the installed package,
 so `pip install -U openloops` upgrades the skills too, and a second `ol install-skills`
-reads `ok: 3`. Where symlinks are unavailable — Windows without Developer Mode — it
+reads `ok: 4`. Where symlinks are unavailable — Windows without Developer Mode — it
 copies instead, and the report says which happened rather than pretending they are the
 same thing.
 
@@ -607,6 +610,20 @@ escaping and a scheme allowlist on every link. `--fragment` drops the document s
 for a host that supplies its own `<head>`.
 
 ---
+
+## `ol board-*` — a task board you can clear from a phone
+
+```bash
+ol board-gather --all-kinds --out work/candidates.json
+ol board-classify work/candidates.json --out work/records.json
+ol board-build work/board work/records.json -c work/candidates.json --session my-desk
+```
+
+Every open item across your owners that asks something of you (the `manual-task` issues, issues titled “Decide…”, PRs waiting on your review) becomes a task record: what to do in one line, where (`tap`, `browser`, `session`, `physical`, `mac-only`), how long, the exact settings page to open, and a paste-ready prompt when a session should do it. Repeated chores are grouped into runs (the same npm form for twelve packages is one sitting), and the result is a static page with its data files, meant to be published as a claude.ai Artifact with a `db` capability.
+
+`board-gather` queries each owner separately with no 50-row cap and reports a query that hits the search API’s ceiling as `saturated` rather than truncating it; `--exclude-repos 'org/*'` (or `OPENLOOPS_EXCLUDE_REPOS`) keeps repositories off the board. `board-classify` is a deterministic heuristic with no model; `--enriched 'batches/out_*.json'` lays records written by the shipped classifier brief over it. `board-build` writes only into the directory you name: the board holds titles from your repositories, so keep it out of any repo.
+
+The taps on the page become GitHub comments, closed issues and dispatched workers only through a Claude session following the `openloops-phone-board` skill. openloops code never does it ([ADR-008]()).
 
 ## Turning it off
 
@@ -1363,6 +1380,119 @@ misses, is the “Discovery is a candidate list” section of this module’s do
 
 A large repository can take longer than `timeout` to paginate; that is a
 [`GhUnavailable`](_autosummary/openloops.blockers.html.md#openloops.blockers.GhUnavailable), which reads `?`, not an empty answer.
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
+
+
+# _autosummary/openloops.board.html.md
+
+# openloops.board
+
+The phone task board: task records in, a static page and its data files out.
+
+[`build_board()`](_autosummary/openloops.board.html.md#openloops.board.build_board) writes five files into a directory the caller names:
+
+The page is meant to be published as a claude.ai Artifact with a `db` capability.
+Its persistence model (immutable `outbox/<eventId>` events written by the page,
+`receipts/<eventId>` written only by the receiving session) is documented at the
+top of its `<script>`.
+
+**What openloops does not do** (ADR-008): post the comments, close the issues or
+dispatch the workers that the board’s events ask for. That write side is a
+procedure a Claude session follows, shipped as the `openloops-phone-board` skill.
+This module writes files into `out_dir` and nothing else, and it never puts the
+data anywhere near the repository: where the board lives is the caller’s choice.
+
+```pycon
+>>> tasks = [
+...     {'id': 'a/x#1', 'tier': 'browser', 'pattern': 'api-key', 'minutes': 3},
+...     {'id': 'a/y#2', 'tier': 'browser', 'pattern': 'api-key', 'minutes': 5},
+...     {'id': 'a/z#3', 'tier': 'tap', 'pattern': 'other', 'status': 'likely-done'},
+... ]
+>>> [(r['key'], r['ids']) for r in group_runs(tasks)]
+[('cleanup', ['a/z#3']), ('api-key', ['a/x#1', 'a/y#2'])]
+```
+
+### Functions
+
+| [`board_dir`](_autosummary/openloops.board.html.md#openloops.board.board_dir)()                              | Where the page template and the default run specs ship, inside the package.    |
+|-------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| [`build_board`](_autosummary/openloops.board.html.md#openloops.board.build_board)(records, out_dir, \*[, ...]) | Write the board's five files into `out_dir` and say what went in.              |
+| [`group_runs`](_autosummary/openloops.board.html.md#openloops.board.group_runs)(tasks, \*[, specs, extras])   | Repeated chores grouped into runs, ordered as the specs are.                   |
+| [`join_created`](_autosummary/openloops.board.html.md#openloops.board.join_created)(tasks, candidates)          | Fill each record's missing `created` from the gathered candidate with its URL. |
+| [`run_specs`](_autosummary/openloops.board.html.md#openloops.board.run_specs)([path])                        | The run specs: one per pattern, in display order.                              |
+| [`sort_tasks`](_autosummary/openloops.board.html.md#openloops.board.sort_tasks)(tasks)                        | Cheapest first: by tier, then by minutes per thing the item unblocks.          |
+
+### openloops.board.board_dir()
+
+Where the page template and the default run specs ship, inside the package.
+
+* **Return type:**
+  [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)
+
+### openloops.board.build_board(records, out_dir, , candidates=(), specs=None, extras=None, title='Phone Task Board', session=None, read_only_orgs=(), machine=None)
+
+Write the board’s five files into `out_dir` and say what went in.
+
+`session` is the name of the Claude session that receives the board’s events (the
+page names it in the prompts it copies); `read_only_orgs` are organisations whose
+items the page never offers to close or comment on; `machine` is the default
+machine named by a run’s “have an agent start this run”.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.board.group_runs(tasks, , specs=None, extras=None)
+
+Repeated chores grouped into runs, ordered as the specs are.
+
+Open items go to their pattern’s run (a `mac-only` tier goes to `mac-only`);
+`likely-done` and `stale` items go to `cleanup`. A pattern with no spec, or
+with fewer items than its `min_items`, has no run.
+
+`extras` overlays a run by key, for what only this deployment knows (a prompt, a
+package table, a better title). Its `absorb` names other runs whose items move
+into this one, and those runs disappear: two chores done in one session run.
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
+
+### openloops.board.join_created(tasks, candidates)
+
+Fill each record’s missing `created` from the gathered candidate with its URL.
+
+```pycon
+>>> join_created([{'url': 'u', 'created': None}], [{'url': 'u', 'created': '2026-01-02'}])
+[{'url': 'u', 'created': '2026-01-02'}]
+```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
+
+### openloops.board.run_specs(path=None)
+
+The run specs: one per pattern, in display order. Packaged ones by default.
+
+Each spec is `{key, title, why, steps, tier?, min_items?, prompt?, machine?}`;
+`key` is a pattern from [`openloops.tasks.PATTERNS`](_autosummary/openloops.tasks.html.md#openloops.tasks.PATTERNS), or `cleanup`.
+
+```pycon
+>>> run_specs()[0]['key']
+'cleanup'
+```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
+
+### openloops.board.sort_tasks(tasks)
+
+Cheapest first: by tier, then by minutes per thing the item unblocks.
+
+```pycon
+>>> [t['id'] for t in sort_tasks([{'id': 'b', 'tier': 'session'}, {'id': 'a', 'tier': 'tap'}])]
+['a', 'b']
+```
 
 * **Return type:**
   [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
@@ -2726,7 +2856,7 @@ the capture skill out.
 ```pycon
 >>> plan = install_skills(target='/nonexistent/host', dry_run=True)
 >>> plan['counts']['install'], plan['dry_run']
-(3, True)
+(4, True)
 >>> sorted({row['action'] for row in plan['actions']})
 ['install']
 ```
@@ -3122,6 +3252,7 @@ which is what makes it safe to suggest when someone suspects a stale digest.
 | [`base`](_autosummary/openloops.base.html.md#module-openloops.base)                 | Data structures shared across openloops: what a session is, and what a digest is.       |
 |---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
 | [`blockers`](_autosummary/openloops.blockers.html.md#module-openloops.blockers)         | The other kind of open loop: the one that points at a repository, not at a person.      |
+| [`board`](_autosummary/openloops.board.html.md#module-openloops.board)               | The phone task board: task records in, a static page and its data files out.            |
 | [`dashboard`](_autosummary/openloops.dashboard.html.md#module-openloops.dashboard)       | One page you can look at instead of reading three command outputs.                      |
 | [`digest`](_autosummary/openloops.digest.html.md#module-openloops.digest)             | Rendering one session into one dated markdown digest.                                   |
 | [`egress`](_autosummary/openloops.egress.html.md#module-openloops.egress)             | The egress choke point: nothing leaves openloops carrying a home path or a secret.      |
@@ -3130,6 +3261,7 @@ which is what makes it safe to suggest when someone suspects a stale digest.
 | [`publications`](_autosummary/openloops.publications.html.md#module-openloops.publications) | What your agents handed you lately: recently published annals documents, per session.   |
 | [`skills`](_autosummary/openloops.skills.html.md#module-openloops.skills)             | The agent-facing surface: two skills, one subagent, and the command that installs them. |
 | [`store`](_autosummary/openloops.store.html.md#module-openloops.store)               | Where digests live, and where the change-detection cache lives — two different things.  |
+| [`tasks`](_autosummary/openloops.tasks.html.md#module-openloops.tasks)               | Everything you could act on, as one list of task records: gather, classify, merge.      |
 | [`tools`](_autosummary/openloops.tools.html.md#module-openloops.tools)               | The package's single list of operations: plain functions, JSON-ready dicts.             |
 | [`transcripts`](_autosummary/openloops.transcripts.html.md#module-openloops.transcripts)   | The default `transcript_source`: a direct reader of Claude Code's on-disk state.        |
 
@@ -3704,7 +3836,7 @@ directly.
 >>> skills_dir().name, agents_dir().name
 ('skills', 'agents')
 >>> sorted(asset.name for asset in bundled())
-['openloops', 'openloops-needs-human', 'openloops-sweep']
+['openloops', 'openloops-needs-human', 'openloops-phone-board', 'openloops-sweep']
 ```
 
 ### Module Attributes
@@ -3808,7 +3940,7 @@ the capture skill out.
 ```pycon
 >>> plan = install_skills(target='/nonexistent/host', dry_run=True)
 >>> plan['counts']['install'], plan['dry_run']
-(3, True)
+(4, True)
 >>> sorted({row['action'] for row in plan['actions']})
 ['install']
 ```
@@ -4017,6 +4149,286 @@ Where the mtime cache lives. Deleting this file forces a full re-read.
   [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)
 
 
+# _autosummary/openloops.tasks.html.md
+
+# openloops.tasks
+
+Everything you could act on, as one list of task records: gather, classify, merge.
+
+[`openloops.owed()`](_autosummary/openloops.html.md#openloops.owed) answers  *“what do I owe, and is it still owed?”* for one label.
+A task board needs a wider net and a different answer: every open item across a fleet
+that asks something of the human (the `manual-task` issues, the issues titled
+“Decide…”, the PRs waiting on their review), each turned into a **task record** saying
+what to do, where to do it, how long it takes and on which device.
+
+Three steps, each a plain function:
+
+1. [`gather()`](_autosummary/openloops.tasks.html.md#openloops.tasks.gather) sweeps several owners with `gh search`, one query per owner and
+   kind so no owner’s results crowd out another’s, with no 50-row cap (the search
+   API’s own ceiling of 1000 per query is the limit, and a query that reaches it is
+   *reported* as saturated, never truncated quietly). Exclusions are keyword arguments.
+2. [`classify()`](_autosummary/openloops.tasks.html.md#openloops.tasks.classify) turns each candidate into a record through a `classifier=`. The
+   default, [`heuristic_classify()`](_autosummary/openloops.tasks.html.md#openloops.tasks.heuristic_classify), is deterministic: label, title and body
+   patterns decide the tier, the pattern and the minutes, and the deep-link builders
+   point at the exact settings page. No model is called, here or anywhere in
+   openloops. The richer path is the classifier brief shipped with the
+   `openloops-phone-board` skill: a subagent reads each item and writes records in
+   the same schema, which [`merge_records()`](_autosummary/openloops.tasks.html.md#openloops.tasks.merge_records) lays over the heuristic ones.
+3. [`merge_records()`](_autosummary/openloops.tasks.html.md#openloops.tasks.merge_records) combines record sources by URL, later sources winning, and
+   normalises every record to [`TASK_FIELDS`](_autosummary/openloops.tasks.html.md#openloops.tasks.TASK_FIELDS).
+
+The record schema is [`Task`](_autosummary/openloops.tasks.html.md#openloops.tasks.Task), defined once, here. The board page, the build
+step and the classifier brief all read it; a field added anywhere else is a field the
+others do not know about.
+
+**Read-only, like the rest of openloops.** Gathering runs `gh search`; nothing here
+comments, closes, labels or approves anything.
+
+```pycon
+>>> candidate = {
+...     'url': 'https://github.com/acme/widget/issues/7', 'repo': 'acme/widget',
+...     'number': 7, 'title': 'Add the NPM_TOKEN secret so CI can publish',
+...     'body': '', 'labels': ['manual-task'], 'created': '2026-08-01',
+... }
+>>> record = heuristic_classify(candidate)
+>>> record['tier'], record['pattern'], record['id']
+('browser', 'github-settings', 'acme/widget#7')
+>>> [link['label'] for link in record['links']]
+['GitHub: Actions secrets', 'Issue']
+```
+
+### Module Attributes
+
+| [`TIERS`](_autosummary/openloops.tasks.html.md#openloops.tasks.TIERS)         | Where the human does the thing, cheapest first.    |
+|----------------------------------------------------------------|----------------------------------------------------|
+| [`STATUSES`](_autosummary/openloops.tasks.html.md#openloops.tasks.STATUSES)      | Whether the item still asks anything of the human. |
+| [`PATTERNS`](_autosummary/openloops.tasks.html.md#openloops.tasks.PATTERNS)      | The controlled vocabulary of repeated chores.      |
+| [`TASK_FIELDS`](_autosummary/openloops.tasks.html.md#openloops.tasks.TASK_FIELDS)   | Every key on every record, in schema order.        |
+| [`DFLT_SEARCHES`](_autosummary/openloops.tasks.html.md#openloops.tasks.DFLT_SEARCHES) | (search terms, the field they match).              |
+
+### Functions
+
+| [`classify`](_autosummary/openloops.tasks.html.md#openloops.tasks.classify)(candidates, \*[, classifier])          | One normalised record per candidate, through `classifier`.                       |
+|--------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+| [`gather`](_autosummary/openloops.tasks.html.md#openloops.tasks.gather)(\*[, owners, exclude_owners, ...])       | Every open item that asks something of the human, across `owners`, deduplicated. |
+| [`github_settings_url`](_autosummary/openloops.tasks.html.md#openloops.tasks.github_settings_url)(repo, section)              | A repository settings page (a key of `GITHUB_SETTINGS`).                         |
+| [`heuristic_classify`](_autosummary/openloops.tasks.html.md#openloops.tasks.heuristic_classify)(candidate, \*[, rules, ...]) | A task record from a gathered candidate, by patterns alone.                      |
+| [`load_records`](_autosummary/openloops.tasks.html.md#openloops.tasks.load_records)(paths)                             | The records in JSON files (each a list, or an envelope with `candidates`).       |
+| [`merge_records`](_autosummary/openloops.tasks.html.md#openloops.tasks.merge_records)(\*sources)                        | Records from several sources, one per item, later sources winning.               |
+| [`npm_access_url`](_autosummary/openloops.tasks.html.md#openloops.tasks.npm_access_url)(package)                         | npm package settings: trusted publisher, publishing access, 2FA requirement.     |
+| [`pypi_publishing_url`](_autosummary/openloops.tasks.html.md#openloops.tasks.pypi_publishing_url)([project])                  | PyPI trusted publishers: a project's page, or the pending-publisher page.        |
+
+### Classes
+
+| [`Rule`](_autosummary/openloops.tasks.html.md#openloops.tasks.Rule)(pattern, tier, minutes, regex)               | A heuristic: when `regex` matches title + body, the item is this pattern.   |
+|----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
+| [`Task`](_autosummary/openloops.tasks.html.md#openloops.tasks.Task)(id[, url, kind, org, repo, title, ask, ...]) | One thing the human could act on.                                           |
+
+### openloops.tasks.DFLT_SEARCHES *= {'decide': ('Decide', 'title'), 'needs-user': ('"Needs the user"', 'body')}*
+
+(search terms, the field they match).
+
+* **Type:**
+  Extra searches beyond the label, by name
+
+### openloops.tasks.PATTERNS *= ('npm-trusted-publisher', 'npm-first-publish', 'npm-scope', 'npm-other', 'pypi-trusted-publisher', 'pypi-release', 'api-key', 'github-settings', 'server-chore', 'decision', 'review-pr', 'merge-bot-pr', 'record', 'device-test', 'listen-look', 'live-check', 'purchase', 'mac-only', 'other')*
+
+The controlled vocabulary of repeated chores. A run on the board groups one pattern.
+
+### *class* openloops.tasks.Rule(pattern, tier, minutes, regex)
+
+Bases: [`NamedTuple`](https://docs.python.org/3/library/typing.html#typing.NamedTuple)
+
+A heuristic: when `regex` matches title + body, the item is this pattern.
+
+#### minutes *: [int](https://docs.python.org/3/builtins/functions.html#int)*
+
+Alias for field number 2
+
+#### pattern *: [str](https://docs.python.org/3/builtins/stdtypes.html#str)*
+
+Alias for field number 0
+
+#### regex *: [str](https://docs.python.org/3/builtins/stdtypes.html#str)*
+
+Alias for field number 3
+
+#### tier *: [str](https://docs.python.org/3/builtins/stdtypes.html#str)*
+
+Alias for field number 1
+
+### openloops.tasks.STATUSES *= ('open', 'likely-done', 'not-for-user', 'stale')*
+
+Whether the item still asks anything of the human.
+
+### openloops.tasks.TASK_FIELDS *= ('id', 'url', 'kind', 'org', 'repo', 'title', 'ask', 'tier', 'minutes', 'links', 'decision', 'prompt', 'machine', 'unblocks', 'pattern', 'pattern_key', 'status', 'note', 'source', 'created')*
+
+Every key on every record, in schema order.
+
+### openloops.tasks.TIERS *= ('tap', 'browser', 'session', 'physical', 'mac-only')*
+
+Where the human does the thing, cheapest first. The board sorts and filters on it.
+
+### *class* openloops.tasks.Task(id, url=None, kind='issue', org=None, repo=None, title='', ask='', tier='session', minutes=None, links=list(), decision=None, prompt=None, machine=None, unblocks=list(), pattern='other', pattern_key=None, status='open', note=None, source=None, created=None)
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+One thing the human could act on. Every record carries every field.
+
+`decision` is `{question, options, recommendation}` or `None`; `links` are
+`{label, url}` with the item itself last; `prompt` is a paste-ready request for
+a coding session (session tier). `source` says how the item was found and
+`created` when it was opened (`YYYY-MM-DD`).
+
+```pycon
+>>> Task.from_mapping({'id': 'a/b#1', 'tier': 'nope', 'pattern': 'x'}).tier
+'session'
+```
+
+#### as_dict()
+
+JSON-ready form.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+#### *classmethod* from_mapping(record)
+
+Normalise a record from any source: unknown keys dropped, bad vocabulary fixed.
+
+A value outside its vocabulary becomes the field’s safe default (`session`
+tier, `other` pattern, `open` status) rather than an error, because one
+sloppy classifier record must not sink a board of three hundred.
+
+* **Return type:**
+  [`Task`](_autosummary/openloops.tasks.html.md#openloops.tasks.Task)
+
+### openloops.tasks.classify(candidates, \*, classifier=<function heuristic_classify>)
+
+One normalised record per candidate, through `classifier`.
+
+```pycon
+>>> classify([{'url': 'https://github.com/a/b/issues/1', 'title': 'Decide the name'}])[0]['tier']
+'tap'
+```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
+
+### openloops.tasks.gather(, owners=None, exclude_owners=(), exclude_repos=None, label='manual-task', searches=(), review_prs=False, limit=1000, timeout=30.0, run_gh=None)
+
+Every open item that asks something of the human, across `owners`, deduplicated.
+
+One query per owner and per kind: the `label` (`manual-task`), each named
+search in `searches` (keys of [`DFLT_SEARCHES`](_autosummary/openloops.tasks.html.md#openloops.tasks.DFLT_SEARCHES)), and with `review_prs` the
+open PRs requesting your review. `owners` defaults to
+[`openloops.obligations.configured_owners()`](_autosummary/openloops.obligations.html.md#openloops.obligations.configured_owners); `exclude_repos` (owner/name
+globs) defaults to `OPENLOOPS_EXCLUDE_REPOS`. `run_gh` replaces the `gh`
+runner (`run_gh(args, timeout=...) -> stdout`).
+
+The result is an envelope: `listed` is `False` with an `error` when any query
+failed, because a partial sweep presented as a whole one is the failure that
+matters. `saturated` names the queries that hit `limit`.
+
+```pycon
+>>> def fake(args, *, timeout):
+...     return json.dumps([{'number': 1, 'title': 'Add a key',
+...         'url': 'https://github.com/acme/w/issues/1',
+...         'repository': {'nameWithOwner': 'acme/w'}, 'labels': [], 'body': ''}])
+>>> report = gather(owners=['acme'], run_gh=fake)
+>>> report['listed'], [c['id'] for c in report['candidates']]
+(True, ['acme/w#1'])
+```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.tasks.github_settings_url(repo, section)
+
+A repository settings page (a key of `GITHUB_SETTINGS`).
+
+```pycon
+>>> github_settings_url('acme/widget', 'pages')
+'https://github.com/acme/widget/settings/pages'
+```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### openloops.tasks.heuristic_classify(candidate, , rules=(('mac-only', 'mac-only', 10, '\\\\b(macos|mac app|keychain|xcode|launchd|on the mac)\\\\b'), ('npm-first-publish', 'session', 10, 'npm.\*(first publish|not (yet )?on npm|does not exist)|first publish.\*npm'), ('npm-trusted-publisher', 'browser', 3, 'npm.\*trusted publish|trusted publish.\*npm'), ('npm-scope', 'browser', 3, 'npm (org|scope)|claim .\*scope'), ('pypi-trusted-publisher', 'browser', 3, 'pypi.\*(trusted|pending) publish|(trusted|pending) publish.\*pypi'), ('pypi-release', 'session', 5, 'pypi.\*(release|upload)|(release|upload).\*pypi'), ('decision', 'tap', 2, '\\\\A\\\\s\*(decision|decide|confirm|should|reopen|choose|pick)\\\\b|\\\\A[^\\\\n]\*\\\\?|\\\\A[^\\\\n]\*\\\\bdecide\\\\b'), ('github-settings', 'browser', 3, '\\\\b(secret|deploy key|github pages|environment|actions settings|repo(sitory)? settings)\\\\b'), ('api-key', 'browser', 5, '\\\\b(api key|api token|access token|create (an )?account|sign up)\\\\b'), ('purchase', 'browser', 5, '\\\\b(purchase|buy|paid plan|subscription|invoice|billing)\\\\b'), ('record', 'physical', 15, '\\\\brecord (yourself|a|an|audio|video|your)\\\\b|\\\\bvoice sample\\\\b'), ('device-test', 'physical', 10, '\\\\b(on (a|your) (phone|device)|test on (ios|android|a device))\\\\b'), ('listen-look', 'physical', 10, '\\\\b(listen to|look at|judge|eyeball)\\\\b'), ('live-check', 'session', 5, '\\\\blive (check|test|run)\\\\b|\\\\breal (api )?key\\\\b'), ('server-chore', 'session', 5, '\\\\b(deploy|install|ssh|sudo|server|cron|systemd)\\\\b'), ('decision', 'tap', 2, '\\\\b(go-ahead|which option|options?:|recommend(ation|ed)?:?\\\\\*\\\\\*)')), machines=None)
+
+A task record from a gathered candidate, by patterns alone. No model, no network.
+
+`rules` are tried in order against the title and body; `machines` maps an owner
+to the machine its session-tier prompts name. Status is always `open`: whether an
+ask was already done is a judgement only a reader of the thread can make (the
+classifier brief’s job).
+
+```pycon
+>>> pr = {'url': 'https://github.com/acme/w/pull/3', 'repo': 'acme/w',
+...       'title': 'Bump lodash from 4.17.20 to 4.17.21', 'body': ''}
+>>> heuristic_classify(pr)['pattern'], heuristic_classify(pr)['links'][0]['url']
+('merge-bot-pr', 'https://github.com/acme/w/pull/3/files')
+```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.tasks.load_records(paths)
+
+The records in JSON files (each a list, or an envelope with `candidates`).
+
+Globs are expanded, in sorted order, so `out_*.json` reads a batch directory. A
+glob that matches nothing raises: the batches a subagent failed to write must not
+quietly turn into a board built from the heuristic alone.
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
+
+### openloops.tasks.merge_records(\*sources)
+
+Records from several sources, one per item, later sources winning.
+
+Keyed by `id` (derived from the URL for a GitHub item, so the two sources agree);
+a record with no id and no URL is dropped. A later record replaces the
+earlier one whole, except that an empty `url` or `created` is filled from it:
+the classifier brief reads threads, the gatherer knows dates.
+
+```pycon
+>>> heuristic = [{'id': 'a/b#1', 'url': 'u1', 'tier': 'browser', 'created': '2026-01-02'}]
+>>> enriched = [{'id': 'a/b#1', 'url': 'u1', 'tier': 'tap', 'ask': 'Say yes'}]
+>>> [(r['tier'], r['ask'], r['created']) for r in merge_records(heuristic, enriched)]
+[('tap', 'Say yes', '2026-01-02')]
+```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
+
+### openloops.tasks.npm_access_url(package)
+
+npm package settings: trusted publisher, publishing access, 2FA requirement.
+
+```pycon
+>>> npm_access_url('@acme/widget')
+'https://www.npmjs.com/package/@acme/widget/access'
+```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### openloops.tasks.pypi_publishing_url(project=None)
+
+PyPI trusted publishers: a project’s page, or the pending-publisher page.
+
+```pycon
+>>> pypi_publishing_url()
+'https://pypi.org/manage/account/publishing/'
+```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+
 # _autosummary/openloops.tools.html.md
 
 # openloops.tools
@@ -4039,15 +4451,18 @@ two surfaces is a sign that there are two implementations, and there is one here
 
 ### Functions
 
-| [`sync`](_autosummary/openloops.tools.html.md#openloops.tools.sync)(\*[, source, since_days, force, ...])        | Read what changed in the sessions and write the digests.                               |
-|----------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------|
-| [`ls`](_autosummary/openloops.tools.html.md#openloops.tools.ls)(\*[, state, source, project, confidence, ...]) | The digests in the store, newest last-turn first.                                      |
-| [`show`](_autosummary/openloops.tools.html.md#openloops.tools.show)(session, \*[, source, digests_store])        | One digest in full, found by session id or by a unique prefix of one.                  |
-| [`status`](_autosummary/openloops.tools.html.md#openloops.tools.status)(\*[, source, since_days, ...])             | Where everything is, how much of it there is, and how stale the cache is.              |
-| [`owed`](_autosummary/openloops.tools.html.md#openloops.tools.owed)(\*[, verify, owners, trusted_owners, ...])   | What you still owe your agents, with each obligation re-checked against the world.     |
-| [`blocked`](_autosummary/openloops.tools.html.md#openloops.tools.blocked)(\*[, resolve, owners, repos, query, ...]) | What your repositories are waiting on — and what is no longer waiting.                 |
-| [`dashboard`](_autosummary/openloops.tools.html.md#openloops.tools.dashboard)(\*[, verify, resolve, owners, ...])     | All three answers as one self-contained HTML page, for looking at rather than reading. |
-| [`published`](_autosummary/openloops.tools.html.md#openloops.tools.published)(\*[, limit, session, source])           | What your agents handed you lately: recently published annals documents, per session.  |
+| [`sync`](_autosummary/openloops.tools.html.md#openloops.tools.sync)(\*[, source, since_days, force, ...])        | Read what changed in the sessions and write the digests.                                  |
+|----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
+| [`ls`](_autosummary/openloops.tools.html.md#openloops.tools.ls)(\*[, state, source, project, confidence, ...]) | The digests in the store, newest last-turn first.                                         |
+| [`show`](_autosummary/openloops.tools.html.md#openloops.tools.show)(session, \*[, source, digests_store])        | One digest in full, found by session id or by a unique prefix of one.                     |
+| [`status`](_autosummary/openloops.tools.html.md#openloops.tools.status)(\*[, source, since_days, ...])             | Where everything is, how much of it there is, and how stale the cache is.                 |
+| [`owed`](_autosummary/openloops.tools.html.md#openloops.tools.owed)(\*[, verify, owners, trusted_owners, ...])   | What you still owe your agents, with each obligation re-checked against the world.        |
+| [`blocked`](_autosummary/openloops.tools.html.md#openloops.tools.blocked)(\*[, resolve, owners, repos, query, ...]) | What your repositories are waiting on — and what is no longer waiting.                    |
+| [`dashboard`](_autosummary/openloops.tools.html.md#openloops.tools.dashboard)(\*[, verify, resolve, owners, ...])     | All three answers as one self-contained HTML page, for looking at rather than reading.    |
+| [`published`](_autosummary/openloops.tools.html.md#openloops.tools.published)(\*[, limit, session, source])           | What your agents handed you lately: recently published annals documents, per session.     |
+| [`board_gather`](_autosummary/openloops.tools.html.md#openloops.tools.board_gather)(\*[, owners, exclude_owners, ...])   | Every open item that asks something of you, across owners: the board's input.             |
+| [`board_classify`](_autosummary/openloops.tools.html.md#openloops.tools.board_classify)(\*, candidates[, enriched, out])   | Task records: the heuristic classifier over gathered candidates, overlaid by richer ones. |
+| [`board_build`](_autosummary/openloops.tools.html.md#openloops.tools.board_build)(\*, records, out_dir[, ...])          | Write the phone task board (page, `tasks.json`, `runs.json`) into `out_dir`.              |
 
 ### openloops.tools.ROW_FIELDS *= ('session', 'source', 'state', 'title', 'ai_title', 'project', 'branches', 'started', 'ended', 'last_turn', 'turns', 'model', 'confidence', 'verified')*
 
@@ -4073,6 +4488,45 @@ itself failed — must not be readable as “nothing is waiting”.
 >>> report = blocked(issues_source=[], blockers_source={})
 >>> report['listed'], report['counts']['total']
 (True, 0)
+```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.tools.board_build(, records, out_dir, candidates=None, run_specs=None, run_extras=None, title='Phone Task Board', session=None, read_only_orgs=None, machine=None)
+
+Write the phone task board (page, `tasks.json`, `runs.json`) into `out_dir`.
+
+`records` are task-record JSON files (globs allowed); `candidates` supply the
+creation dates; `run_specs` replaces the packaged run specs and `run_extras` (a
+JSON object keyed by run) overlays deployment-specific prompts and tables. Writes
+only into `out_dir`; publishing and the receiving side are the skill’s job.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.tools.board_classify(, candidates, enriched=None, out=None)
+
+Task records: the heuristic classifier over gathered candidates, overlaid by richer ones.
+
+`candidates` are JSON files from [`board_gather()`](_autosummary/openloops.tools.html.md#openloops.tools.board_gather); `enriched` are record
+files written by the classifier brief (globs allowed), which win over the heuristic
+record for the same item. `out` writes the merged records there.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.tools.board_gather(, owners=None, exclude_owners=None, exclude_repos=None, label='manual-task', searches=None, review_prs=False, limit=1000, timeout=30.0, out=None, run_gh=None)
+
+Every open item that asks something of you, across owners: the board’s input.
+
+Sweeps the `label` (`manual-task`) per owner with no 50-row cap, plus the named
+`searches` (`decide`, `needs-user`) and, with `review_prs`, the PRs waiting
+on your review. `out` also writes the envelope there as JSON. Read-only.
+
+```pycon
+>>> board_gather(owners=['acme'], run_gh=lambda args, *, timeout: '[]')['listed']
+True
 ```
 
 * **Return type:**
@@ -4415,7 +4869,7 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-10-20 12:48 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/232b353279ae976d9b0cde77eeacbc7d26d12172"><code>232b353</code></a> on branch <code>main</code>, for **openloops 0.1.18** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-27 06:00 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/b13badae3ccab2a87bb8c0858c067e8950497efd"><code>b13bada</code></a> on branch <code>main</code>, for **openloops 0.1.19** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -4424,7 +4878,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/232b353279ae976d9b0cde77eeacbc7d26d12172"><code>232b353279ae976d9b0cde77eeacbc7d26d12172</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/b13badae3ccab2a87bb8c0858c067e8950497efd"><code>b13badae3ccab2a87bb8c0858c067e8950497efd</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -4435,15 +4889,15 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/39424896801">39424896801</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/40458399989">40458399989</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>232b353279ae976d9b0cde77eeacbc7d26d12172</code> (in the history of the built commit) |
+| Event commit | <code>b13badae3ccab2a87bb8c0858c067e8950497efd</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.20  |
+| epythet  | 0.2.22  |
 | Sphinx   | 9.1.1   |
 | docutils | 0.22.4  |
 | Python   | 3.12.15 |
@@ -4462,14 +4916,14 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.18/">0.1.18</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.19/">0.1.19</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 232b353279ae976d9b0cde77eeacbc7d26d12172
-pip install "epythet==0.2.20"
+git checkout b13badae3ccab2a87bb8c0858c067e8950497efd
+pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 
@@ -4509,6 +4963,16 @@ gh skill install thorwhalen/openloops openloops-needs-human --agent claude-code
 ```
 
 Source: [`openloops/data/skills/openloops-needs-human`](https://github.com/thorwhalen/openloops/tree/HEAD/openloops/data/skills/openloops-needs-human) (bundled with the pip package).
+
+### `openloops-phone-board`
+
+Build, publish and run a phone task board: every open item across the owner’s repositories that asks something of them (manual-task issues, ‘Decide…’ issues, PRs waiting on their review), classified by where they can do it (tap, browser, session, physical, mac-only), grouped into runs of repeated chores, published as a claude.ai Artifact they can act on from a phone, with a receiving Claude session that turns their taps into GitHub comments, closes and dispatched workers. Use when the owner will be away from their desk, on a phone, and wants to clear what they owe; when they ask for ‘a board’, ‘a phone task list’, ‘what can I do from my phone’, ‘turn my manual-tasks into something I can tap through’; or when an existing board needs rebuilding or its outbox processed (‘process the board’, ‘post my desk answers’). The `ol board-*` commands build it read-only; the write side is this skill’s procedure.
+
+```bash
+gh skill install thorwhalen/openloops openloops-phone-board --agent claude-code
+```
+
+Source: [`openloops/data/skills/openloops-phone-board`](https://github.com/thorwhalen/openloops/tree/HEAD/openloops/data/skills/openloops-phone-board) (bundled with the pip package).
 
 The bundled skills are also on disk after `pip install openloops`, under the package’s `data/skills/` directory; link them into an agent without network access with `skill link-skills <that directory>`.
 

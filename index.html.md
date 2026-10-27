@@ -28,12 +28,14 @@ ol install-skills            # link the skills and the subagent into ~/.claude
 
 ```default
 installed into ~/.claude
-  method: symlink   install: 3   ok: 0   conflict: 0
+  method: symlink   install: 4   ok: 0   conflict: 0
 
 install  skill  openloops                 not present
                   -> ~/.claude/skills/openloops
 install  skill  openloops-needs-human     not present
                   -> ~/.claude/skills/openloops-needs-human
+install  skill  openloops-phone-board     not present
+                  -> ~/.claude/skills/openloops-phone-board
 install  agent  openloops-sweep           not present
                   -> ~/.claude/agents/openloops-sweep.md
 ```
@@ -97,6 +99,7 @@ and tell you when it looks too narrow. More on the resolution order below.
 |-------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `openloops`             | skill    | **the read side.** Teaches an agent which of the three commands answers which question, how to synthesise the three into one page, and — most of all — never to round a `?` into a clean answer. |
 | `openloops-needs-human` | skill    | **the capture side.** Teaches an agent to file a `manual-task` issue, with a re-checkable predicate, at the moment it gets blocked on you. Without it, `ol owed` has nothing to read.            |
+| `openloops-phone-board` | skill    | **the phone board.** Gather, classify, build and publish the task board, and the receiver procedure that turns its taps into comments, closes and dispatched workers.                            |
 | `openloops-sweep`       | subagent | the same sweep, run in a fresh context, returning a page instead of three screens. For the session you keep open all day.                                                                        |
 
 `~/.claude` is Claude Code’s config directory, and `CLAUDE_CONFIG_DIR` is honoured if
@@ -106,7 +109,7 @@ except where they get installed.
 
 **Re-running it changes nothing.** Each asset is a symlink into the installed package,
 so `pip install -U openloops` upgrades the skills too, and a second `ol install-skills`
-reads `ok: 3`. Where symlinks are unavailable — Windows without Developer Mode — it
+reads `ok: 4`. Where symlinks are unavailable — Windows without Developer Mode — it
 copies instead, and the report says which happened rather than pretending they are the
 same thing.
 
@@ -603,6 +606,20 @@ escaping and a scheme allowlist on every link. `--fragment` drops the document s
 for a host that supplies its own `<head>`.
 
 ---
+
+## `ol board-*` — a task board you can clear from a phone
+
+```bash
+ol board-gather --all-kinds --out work/candidates.json
+ol board-classify work/candidates.json --out work/records.json
+ol board-build work/board work/records.json -c work/candidates.json --session my-desk
+```
+
+Every open item across your owners that asks something of you (the `manual-task` issues, issues titled “Decide…”, PRs waiting on your review) becomes a task record: what to do in one line, where (`tap`, `browser`, `session`, `physical`, `mac-only`), how long, the exact settings page to open, and a paste-ready prompt when a session should do it. Repeated chores are grouped into runs (the same npm form for twelve packages is one sitting), and the result is a static page with its data files, meant to be published as a claude.ai Artifact with a `db` capability.
+
+`board-gather` queries each owner separately with no 50-row cap and reports a query that hits the search API’s ceiling as `saturated` rather than truncating it; `--exclude-repos 'org/*'` (or `OPENLOOPS_EXCLUDE_REPOS`) keeps repositories off the board. `board-classify` is a deterministic heuristic with no model; `--enriched 'batches/out_*.json'` lays records written by the shipped classifier brief over it. `board-build` writes only into the directory you name: the board holds titles from your repositories, so keep it out of any repo.
+
+The taps on the page become GitHub comments, closed issues and dispatched workers only through a Claude session following the `openloops-phone-board` skill. openloops code never does it ([ADR-008]()).
 
 ## Turning it off
 

@@ -22,4 +22,7 @@ openloops.tools
       blocked
       dashboard
       published
+      board_gather
+      board_classify
+      board_build
    

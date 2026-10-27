@@ -31,6 +31,16 @@ gh skill install thorwhalen/openloops openloops-needs-human --agent claude-code
 
 Source: [`openloops/data/skills/openloops-needs-human`](https://github.com/thorwhalen/openloops/tree/HEAD/openloops/data/skills/openloops-needs-human) (bundled with the pip package).
 
+### `openloops-phone-board`
+
+Build, publish and run a phone task board: every open item across the owner's repositories that asks something of them (manual-task issues, 'Decide…' issues, PRs waiting on their review), classified by where they can do it (tap, browser, session, physical, mac-only), grouped into runs of repeated chores, published as a claude.ai Artifact they can act on from a phone, with a receiving Claude session that turns their taps into GitHub comments, closes and dispatched workers. Use when the owner will be away from their desk, on a phone, and wants to clear what they owe; when they ask for 'a board', 'a phone task list', 'what can I do from my phone', 'turn my manual-tasks into something I can tap through'; or when an existing board needs rebuilding or its outbox processed ('process the board', 'post my desk answers'). The `ol board-*` commands build it read-only; the write side is this skill's procedure.
+
+```bash
+gh skill install thorwhalen/openloops openloops-phone-board --agent claude-code
+```
+
+Source: [`openloops/data/skills/openloops-phone-board`](https://github.com/thorwhalen/openloops/tree/HEAD/openloops/data/skills/openloops-phone-board) (bundled with the pip package).
+
 The bundled skills are also on disk after `pip install openloops`, under the package's `data/skills/` directory; link them into an agent without network access with `skill link-skills <that directory>`.
 
 

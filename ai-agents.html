@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="_static/documentation_options.js?v=9969ed3f"></script>
+    <script src="_static/documentation_options.js?v=3d116926"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -57,7 +57,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.18" />
+  <meta name="docsearch:version" content="0.1.19" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -397,6 +397,14 @@ machine-readable copies of this documentation.</p>
 </pre></div>
 </div>
 <p>Source: <a class="reference external" href="https://github.com/thorwhalen/openloops/tree/HEAD/openloops/data/skills/openloops-needs-human"><code class="docutils literal notranslate"><span class="pre">openloops/data/skills/openloops-needs-human</span></code></a> (bundled with the pip package).</p>
+</section>
+<section id="openloops-phone-board">
+<h3><code class="docutils literal notranslate"><span class="pre">openloops-phone-board</span></code><a class="headerlink" href="#openloops-phone-board" title="Link to this heading">#</a></h3>
+<p>Build, publish and run a phone task board: every open item across the owner’s repositories that asks something of them (manual-task issues, ‘Decide…’ issues, PRs waiting on their review), classified by where they can do it (tap, browser, session, physical, mac-only), grouped into runs of repeated chores, published as a claude.ai Artifact they can act on from a phone, with a receiving Claude session that turns their taps into GitHub comments, closes and dispatched workers. Use when the owner will be away from their desk, on a phone, and wants to clear what they owe; when they ask for ‘a board’, ‘a phone task list’, ‘what can I do from my phone’, ‘turn my manual-tasks into something I can tap through’; or when an existing board needs rebuilding or its outbox processed (‘process the board’, ‘post my desk answers’). The <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">board-*</span></code> commands build it read-only; the write side is this skill’s procedure.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gh<span class="w"> </span>skill<span class="w"> </span>install<span class="w"> </span>thorwhalen/openloops<span class="w"> </span>openloops-phone-board<span class="w"> </span>--agent<span class="w"> </span>claude-code
+</pre></div>
+</div>
+<p>Source: <a class="reference external" href="https://github.com/thorwhalen/openloops/tree/HEAD/openloops/data/skills/openloops-phone-board"><code class="docutils literal notranslate"><span class="pre">openloops/data/skills/openloops-phone-board</span></code></a> (bundled with the pip package).</p>
 <p>The bundled skills are also on disk after <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">openloops</span></code>, under the package’s <code class="docutils literal notranslate"><span class="pre">data/skills/</span></code> directory; link them into an agent without network access with <code class="docutils literal notranslate"><span class="pre">skill</span> <span class="pre">link-skills</span> <span class="pre">&lt;that</span> <span class="pre">directory&gt;</span></code>.</p>
 </section>
 </section>
@@ -469,6 +477,7 @@ machine-readable copies of this documentation.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#skills">Skills</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops"><code class="docutils literal notranslate"><span class="pre">openloops</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops-needs-human"><code class="docutils literal notranslate"><span class="pre">openloops-needs-human</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops-phone-board"><code class="docutils literal notranslate"><span class="pre">openloops-phone-board</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#subagents">Subagents</a><ul class="nav section-nav flex-column">

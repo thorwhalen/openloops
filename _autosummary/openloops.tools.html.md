@@ -18,15 +18,18 @@ two surfaces is a sign that there are two implementations, and there is one here
 
 ### Functions
 
-| [`sync`](#openloops.tools.sync)(\*[, source, since_days, force, ...])        | Read what changed in the sessions and write the digests.                               |
-|----------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------|
-| [`ls`](#openloops.tools.ls)(\*[, state, source, project, confidence, ...]) | The digests in the store, newest last-turn first.                                      |
-| [`show`](#openloops.tools.show)(session, \*[, source, digests_store])        | One digest in full, found by session id or by a unique prefix of one.                  |
-| [`status`](#openloops.tools.status)(\*[, source, since_days, ...])             | Where everything is, how much of it there is, and how stale the cache is.              |
-| [`owed`](#openloops.tools.owed)(\*[, verify, owners, trusted_owners, ...])   | What you still owe your agents, with each obligation re-checked against the world.     |
-| [`blocked`](#openloops.tools.blocked)(\*[, resolve, owners, repos, query, ...]) | What your repositories are waiting on — and what is no longer waiting.                 |
-| [`dashboard`](#openloops.tools.dashboard)(\*[, verify, resolve, owners, ...])     | All three answers as one self-contained HTML page, for looking at rather than reading. |
-| [`published`](#openloops.tools.published)(\*[, limit, session, source])           | What your agents handed you lately: recently published annals documents, per session.  |
+| [`sync`](#openloops.tools.sync)(\*[, source, since_days, force, ...])        | Read what changed in the sessions and write the digests.                                  |
+|----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
+| [`ls`](#openloops.tools.ls)(\*[, state, source, project, confidence, ...]) | The digests in the store, newest last-turn first.                                         |
+| [`show`](#openloops.tools.show)(session, \*[, source, digests_store])        | One digest in full, found by session id or by a unique prefix of one.                     |
+| [`status`](#openloops.tools.status)(\*[, source, since_days, ...])             | Where everything is, how much of it there is, and how stale the cache is.                 |
+| [`owed`](#openloops.tools.owed)(\*[, verify, owners, trusted_owners, ...])   | What you still owe your agents, with each obligation re-checked against the world.        |
+| [`blocked`](#openloops.tools.blocked)(\*[, resolve, owners, repos, query, ...]) | What your repositories are waiting on — and what is no longer waiting.                    |
+| [`dashboard`](#openloops.tools.dashboard)(\*[, verify, resolve, owners, ...])     | All three answers as one self-contained HTML page, for looking at rather than reading.    |
+| [`published`](#openloops.tools.published)(\*[, limit, session, source])           | What your agents handed you lately: recently published annals documents, per session.     |
+| [`board_gather`](#openloops.tools.board_gather)(\*[, owners, exclude_owners, ...])   | Every open item that asks something of you, across owners: the board's input.             |
+| [`board_classify`](#openloops.tools.board_classify)(\*, candidates[, enriched, out])   | Task records: the heuristic classifier over gathered candidates, overlaid by richer ones. |
+| [`board_build`](#openloops.tools.board_build)(\*, records, out_dir[, ...])          | Write the phone task board (page, `tasks.json`, `runs.json`) into `out_dir`.              |
 
 ### openloops.tools.ROW_FIELDS *= ('session', 'source', 'state', 'title', 'ai_title', 'project', 'branches', 'started', 'ended', 'last_turn', 'turns', 'model', 'confidence', 'verified')*
 
@@ -52,6 +55,45 @@ itself failed — must not be readable as “nothing is waiting”.
 >>> report = blocked(issues_source=[], blockers_source={})
 >>> report['listed'], report['counts']['total']
 (True, 0)
+```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.tools.board_build(, records, out_dir, candidates=None, run_specs=None, run_extras=None, title='Phone Task Board', session=None, read_only_orgs=None, machine=None)
+
+Write the phone task board (page, `tasks.json`, `runs.json`) into `out_dir`.
+
+`records` are task-record JSON files (globs allowed); `candidates` supply the
+creation dates; `run_specs` replaces the packaged run specs and `run_extras` (a
+JSON object keyed by run) overlays deployment-specific prompts and tables. Writes
+only into `out_dir`; publishing and the receiving side are the skill’s job.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.tools.board_classify(, candidates, enriched=None, out=None)
+
+Task records: the heuristic classifier over gathered candidates, overlaid by richer ones.
+
+`candidates` are JSON files from [`board_gather()`](#openloops.tools.board_gather); `enriched` are record
+files written by the classifier brief (globs allowed), which win over the heuristic
+record for the same item. `out` writes the merged records there.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.tools.board_gather(, owners=None, exclude_owners=None, exclude_repos=None, label='manual-task', searches=None, review_prs=False, limit=1000, timeout=30.0, out=None, run_gh=None)
+
+Every open item that asks something of you, across owners: the board’s input.
+
+Sweeps the `label` (`manual-task`) per owner with no 50-row cap, plus the named
+`searches` (`decide`, `needs-user`) and, with `review_prs`, the PRs waiting
+on your review. `out` also writes the envelope there as JSON. Read-only.
+
+```pycon
+>>> board_gather(owners=['acme'], run_gh=lambda args, *, timeout: '[]')['listed']
+True
 ```
 
 * **Return type:**

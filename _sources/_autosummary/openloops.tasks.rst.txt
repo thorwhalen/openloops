@@ -1,0 +1,36 @@
+openloops.tasks
+===============
+
+.. automodule:: openloops.tasks
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      TIERS
+      STATUSES
+      PATTERNS
+      TASK_FIELDS
+      DFLT_SEARCHES
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      classify
+      gather
+      github_settings_url
+      heuristic_classify
+      load_records
+      merge_records
+      npm_access_url
+      pypi_publishing_url
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Rule
+      Task
+   

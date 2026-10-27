@@ -1,0 +1,17 @@
+openloops.board
+===============
+
+.. automodule:: openloops.board
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      board_dir
+      build_board
+      group_runs
+      join_created
+      run_specs
+      sort_tasks
+   

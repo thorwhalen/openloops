@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="../_static/documentation_options.js?v=9969ed3f"></script>
+    <script src="../_static/documentation_options.js?v=3d116926"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -54,11 +54,11 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="openloops.transcripts" href="openloops.transcripts.html" />
-    <link rel="prev" title="openloops.store" href="openloops.store.html" />
+    <link rel="prev" title="openloops.tasks" href="openloops.tasks.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.18" />
+  <meta name="docsearch:version" content="0.1.19" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -322,6 +322,7 @@
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="openloops.html">openloops</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="openloops.base.html">openloops.base</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.blockers.html">openloops.blockers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.board.html">openloops.board</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.dashboard.html">openloops.dashboard</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.digest.html">openloops.digest</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.egress.html">openloops.egress</a></li>
@@ -330,6 +331,7 @@
 <li class="toctree-l2"><a class="reference internal" href="openloops.publications.html">openloops.publications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.skills.html">openloops.skills</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.store.html">openloops.store</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.tasks.html">openloops.tasks</a></li>
 <li class="toctree-l2 current active"><a aria-current="page" class="current reference internal" href="#">openloops.tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.transcripts.html">openloops.transcripts</a></li>
 </ul>
@@ -443,6 +445,15 @@ two surfaces is a sign that there are two implementations, and there is one here
 <tr class="row-even"><td><p><a class="reference internal" href="#openloops.tools.published" title="openloops.tools.published"><code class="xref py py-obj docutils literal notranslate"><span class="pre">published</span></code></a>(*[, limit, session, source])</p></td>
 <td><p>What your agents handed you lately: recently published annals documents, per session.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.tools.board_gather" title="openloops.tools.board_gather"><code class="xref py py-obj docutils literal notranslate"><span class="pre">board_gather</span></code></a>(*[, owners, exclude_owners, ...])</p></td>
+<td><p>Every open item that asks something of you, across owners: the board's input.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.tools.board_classify" title="openloops.tools.board_classify"><code class="xref py py-obj docutils literal notranslate"><span class="pre">board_classify</span></code></a>(*, candidates[, enriched, out])</p></td>
+<td><p>Task records: the heuristic classifier over gathered candidates, overlaid by richer ones.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.tools.board_build" title="openloops.tools.board_build"><code class="xref py py-obj docutils literal notranslate"><span class="pre">board_build</span></code></a>(*, records, out_dir[, ...])</p></td>
+<td><p>Write the phone task board (page, <code class="docutils literal notranslate"><span class="pre">tasks.json</span></code>, <code class="docutils literal notranslate"><span class="pre">runs.json</span></code>) into <code class="docutils literal notranslate"><span class="pre">out_dir</span></code>.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -469,6 +480,53 @@ itself failed — must not be readable as “nothing is waiting”.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">report</span> <span class="o">=</span> <span class="n">blocked</span><span class="p">(</span><span class="n">issues_source</span><span class="o">=</span><span class="p">[],</span> <span class="n">blockers_source</span><span class="o">=</span><span class="p">{})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">report</span><span class="p">[</span><span class="s1">'listed'</span><span class="p">],</span> <span class="n">report</span><span class="p">[</span><span class="s1">'counts'</span><span class="p">][</span><span class="s1">'total'</span><span class="p">]</span>
 <span class="go">(True, 0)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.tools.board_build">
+<span class="sig-prename descclassname"><span class="pre">openloops.tools.</span></span><span class="sig-name descname"><span class="pre">board_build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">records</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">candidates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_specs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_extras</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Phone</span> <span class="pre">Task</span> <span class="pre">Board'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_only_orgs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">machine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/tools.html#board_build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.tools.board_build" title="Link to this definition">#</a></dt>
+<dd><p>Write the phone task board (page, <code class="docutils literal notranslate"><span class="pre">tasks.json</span></code>, <code class="docutils literal notranslate"><span class="pre">runs.json</span></code>) into <code class="docutils literal notranslate"><span class="pre">out_dir</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">records</span></code> are task-record JSON files (globs allowed); <code class="docutils literal notranslate"><span class="pre">candidates</span></code> supply the
+creation dates; <code class="docutils literal notranslate"><span class="pre">run_specs</span></code> replaces the packaged run specs and <code class="docutils literal notranslate"><span class="pre">run_extras</span></code> (a
+JSON object keyed by run) overlays deployment-specific prompts and tables. Writes
+only into <code class="docutils literal notranslate"><span class="pre">out_dir</span></code>; publishing and the receiving side are the skill’s job.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.tools.board_classify">
+<span class="sig-prename descclassname"><span class="pre">openloops.tools.</span></span><span class="sig-name descname"><span class="pre">board_classify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">candidates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enriched</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/tools.html#board_classify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.tools.board_classify" title="Link to this definition">#</a></dt>
+<dd><p>Task records: the heuristic classifier over gathered candidates, overlaid by richer ones.</p>
+<p><code class="docutils literal notranslate"><span class="pre">candidates</span></code> are JSON files from <a class="reference internal" href="#openloops.tools.board_gather" title="openloops.tools.board_gather"><code class="xref py py-func docutils literal notranslate"><span class="pre">board_gather()</span></code></a>; <code class="docutils literal notranslate"><span class="pre">enriched</span></code> are record
+files written by the classifier brief (globs allowed), which win over the heuristic
+record for the same item. <code class="docutils literal notranslate"><span class="pre">out</span></code> writes the merged records there.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.tools.board_gather">
+<span class="sig-prename descclassname"><span class="pre">openloops.tools.</span></span><span class="sig-name descname"><span class="pre">board_gather</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">owners</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_owners</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_repos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'manual-task'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">searches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">review_prs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_gh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/tools.html#board_gather"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.tools.board_gather" title="Link to this definition">#</a></dt>
+<dd><p>Every open item that asks something of you, across owners: the board’s input.</p>
+<p>Sweeps the <code class="docutils literal notranslate"><span class="pre">label</span></code> (<code class="docutils literal notranslate"><span class="pre">manual-task</span></code>) per owner with no 50-row cap, plus the named
+<code class="docutils literal notranslate"><span class="pre">searches</span></code> (<code class="docutils literal notranslate"><span class="pre">decide</span></code>, <code class="docutils literal notranslate"><span class="pre">needs-user</span></code>) and, with <code class="docutils literal notranslate"><span class="pre">review_prs</span></code>, the PRs waiting
+on your review. <code class="docutils literal notranslate"><span class="pre">out</span></code> also writes the envelope there as JSON. Read-only.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">board_gather</span><span class="p">(</span><span class="n">owners</span><span class="o">=</span><span class="p">[</span><span class="s1">'acme'</span><span class="p">],</span> <span class="n">run_gh</span><span class="o">=</span><span class="k">lambda</span> <span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="s1">'[]'</span><span class="p">)[</span><span class="s1">'listed'</span><span class="p">]</span>
+<span class="go">True</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
@@ -641,12 +699,12 @@ the cache alone writes the fixture’s revisions into the caller’s real one.</
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="openloops.store.html"
+       href="openloops.tasks.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">openloops.store</p>
+        <p class="prev-next-title">openloops.tasks</p>
       </div>
     </a>
     <a class="right-next"
@@ -679,6 +737,9 @@ the cache alone writes the fixture’s revisions into the caller’s real one.</
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.tools.ROW_FIELDS"><code class="docutils literal notranslate"><span class="pre">ROW_FIELDS</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.tools.blocked"><code class="docutils literal notranslate"><span class="pre">blocked()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.tools.board_build"><code class="docutils literal notranslate"><span class="pre">board_build()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.tools.board_classify"><code class="docutils literal notranslate"><span class="pre">board_classify()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.tools.board_gather"><code class="docutils literal notranslate"><span class="pre">board_gather()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.tools.dashboard"><code class="docutils literal notranslate"><span class="pre">dashboard()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.tools.ls"><code class="docutils literal notranslate"><span class="pre">ls()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.tools.owed"><code class="docutils literal notranslate"><span class="pre">owed()</span></code></a></li>
