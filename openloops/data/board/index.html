@@ -29,10 +29,13 @@ body { background: var(--bg); color: var(--fg); font: 16px/1.45 var(--f-body); m
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
 .wrap { max-width: 720px; margin: 0 auto }
-header.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 12px 8px; border-bottom: 1px solid var(--line) }
+header.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 8px 6px; border-bottom: 1px solid var(--line) }
 h1 { font: 700 1.35rem/1.1 var(--f-display); margin: 0; letter-spacing: -.01em }
 h2 { font: 700 1.15rem/1.2 var(--f-display); margin: 0; text-wrap: balance }
-.top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 10px }
+.navtoggle { font: 700 1.05rem var(--f-display); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; min-height: 40px; cursor: pointer; max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.navtoggle[aria-expanded="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+#navpanel { padding-top: 4px }
 .tally { font: 400 .85rem var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums }
 nav.views { display: flex; gap: 6px; margin-top: 10px }
 nav.views a { flex: 1; text-align: center; padding: 10px 8px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); color: var(--fg); text-decoration: none; font-weight: 600; min-height: 44px }
@@ -84,7 +87,8 @@ summary { cursor: pointer; padding: 8px 0; min-height: 40px }
 .kit a { color: var(--accent) }
 .kit .refs { font-size: .82rem; color: var(--muted) }
 .small { font-size: .8rem; color: var(--muted) }
-.sync { font: 600 .8rem var(--f-mono); margin-top: 6px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center }
+.sync { font: 600 .74rem var(--f-mono); margin-top: 4px; display: flex; gap: 8px; align-items: center; overflow-x: auto; white-space: nowrap; scrollbar-width: none }
+.sync::-webkit-scrollbar { display: none }
 .sync .ok { color: var(--done) } .sync .bad { color: var(--warn) } .sync .err { color: #c0362c }
 .sync button { font: 600 .78rem var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 6px; padding: 4px 8px; min-height: 32px }
 .receipt { font: 600 .75rem var(--f-mono); padding: 3px 8px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); text-decoration: none }
@@ -99,12 +103,17 @@ summary { cursor: pointer; padding: 8px 0; min-height: 40px }
 
 <div class="wrap">
   <header class="bar">
-    <div class="top"><h1>Phone Task Board</h1><span class="tally" id="tally">loading…</span></div>
+    <div class="top">
+      <button class="navtoggle" id="navtoggle" aria-expanded="false" aria-controls="navpanel"><span id="navlabel">Tasks</span> <span aria-hidden="true">▾</span></button>
+      <span class="tally" id="tally">loading…</span>
+    </div>
     <div class="sync" id="sync" role="status" aria-live="polite">Starting…</div>
-    <nav class="views">
-      <a href="#tasks" id="v-tasks">Tasks</a><a href="#desk" id="v-desk">Decide</a><a href="#runs" id="v-runs">Runs</a><a href="#kit" id="v-kit">Phone kit</a>
-    </nav>
-    <div class="filters" id="filters" aria-label="Filters"></div>
+    <div id="navpanel" hidden>
+      <nav class="views">
+        <a href="#tasks" id="v-tasks">Tasks</a><a href="#desk" id="v-desk">Decide</a><a href="#runs" id="v-runs">Runs</a><a href="#kit" id="v-kit">Phone kit</a>
+      </nav>
+      <div class="filters" id="filters" aria-label="Filters"></div>
+    </div>
     <div id="banner" class="banner" hidden></div>
   </header>
   <main id="main"><p class="empty">Loading the task list…</p></main>
@@ -505,12 +514,18 @@ function render() {
   const v = (location.hash || "#tasks").slice(1);
   for (const k of ["tasks", "desk", "runs", "kit"]) $("#v-" + k).setAttribute("aria-current", k === v ? "page" : "false");
   $("#filters").hidden = v !== "tasks";
+  const VIEW = { tasks: "Tasks", desk: "Decide", runs: "Runs", kit: "Phone kit" }[v] || "Tasks";
+  const nf = (ui.tiers.length !== 4 ? 1 : 0) + ui.orgs.length + (ui.time ? 1 : 0);
+  $("#navlabel").textContent = v === "tasks" ? `${VIEW} · ${SHOWS.find(x => x.k === ui.show)?.label || ""}${nf ? ` · ${nf} filter${nf > 1 ? "s" : ""}` : ""}` : VIEW;
   $("#tally").textContent = `${TASKS.filter(t => stOf(t) === "todo").length} to do · ${TASKS.filter(t => stOf(t) === "done").length} done`;
   syncLine(); filtersBar();
   const m = $("#main");
   if (v === "runs") viewRuns(m); else if (v === "desk") viewDesk(m); else if (v === "kit") viewKit(m); else viewTasks(m);
 }
-addEventListener("hashchange", () => { needsRender = false; acted.clear(); document.activeElement?.blur?.(); render() });
+function setNav(open) { $("#navpanel").hidden = !open; $("#navtoggle").setAttribute("aria-expanded", String(open)); save("navopen", open) }
+$("#navtoggle").addEventListener("click", () => setNav($("#navpanel").hidden));
+setNav(load("navopen", false) === true);
+addEventListener("hashchange", () => { setNav(false); needsRender = false; acted.clear(); document.activeElement?.blur?.(); render() });
 
 /* ---------- live subscriptions, re-opened with backoff if they die ---------- */
 const byId = docs => Object.fromEntries(docs.map(d => [d.id, d.data()]));
@@ -538,7 +553,7 @@ async function boot() {
       READ_ONLY_ORGS = c.read_only_orgs.map(o => String(o).toLowerCase());
       if (c.session) SESSION = c.session;
       if (c.machine) RUN_MACHINE = c.machine;
-      if (c.title) { document.title = c.title; $("h1").textContent = c.title }
+      if (c.title) document.title = c.title
     }
     if (c && /^https:\/\//.test(c.moved_to || "")) MOVED_TO = c.moved_to;
   } catch { $("#main").replaceChildren(el("p", { class: "empty" }, "The task list did not load. Reload the page.")) }
