@@ -4,9 +4,9 @@
 
 ## Credentials: the receiver's own account, never printed
 
-The receiver signs in as **its own account** (not the owner's), which the server maps to the role `receiver`. That role may write `receipts`, `meta`, `questions` and import `outbox`/`drafts`; the owner's browser login is `viewer` and may write only `outbox` (create-only) and `drafts`.
+The receiver signs in as **its own account** (not the owner's), which the server maps to the role `receiver`. That role may write `receipts`, `meta` and `questions`, and `outbox`/`drafts` only while the server has an import open (migrate.md); the owner's browser login is `viewer` and may write only `outbox` (create-only) and `drafts`. The receiver never speaks for the owner.
 
-- Keep the account's credentials in a file only the receiving session's user can read (`chmod 600`), for example `~/.config/openloops/board-receiver.env` with `BOARD_ORIGIN`, `BOARD_API` (the store's path, e.g. `/api/openloops/store`), `BOARD_EMAIL`, `BOARD_PASSWORD`. Never commit it, never paste it into a prompt, an issue or the store, and never let a command print it: no `set -x`, no `echo`, no `curl -v`.
+- Keep the account's credentials in a file only the receiving session's user can read (`chmod 600`), for example `~/.config/openloops/board-receiver.env` with `BOARD_ORIGIN`, `BOARD_API` (the store's path, e.g. `/api/openloops/board-store`), `BOARD_EMAIL`, `BOARD_PASSWORD`. Never commit it, never paste it into a prompt, an issue or the store, and never let a command print it: no `set -x`, no `echo`, no `curl -v`.
 - Keep the session's cookies in a cookie jar with the same permissions (`~/.config/openloops/board-receiver.cookies`). Sign in only when a call answers 401.
 
 Signing in depends on the platform. For an enlace_auth server (`thorwhalen.com`-style): fetch a CSRF token, then post the credentials built from the env file without echoing them:
@@ -28,7 +28,7 @@ With `S="$BOARD_ORIGIN$BOARD_API"` and `C=(-sS -b "$J" -c "$J" -H 'Content-Type:
 
 | receiver.md says | HTTP |
 |---|---|
-| list a collection (`outbox`, `receipts`, `drafts`, `meta`, `questions`) | `curl "${C[@]}" "$S/outbox"` → `{"docs": [{"id", "data", "version"}]}`. Save each response into the sweep's backup directory. There is no paging: one listing is the whole collection (capped at 5000 documents; a 507 means the board has outgrown this store). |
+| list a collection (`outbox`, `receipts`, `drafts`, `meta`, `questions`) | `curl "${C[@]}" "$S/outbox"` → `{"docs": [{"id", "data", "version"}]}`. Save each response into the sweep's backup directory. There is no paging: one listing is the whole collection (capped at 20000 documents; a 507 means the board has outgrown this store). |
 | get one document | `curl "${C[@]}" "$S/receipts/<id>"` → `{"id", "data", "version"}`, or 404 |
 | set, create-if-absent (a claim with no receipt yet) | `curl "${C[@]}" -X PUT -H 'If-None-Match: *' --data @body.json "$S/receipts/<id>"`; **412** means another sweep holds it: skip |
 | set, pinned to a version (a claim on an existing receipt, the finish, the heartbeat) | `curl "${C[@]}" -X PUT -H 'If-Match: <version>' --data @body.json "$S/receipts/<id>"`; **412** is a pin conflict: re-read, as receiver.md says |

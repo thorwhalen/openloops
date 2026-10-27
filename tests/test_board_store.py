@@ -41,6 +41,7 @@ def test_an_event_is_created_once_and_an_identical_retry_is_harmless():
                 {"x": 1},
                 role="receiver",
                 if_match=first["version"],
+                allow_import=True,
             )
         )
         == 409
@@ -54,7 +55,18 @@ def test_each_collection_has_its_own_writers():
             _status(lambda: put_doc(store, collection, "x", {}, role="viewer")) == 403
         )
         assert put_doc(store, collection, "x", {}, role="receiver")["created"]
-    assert put_doc(store, "drafts", "x", {"at": "1"}, role="receiver")["created"]
+    # Outside an import the receiver cannot speak for the owner.
+    assert (
+        _status(lambda: put_doc(store, "drafts", "x", {"at": "1"}, role="receiver"))
+        == 403
+    )
+    assert _status(lambda: put_doc(store, "outbox", "x", {}, role="receiver")) == 403
+    assert put_doc(
+        store, "drafts", "x", {"at": "1"}, role="receiver", allow_import=True
+    )["created"]
+    assert put_doc(store, "outbox", "x", {}, role="receiver", allow_import=True)[
+        "created"
+    ]
     assert _status(lambda: put_doc(store, "outbox", "x", {}, role="stranger")) == 403
 
 
@@ -169,3 +181,53 @@ def test_listing_reads_only_its_own_collection_and_accepts_bytes_values():
         ("a", {"n": 1}),
         ("b", {"n": 2}),
     ]
+
+
+def test_nan_is_refused_on_the_way_in_and_out():
+    from openloops.board_store import parse_body
+
+    assert _status(lambda: parse_body(b'{"x": NaN}')) == 400
+    assert (
+        _status(lambda: put_doc({}, "outbox", "e", {"x": float("nan")}, role="viewer"))
+        == 400
+    )
+
+
+def test_a_corrupt_file_is_skipped_not_fatal():
+    store = {"outbox/a.json": '{"n":1}', "outbox/b.json": '{"n":'}
+    listing = list_docs(store, "outbox")
+    assert [d["id"] for d in listing["docs"]] == ["a"] and listing["skipped"] == 1
+
+
+def test_the_cap_is_exclusive_and_reported():
+    store = {f"outbox/e{i}.json": "{}" for i in range(3)}
+    assert len(list_docs(store, "outbox", max_docs=3)["docs"]) == 3
+    assert _status(lambda: list_docs(store, "outbox", max_docs=2)) == 507
+
+
+def test_a_pinned_draft_that_loses_is_told_and_if_match_star_means_exists():
+    store = {}
+    made = put_doc(store, "drafts", "k", {"at": "2"}, role="viewer")
+    assert (
+        _status(
+            lambda: put_doc(
+                store,
+                "drafts",
+                "k",
+                {"at": "1"},
+                role="viewer",
+                if_match=made["version"],
+            )
+        )
+        == 412
+    )
+    assert (
+        put_doc(store, "drafts", "k", {"at": "3"}, role="viewer", if_match="*")[
+            "created"
+        ]
+        is False
+    )
+    assert (
+        _status(lambda: put_doc({}, "receipts", "r", {}, role="receiver", if_match="*"))
+        == 412
+    )

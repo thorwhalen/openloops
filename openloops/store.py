@@ -25,10 +25,12 @@ running", this would be a session dashboard rather than a record of what session
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import re
 import socket
+import tempfile
 from collections.abc import Iterator, MutableMapping
 from pathlib import Path
 
@@ -44,6 +46,7 @@ __all__ = [
     "default_source",
     "digests_store",
     "board_docs_store",
+    "AtomicTextFiles",
     "digest_key",
     "parse_digest_key",
     "load_sync_state",
@@ -184,15 +187,72 @@ def digests_store(rootdir: str | Path | None = None) -> MutableMapping[str, str]
     return _posix_keys(_DigestFiles(str(root), delete_func=os.remove))
 
 
-def board_docs_store(rootdir: str | Path) -> MutableMapping[str, str]:
-    """A self-hosted board's documents as UTF-8 JSON files: ``<collection>/<id>.json``.
+class AtomicTextFiles(MutableMapping):
+    """``<root>/<key>`` text files, each write atomic: temp file, ``fsync``, rename.
 
-    The same configured file store as the digests (UTF-8 pinned, POSIX keys, real
-    deletes); :mod:`openloops.board_server` serialises access to it with a file lock.
+    A self-hosted board's store is read by every poll while it is written, by several
+    server processes. A plain ``open(path, "w")`` leaves a truncated file behind when a
+    worker is killed mid-write or the disk fills, and readers can see a half-written one;
+    a rename never shows either. Keys are POSIX relative paths (``outbox/e1.json``);
+    a key that would leave ``root`` is refused.
     """
-    root = Path(rootdir).expanduser()
-    root.mkdir(parents=True, exist_ok=True)
-    return _posix_keys(_DigestFiles(str(root), delete_func=os.remove))
+
+    def __init__(self, root: str | Path):
+        self.root = Path(root).expanduser().resolve()
+        self.root.mkdir(parents=True, exist_ok=True)
+
+    def _path(self, key: str) -> Path:
+        path = (self.root / key).resolve()
+        if self.root not in path.parents:
+            raise KeyError(key)
+        return path
+
+    def __getitem__(self, key: str) -> str:
+        try:
+            return self._path(key).read_text(encoding="utf-8")
+        except (FileNotFoundError, IsADirectoryError, NotADirectoryError):
+            raise KeyError(key) from None
+
+    def __setitem__(self, key: str, value: str) -> None:
+        path = self._path(key)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=".tmp-")
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                handle.write(value)
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(tmp, path)
+        except BaseException:
+            with contextlib.suppress(FileNotFoundError):
+                os.remove(tmp)
+            raise
+
+    def __delitem__(self, key: str) -> None:
+        try:
+            os.remove(self._path(key))
+        except FileNotFoundError:
+            raise KeyError(key) from None
+
+    def __iter__(self):
+        for path in self.root.rglob("*"):
+            if path.is_file() and not path.name.startswith("."):
+                yield path.relative_to(self.root).as_posix()
+
+    def __len__(self) -> int:
+        return sum(1 for _ in self)
+
+
+def board_docs_store(rootdir: str | Path) -> MutableMapping[str, str]:
+    """A self-hosted board's documents: ``<root>/<collection>/<id>.json``, written atomically.
+
+    >>> import tempfile
+    >>> store = board_docs_store(tempfile.mkdtemp())
+    >>> store['outbox/e1.json'] = '{}'
+    >>> list(store), store['outbox/e1.json']
+    (['outbox/e1.json'], '{}')
+    """
+    return AtomicTextFiles(rootdir)
 
 
 def digest_key(source: str, state: str, session_key: str) -> str:

@@ -5,15 +5,22 @@ module, so the core still never reaches the network. :func:`mk_app` returns a Fa
 app with two route groups:
 
 - ``GET /board/`` and ``GET /board/{file}``: the board directory written by
-  ``ol board-build --store http --api <prefix>/store`` (``index.html``, ``tasks.json``,
+  ``ol board-build --store http --api <prefix>/board-store`` (``index.html``, ``tasks.json``,
   ``runs.json``, ``board.json``, ``kit.html``, nothing else).
-- ``/store/...``: the board store API of :mod:`openloops.board_store`.
+- ``/board-store/...``: the board store API of :mod:`openloops.board_store`. Not
+  ``/store``: a host may already own that path (enlace_auth mounts its own per-user
+  store at ``/api/<app>/store``), and the page sends no CSRF token, so the API must sit
+  where the host exempts an app's own routes from CSRF.
 
 **It does not authenticate anyone.** It asks ``role_of(request)`` for ``"viewer"`` (the
 owner's browser) or ``"receiver"`` (the receiving session) and refuses every request,
 reads included, for which it gets anything else. Put it behind your platform's login
 and derive the role from the identity that login established, never from anything the
 client sends. The board's task titles come from private repositories.
+
+**Imports** (moving a board here, see the skill's ``migrate.md``) are possible only
+while a file named ``.import-open`` exists in ``store_root``: create it on the server
+for the migration, delete it after. The receiver's credentials cannot open it.
 
     app = mk_app(
         board_dir="~/.local/share/openloops/board",
@@ -24,7 +31,6 @@ client sends. The board's task titles come from private repositories.
 
 import contextlib
 import hashlib
-import json
 import threading
 from collections.abc import Callable, Iterator
 from pathlib import Path
@@ -32,25 +38,30 @@ from typing import Any
 
 from openloops.board import BOARD_FILES
 from openloops.board_store import (
+    COLLECTIONS,
     DFLT_MAX_BYTES,
     ROLES,
     BoardStoreError,
     get_doc,
     list_docs,
+    parse_body,
     put_doc,
 )
 from openloops.store import board_docs_store
 
-__all__ = ["file_lock", "mk_app"]
+__all__ = ["IMPORT_FLAG", "file_lock", "mk_app"]
 
 #: Private and changing: never cached by a browser or a proxy.
 NO_STORE = {"Cache-Control": "no-store"}
+#: Its presence in the store root allows imports; see the module docstring.
+IMPORT_FLAG = ".import-open"
 _LOCK_NAME = ".lock"
+_PROCESS_LOCK = threading.Lock()
 
 
 @contextlib.contextmanager
-def file_lock(path: str | Path) -> Iterator[None]:
-    """An exclusive lock on ``path`` across processes (POSIX ``flock``).
+def file_lock(path: str | Path, *, shared: bool = False) -> Iterator[None]:
+    """A lock on ``path`` across processes (POSIX ``flock``): shared to read, else exclusive.
 
     A web server usually runs several worker processes; without this, two of them can
     both see an event as absent and both "create" it. Where ``fcntl`` is missing the
@@ -63,14 +74,15 @@ def file_lock(path: str | Path) -> Iterator[None]:
             yield
         return
     with open(path, "a") as handle:
-        fcntl.flock(handle, fcntl.LOCK_EX)
+        fcntl.flock(handle, fcntl.LOCK_SH if shared else fcntl.LOCK_EX)
         try:
             yield
         finally:
             fcntl.flock(handle, fcntl.LOCK_UN)
 
 
-_PROCESS_LOCK = threading.Lock()
+def _etag(text: str) -> str:
+    return '"' + hashlib.sha256(text.encode()).hexdigest()[:16] + '"'
 
 
 def mk_app(
@@ -84,12 +96,18 @@ def mk_app(
     """The board's FastAPI app. ``role_of`` is the only authorisation it has."""
     from fastapi import FastAPI, HTTPException, Request, Response
     from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+    from starlette.concurrency import run_in_threadpool
 
     board = Path(board_dir).expanduser()
     root = Path(store_root).expanduser()
     store = board_docs_store(root)
     lock_path = root / _LOCK_NAME
-    app = FastAPI(title=title)
+    # Interactive API docs would answer without a role: off.
+    app = FastAPI(title=title, docs_url=None, redoc_url=None, openapi_url=None)
+    # Every poll lists every collection; re-reading every file each time is the cost
+    # that grows. A listing is reused until its directory changes (an atomic write is a
+    # rename, which updates the directory's mtime), in any worker.
+    listings: dict[str, tuple[Any, dict, str]] = {}
 
     def require_role(request: Request) -> str:
         role = role_of(request)
@@ -101,6 +119,40 @@ def mk_app(
         return JSONResponse(
             {"error": exc.message}, status_code=exc.status, headers=NO_STORE
         )
+
+    def stamp(collection: str):
+        try:
+            info = (root / collection).stat()
+        except FileNotFoundError:
+            return None
+        return (info.st_mtime_ns, info.st_ino)
+
+    def listing_of(collection: str) -> tuple[dict, str]:
+        if collection not in COLLECTIONS:
+            raise BoardStoreError(404, f"no collection {collection!r}")
+        with file_lock(lock_path, shared=True):
+            now = stamp(collection)
+            cached = listings.get(collection)
+            if cached and now is not None and cached[0] == now:
+                return cached[1], cached[2]
+            listing = list_docs(store, collection)
+        tag = _etag("".join(d["id"] + d["version"] for d in listing["docs"]))
+        listings[collection] = (now, listing, tag)
+        return listing, tag
+
+    def write(collection, doc_id, data, role, if_match, if_none_match):
+        with file_lock(lock_path):
+            return put_doc(
+                store,
+                collection,
+                doc_id,
+                data,
+                role=role,
+                if_match=if_match,
+                if_none_match=if_none_match,
+                max_bytes=max_bytes,
+                allow_import=(root / IMPORT_FLAG).exists(),
+            )
 
     @app.get("/board")
     def board_redirect(request: Request):
@@ -120,61 +172,45 @@ def mk_app(
             raise HTTPException(404, "no such board file")
         return FileResponse(path, headers=NO_STORE)
 
-    @app.get("/store/{collection}")
+    @app.get("/board-store/{collection}")
     def store_list(collection: str, request: Request):
         require_role(request)
         try:
-            with file_lock(lock_path):
-                listing = list_docs(store, collection)
+            listing, tag = listing_of(collection)
         except BoardStoreError as exc:
             return refused(exc)
-        tag = (
-            '"'
-            + hashlib.sha256(
-                "".join(d["id"] + d["version"] for d in listing["docs"]).encode()
-            ).hexdigest()[:16]
-            + '"'
-        )
-        if request.headers.get("if-none-match") == tag:
+        # A compressing proxy may weaken the tag to W/"..."; it still names this listing.
+        sent = (request.headers.get("if-none-match") or "").removeprefix("W/")
+        if sent == tag:
             return Response(status_code=304, headers={**NO_STORE, "ETag": tag})
         return JSONResponse(listing, headers={**NO_STORE, "ETag": tag})
 
-    @app.get("/store/{collection}/{doc_id}")
+    @app.get("/board-store/{collection}/{doc_id}")
     def store_get(collection: str, doc_id: str, request: Request):
         require_role(request)
         try:
-            with file_lock(lock_path):
+            with file_lock(lock_path, shared=True):
                 doc = get_doc(store, collection, doc_id)
         except BoardStoreError as exc:
             return refused(exc)
         return JSONResponse(doc, headers={**NO_STORE, "ETag": f'"{doc["version"]}"'})
 
-    @app.put("/store/{collection}/{doc_id}")
+    @app.put("/board-store/{collection}/{doc_id}")
     async def store_put(collection: str, doc_id: str, request: Request):
         role = require_role(request)
         raw = await request.body()
-        if len(raw) > max_bytes:
-            return refused(
-                BoardStoreError(413, f"body is larger than {max_bytes} bytes")
+        try:
+            if len(raw) > max_bytes:
+                raise BoardStoreError(413, f"body is larger than {max_bytes} bytes")
+            data = parse_body(raw)
+            if_match = (request.headers.get("if-match") or "").removeprefix("W/").strip(
+                '"'
+            ) or None
+            if_none_match = request.headers.get("if-none-match") == "*"
+            # flock blocks: run it off the event loop so one slow write stalls no one.
+            result = await run_in_threadpool(
+                write, collection, doc_id, data, role, if_match, if_none_match
             )
-        try:
-            data = json.loads(raw or b"null")
-        except ValueError:
-            return refused(BoardStoreError(400, "body is not JSON"))
-        if_match = (request.headers.get("if-match") or "").strip('"') or None
-        if_none_match = request.headers.get("if-none-match") == "*"
-        try:
-            with file_lock(lock_path):
-                result = put_doc(
-                    store,
-                    collection,
-                    doc_id,
-                    data,
-                    role=role,
-                    if_match=if_match,
-                    if_none_match=if_none_match,
-                    max_bytes=max_bytes,
-                )
         except BoardStoreError as exc:
             return refused(exc)
         return JSONResponse(result, headers=NO_STORE)

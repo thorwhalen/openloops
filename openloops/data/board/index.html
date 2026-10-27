@@ -165,10 +165,13 @@ const confirmed = new Set();
    which speaks the openloops board store API (openloops.board_store) on the same
    origin, with the viewer's own login cookie. Error codes map onto the db ones, so the
    code below cannot tell the two apart. */
+let SIGNED_OUT = false;
+const sleepers = new Set();
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { const due = [...sleepers]; sleepers.clear(); due.forEach(f => f()) } });
 function httpStore(api, { pollMs = 5000 } = {}) {
   const base = String(api).replace(/\/+$/, "");
   const CODES = { 400: "invalid_argument", 409: "invalid_argument", 412: "invalid_argument", 413: "quota_exceeded", 401: "not_granted", 403: "not_granted" };
-  const fail = r => { const e = new Error("store said " + r.status); e.code = CODES[r.status] || "unavailable"; throw e };
+  const fail = r => { if (r.status === 401) SIGNED_OUT = true; const e = new Error("store said " + r.status); e.code = CODES[r.status] || "unavailable"; throw e };
   const call = (path, init = {}) => fetch(base + "/" + path.split("/").map(encodeURIComponent).join("/"),
     { credentials: "same-origin", cache: "no-store", ...init, headers: { "Content-Type": "application/json", ...(init.headers || {}) } })
     .then(r => r.status === 304 ? null : r.ok ? r.json().then(j => (j.__etag = r.headers.get("ETag"), j)) : fail(r), () => fail({ status: 0 }));
@@ -178,10 +181,12 @@ function httpStore(api, { pollMs = 5000 } = {}) {
       onSnapshot(onNext, onError) {
         let stopped = false, timer = null, etag = null;
         // A poll that changed nothing costs a 304 and no render: the listing's ETag is sent back.
-        const tick = () => call(name, etag ? { headers: { "If-None-Match": etag } } : {}).then(j => {
+        const tick = () => stopped ? null : call(name, etag ? { headers: { "If-None-Match": etag } } : {}).then(j => {
           if (stopped) return;
           if (j) { etag = j.__etag || null; onNext({ docs: (j.docs || []).map(d => ({ id: d.id, data: () => d.data })), metadata: { fromCache: false } }) }
-          timer = setTimeout(tick, pollMs);
+          // A hidden tab stops polling; visibilitychange below wakes it.
+          timer = document.hidden ? null : setTimeout(tick, pollMs);
+          if (!timer) sleepers.add(tick);
         }, e => { if (!stopped) { stopped = true; onError(e) } });
         tick();
         return () => { stopped = true; clearTimeout(timer) };
@@ -271,7 +276,7 @@ function setDraft(key, text, store) {
   clearTimeout(draftTimers[key]);
   if (store) storeDraft(key); else draftTimers[key] = setTimeout(() => storeDraft(key), DRAFT_MS);
 }
-function storeDraft(key) { clearTimeout(draftTimers[key]); delete draftTimers[key]; if (drafts[key]) put("drafts/" + key, { key, ...drafts[key], device: DEVICE }) }
+function storeDraft(key) { clearTimeout(draftTimers[key]); delete draftTimers[key]; if (drafts[key] && !MOVED_TO) put("drafts/" + key, { key, ...drafts[key], device: DEVICE }) }
 addEventListener("pagehide", () => { for (const k of Object.keys(draftTimers)) storeDraft(k); save("drafts3", drafts); save("pending3", pending) });
 function noteFor(key) { const ta = document.getElementById("note-" + key); return (ta ? ta.value : draftOf(key)).trim() }
 
@@ -320,6 +325,7 @@ function syncLine() {
   const s = $("#sync"); s.replaceChildren();
   const b = $("#banner"); b.hidden = true; b.className = "banner";
   if (MOVED_TO) { b.hidden = false; b.className = "blocker"; b.replaceChildren("This board has moved. Nothing you tap here is saved any more: ", el("a", { href: MOVED_TO, rel: "noopener" }, "open the new board")) }
+  else if (!db && SIGNED_OUT) { b.hidden = false; b.className = "blocker"; b.textContent = "You are signed out, so the buttons are off. Reload the page to sign in again; your unsaved taps are kept on this phone." }
   else if (!db && dbState !== "connecting") { b.hidden = false; b.className = "blocker"; b.textContent = "This view cannot save to the board. Your taps would stay on this phone only, so the buttons are off. Reload the page; if this stays, open the board in your phone's browser." }
   else if (server.schema && server.schema > SCHEMA) { b.hidden = false; b.className = "blocker"; b.textContent = "A newer version of this board is out. Reload the page before tapping anything." }
   if (!storageOk) s.append(el("span", { class: "err" }, "This browser blocks local storage."));
