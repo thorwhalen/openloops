@@ -88,8 +88,10 @@ def test_the_recap_is_claude_codes_own_and_the_latest_one_wins():
     records = [
         user("go", at=stamp(1, 9)),
         recap("Did the first half.", at=stamp(1, 10)),
-        recap("Did the rest. Next: your review. (disable recaps in /config)",
-              at=stamp(1, 12)),
+        recap(
+            "Did the rest. Next: your review. (disable recaps in /config)",
+            at=stamp(1, 12),
+        ),
         assistant("carrying on", at=stamp(1, 11)),
     ]
     s = parse_session(records)
@@ -185,7 +187,9 @@ def test_only_top_level_session_files_are_sessions(projects_dir):
 
 def test_scratchpad_project_dirs_are_skipped_by_default(projects_dir):
     write_transcripts(projects_dir, {"s1": closed_session()})
-    write_transcripts(projects_dir, {"s9": closed_session("s9")}, project="-private-tmp-x")
+    write_transcripts(
+        projects_dir, {"s9": closed_session("s9")}, project="-private-tmp-x"
+    )
     assert list(ClaudeCodeTranscripts()) == ["s1"]
     assert list(ClaudeCodeTranscripts(skip_scratchpads=False)) == ["s1", "s9"]
 

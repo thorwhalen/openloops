@@ -56,7 +56,11 @@ def test_a_notification_ends_the_turn_and_asks_nothing():
     ]
     asked, woke = exchanges(recs)
     assert asked.reply == "Not yet; watching it."
-    assert (woke.origin, woke.questions, woke.reply) == (SYSTEM, (), "The deploy finished.")
+    assert (woke.origin, woke.questions, woke.reply) == (
+        SYSTEM,
+        (),
+        "The deploy finished.",
+    )
 
 
 def test_a_headless_run_is_not_a_person_asking():
@@ -101,7 +105,10 @@ def test_records_load_from_a_file(tmp_path):
 @pytest.mark.parametrize(
     ("text", "found"),
     [
-        ("Why does CI take ten minutes? Then merge it.", ("Why does CI take ten minutes?",)),
+        (
+            "Why does CI take ten minutes? Then merge it.",
+            ("Why does CI take ten minutes?",),
+        ),
         ("why does the page load twice", ("why does the page load twice",)),
         ("Can you add a test?", ()),  # a request phrased as a question
         ("Could you explain why it failed?", ("Could you explain why it failed?",)),
@@ -111,7 +118,10 @@ def test_records_load_from_a_file(tmp_path):
         ("WHERE TO LOOK FIRST", ()),  # a heading
         ("Where to look, in order:", ()),  # a lead-in
         ("When you're done, upload them.", ()),  # a clause, not a question
-        ("- Is the cache warm?\n- Is the queue empty?", ("Is the cache warm?", "Is the queue empty?")),
+        (
+            "- Is the cache warm?\n- Is the queue empty?",
+            ("Is the cache warm?", "Is the queue empty?"),
+        ),
     ],
 )
 def test_question_sentences(text, found):

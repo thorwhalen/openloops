@@ -115,7 +115,10 @@ def test_prose_where_a_predicate_cannot_exist_reads_open_and_keeps_the_prose():
     [None, PredicateOutcome(None, "timed out after 20s"), (None, "no idea")],
 )
 def test_a_predicate_that_cannot_be_run_reads_unknown(outcome):
-    row = only([issue(predicate="gh api repos/acme/widget/keys")], run_predicate=lambda c: outcome)
+    row = only(
+        [issue(predicate="gh api repos/acme/widget/keys")],
+        run_predicate=lambda c: outcome,
+    )
     assert row["state"] == UNKNOWN
 
 
@@ -190,7 +193,9 @@ def test_widening_the_search_does_not_widen_what_may_execute():
 def test_injecting_a_source_does_not_by_itself_grant_trust():
     calls = []
     result = owed(
-        issues_source=[issue(predicate="test -f x")], run_predicate=calls.append, now=NOW
+        issues_source=[issue(predicate="test -f x")],
+        run_predicate=calls.append,
+        now=NOW,
     )
     assert result["trusted_owners"] == []
     assert calls == []
@@ -211,7 +216,9 @@ def test_verify_false_evaluates_nothing_and_says_so_on_every_row():
 
 
 def test_the_predicate_text_is_carried_on_every_row_verdict_or_not():
-    command = "gh secret list --repo acme/widget --json name -q '.[].name' | grep -qx NAME"
+    command = (
+        "gh secret list --repo acme/widget --json name -q '.[].name' | grep -qx NAME"
+    )
     for run in (lambda c: 0, lambda c: 1, lambda c: None):
         row = only([issue(predicate=command)], run_predicate=run)
         assert row["predicate"] == command
@@ -280,7 +287,9 @@ def test_a_result_set_that_saturates_its_own_cap_says_so():
 
 def test_a_failed_listing_is_reported_as_unknown_never_as_zero():
     def unauthenticated(**query):
-        raise GhUnavailable("gh: To get started with GitHub CLI, please run: gh auth login")
+        raise GhUnavailable(
+            "gh: To get started with GitHub CLI, please run: gh auth login"
+        )
 
     result = owed(issues_source=unauthenticated)
     assert result["listed"] is False
@@ -288,7 +297,9 @@ def test_a_failed_listing_is_reported_as_unknown_never_as_zero():
     assert "auth login" in result["error"]
 
 
-def test_with_no_gh_on_the_machine_the_default_path_answers_a_question_mark(monkeypatch):
+def test_with_no_gh_on_the_machine_the_default_path_answers_a_question_mark(
+    monkeypatch,
+):
     """The default seams, on a machine with nothing installed: `?`, never `0`."""
     monkeypatch.setattr("openloops.obligations.shutil.which", lambda name: None)
     result = tools.owed()
@@ -367,7 +378,7 @@ def test_a_timeout_kills_what_the_predicate_started(tmp_path):
     marker = tmp_path / "escaped"
     child = (
         f'"{sys.executable}" -c '
-        f'"import time,pathlib; time.sleep(2); pathlib.Path(r\'{marker}\').touch()"'
+        f"\"import time,pathlib; time.sleep(2); pathlib.Path(r'{marker}').touch()\""
     )
     outcome = shell_predicate(f"({child}) & {SLEEP_30}", timeout=0.5)
     assert outcome.status is None
@@ -452,7 +463,9 @@ def test_owners_come_from_the_environment_before_they_come_from_gh(monkeypatch):
 
 
 def test_a_bad_json_payload_is_unknown_rather_than_an_empty_list(monkeypatch):
-    monkeypatch.setattr("openloops.obligations._gh", lambda args, *, timeout: "not json")
+    monkeypatch.setattr(
+        "openloops.obligations._gh", lambda args, *, timeout: "not json"
+    )
     with pytest.raises(GhUnavailable):
         gh_issues(owners=("acme",))
 
@@ -474,19 +487,40 @@ def canned(**kwargs):
         "counts": {OPEN: 1, DISCHARGED: 1, UNKNOWN: 1, "with_predicate": 2, "total": 3},
         "rows": [
             {
-                "repo": "acme/widget", "number": 1, "title": "Owed thing",
-                "url": "u", "created": "", "age_days": 22, "state": OPEN,
-                "verify": "`check-me`", "predicate": "check-me", "evidence": "exit 1",
+                "repo": "acme/widget",
+                "number": 1,
+                "title": "Owed thing",
+                "url": "u",
+                "created": "",
+                "age_days": 22,
+                "state": OPEN,
+                "verify": "`check-me`",
+                "predicate": "check-me",
+                "evidence": "exit 1",
             },
             {
-                "repo": "acme/widget", "number": 2, "title": "Unknowable thing",
-                "url": "u", "created": "", "age_days": 54, "state": UNKNOWN,
-                "verify": "", "predicate": "", "evidence": "no verify predicate",
+                "repo": "acme/widget",
+                "number": 2,
+                "title": "Unknowable thing",
+                "url": "u",
+                "created": "",
+                "age_days": 54,
+                "state": UNKNOWN,
+                "verify": "",
+                "predicate": "",
+                "evidence": "no verify predicate",
             },
             {
-                "repo": "acme/widget", "number": 3, "title": "Done thing",
-                "url": "u", "created": "", "age_days": 8, "state": DISCHARGED,
-                "verify": "`ran-fine`", "predicate": "ran-fine", "evidence": "exit 0",
+                "repo": "acme/widget",
+                "number": 3,
+                "title": "Done thing",
+                "url": "u",
+                "created": "",
+                "age_days": 8,
+                "state": DISCHARGED,
+                "verify": "`ran-fine`",
+                "predicate": "ran-fine",
+                "evidence": "exit 0",
             },
         ],
     }
@@ -539,7 +573,13 @@ def test_nothing_owed_is_a_sentence_not_an_empty_screen(monkeypatch, capsys):
         "owed",
         lambda **kwargs: canned(
             rows=[],
-            counts={OPEN: 0, DISCHARGED: 0, UNKNOWN: 0, "with_predicate": 0, "total": 0},
+            counts={
+                OPEN: 0,
+                DISCHARGED: 0,
+                UNKNOWN: 0,
+                "with_predicate": 0,
+                "total": 0,
+            },
         ),
     )
     main(["owed"])
@@ -549,7 +589,9 @@ def test_nothing_owed_is_a_sentence_not_an_empty_screen(monkeypatch, capsys):
 def test_the_tool_returns_something_json_serialisable():
     import json
 
-    json.dumps(tools.owed(issues_source=[issue(predicate="x")], run_predicate=lambda c: 0))
+    json.dumps(
+        tools.owed(issues_source=[issue(predicate="x")], run_predicate=lambda c: 0)
+    )
 
 
 # --------------------------------------------------------------------------------

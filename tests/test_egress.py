@@ -48,9 +48,23 @@ def make(kind: str) -> str:
 @pytest.mark.parametrize(
     "kind",
     [
-        "aws", "github", "github_pat", "anthropic", "openai", "slack", "google", "pem",
-        "assignment", "unquoted", "jwt", "npm", "gitlab", "huggingface", "stripe",
-        "sendgrid", "url_password",
+        "aws",
+        "github",
+        "github_pat",
+        "anthropic",
+        "openai",
+        "slack",
+        "google",
+        "pem",
+        "assignment",
+        "unquoted",
+        "jwt",
+        "npm",
+        "gitlab",
+        "huggingface",
+        "stripe",
+        "sendgrid",
+        "url_password",
     ],
 )
 def test_every_credential_shape_raises(kind):

@@ -14,6 +14,7 @@ the useful thing.
 
 from __future__ import annotations
 
+import json
 import sys
 from datetime import datetime, timezone
 
@@ -451,6 +452,95 @@ def published(*, limit: int = 20, session: str = None):
     )
 
 
+def _words(raw: str | None) -> list[str] | None:
+    return [w for w in (raw or "").replace(",", " ").split() if w] or None
+
+
+def board_gather(
+    *,
+    out: str = None,
+    owners: str = None,
+    exclude_owners: str = None,
+    exclude_repos: str = None,
+    searches: str = None,
+    review_prs: bool = False,
+    all_kinds: bool = False,
+    limit: int = 1000,
+):
+    """Gather every open item that asks something of you, across owners (the board's input).
+
+    Sweeps `manual-task` per owner with no 50-row cap. `--searches decide,needs-user`
+    adds the title/body searches, `--review-prs` the PRs waiting on your review, and
+    `--all-kinds` all of them. `--exclude-repos 'acme/secret-*'` takes globs. Writes
+    the result to `--out` as JSON, or prints it. Read-only.
+    """
+    from openloops.tasks import DFLT_SEARCHES
+
+    report = tools.board_gather(
+        owners=_words(owners),
+        exclude_owners=_words(exclude_owners),
+        exclude_repos=_words(exclude_repos),
+        searches=list(DFLT_SEARCHES) if all_kinds else _words(searches),
+        review_prs=review_prs or all_kinds,
+        limit=limit,
+        out=out,
+    )
+    if not out:
+        return json.dumps(report, ensure_ascii=False, indent=1)
+    head = f"gathered {report['counts']['total']} items from {len(report['owners'])} owners -> {report['path']}"
+    if report["saturated"]:
+        head += f"\n  saturated (more exist than were listed): {', '.join(report['saturated'])}"
+    if not report["listed"]:
+        head += f"\n  ? incomplete - {report['error']}"
+    return head
+
+
+def board_classify(*candidates: str, out: str = None, enriched: str = None):
+    """Classify gathered items into task records (deterministic heuristic, no model).
+
+    `--enriched 'batches/out_*.json'` overlays records written by the classifier
+    brief, which win over the heuristic record for the same item.
+    """
+    report = tools.board_classify(
+        candidates=list(candidates), enriched=_words(enriched), out=out
+    )
+    if not out:
+        return json.dumps(report["records"], ensure_ascii=False, indent=1)
+    figures = "  ".join(f"{k}: {v}" for k, v in report["counts"].items())
+    return f"wrote {report['counts']['total']} records to {report['path']}\n  {figures}"
+
+
+def board_build(
+    out_dir: str,
+    *records: str,
+    candidates: str = None,
+    run_specs: str = None,
+    run_extras: str = None,
+    title: str = "Phone Task Board",
+    session: str = None,
+    read_only_orgs: str = None,
+    machine: str = None,
+):
+    """Build the phone task board (page + tasks.json + runs.json) into OUT_DIR from RECORDS.
+
+    Publish the directory as an Artifact with the `db` capability; the
+    `openloops-phone-board` skill covers publishing and the receiving side.
+    """
+    result = tools.board_build(
+        records=list(records),
+        out_dir=out_dir,
+        candidates=_words(candidates),
+        run_specs=run_specs,
+        run_extras=run_extras,
+        title=title,
+        session=session,
+        read_only_orgs=_words(read_only_orgs),
+        machine=machine,
+    )
+    runs = ", ".join(f"{r['key']} {r['items']}" for r in result["runs"]) or "none"
+    return f"wrote {result['tasks']} tasks to {result['out_dir']}\n  runs: {runs}"
+
+
 #: Every verb the CLI exposes, in the order `ol --help` lists them.
 _commands = [
     brief,
@@ -458,6 +548,9 @@ _commands = [
     blocked,
     published,
     dashboard,
+    board_gather,
+    board_classify,
+    board_build,
     sync,
     ls,
     show,

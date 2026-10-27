@@ -63,14 +63,19 @@ def test_finishing_words_alone_are_not_a_close_out():
 def test_the_latest_cue_wins_not_a_fixed_precedence():
     """Real closing paragraphs carry both kinds of cue; order in the text decides."""
     closed = "…or say the word and I'll remove it. Nothing is blocking; safe to close."
-    still_open = "You're all set to exit. The two threads waiting for you are #1 and #2."
+    still_open = (
+        "You're all set to exit. The two threads waiting for you are #1 and #2."
+    )
     assert classify(sess(closed)).state == ARCHIVE
     assert classify(sess(still_open)).state == OPEN
 
 
 def test_a_question_far_from_the_end_does_not_decide_it():
-    text = "Do you want the long version? Here it is.\n\n" + ("detail. " * 300) + \
-        "Nothing is pending."
+    text = (
+        "Do you want the long version? Here it is.\n\n"
+        + ("detail. " * 300)
+        + "Nothing is pending."
+    )
     assert classify(sess(text)).state == ARCHIVE
 
 
@@ -168,7 +173,12 @@ def test_the_recap_decides_only_when_the_closing_turn_is_mute():
     assert classify(sess(mute)).confidence == "low"
 
     decided = classify(
-        sess(mute, last_turn_at="T1", recap="All merged; nothing is pending.", recap_at="T2")
+        sess(
+            mute,
+            last_turn_at="T1",
+            recap="All merged; nothing is pending.",
+            recap_at="T2",
+        )
     )
     assert decided.state == ARCHIVE
     assert "its own recap" in decided.reason

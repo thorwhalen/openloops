@@ -24,8 +24,20 @@ REPO = Path(__file__).resolve().parent.parent
 #: Suffixes worth reading as text. Everything else is skipped by ``scan_files`` anyway,
 #: but naming them keeps the scan fast and the failure list legible.
 TEXT_SUFFIXES = {
-    ".py", ".md", ".toml", ".yml", ".yaml", ".txt", ".cfg", ".ini",
-    ".json", ".sh", ".plist", ".gitignore", ".editorconfig", ".gitattributes",
+    ".py",
+    ".md",
+    ".toml",
+    ".yml",
+    ".yaml",
+    ".txt",
+    ".cfg",
+    ".ini",
+    ".json",
+    ".sh",
+    ".plist",
+    ".gitignore",
+    ".editorconfig",
+    ".gitattributes",
 }
 
 

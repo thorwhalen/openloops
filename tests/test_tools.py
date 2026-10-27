@@ -52,10 +52,20 @@ def test_no_tool_prints(projects_dir):
 
 def test_ls_filters_and_orders():
     store = two_digests()
-    assert [r["session"] for r in tools.ls(state="all", digests_store=store)] == ["aaa", "bbb"]
-    assert [r["session"] for r in tools.ls(state="open", digests_store=store)] == ["aaa"]
-    assert [r["session"] for r in tools.ls(state="all", project="q", digests_store=store)] == ["bbb"]
-    assert [r["session"] for r in tools.ls(state="all", confidence="high", digests_store=store)] == ["bbb"]
+    assert [r["session"] for r in tools.ls(state="all", digests_store=store)] == [
+        "aaa",
+        "bbb",
+    ]
+    assert [r["session"] for r in tools.ls(state="open", digests_store=store)] == [
+        "aaa"
+    ]
+    assert [
+        r["session"] for r in tools.ls(state="all", project="q", digests_store=store)
+    ] == ["bbb"]
+    assert [
+        r["session"]
+        for r in tools.ls(state="all", confidence="high", digests_store=store)
+    ] == ["bbb"]
     assert tools.ls(state="all", source="other", digests_store=store) == []
 
 
@@ -100,7 +110,19 @@ def test_status_counts_retained_digests_separately(projects_dir):
 
 def test_the_dispatch_list_is_the_public_surface():
     names = {f.__name__ for f in tools._dispatch_funcs}
-    assert names == {"sync", "ls", "show", "status", "owed", "blocked", "dashboard", "published"}
+    assert names == {
+        "sync",
+        "ls",
+        "show",
+        "status",
+        "owed",
+        "blocked",
+        "dashboard",
+        "published",
+        "board_gather",
+        "board_classify",
+        "board_build",
+    }
     for func in tools._dispatch_funcs:
         assert func.__doc__, f"{func.__name__} needs a docstring — it is the CLI help"
 

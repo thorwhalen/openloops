@@ -19,7 +19,9 @@ def run(*argv, capsys):
 
 
 def test_the_whole_path_end_to_end_on_the_defaults(projects_dir, capsys):
-    write_transcripts(projects_dir, {"s1": closed_session("s1"), "s2": asking_session("s2")})
+    write_transcripts(
+        projects_dir, {"s1": closed_session("s1"), "s2": asking_session("s2")}
+    )
 
     assert "2 sessions scanned" in run("sync", capsys=capsys)
 
