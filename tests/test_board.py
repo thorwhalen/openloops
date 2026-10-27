@@ -242,3 +242,13 @@ def test_a_self_hosted_page_is_a_full_document_with_a_viewport(tmp_path):
         .read_text(encoding="utf-8")
         .startswith("<!doctype")
     )
+
+
+def test_cards_offer_a_snooze_picker_and_the_recommendation_in_one_tap():
+    page = (board.board_dir() / "index.html").read_text(encoding="utf-8")
+    for label in ("3 hours", "Tomorrow morning", "3 days", "1 week", "1 month"):
+        assert f'["{label}"' in page
+    assert "Snooze ▾" in page and "Snooze 1 day" not in page
+    # Same answer the Decide tab's star writes, so the receiver treats it the same way.
+    assert "Do what's recommended" in page
+    assert 'const ACCEPT = "Accept the recommendation"' in page
