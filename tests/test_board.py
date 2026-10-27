@@ -227,3 +227,18 @@ def test_the_page_has_both_store_adapters_and_the_forwarding_notice():
     page = (board.board_dir() / "index.html").read_text(encoding="utf-8")
     assert "function httpStore(" in page and 'window.claude.use("db")' in page
     assert "MOVED_TO" in page and 'credentials: "same-origin"' in page
+
+
+def test_a_self_hosted_page_is_a_full_document_with_a_viewport(tmp_path):
+    board.build_board([], tmp_path / "h", store="http", api="board-store")
+    page = (tmp_path / "h" / "index.html").read_text(encoding="utf-8")
+    assert page.startswith("<!doctype html>")
+    assert '<meta charset="utf-8">' in page
+    assert 'name="viewport" content="width=device-width, initial-scale=1' in page
+    # The Artifact host supplies its own skeleton: the Artifact build stays a fragment.
+    board.build_board([], tmp_path / "a")
+    assert (
+        not (tmp_path / "a" / "index.html")
+        .read_text(encoding="utf-8")
+        .startswith("<!doctype")
+    )

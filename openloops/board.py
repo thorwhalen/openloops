@@ -48,6 +48,7 @@ from openloops.tasks import TIERS, Task
 __all__ = [
     "BOARD_FILES",
     "DFLT_TITLE",
+    "as_document",
     "board_dir",
     "build_board",
     "group_runs",
@@ -192,6 +193,42 @@ def group_runs(
     return runs
 
 
+#: What the claude.ai Artifact host wraps around a published page, which a self-hosted
+#: page must carry itself: without the viewport meta a phone lays the page out 980px
+#: wide and shrinks it unreadable; without the doctype it renders in quirks mode.
+DOCUMENT_HEAD = """<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<style>
+:root { color-scheme: light }
+body { margin: 0 }
+img, video { max-width: 100%; height: auto }
+[hidden] { display: none !important }
+</style>
+"""
+
+
+def as_document(fragment: str) -> str:
+    """The page as a full HTML document, for hosting outside a claude.ai Artifact.
+
+    The page template is a fragment, because the Artifact host supplies the document
+    skeleton; anywhere else the skeleton has to be in the file. The page's own styles
+    come after this reset, so its dark theme still wins.
+
+    >>> doc = as_document('<title>t</title><p>hi</p>')
+    >>> doc.startswith('<!doctype html>') and 'name="viewport"' in doc
+    True
+    >>> as_document(doc) == doc
+    True
+    """
+    if fragment.lstrip().lower().startswith("<!doctype"):
+        return fragment
+    return DOCUMENT_HEAD + fragment
+
+
 def build_board(
     records: Iterable[Mapping[str, Any]],
     out_dir: str | Path,
@@ -251,6 +288,9 @@ def build_board(
     dump("board.json", config)
     for name in TEMPLATE_FILES:
         shutil.copyfile(board_dir() / name, out / name)
+    if store == "http":
+        page = out / "index.html"
+        page.write_text(as_document(page.read_text(encoding="utf-8")), encoding="utf-8")
 
     counts: dict[str, dict[str, int]] = {"tier": {}, "status": {}}
     for task in tasks:
