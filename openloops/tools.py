@@ -587,6 +587,9 @@ def board_build(
     session: str | None = None,
     read_only_orgs: list[str] | None = None,
     machine: str | None = None,
+    store: str = "artifact",
+    api: str | None = None,
+    moved_to: str | None = None,
 ) -> dict[str, Any]:
     """Write the phone task board (page, ``tasks.json``, ``runs.json``) into ``out_dir``.
 
@@ -594,6 +597,8 @@ def board_build(
     creation dates; ``run_specs`` replaces the packaged run specs and ``run_extras`` (a
     JSON object keyed by run) overlays deployment-specific prompts and tables. Writes
     only into ``out_dir``; publishing and the receiving side are the skill's job.
+    ``store='http'`` with ``api`` wires the page to a self-hosted board store API
+    instead of the claude.ai Artifact store; ``moved_to`` builds a forwarding page.
     """
     extras = (
         json.loads(Path(run_extras).expanduser().read_text(encoding="utf-8"))
@@ -610,6 +615,9 @@ def board_build(
         session=session,
         read_only_orgs=read_only_orgs or (),
         machine=machine,
+        store=store,
+        api=api,
+        moved_to=moved_to,
     )
 
 
