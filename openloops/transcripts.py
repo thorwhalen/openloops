@@ -32,7 +32,7 @@ import json
 import os
 import re
 import time
-from collections.abc import Iterable, Iterator, Mapping
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from pathlib import Path
 from typing import Any
 
@@ -171,8 +171,43 @@ def _is_human_prompt(record: Mapping) -> bool:
     return bool(_clean_prompt(_text_of(record)))
 
 
-def _load_jsonl(path: Path) -> list[dict]:
+try:  # optional accelerator; never required, never changes what a line decodes to
+    import orjson as _orjson
+except ImportError:  # pragma: no cover - exercised by the environment, not a test
+    _orjson = None
+
+
+#: A run of digits that may not fit in 64 bits; orjson turns such integers into floats.
+_LONG_DIGITS = re.compile(r"\d{20,}")
+
+
+def _orjson_then_json(line: str) -> Any:
+    """``orjson.loads`` where it provably agrees with ``json.loads``, else ``json.loads``.
+
+    orjson is stricter than the standard library (it rejects ``NaN``) and, worse,
+    silently turns integers beyond 64 bits into floats. Lines with a long digit run, and
+    lines orjson rejects, therefore go to the standard library, so the decoded dicts —
+    and every digest — are identical with or without orjson installed.
+    """
+    if _LONG_DIGITS.search(line):
+        return json.loads(line)
+    try:
+        return _orjson.loads(line)
+    except ValueError:
+        return json.loads(line)
+
+
+#: The line decoder :func:`_load_jsonl` uses unless given another.
+default_loads: Callable[[str], Any] = (
+    json.loads if _orjson is None else _orjson_then_json
+)
+
+
+def _load_jsonl(path: Path, *, loads: Callable[[str], Any] | None = None) -> list[dict]:
     """Parse a JSONL transcript, tolerating blank and malformed lines.
+
+    ``loads`` decodes one line (default :data:`default_loads`: ``json.loads``, or orjson
+    when installed); any decoder must raise ``ValueError`` on a bad line.
 
     A file that cannot be *read* is a different thing from a file that is empty, and
     the difference matters: swallowing the error would hand back an empty session, whose
@@ -180,6 +215,7 @@ def _load_jsonl(path: Path) -> list[dict]:
     ``OSError`` propagates, and :func:`~openloops._sync.sync` records it and leaves the
     existing digest alone.
     """
+    loads = default_loads if loads is None else loads
     out: list[dict] = []
     text = path.read_text(encoding="utf-8", errors="replace")
     for line in text.splitlines():
@@ -187,7 +223,7 @@ def _load_jsonl(path: Path) -> list[dict]:
         if not line:
             continue
         try:
-            obj = json.loads(line)
+            obj = loads(line)
         except ValueError:
             continue
         if isinstance(obj, dict):

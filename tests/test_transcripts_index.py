@@ -144,3 +144,47 @@ def test_sync_output_matches_the_one_recorded_before_the_fix(projects_dir, tmp_p
     synthetic_tree(projects_dir, projects=5, per_project=4)
     _, store = run_sync(ClaudeCodeTranscripts(), tmp_path)
     assert store_hash(store) == PRE_FIX_STORE_HASH
+
+
+# --- the tolerant line decoder takes a ``loads=`` keyword ------------------------------
+
+
+def test_load_jsonl_uses_the_given_loads(projects_dir):
+    import json
+
+    from openloops.transcripts import _load_jsonl
+
+    write_transcripts(projects_dir, {"s1": closed_session("s1")})
+    path = projects_dir / "-w-demo" / "s1.jsonl"
+    seen = []
+
+    def spy(line):
+        seen.append(line)
+        return json.loads(line)
+
+    assert _load_jsonl(path, loads=spy) == _load_jsonl(path)
+    assert len(seen) == len(path.read_text().splitlines())
+
+
+def test_orjson_and_json_decode_every_fixture_to_equal_dicts(projects_dir):
+    import json
+
+    import pytest
+
+    pytest.importorskip("orjson")
+    from openloops.transcripts import _load_jsonl, _orjson_then_json
+
+    synthetic_tree(projects_dir, projects=3, per_project=3)
+    # Lines the standard library accepts and orjson rejects must still decode.
+    odd = projects_dir / "-w-proj000" / "sess-0000.jsonl"
+    odd.write_text(
+        odd.read_text() + '{"x": NaN}\n{"big": 123456789012345678901234567890}\n'
+        '{"u64": 18446744073709551615, "i64": -9223372036854775808, "f": 1.5e300}\n'
+    )
+    paths = sorted(projects_dir.glob("*/*.jsonl"))
+    assert paths
+    for path in paths:
+        std = _load_jsonl(path, loads=json.loads)
+        fast = _load_jsonl(path, loads=_orjson_then_json)
+        assert repr(fast) == repr(std)  # repr: NaN != NaN
+    assert any("big" in rec for rec in _load_jsonl(odd, loads=_orjson_then_json))
