@@ -77,6 +77,19 @@ The transcript file backing *key*.
 * **Return type:**
   [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)
 
+#### refresh()
+
+Forget the cached index; the next access walks the projects tree again.
+
+The index is a snapshot, built once per pass: iterating (or `len`) starts a
+new pass and refreshes it, while `in`, `[]`, [`revision()`](#openloops.transcripts.ClaudeCodeTranscripts.revision) and
+[`path_of()`](#openloops.transcripts.ClaudeCodeTranscripts.path_of) read the snapshot rather than walking the tree per key (issue
+#33: that made one `sync` cost a full directory walk per session). Call this
+to see transcripts written since the snapshot without iterating.
+
+* **Return type:**
+  [`None`](https://docs.python.org/3/builtins/constants.html#None)
+
 #### revision(key=None)
 
 An opaque change token: for one session, or for the whole collection.

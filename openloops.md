@@ -1,4 +1,4 @@
-> built 2026-10-27 08:31 UTC from 604aea8 (main) · openloops 0.1.24. Details: build_info.json
+> built 2026-11-02 15:36 UTC from 81d89ea (main) · openloops 0.1.25. Details: build_info.json
 
 # index.html.md
 
@@ -2580,6 +2580,19 @@ The transcript file backing *key*.
 * **Return type:**
   [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)
 
+#### refresh()
+
+Forget the cached index; the next access walks the projects tree again.
+
+The index is a snapshot, built once per pass: iterating (or `len`) starts a
+new pass and refreshes it, while `in`, `[]`, [`revision()`](_autosummary/openloops.html.md#openloops.ClaudeCodeTranscripts.revision) and
+[`path_of()`](_autosummary/openloops.html.md#openloops.ClaudeCodeTranscripts.path_of) read the snapshot rather than walking the tree per key (issue
+#33: that made one `sync` cost a full directory walk per session). Call this
+to see transcripts written since the snapshot without iterating.
+
+* **Return type:**
+  [`None`](https://docs.python.org/3/builtins/constants.html#None)
+
 #### revision(key=None)
 
 An opaque change token: for one session, or for the whole collection.
@@ -5009,6 +5022,19 @@ The transcript file backing *key*.
 * **Return type:**
   [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)
 
+#### refresh()
+
+Forget the cached index; the next access walks the projects tree again.
+
+The index is a snapshot, built once per pass: iterating (or `len`) starts a
+new pass and refreshes it, while `in`, `[]`, [`revision()`](_autosummary/openloops.transcripts.html.md#openloops.transcripts.ClaudeCodeTranscripts.revision) and
+[`path_of()`](_autosummary/openloops.transcripts.html.md#openloops.transcripts.ClaudeCodeTranscripts.path_of) read the snapshot rather than walking the tree per key (issue
+#33: that made one `sync` cost a full directory walk per session). Call this
+to see transcripts written since the snapshot without iterating.
+
+* **Return type:**
+  [`None`](https://docs.python.org/3/builtins/constants.html#None)
+
 #### revision(key=None)
 
 An opaque change token: for one session, or for the whole collection.
@@ -5124,7 +5150,7 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-10-27 08:31 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/604aea8569362028cb91d19ceb75a2cadadc0bfe"><code>604aea8</code></a> on branch <code>main</code>, for **openloops 0.1.24** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-02 15:36 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/81d89eab43c7eb5c26871820edffbc159a880495"><code>81d89ea</code></a> on branch <code>main</code>, for **openloops 0.1.25** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -5133,7 +5159,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/604aea8569362028cb91d19ceb75a2cadadc0bfe"><code>604aea8569362028cb91d19ceb75a2cadadc0bfe</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/81d89eab43c7eb5c26871820edffbc159a880495"><code>81d89eab43c7eb5c26871820edffbc159a880495</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -5144,9 +5170,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/40473864014">40473864014</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/41472969778">41472969778</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>604aea8569362028cb91d19ceb75a2cadadc0bfe</code> (in the history of the built commit) |
+| Event commit | <code>81d89eab43c7eb5c26871820edffbc159a880495</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -5171,13 +5197,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.24/">0.1.24</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.25/">0.1.25</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 604aea8569362028cb91d19ceb75a2cadadc0bfe
+git checkout 81d89eab43c7eb5c26871820edffbc159a880495
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

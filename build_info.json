@@ -1,32 +1,32 @@
 {
   "schema_version": 1,
-  "built_at": "2026-10-27T08:31:05Z",
+  "built_at": "2026-11-02T15:36:28Z",
   "package": {
     "name": "openloops",
-    "version": "0.1.24",
+    "version": "0.1.25",
     "display_name": "openloops",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "604aea8569362028cb91d19ceb75a2cadadc0bfe",
-    "short_commit": "604aea8",
+    "commit": "81d89eab43c7eb5c26871820edffbc159a880495",
+    "short_commit": "81d89ea",
     "branch": "main",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/thorwhalen/openloops",
-    "commit_url": "https://github.com/thorwhalen/openloops/commit/604aea8569362028cb91d19ceb75a2cadadc0bfe",
+    "commit_url": "https://github.com/thorwhalen/openloops/commit/81d89eab43c7eb5c26871820edffbc159a880495",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "thorwhalen/openloops",
-    "sha": "604aea8569362028cb91d19ceb75a2cadadc0bfe",
+    "sha": "81d89eab43c7eb5c26871820edffbc159a880495",
     "sha_in_history": true,
     "ref": "refs/heads/main",
     "ref_name": "main",
-    "run_id": "40473864014",
-    "run_url": "https://github.com/thorwhalen/openloops/actions/runs/40473864014",
+    "run_id": "41472969778",
+    "run_url": "https://github.com/thorwhalen/openloops/actions/runs/41472969778",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -56,15 +56,15 @@
   },
   "site": {
     "modules_documented": 17,
-    "objects_documented": 231
+    "objects_documented": 233
   },
   "pypi": {
     "checked": true,
-    "latest": "0.1.24",
+    "latest": "0.1.25",
     "relation": "same",
     "error": null
   },
-  "reproduce": "git clone https://github.com/thorwhalen/openloops && cd openloops\ngit checkout 604aea8569362028cb91d19ceb75a2cadadc0bfe\npip install \"epythet==0.2.22\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/thorwhalen/openloops && cd openloops\ngit checkout 81d89eab43c7eb5c26871820edffbc159a880495\npip install \"epythet==0.2.22\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
     "aligned": true,
