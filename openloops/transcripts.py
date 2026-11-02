@@ -434,8 +434,26 @@ class ClaudeCodeTranscripts(Mapping):
             [projects] if isinstance(projects, str) else list(projects or ())
         )
         self.skip_scratchpads = skip_scratchpads
+        self._cached_index: dict[str, Path] | None = None
+
+    def refresh(self) -> None:
+        """Forget the cached index; the next access walks the projects tree again.
+
+        The index is a snapshot, built once per pass: iterating (or ``len``) starts a
+        new pass and refreshes it, while ``in``, ``[]``, :meth:`revision` and
+        :meth:`path_of` read the snapshot rather than walking the tree per key (issue
+        #33: that made one ``sync`` cost a full directory walk per session). Call this
+        to see transcripts written since the snapshot without iterating.
+        """
+        self._cached_index = None
 
     def _index(self) -> dict[str, Path]:
+        """The cached session index, built on first use (see :meth:`refresh`)."""
+        if self._cached_index is None:
+            self._cached_index = self._build_index()
+        return self._cached_index
+
+    def _build_index(self) -> dict[str, Path]:
         """Session id → transcript path, newest file winning any collision."""
         if not self.root.is_dir():
             return {}
@@ -463,9 +481,11 @@ class ClaudeCodeTranscripts(Mapping):
         return {k: v[1] for k, v in found.items()}
 
     def __iter__(self) -> Iterator[str]:
+        self.refresh()
         return iter(sorted(self._index()))
 
     def __len__(self) -> int:
+        self.refresh()
         return len(self._index())
 
     def __contains__(self, key: object) -> bool:
