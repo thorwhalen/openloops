@@ -177,8 +177,9 @@ except ImportError:  # pragma: no cover - exercised by the environment, not a te
     _orjson = None
 
 
-#: A run of digits that may not fit in 64 bits; orjson turns such integers into floats.
-_LONG_DIGITS = re.compile(r"\d{20,}")
+#: A run of digits that may not fit in 64 bits (19 covers -9223372036854775809 and
+#: below); orjson turns such integers into floats instead of raising.
+_LONG_DIGITS = re.compile(r"\d{19,}")
 
 
 def _orjson_then_json(line: str) -> Any:
@@ -485,9 +486,10 @@ class ClaudeCodeTranscripts(Mapping):
 
     def _index(self) -> dict[str, Path]:
         """The cached session index, built on first use (see :meth:`refresh`)."""
-        if self._cached_index is None:
-            self._cached_index = self._build_index()
-        return self._cached_index
+        index = self._cached_index
+        if index is None:
+            index = self._cached_index = self._build_index()
+        return index
 
     def _build_index(self) -> dict[str, Path]:
         """Session id → transcript path, newest file winning any collision."""
@@ -551,12 +553,19 @@ class ClaudeCodeTranscripts(Mapping):
         the collection it is a hash over every ``(key, mtime)`` pair, so a token can
         be compared without holding the whole index.
         """
+        if key is None:
+            self.refresh()  # a collection-level token must see new transcripts
         index = self._index()
         if key is not None:
             path = index.get(key)
             if path is None:
                 raise KeyError(key)
-            return str(path.stat().st_mtime_ns)
+            try:
+                return str(path.stat().st_mtime_ns)
+            except OSError as exc:
+                raise KeyError(
+                    f"{key}: transcript unreadable ({exc.strerror})"
+                ) from exc
         if not index:
             return "0"
         h = hashlib.sha256()

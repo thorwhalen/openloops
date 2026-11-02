@@ -180,6 +180,8 @@ def test_orjson_and_json_decode_every_fixture_to_equal_dicts(projects_dir):
     odd.write_text(
         odd.read_text() + '{"x": NaN}\n{"big": 123456789012345678901234567890}\n'
         '{"u64": 18446744073709551615, "i64": -9223372036854775808, "f": 1.5e300}\n'
+        '{"lo": -9223372036854775809}\n{"lo19": -9999999999999999999}\n'
+        '{"hi": 18446744073709551616}\n'
     )
     paths = sorted(projects_dir.glob("*/*.jsonl"))
     assert paths
@@ -188,3 +190,12 @@ def test_orjson_and_json_decode_every_fixture_to_equal_dicts(projects_dir):
         fast = _load_jsonl(path, loads=_orjson_then_json)
         assert repr(fast) == repr(std)  # repr: NaN != NaN
     assert any("big" in rec for rec in _load_jsonl(odd, loads=_orjson_then_json))
+
+
+def test_the_collection_revision_sees_new_transcripts(projects_dir):
+    write_transcripts(projects_dir, {"s1": closed_session("s1")})
+    src = ClaudeCodeTranscripts()
+    before = src.revision()
+    write_transcripts(projects_dir, {"s2": asking_session("s2")})
+    assert src.revision() != before
+    assert src.changed_since(before) is True
