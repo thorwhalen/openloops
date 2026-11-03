@@ -39,7 +39,10 @@ the records.
 - `tools.py` — **the single surface all dispatch goes through** (CLI today, MCP/HTTP
   later): plain functions taking/returning flat JSON-ready dicts — `sync`, `ls`,
   `show`, `status`, `owed`, `blocked`, `dashboard`, `published`, `board_*`.
-- `job.py` — the periodic-job (launchd `StartInterval`) design: no daemon, ADR-006.
+- `job.py` — the periodic-job (launchd `StartInterval`) design: no daemon, ADR-006; also the board-receiver job (ADR-011).
+- `receiver_tick.py` — run by that job, nothing imports it: a no-model check of the
+  board store (HTTP), then `exec` of `claude -p` only if work is pending. The one module
+  that reaches the network.
 - `skills.py` — the agent-facing surface: `ol install-skills` symlinks the shipped
   skills/subagent (`openloops/data/skills/`, `openloops/data/agents/`) into
   `~/.claude`.
@@ -64,15 +67,16 @@ pass, or ignore that one failure in a root sandbox.
 - **A digest says what a session said, dated — never what is true now** (ADR-005).
   Nothing here re-checks a digest's own content against the world after writing it.
 - Never calls a model, never reaches the network, needs no account (import-time or
-  run-time) — reads files already on disk, writes files the user already owns.
+  run-time) — reads files already on disk, writes files the user already owns. The one
+  exception is `receiver_tick.py` (ADR-011), which nothing imports.
 - `openloops/data/skills/` and `openloops/data/agents/` are markdown shipped inside
   the wheel; `tests/test_skills.py` builds a wheel and checks they're actually in it.
 
 ## Docs & skills
 
-- ADRs: `docs/adr/001`–`010` (naming, release scope, public/private boundary, loop
+- ADRs: `docs/adr/001`–`011` (naming, release scope, public/private boundary, loop
   state vs process state, the digest-dated rule, periodic-job design, the two seams,
-  board write side in a skill, self-hosted board store, agents decide what is reversible and clearly recommended).
+  board write side in a skill, self-hosted board store, agents decide what is reversible and clearly recommended, the board receiver as a periodic job).
 - Shipped skills/subagent: `.claude/skills/openloops`, `.claude/skills/openloops-needs-human`,
   `.claude/skills/openloops-phone-board`,
   `.claude/agents/openloops-sweep.md` (also documented via `openloops-sweep` skill).
