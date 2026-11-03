@@ -105,9 +105,10 @@ def test_a_real_install_refuses_inputs_that_would_fail_silently(tmp_path, fake_c
 
 
 def test_receiver_status_reads_the_log_not_the_sync_cache(isolated_dirs, monkeypatch):
-    monkeypatch.setenv("HOME", str(isolated_dirs))
-    assert job.job_status(label=job.RECEIVER_LABEL)["last_write"] is None
     log = isolated_dirs / "Library" / "Logs" / "openloops.board-receiver.log"
+    # `Path.home()` ignores HOME on Windows, so point the job at the log directly.
+    monkeypatch.setattr(job, "_log_path", lambda label: log)
+    assert job.job_status(label=job.RECEIVER_LABEL)["last_write"] is None
     log.parent.mkdir(parents=True)
     log.write_text("pending: 1 event(s) without a receipt\n")
     assert job.job_status(label=job.RECEIVER_LABEL)["last_write"] == pytest.approx(
@@ -219,7 +220,9 @@ def test_the_check_signs_in_once_reads_the_store_and_reuses_the_cookie(board):
     assert first == ["1 event(s) without a receipt"]
     assert FakeBoard.logins == 1
     jar = board.with_name("board-receiver.cookies")
-    assert jar.exists() and (jar.stat().st_mode & 0o077) == 0
+    assert jar.exists()
+    if sys.platform != "win32":  # POSIX modes mean nothing on Windows
+        assert (jar.stat().st_mode & 0o077) == 0
     receiver_tick.check(board)
     assert FakeBoard.logins == 1, "a second tick uses the saved cookie"
 
