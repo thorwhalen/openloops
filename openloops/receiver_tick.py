@@ -141,6 +141,9 @@ class _Store:
                 self.jar.load(ignore_discard=True, ignore_expires=True)
             except (OSError, http.cookiejar.LoadError):
                 pass
+        #: With no saved session, sign in before the first listing rather than waiting
+        #: for a 401: a host may answer an anonymous request with a 403 instead.
+        self.has_session = len(self.jar) > 0
         self.opener = urllib.request.build_opener(
             urllib.request.HTTPCookieProcessor(self.jar)
         )
@@ -169,12 +172,15 @@ class _Store:
 
     def collection(self, name: str) -> dict[str, Any]:
         url = f"{self.origin}{self.api}/{name}"
+        if not self.has_session:
+            self.sign_in()
+            self.has_session = True
         for attempt in (0, 1):
             try:
                 docs = json.loads(self._open(urllib.request.Request(url)))["docs"]
                 return {d["id"]: d["data"] for d in docs}
             except urllib.error.HTTPError as exc:
-                if exc.code == 401 and attempt == 0:
+                if exc.code in (401, 403) and attempt == 0:
                     self.sign_in()
                     continue
                 raise
@@ -195,6 +201,20 @@ def check(env_file: str | Path = DFLT_ENV_FILE) -> Pending:
     )
 
 
+#: After a failed check starts a session, wait this long before starting another one
+#: for the same reason: a lasting misconfiguration must not start a paid session every
+#: tick, all day.
+FAIL_OPEN_BACKOFF = timedelta(hours=1)
+
+_USAGE = (
+    "usage: python -m openloops.receiver_tick [--check-only] [--env-file FILE] "
+    "[-- COMMAND ...]\n"
+    "Asks the board store, with no model, whether the receiver has work; if so "
+    "(or if the question cannot be answered, at most once an hour) replaces itself "
+    "with COMMAND."
+)
+
+
 def main(argv: list[str] | None = None) -> int:
     """``python -m openloops.receiver_tick [--check-only] [--env-file F] [-- CMD ...]``."""
     args = list(sys.argv[1:] if argv is None else argv)
@@ -202,10 +222,18 @@ def main(argv: list[str] | None = None) -> int:
     if "--" in args:
         i = args.index("--")
         args, command = args[:i], args[i + 1 :]
+    if "--help" in args or "-h" in args:
+        print(_USAGE)
+        return 0
     check_only = "--check-only" in args
     env_file = DFLT_ENV_FILE
     if "--env-file" in args:
-        env_file = Path(args[args.index("--env-file") + 1])
+        at = args.index("--env-file") + 1
+        if at >= len(args):
+            print("--env-file needs a path", file=sys.stderr)
+            return 2
+        env_file = Path(args[at])
+    stamp = Path(env_file).expanduser().with_name("board-receiver.failopen")
 
     try:
         reasons = check(env_file)
@@ -220,13 +248,36 @@ def main(argv: list[str] | None = None) -> int:
         print("pending: " + ("; ".join(reasons) if reasons else "nothing"))
         return 0
     if failure:
+        now = datetime.now(timezone.utc).timestamp()
+        try:
+            recent = now - stamp.stat().st_mtime < FAIL_OPEN_BACKOFF.total_seconds()
+        except OSError:
+            recent = False
+        if recent:
+            print(
+                f"receiver check still failing ({failure}); a session was started "
+                "within the last hour, waiting",
+                file=sys.stderr,
+            )
+            return 1
         print(f"receiver check failed, starting anyway: {failure}", file=sys.stderr)
-    elif not reasons:
-        print("nothing pending")
-        return 0
+        try:
+            stamp.touch()
+        except OSError:
+            pass
     else:
+        try:
+            stamp.unlink()
+        except OSError:
+            pass
+        if not reasons:
+            return 0  # idle: say nothing, so the log is touched only by ticks with work
         print("pending: " + "; ".join(reasons), file=sys.stderr)
-    os.execv(command[0], command)
+    try:
+        os.execv(command[0], command)
+    except OSError as exc:
+        print(f"cannot start {command[0]}: {exc.strerror or exc}", file=sys.stderr)
+        return 127
     return 0  # pragma: no cover - execv does not return
 
 

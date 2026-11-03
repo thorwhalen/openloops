@@ -5,6 +5,7 @@ fake that speaks the sign-in and listing calls of references/receiver-http.md.
 """
 
 import json
+import os
 import subprocess
 import sys
 import threading
@@ -25,11 +26,15 @@ def iso(delta):
 
 @pytest.fixture
 def fake_claude(tmp_path):
-    path = tmp_path / "bin" / "claude"
-    path.parent.mkdir()
-    path.write_text("#!/bin/sh\n")
-    path.chmod(0o755)
-    return path
+    """`claude` as installers lay it out: a link to a versioned file an update deletes."""
+    versioned = tmp_path / "share" / "versions" / "2.1.0"
+    versioned.parent.mkdir(parents=True)
+    versioned.write_text("#!/bin/sh\n")
+    versioned.chmod(0o755)
+    link = tmp_path / "bin" / "claude"
+    link.parent.mkdir()
+    link.symlink_to(versioned)
+    return link
 
 
 # --- the job spec ---------------------------------------------------------------------
@@ -44,10 +49,14 @@ def test_the_receiver_plist_is_a_start_interval_job_that_pins_its_inputs(
     assert "<key>WorkingDirectory</key>" in xml and str(tmp_path.resolve()) in xml
     args = spec["program_args"]
     assert args[:3] == [sys.executable, "-m", "openloops.receiver_tick"]
-    assert args[args.index("--") + 1] == str(fake_claude.resolve())
+    # The link, never the versioned file it points to today: an update deletes that.
+    assert args[args.index("--") + 1] == str(fake_claude)
+    assert spec["claude"] == str(fake_claude)
+    assert "versions" not in " ".join(args)
     assert "-p" in args and "--max-budget-usd" in args and "--allowedTools" in args
     assert "phone-board receiver" in args[args.index("-p") + 1]
-    assert str(fake_claude.parent.resolve()) in spec["env"]["PATH"]
+    assert str(fake_claude.parent) in spec["env"]["PATH"]
+    assert "Skill" in args[args.index("--allowedTools") + 1].split()
 
 
 def test_no_credential_name_or_value_reaches_the_plist(
@@ -152,6 +161,7 @@ def test_each_part_of_the_work_set_is_pending():
 class FakeBoard(BaseHTTPRequestHandler):
     collections: dict = {}
     logins = 0
+    anonymous_status = 401
 
     def log_message(self, *a):
         pass
@@ -167,7 +177,7 @@ class FakeBoard(BaseHTTPRequestHandler):
         if self.path == "/auth/csrf":
             return self._send(200, b'{"csrf": "tok"}')
         if "session=ok" not in (self.headers.get("Cookie") or ""):
-            return self._send(401)
+            return self._send(type(self).anonymous_status)
         name = self.path.rsplit("/", 1)[-1]
         docs = [
             {"id": k, "data": v, "version": "1"}
@@ -188,6 +198,7 @@ class FakeBoard(BaseHTTPRequestHandler):
 @pytest.fixture
 def board(tmp_path):
     FakeBoard.collections, FakeBoard.logins = {}, 0
+    FakeBoard.anonymous_status = 401
     server = HTTPServer(("127.0.0.1", 0), FakeBoard)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     env_file = tmp_path / "board-receiver.env"
@@ -222,7 +233,10 @@ def test_a_tick_with_nothing_pending_never_starts_the_session(
         ["--env-file", str(board), "--", "/bin/claude", "-p", "x"]
     )
     assert code == 0 and started == []
-    assert "nothing pending" in capsys.readouterr().out
+    captured = capsys.readouterr()
+    assert captured.out == "" and captured.err == "", (
+        "an idle tick leaves the log alone"
+    )
 
 
 def test_a_tick_with_work_replaces_itself_with_the_session(board, monkeypatch):
@@ -241,6 +255,58 @@ def test_a_failing_check_starts_the_session_anyway(tmp_path, monkeypatch, capsys
     receiver_tick.main(["--env-file", str(missing), "--", "/bin/claude", "-p", "x"])
     assert started, "the session must start when the check cannot run"
     assert "starting anyway" in capsys.readouterr().err
+
+
+def test_a_failing_check_starts_at_most_one_session_an_hour(
+    tmp_path, monkeypatch, capsys
+):
+    started = []
+    monkeypatch.setattr(receiver_tick.os, "execv", lambda *a: started.append(a))
+    broken = tmp_path / "nope.env"
+    argv = ["--env-file", str(broken), "--", "/bin/claude", "-p", "x"]
+    receiver_tick.main(argv)
+    assert len(started) == 1
+    assert receiver_tick.main(argv) == 1, "the second failing tick waits"
+    assert len(started) == 1 and "waiting" in capsys.readouterr().err
+    stamp = tmp_path / "board-receiver.failopen"
+    old = stamp.stat().st_mtime - 2 * 3600
+    os.utime(stamp, (old, old))
+    receiver_tick.main(argv)
+    assert len(started) == 2, "an hour later it tries again"
+
+
+def test_a_working_check_clears_the_back_off(board, monkeypatch):
+    stamp = board.with_name("board-receiver.failopen")
+    stamp.touch()
+    monkeypatch.setattr(receiver_tick.os, "execv", lambda *a: None)
+    receiver_tick.main(["--env-file", str(board), "--", "/bin/claude"])
+    assert not stamp.exists()
+
+
+def test_a_session_that_cannot_start_is_reported_not_a_traceback(
+    board, monkeypatch, capsys
+):
+    FakeBoard.collections = {"outbox": {"e1": {"action": "done"}}}
+
+    def gone(*a):
+        raise FileNotFoundError(2, "No such file or directory")
+
+    monkeypatch.setattr(receiver_tick.os, "execv", gone)
+    argv = ["--env-file", str(board), "--", "/gone/claude", "-p", "x"]
+    assert receiver_tick.main(argv) == 127
+    assert "cannot start /gone/claude" in capsys.readouterr().err
+
+
+def test_a_first_tick_signs_in_even_if_anonymous_requests_get_a_403(board):
+    FakeBoard.collections = {"outbox": {"e1": {"action": "done"}}}
+    FakeBoard.anonymous_status = 403
+    assert receiver_tick.check(board) == ["1 event(s) without a receipt"]
+    assert FakeBoard.logins == 1
+
+
+def test_help_needs_no_network_or_credentials(capsys):
+    assert receiver_tick.main(["--help"]) == 0
+    assert "usage" in capsys.readouterr().out
 
 
 def test_check_only_reports_and_never_execs(board, monkeypatch, capsys):

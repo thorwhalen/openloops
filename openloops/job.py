@@ -67,7 +67,7 @@ RECEIVER_INTERVAL = 300
 
 #: Tools the unattended receiver session may use without asking: it runs `gh`, `curl`
 #: and `python3` through Bash, writes backups and comment bodies, and reads the skill.
-RECEIVER_TOOLS = "Bash Read Write Edit Glob Grep"
+RECEIVER_TOOLS = "Bash Read Write Edit Glob Grep Skill"
 
 #: Environment variables the receiver session reads, passed through like the others.
 RECEIVER_PASSED_THROUGH = (
@@ -205,7 +205,7 @@ def install(
         plist_path,
         log_path,
         xml,
-        smoke=[*args[:2], "openloops", "--help"],
+        smoke=[[*args[:2], "openloops", "--help"]],
         env=env,
     )
     return {"plist": str(plist_path), "log": str(log_path), "interval": str(interval)}
@@ -217,7 +217,7 @@ def _bootstrap(
     log_path: Path,
     xml: str,
     *,
-    smoke: list[str],
+    smoke: list[list[str]],
     env: dict[str, str],
 ) -> None:
     """Write the plist, (re)load it, and prove the command can start under *env*."""
@@ -237,13 +237,16 @@ def _bootstrap(
             f"wrote {plist_path} but launchctl bootstrap failed: "
             f"{(loaded.stderr or loaded.stdout).strip()}"
         )
-    check = subprocess.run(smoke, env=env, capture_output=True, text=True, timeout=120)
-    if check.returncode != 0:
-        raise RuntimeError(
-            f"installed {label}, but the command cannot run under the pinned "
-            f"environment — it would fail silently every tick:\n"
-            f"  {(check.stderr or check.stdout).strip()[:400]}"
+    for command in smoke:
+        check = subprocess.run(
+            command, env=env, capture_output=True, text=True, timeout=120
         )
+        if check.returncode != 0:
+            raise RuntimeError(
+                f"installed {label}, but `{' '.join(command[:3])}` cannot run under "
+                f"the pinned environment — it would fail silently every tick:\n"
+                f"  {(check.stderr or check.stdout).strip()[:400]}"
+            )
 
 
 def _receiver_prompt() -> str:
@@ -276,7 +279,9 @@ def receiver_job_spec(
         raise FileNotFoundError(
             "`claude` is not on PATH: install Claude Code, or pass its absolute path"
         )
-    claude_path = str(Path(claude_path).expanduser().resolve())
+    # Not resolved: `claude` is usually a symlink to a versioned file that an update
+    # deletes, and the link is what keeps pointing at the current one.
+    claude_path = os.path.abspath(Path(claude_path).expanduser())
     work = Path(work_dir).expanduser().resolve()
     env_path = Path(env_file).expanduser()
     env = job_environment()
@@ -287,7 +292,7 @@ def receiver_job_spec(
     extra = [str(Path(claude_path).parent)]
     node = shutil.which("node")
     if node:
-        extra.append(str(Path(node).resolve().parent))
+        extra.append(str(Path(node).parent))
     env["PATH"] = ":".join(dict.fromkeys([*extra, *env["PATH"].split(":")]))
     args = [
         sys.executable,
@@ -309,6 +314,7 @@ def receiver_job_spec(
     log_path = _log_path(label)
     return {
         "label": label,
+        "claude": claude_path,
         "program_args": args,
         "env": env,
         "interval": interval,
@@ -368,7 +374,10 @@ def install_receiver(
         Path(str(spec["plist"])),
         Path(str(spec["log"])),
         str(spec["xml"]),
-        smoke=[sys.executable, "-m", "openloops.receiver_tick", "--help"],
+        smoke=[
+            [sys.executable, "-m", "openloops.receiver_tick", "--help"],
+            [str(spec["claude"]), "--version"],
+        ],
         env=dict(spec["env"]),  # type: ignore[arg-type]
     )
     return {
