@@ -216,9 +216,9 @@ def _id_of(url: str) -> str:
 
 #: The search API's own per-query ceiling. A query that returns this many is saturated.
 DFLT_GATHER_LIMIT = 1000
-#: Extra searches beyond the label, by name: (search terms, the field they match).
 #: The label an agent files a decision it made itself under (ADR-010).
 AGENT_DECIDED_LABEL = "agent-decided"
+#: Extra searches beyond the label, by name: (search terms, the field they match).
 #: A ``label`` match is a label name rather than text: ``agent-decided`` issues are the
 #: record of a decision an agent made and the owner can veto (ADR-010).
 DFLT_SEARCHES = {
@@ -616,7 +616,9 @@ def heuristic_classify(
 
     # By label, not by which query found it first: deduplication keeps the first query
     # that returned an issue, and the `decide` title search can return it too.
-    agent_decided = AGENT_DECIDED_LABEL in (candidate.get("labels") or ())
+    agent_decided = AGENT_DECIDED_LABEL in (
+        str(lab).lower() for lab in candidate.get("labels") or ()
+    )
     if agent_decided:
         rule = Rule("decision", "tap", 1, "")  # keep or veto: one tap
     elif kind == "pr":

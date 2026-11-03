@@ -83,6 +83,20 @@ def test_an_agent_decided_issue_is_keep_or_veto_whichever_query_found_it_first()
     ]
 
 
+def test_the_agent_decided_label_is_matched_case_insensitively():
+    candidate = {
+        "url": "https://github.com/acme/w/issues/5",
+        "repo": "acme/w",
+        "title": "Decided: x",
+        "body": "",
+        "labels": ["Agent-Decided"],
+    }
+    assert tasks.heuristic_classify(candidate)["decision"]["options"] == [
+        "Keep",
+        "Veto",
+    ]
+
+
 def test_a_decided_title_without_the_label_is_not_a_keep_or_veto_card():
     plain = {
         "url": "https://github.com/acme/w/issues/4",

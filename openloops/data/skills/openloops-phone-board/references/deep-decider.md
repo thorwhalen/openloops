@@ -6,7 +6,7 @@ It is a brief for a subagent, in the same way as [classifier-brief.md](classifie
 
 ## Which decisions
 
-In `tasks.json`, tasks with `pattern: "decision"`, `status: "open"`, `decision.recommendation` empty and no `agent-decided` label, that have no `questions` item yet. Batches of at most 5 per subagent. Skip tasks in a read-only organisation: the owner acts there by hand.
+In `tasks.json`, tasks with `pattern: "decision"`, `status: "open"`, `decision.recommendation` empty (an `agent-decided` card carries the recommendation "Keep", so it is not picked up), that have no `questions` item yet. Batches of at most 5 per subagent. Skip tasks in a read-only organisation: the owner acts there by hand.
 
 ## What the subagent does for each decision
 
