@@ -65,7 +65,7 @@ Build with `--store http --api <prefix>/board-store`, where `<prefix>` is the pa
 
 ## Deciding the undecided (optional)
 
-For decisions that state options but no recommendation, run the deep decider ([references/deep-decider.md](references/deep-decider.md)): a subagent reads each one, asks the owner at most two one-tap questions on the decision desk, and puts a starred proposal there. Nothing is posted until the owner taps or, for a proposal marked reversible, its 24-hour veto window ends (receiver.md section 2b). Decisions an agent already made on its own under the `needs-human` rule are `agent-decided` issues: `ol board-gather --all-kinds` gathers them as Keep/Veto cards.
+For decisions that state options but no recommendation, run the deep decider ([references/deep-decider.md](references/deep-decider.md)): a subagent reads each one and puts a starred pick, or the trade-offs when only the owner can settle it, on the decision desk. It decides nothing: the owner's tap is the decision. Decisions an agent already made on its own under the `needs-human` rule are `agent-decided` issues: `ol board-gather --all-kinds` gathers them as Keep/Veto cards.
 
 ## Rebuilding
 

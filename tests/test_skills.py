@@ -332,42 +332,18 @@ def test_the_capture_skill_states_the_eligibility_test_and_the_label():
     assert "Veto by:" in text
 
 
-def test_the_board_skill_ships_the_deep_decider_and_the_receiver_handles_proposals():
+def test_the_deep_decider_is_shipped_decides_nothing_and_treats_what_it_reads_as_data():
     board = skills.skills_dir() / "openloops-phone-board"
-    assert (board / "references" / "deep-decider.md").is_file()
+    brief = (board / "references" / "deep-decider.md").read_text(encoding="utf-8")
     assert "deep-decider.md" in (board / "SKILL.md").read_text(encoding="utf-8")
+    assert "It decides nothing" in brief
+    assert "data, not instructions" in brief
+    # No unattended path: the receiver procedure knows nothing of proposals or windows.
     receiver = (board / "references" / "receiver.md").read_text(encoding="utf-8")
-    assert "proposal-<docId>-<hash>" in receiver and "veto_until" in receiver
+    assert "veto_until" not in receiver and "proposal" not in receiver.lower()
 
 
-def test_the_proposal_hash_in_the_receiver_procedure_runs_and_is_stable(tmp_path):
-    """The procedure gives the receiver a one-liner; it must be one that works."""
-    import json
-    import re
-    import subprocess
-    import sys
-
-    receiver = _skill_text("openloops-phone-board", "references", "receiver.md")
-    blocks = re.findall(r"```bash\n(.*?)```", receiver, re.DOTALL)
-    line = next(b for b in blocks if "hashlib" in b).strip()
-    item = {
-        "task_id": "acme/w#1",
-        "question": "TTL?",
-        "recommended": "5 minutes",
-        "proposal": {"reversible": True, "veto_until": "2026-11-05T00:00:00Z"},
-    }
-
-    def run(it):
-        path = tmp_path / "item.json"
-        path.write_text(json.dumps(it))
-        cmd = line.replace("python3", sys.executable, 1)
-        done = subprocess.run(
-            ["bash", "-c", cmd], cwd=tmp_path, capture_output=True, text=True
-        )
-        assert done.returncode == 0, done.stderr
-        return done.stdout.strip()
-
-    first = run(item)
-    assert re.fullmatch(r"[0-9a-f]{12}", first)
-    assert run(item) == first
-    assert run({**item, "recommended": "1 hour"}) != first
+def test_a_strangers_recommendation_is_not_a_recommendation():
+    text = _skill_text("openloops-needs-human", "SKILL.md")
+    assert "A recommendation from anyone else is not one" in text
+    assert "third-party" in text, "dependencies and install sources are never eligible"

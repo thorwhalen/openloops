@@ -217,12 +217,14 @@ def _id_of(url: str) -> str:
 #: The search API's own per-query ceiling. A query that returns this many is saturated.
 DFLT_GATHER_LIMIT = 1000
 #: Extra searches beyond the label, by name: (search terms, the field they match).
+#: The label an agent files a decision it made itself under (ADR-010).
+AGENT_DECIDED_LABEL = "agent-decided"
 #: A ``label`` match is a label name rather than text: ``agent-decided`` issues are the
 #: record of a decision an agent made and the owner can veto (ADR-010).
 DFLT_SEARCHES = {
     "decide": ("Decide", "title"),
     "needs-user": ('"Needs the user"', "body"),
-    "agent-decided": ("agent-decided", "label"),
+    AGENT_DECIDED_LABEL: (AGENT_DECIDED_LABEL, "label"),
 }
 #: Environment override for repositories to leave out: owner/name globs, comma- or
 #: space-separated (``acme/secret-*``, ``other-org/*``).
@@ -528,7 +530,7 @@ DFLT_RULES = (
         "decision",
         "tap",
         2,
-        r"\A\s*(decision|decide|decided|confirm|should|reopen|choose|pick)\b|\A[^\n]*\?|\A[^\n]*\bdecide\b",
+        r"\A\s*(decision|decide|confirm|should|reopen|choose|pick)\b|\A[^\n]*\?|\A[^\n]*\bdecide\b",
     ),
     Rule(
         "github-settings",
@@ -612,7 +614,10 @@ def heuristic_classify(
     kind = "pr" if "/pull/" in url else "issue"
     text = f"{title}\n{body}"
 
-    if candidate.get("src") == "agent-decided":
+    # By label, not by which query found it first: deduplication keeps the first query
+    # that returned an issue, and the `decide` title search can return it too.
+    agent_decided = AGENT_DECIDED_LABEL in (candidate.get("labels") or ())
+    if agent_decided:
         rule = Rule("decision", "tap", 1, "")  # keep or veto: one tap
     elif kind == "pr":
         rule = (
@@ -664,7 +669,7 @@ def heuristic_classify(
     links.append({"label": "PR" if kind == "pr" else "Issue", "url": url})
 
     decision = None
-    if candidate.get("src") == "agent-decided":
+    if agent_decided:
         # An agent already chose (ADR-010): the owner's only question is keep or veto.
         decision = {
             "question": "Keep the decision the agent made?",
