@@ -313,3 +313,61 @@ def test_every_shipped_file_is_utf8_text():
     """
     for path in [*skill_paths(), *agent_paths()]:
         assert path.read_bytes().decode("utf-8").strip()
+
+
+# --------------------------------------------------------------------------------
+# ADR-010: agents decide what is reversible and clearly recommended.
+
+
+def _skill_text(*parts):
+    return (skills.skills_dir().joinpath(*parts)).read_text(encoding="utf-8")
+
+
+def test_the_capture_skill_states_the_eligibility_test_and_the_label():
+    text = _skill_text("openloops-needs-human", "SKILL.md")
+    assert "agent-decided" in text
+    for condition in ("Reversible.", "A clear recommendation.", "Inside your task."):
+        assert condition in text
+    assert "Nobody's recorded decision is overturned." in text
+    assert "Veto by:" in text
+
+
+def test_the_board_skill_ships_the_deep_decider_and_the_receiver_handles_proposals():
+    board = skills.skills_dir() / "openloops-phone-board"
+    assert (board / "references" / "deep-decider.md").is_file()
+    assert "deep-decider.md" in (board / "SKILL.md").read_text(encoding="utf-8")
+    receiver = (board / "references" / "receiver.md").read_text(encoding="utf-8")
+    assert "proposal-<docId>-<hash>" in receiver and "veto_until" in receiver
+
+
+def test_the_proposal_hash_in_the_receiver_procedure_runs_and_is_stable(tmp_path):
+    """The procedure gives the receiver a one-liner; it must be one that works."""
+    import json
+    import re
+    import subprocess
+    import sys
+
+    receiver = _skill_text("openloops-phone-board", "references", "receiver.md")
+    blocks = re.findall(r"```bash\n(.*?)```", receiver, re.DOTALL)
+    line = next(b for b in blocks if "hashlib" in b).strip()
+    item = {
+        "task_id": "acme/w#1",
+        "question": "TTL?",
+        "recommended": "5 minutes",
+        "proposal": {"reversible": True, "veto_until": "2026-11-05T00:00:00Z"},
+    }
+
+    def run(it):
+        path = tmp_path / "item.json"
+        path.write_text(json.dumps(it))
+        cmd = line.replace("python3", sys.executable, 1)
+        done = subprocess.run(
+            ["bash", "-c", cmd], cwd=tmp_path, capture_output=True, text=True
+        )
+        assert done.returncode == 0, done.stderr
+        return done.stdout.strip()
+
+    first = run(item)
+    assert re.fullmatch(r"[0-9a-f]{12}", first)
+    assert run(item) == first
+    assert run({**item, "recommended": "1 hour"}) != first

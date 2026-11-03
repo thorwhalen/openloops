@@ -39,13 +39,42 @@ class FakeGh:
         if "prs" in args:
             key = "prs"
         elif "--label" in args:
-            key = "label"
+            label = args[args.index("--label") + 1]
+            key = "label" if label == "manual-task" else label
         else:
             key = args[-1]
         result = self.table.get((owner, key), [])
         if isinstance(result, Exception):
             raise result
         return json.dumps(result)
+
+
+def test_agent_decided_issues_are_gathered_by_label_and_become_a_keep_or_veto_card():
+    """ADR-010: an agent's recorded decision is a one-tap card, not a free-text question."""
+    decided = _row("acme/w", 9, "Decided: use the shorter retry window")
+    gh = FakeGh({("acme", "agent-decided"): [decided]})
+    report = tasks.gather(owners=["acme"], searches=["agent-decided"], run_gh=gh)
+    assert [c["id"] for c in report["candidates"]] == ["acme/w#9"]
+    assert report["candidates"][0]["src"] == "agent-decided"
+    query = next(a for a in gh.calls if "agent-decided" in a)
+    assert query[query.index("--label") + 1] == "agent-decided"
+    assert "--match" not in query, "a label is not a text search"
+
+    record = tasks.heuristic_classify(report["candidates"][0])
+    assert (record["tier"], record["pattern"]) == ("tap", "decision")
+    assert record["decision"]["options"] == ["Keep", "Veto"]
+    assert record["decision"]["recommendation"] == "Keep"
+
+
+def test_a_decided_title_without_the_label_is_not_forced_into_keep_or_veto():
+    plain = {
+        "url": "https://github.com/acme/w/issues/4",
+        "repo": "acme/w",
+        "title": "Decided: nothing yet",
+        "body": "",
+        "src": "label",
+    }
+    assert tasks.heuristic_classify(plain)["decision"]["options"] == []
 
 
 def test_gather_queries_each_owner_separately_and_deduplicates_by_url():

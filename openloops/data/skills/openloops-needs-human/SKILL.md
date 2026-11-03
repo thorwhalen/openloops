@@ -1,6 +1,6 @@
 ---
 name: openloops-needs-human
-description: "Use the moment you are blocked on the human and cannot finish on your own: a secret or API key only they can set; a command only they can run (a deploy, a `sudo`, a step your permissions refuse); access you do not have; a purchase, an approval, a decision only they can make; or a decision ALREADY RECORDED -- an ADR, a convention, a default -- that is now in your way or looks wrong given what you now know. Files the blocker as a `manual-task` GitHub issue in the affected repo, carrying a shell predicate, so the obligation outlives the session instead of dying in a message nobody re-reads and `ol owed` can re-check it later. Triggers on: 'I can't do this without you', 'you'll need to run this', 'this needs your credentials', 'blocked on', 'someone has to decide', 'I don't have access to', 'the ADR says X but', or any point where the honest next step is to hand the work back. File it BEFORE writing the hand-back message, not instead of it. Skip when you could do the thing yourself."
+description: "Use the moment you are blocked on the human and cannot finish on your own: a secret or API key only they can set; a command only they can run (a deploy, a `sudo`, a step your permissions refuse); access you do not have; a purchase, an approval, a decision only they can make; or a RECORDED decision (an ADR, a convention, a default) that is now in your way or looks wrong. Files the blocker as a `manual-task` GitHub issue in the affected repo, with a shell predicate, so the obligation outlives the session and `ol owed` can re-check it. Triggers on: 'I can't do this without you', 'you'll need to run this', 'this needs your credentials', 'blocked on', 'someone has to decide', 'I don't have access to', 'the ADR says X but', or any honest hand-back. File it BEFORE writing the hand-back message, not instead of it. Skip when you could do it yourself, or when the decision is reversible, clearly recommended and inside your task: decide it and record it as an `agent-decided` issue instead."
 metadata:
   audience: users
 ---
@@ -66,6 +66,76 @@ the session and belongs in an issue as well.
 
 **Do not file** for a preference where any reasonable choice works (pick one and say
 which), or for a routine review request. Those go in your closing message.
+
+**Do not file a decision you may make yourself.** A decision that is reversible, clearly
+recommended and inside your task is decided by you and recorded, not handed back — see
+the next section. The owner can veto it from their phone; they should not have to
+answer it first.
+
+## Decide and record (reversible, clearly recommended)
+
+A decision is **yours to make** only when **all five** hold:
+
+1. **Reversible.** Undoing it is a revert, a config change or a rename, and you can say
+   the exact command or change that does it. Never eligible, whatever the
+   recommendation: spend or a purchase; publishing or releasing anything; deleting or
+   overwriting data that is not in version control; credentials, permissions or any
+   security posture; messages to third parties; a change another team or an outside
+   user would feel before it can be reversed.
+2. **A clear recommendation.** One option is named, with a reason, in the issue or its
+   comments, in an ADR or convention, or in a standing preference of the owner's — or the
+   evidence in front of you settles it. Two options that are close, or a disagreement
+   between sources, mean there is no clear recommendation. You are not to invent one to
+   qualify.
+3. **Inside your task.** The decision is about the work you were asked to do, in the
+   repo you were asked to do it in.
+4. **Nobody's recorded decision is overturned.** Filling a gap is yours. *Reopening* a
+   recorded decision (an ADR, a convention, a default — whoever recorded it) stays what it
+   was: you may reopen it, you may not decide it.
+5. **You can record it** where the owner will find it: you can label in the affected
+   repo (step 2 below applies unchanged). If not, file a `manual-task` as before.
+
+If all five hold: **choose, record, carry on.** Do not stop and do not file a
+`manual-task`. If any one does not hold, the rest of this skill applies.
+
+**Record it as an issue labelled `agent-decided`** (create the label the same way as
+`manual-task`, colour `0e8a16`, description "An agent decided this; the owner can veto
+it."). It is not `manual-task`: nothing is owed, so `ol owed` does not list it. It is
+a card on the phone board (`ol board-gather --all-kinds` gathers the label) with two
+answers, **Keep** and **Veto**, and it is queryable with
+`gh search issues --owner OWNER --label agent-decided --state open`.
+
+Use steps 1–3 and 6–7 as written (in step 3, search `--label agent-decided` for a
+duplicate), with two changes to step 7's block: `--label
+agent-decided`, and this body (the block's `**Verify:**` check still applies, and this
+is the documented answer):
+
+```markdown
+**Decided:** <the choice, one line, past tense>
+
+**Verify:** none possible — a judgement call; the owner keeps or vetoes it.
+
+**Why:** <the reason, and where the recommendation came from: a URL or a repo-relative path>
+
+**Alternatives:** <the options you passed over, one line each>
+
+**Reverse:** <the exact command or change that undoes it>
+
+**Veto by:** <date, three days from today>. To veto, answer **Veto** on the board, or
+comment `veto` here. A vetoed decision is reversed; one nobody vetoes stands, and
+the owner closes it with **Keep**.
+```
+
+Title: `Decided: <the choice>`, under about 70 characters, past tense, same egress rules.
+
+**After a veto**, the session that finds it (the board's worker, or the next session in
+that repo) follows the **Reverse** line, comments what it did, and closes the issue. It
+does not argue with the veto and it does not decide the same thing again.
+
+**Keep the bound honest.** The point is to stop asking the owner things they would answer
+"yes, that one" to. A decision that is merely convenient to make alone is not eligible;
+when in doubt, it is not. Vetoes are the evidence for tightening this test, and the
+board shows them.
 
 ## The procedure
 

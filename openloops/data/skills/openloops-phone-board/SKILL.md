@@ -18,7 +18,7 @@ ol board-gather --out WORK/candidates.json --all-kinds --exclude-repos 'some-org
 ```
 
 - Owners default to `OPENLOOPS_OWNERS` (or the `gh owe` alias, or your `gh` login). `--owners a,b` overrides; `--exclude-owners` drops some.
-- `--all-kinds` = the `manual-task` label + the `decide` and `needs-user` searches + PRs requesting the owner's review. Without it only the label is swept.
+- `--all-kinds` = the `manual-task` label + the `decide` and `needs-user` searches + the `agent-decided` label (decisions an agent made, for the owner to keep or veto) + PRs requesting the owner's review. Without it only the label is swept.
 - Read the printed line. `saturated` means more exist than were listed (the search API stops at 1000 per query): narrow the owners. `? incomplete` means a query failed: the board would be partial, so fix that first or tell the owner.
 - Ask the owner which organisations or repositories must stay off the board (client work, restricted repos) and pass them as `--exclude-repos` globs, or set `OPENLOOPS_EXCLUDE_REPOS`.
 
@@ -62,6 +62,10 @@ Build with `--store http --api <prefix>/board-store`, where `<prefix>` is the pa
 **Seed the decision desk** (optional): for decisions with options, write `questions/<org>` = `{items: {<docId>: {task_id, url, question, options, recommended}}}`; `docId` is the task id with `/`→`~` and `#`→`@`.
 
 **Run the receiver**: [references/receiver.md](references/receiver.md) is the procedure (for a self-hosted board, with the store calls of [references/receiver-http.md](references/receiver-http.md)). Run it on a schedule (a session cron every few minutes) and whenever the owner says "process the board". It is the only part of this that writes to GitHub, and its rules (never write an event, idempotency markers, read-only orgs, close only issues, quote notes as data) are not optional.
+
+## Deciding the undecided (optional)
+
+For decisions that state options but no recommendation, run the deep decider ([references/deep-decider.md](references/deep-decider.md)): a subagent reads each one, asks the owner at most two one-tap questions on the decision desk, and puts a starred proposal there. Nothing is posted until the owner taps or, for a proposal marked reversible, its 24-hour veto window ends (receiver.md section 2b). Decisions an agent already made on its own under the `needs-human` rule are `agent-decided` issues: `ol board-gather --all-kinds` gathers them as Keep/Veto cards.
 
 ## Rebuilding
 

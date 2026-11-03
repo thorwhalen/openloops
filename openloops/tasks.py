@@ -217,9 +217,12 @@ def _id_of(url: str) -> str:
 #: The search API's own per-query ceiling. A query that returns this many is saturated.
 DFLT_GATHER_LIMIT = 1000
 #: Extra searches beyond the label, by name: (search terms, the field they match).
+#: A ``label`` match is a label name rather than text: ``agent-decided`` issues are the
+#: record of a decision an agent made and the owner can veto (ADR-010).
 DFLT_SEARCHES = {
     "decide": ("Decide", "title"),
     "needs-user": ('"Needs the user"', "body"),
+    "agent-decided": ("agent-decided", "label"),
 }
 #: Environment override for repositories to leave out: owner/name globs, comma- or
 #: space-separated (``acme/secret-*``, ``other-org/*``).
@@ -321,6 +324,8 @@ def gather(
         )
         for name in searches:
             terms, match = DFLT_SEARCHES[name]
+            by = ["--label", terms] if match == "label" else ["--match", match]
+            tail = [] if match == "label" else ["--", terms]
             queries.append(
                 (
                     owner,
@@ -329,12 +334,10 @@ def gather(
                         "search",
                         "issues",
                         *base,
-                        "--match",
-                        match,
+                        *by,
                         "--json",
                         ",".join(_ISSUE_FIELDS),
-                        "--",
-                        terms,
+                        *tail,
                     ],
                 )
             )
@@ -525,7 +528,7 @@ DFLT_RULES = (
         "decision",
         "tap",
         2,
-        r"\A\s*(decision|decide|confirm|should|reopen|choose|pick)\b|\A[^\n]*\?|\A[^\n]*\bdecide\b",
+        r"\A\s*(decision|decide|decided|confirm|should|reopen|choose|pick)\b|\A[^\n]*\?|\A[^\n]*\bdecide\b",
     ),
     Rule(
         "github-settings",
@@ -609,7 +612,9 @@ def heuristic_classify(
     kind = "pr" if "/pull/" in url else "issue"
     text = f"{title}\n{body}"
 
-    if kind == "pr":
+    if candidate.get("src") == "agent-decided":
+        rule = Rule("decision", "tap", 1, "")  # keep or veto: one tap
+    elif kind == "pr":
         rule = (
             Rule("merge-bot-pr", "tap", 2, "")
             if _BOT_PR.search(title)
@@ -659,7 +664,14 @@ def heuristic_classify(
     links.append({"label": "PR" if kind == "pr" else "Issue", "url": url})
 
     decision = None
-    if rule.pattern == "decision":
+    if candidate.get("src") == "agent-decided":
+        # An agent already chose (ADR-010): the owner's only question is keep or veto.
+        decision = {
+            "question": "Keep the decision the agent made?",
+            "options": ["Keep", "Veto"],
+            "recommendation": "Keep",
+        }
+    elif rule.pattern == "decision":
         recommended = _RECOMMEND.search(body)
         decision = {
             "question": title,

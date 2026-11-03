@@ -469,7 +469,7 @@ def board_gather(
 ):
     """Gather every open item that asks something of you, across owners (the board's input).
 
-    Sweeps `manual-task` per owner with no 50-row cap. `--searches decide,needs-user`
+    Sweeps `manual-task` per owner with no 50-row cap. `--searches decide,needs-user,agent-decided`
     adds the title/body searches, `--review-prs` the PRs waiting on your review, and
     `--all-kinds` all of them. `--exclude-repos 'acme/secret-*'` takes globs. Writes
     the result to `--out` as JSON, or prints it. Read-only.
