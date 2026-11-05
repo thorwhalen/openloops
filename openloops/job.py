@@ -65,9 +65,35 @@ RECEIVER_LABEL = "openloops.board-receiver"
 #: calls and no model, so this can be as short as the phone board's latency wants.
 RECEIVER_INTERVAL = 300
 
-#: Tools the unattended receiver session may use without asking: it runs `gh`, `curl`
-#: and `python3` through Bash, writes backups and comment bodies, and reads the skill.
-RECEIVER_TOOLS = "Bash Read Write Edit Glob Grep Skill"
+#: Tools the unattended receiver session may use without asking. Bash is limited to the
+#: commands the receiver procedure runs (`gh`, `curl`, `python3`, the worker dispatch,
+#: and the shell steps of the sign-in); everything else is refused, not asked about.
+#: `python3` is still arbitrary code, so the real guard is the prompt's rule that
+#: GitHub and store text is data. Widen with `ol install-receiver-job --allowed-tools`.
+RECEIVER_TOOLS = " ".join(
+    [
+        *(
+            f"Bash({cmd}:*)"
+            for cmd in (
+                "gh",
+                "curl",
+                "python3",
+                "crowsnest",
+                "mkdir",
+                "date",
+                "set",
+                "umask",
+                "source",
+            )
+        ),
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep",
+        "Skill",
+    ]
+)
 
 #: Environment variables the receiver session reads, passed through like the others.
 RECEIVER_PASSED_THROUGH = (
@@ -249,10 +275,18 @@ def _bootstrap(
             )
 
 
+#: The receiver's procedure, as packaged: the prompt points here rather than at an
+#: installed skill, so a job never depends on `ol install-skills` having run.
+RECEIVER_REFERENCES = (
+    Path(__file__).parent / "data" / "skills" / "openloops-phone-board" / "references"
+)
+
+
 def _receiver_prompt() -> str:
-    return (Path(__file__).parent / "data" / "board" / "receiver-prompt.md").read_text(
+    text = (Path(__file__).parent / "data" / "board" / "receiver-prompt.md").read_text(
         encoding="utf-8"
     )
+    return text.replace("{references}", str(RECEIVER_REFERENCES))
 
 
 def receiver_job_spec(
@@ -265,6 +299,7 @@ def receiver_job_spec(
     env_file: str | Path = RECEIVER_ENV_FILE,
     interval: int = RECEIVER_INTERVAL,
     label: str = RECEIVER_LABEL,
+    require_claude: bool = True,
 ) -> dict[str, object]:
     """The receiver job as data: program arguments, environment, plist. Pure but for
     looking up where ``claude`` and ``node`` are, so it can be tested anywhere.
@@ -273,15 +308,20 @@ def receiver_job_spec(
     whether anything is pending and only then replaces itself with ``claude -p`` and the
     packaged receiver prompt. The credentials stay in *env_file*; nothing about them
     is in the plist, the arguments or the environment (``PASSED_THROUGH`` names none).
+    With ``require_claude=False`` (a dry run) a missing ``claude`` is shown as a bare
+    name instead of refused.
     """
     claude_path = claude or shutil.which("claude")
-    if not claude_path:
+    if claude_path:
+        # Not resolved: `claude` is usually a symlink to a versioned file that an
+        # update deletes, and the link is what keeps pointing at the current one.
+        claude_path = os.path.abspath(Path(claude_path).expanduser())
+    elif require_claude:
         raise FileNotFoundError(
             "`claude` is not on PATH: install Claude Code, or pass its absolute path"
         )
-    # Not resolved: `claude` is usually a symlink to a versioned file that an update
-    # deletes, and the link is what keeps pointing at the current one.
-    claude_path = os.path.abspath(Path(claude_path).expanduser())
+    else:
+        claude_path = "claude"
     work = Path(work_dir).expanduser().resolve()
     env_path = Path(env_file).expanduser()
     env = job_environment()
@@ -363,7 +403,7 @@ def install_receiver(
     ``kwargs`` are those of :func:`receiver_job_spec`. A dry run builds and returns the
     plist without touching launchd and without requiring the credentials file.
     """
-    spec = receiver_job_spec(work_dir, **kwargs)
+    spec = receiver_job_spec(work_dir, require_claude=not dry_run, **kwargs)
     if dry_run:
         return {k: str(v) for k, v in spec.items() if k in ("plist", "log", "xml")}
     _check_receiver_inputs(Path(str(spec["work_dir"])), Path(str(spec["env_file"])))
@@ -400,12 +440,16 @@ def uninstall(*, label: str = DFLT_LABEL) -> dict[str, str]:
     return {"plist": str(plist_path), "removed": str(existed).lower()}
 
 
-def job_status(*, label: str = DFLT_LABEL) -> dict[str, object]:
+def job_status(
+    *, label: str = DFLT_LABEL, env_file: str | Path = RECEIVER_ENV_FILE
+) -> dict[str, object]:
     """Installed? loaded? and — the question that matters — when did it last write?
 
     ``launchctl list`` says the job is registered, which is not the same as the job
     doing anything. The cache's modification time is the only evidence that a tick
-    completed, so it is reported alongside.
+    completed, so it is reported alongside. For the receiver, ``last_check`` is the
+    last tick whose check succeeded (a stamp beside *env_file*) and ``last_write`` the
+    last tick that had work (its log).
     """
     plist_path = _plist_path(label)
     loaded = None
@@ -416,13 +460,17 @@ def job_status(*, label: str = DFLT_LABEL) -> dict[str, object]:
         loaded = listed.returncode == 0
     cache = sync_state_path()
     log = _log_path(label)
+    last_check = None
     if label == RECEIVER_LABEL:
-        # Nothing here writes a cache; the log is touched only when a tick had work, and
-        # the board's own `meta/receiver` heartbeat is the authority on liveness.
+        # The log is touched only when a tick had work; a successful check touches its
+        # own stamp and writes the board's `meta/receiver` heartbeat.
         evidence = log.stat().st_mtime if log.exists() else None
+        stamp = Path(env_file).expanduser().with_name("board-receiver.lastcheck")
+        last_check = stamp.stat().st_mtime if stamp.exists() else None
     else:
         evidence = cache.stat().st_mtime if cache.exists() else None
     return {
+        "last_check": last_check,
         "label": label,
         "platform_supported": sys.platform == "darwin",
         "plist": str(plist_path),

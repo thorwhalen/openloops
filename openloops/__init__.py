@@ -4,6 +4,9 @@ Claude Code writes a JSONL transcript for every session and deletes it after abo
 month. openloops reads those transcripts, writes one short dated markdown digest per
 session, and keeps the digests. Nothing here calls a model, reaches the network, or
 needs an account: it reads files you already have and writes files you already own.
+(One opt-in exception: ``openloops.receiver_tick``, run only by the board-receiver job
+you install with ``ol install-receiver-job``, signs in to your own board store and may
+start a ``claude`` session. Nothing imports it, so ``import openloops`` never loads it.)
 
     >>> import openloops
     >>> report = openloops.sync()                       # doctest: +SKIP

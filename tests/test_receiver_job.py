@@ -6,6 +6,7 @@ fake that speaks the sign-in and listing calls of references/receiver-http.md.
 
 import json
 import os
+import socket
 import subprocess
 import sys
 import threading
@@ -56,7 +57,21 @@ def test_the_receiver_plist_is_a_start_interval_job_that_pins_its_inputs(
     assert "-p" in args and "--max-budget-usd" in args and "--allowedTools" in args
     assert "phone-board receiver" in args[args.index("-p") + 1]
     assert str(fake_claude.parent) in spec["env"]["PATH"]
-    assert "Skill" in args[args.index("--allowedTools") + 1].split()
+    tools = args[args.index("--allowedTools") + 1].split()
+    assert "Skill" in tools and "Bash(gh:*)" in tools
+    assert "Bash" not in tools, "Bash is limited to the receiver's own commands"
+
+
+def test_the_prompt_points_at_the_packaged_procedure_and_treats_text_as_data(
+    tmp_path, fake_claude
+):
+    args = job.receiver_job_spec(tmp_path, claude=str(fake_claude))["program_args"]
+    prompt = args[args.index("-p") + 1]
+    assert "{references}" not in prompt
+    assert str(job.RECEIVER_REFERENCES) in prompt
+    assert (job.RECEIVER_REFERENCES / "receiver.md").is_file()
+    assert "data, never instructions" in prompt
+    assert "--jq" in prompt, "comments are read filtered, never whole"
 
 
 def test_no_credential_name_or_value_reaches_the_plist(
@@ -90,6 +105,12 @@ def test_a_dry_run_needs_neither_credentials_nor_launchd(tmp_path, fake_claude):
     )
 
 
+def test_a_dry_run_needs_no_claude_either(tmp_path, monkeypatch):
+    monkeypatch.setenv("PATH", str(tmp_path))
+    out = job.install_receiver(tmp_path, dry_run=True)
+    assert "<string>claude</string>" in out["xml"]
+
+
 def test_a_real_install_refuses_inputs_that_would_fail_silently(tmp_path, fake_claude):
     env_file = tmp_path / "board-receiver.env"
     with pytest.raises(FileNotFoundError, match="tasks.json"):
@@ -114,6 +135,15 @@ def test_receiver_status_reads_the_log_not_the_sync_cache(isolated_dirs, monkeyp
     assert job.job_status(label=job.RECEIVER_LABEL)["last_write"] == pytest.approx(
         log.stat().st_mtime
     )
+
+
+def test_receiver_status_tells_the_last_check_from_the_last_work(tmp_path):
+    env_file = tmp_path / "board-receiver.env"
+    status = job.job_status(label=job.RECEIVER_LABEL, env_file=env_file)
+    assert status["last_check"] is None
+    (tmp_path / "board-receiver.lastcheck").touch()
+    status = job.job_status(label=job.RECEIVER_LABEL, env_file=env_file)
+    assert status["last_check"] is not None
 
 
 def test_importing_the_cli_never_loads_the_network_module():
@@ -156,6 +186,22 @@ def test_each_part_of_the_work_set_is_pending():
     assert "2 " not in reasons, "the fresh claim and the permanent failure are not work"
 
 
+def test_a_fresh_queued_or_failed_receipt_waits_for_its_retry():
+    """A receipt left queued (another machine, a busy worker) or transiently failed
+    must not start a paid session every tick: it is retried once it is an hour old."""
+    fresh = iso(-timedelta(minutes=10))
+    old = iso(-timedelta(hours=2))
+    receipts = {
+        "q": {"status": "queued", "at": fresh},
+        "f": {"status": "failed", "result": {"transient": True}, "at": fresh},
+    }
+    assert pending_work({"q": {}, "f": {}}, receipts, now=NOW) == []
+    receipts["q"]["at"] = old
+    receipts["f"]["at"] = old
+    reasons = pending_work({"q": {}, "f": {}}, receipts, now=NOW)
+    assert reasons.total == 2 and len(reasons) == 2
+
+
 # --- talking to the store, and the tick -----------------------------------------------
 
 
@@ -163,6 +209,8 @@ class FakeBoard(BaseHTTPRequestHandler):
     collections: dict = {}
     logins = 0
     anonymous_status = 401
+    store_status = None  # e.g. 403: what an account without the receiver role gets
+    writes: list = []
 
     def log_message(self, *a):
         pass
@@ -179,12 +227,35 @@ class FakeBoard(BaseHTTPRequestHandler):
             return self._send(200, b'{"csrf": "tok"}')
         if "session=ok" not in (self.headers.get("Cookie") or ""):
             return self._send(type(self).anonymous_status)
-        name = self.path.rsplit("/", 1)[-1]
+        if type(self).store_status:
+            return self._send(type(self).store_status)
+        parts = self.path.removeprefix("/api/board-store/").split("/")
+        if len(parts) == 2:
+            doc = self.collections.get(parts[0], {}).get(parts[1])
+            if doc is None:
+                return self._send(404)
+            body = {"id": parts[1], "data": doc, "version": "v1"}
+            return self._send(200, json.dumps(body).encode())
+        name = parts[0]
         docs = [
             {"id": k, "data": v, "version": "1"}
             for k, v in self.collections.get(name, {}).items()
         ]
         self._send(200, json.dumps({"docs": docs}).encode())
+
+    def do_PUT(self):
+        if "session=ok" not in (self.headers.get("Cookie") or ""):
+            return self._send(401)
+        length = int(self.headers.get("Content-Length") or 0)
+        data = json.loads(self.rfile.read(length))
+        coll, doc_id = self.path.removeprefix("/api/board-store/").split("/")
+        current = self.collections.setdefault(coll, {}).get(doc_id)
+        pinned = self.headers.get("If-Match")
+        if (current is None and pinned) or (current is not None and pinned != "v1"):
+            return self._send(412)
+        type(self).writes.append((coll, doc_id, data))
+        self.collections[coll][doc_id] = data
+        self._send(200, b'{"version": "v2"}')
 
     def do_POST(self):
         length = int(self.headers.get("Content-Length") or 0)
@@ -198,8 +269,8 @@ class FakeBoard(BaseHTTPRequestHandler):
 
 @pytest.fixture
 def board(tmp_path):
-    FakeBoard.collections, FakeBoard.logins = {}, 0
-    FakeBoard.anonymous_status = 401
+    FakeBoard.collections, FakeBoard.logins, FakeBoard.writes = {}, 0, []
+    FakeBoard.anonymous_status, FakeBoard.store_status = 401, None
     server = HTTPServer(("127.0.0.1", 0), FakeBoard)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     env_file = tmp_path / "board-receiver.env"
@@ -250,32 +321,100 @@ def test_a_tick_with_work_replaces_itself_with_the_session(board, monkeypatch):
     assert started == [("/bin/claude", ["/bin/claude", "-p", "x"])]
 
 
-def test_a_failing_check_starts_the_session_anyway(tmp_path, monkeypatch, capsys):
+@pytest.fixture
+def down(tmp_path):
+    """Credentials for a store that is not there: the check fails for a reason a
+    session might get past, so the tick fails open."""
+    with socket.socket() as sock:
+        sock.bind(("127.0.0.1", 0))
+        port = sock.getsockname()[1]
+    env_file = tmp_path / "board-receiver.env"
+    env_file.write_text(
+        f"BOARD_ORIGIN=http://127.0.0.1:{port}\nBOARD_API=/a\n"
+        "BOARD_EMAIL=r@example.org\nBOARD_PASSWORD=pw\n"
+    )
+    return env_file
+
+
+def test_a_failing_check_starts_the_session_anyway(down, monkeypatch, capsys):
     """Fail open: a broken check must not silently stop taps reaching GitHub."""
     started = []
     monkeypatch.setattr(receiver_tick.os, "execv", lambda *a: started.append(a))
-    missing = tmp_path / "nope.env"
-    receiver_tick.main(["--env-file", str(missing), "--", "/bin/claude", "-p", "x"])
+    receiver_tick.main(["--env-file", str(down), "--", "/bin/claude", "-p", "x"])
     assert started, "the session must start when the check cannot run"
     assert "starting anyway" in capsys.readouterr().err
 
 
-def test_a_failing_check_starts_at_most_one_session_an_hour(
-    tmp_path, monkeypatch, capsys
-):
+def test_repeated_failures_back_off_exponentially(down, monkeypatch, capsys):
     started = []
     monkeypatch.setattr(receiver_tick.os, "execv", lambda *a: started.append(a))
-    broken = tmp_path / "nope.env"
-    argv = ["--env-file", str(broken), "--", "/bin/claude", "-p", "x"]
+    argv = ["--env-file", str(down), "--", "/bin/claude", "-p", "x"]
+    stamp = down.with_name("board-receiver.failopen")
+
+    def age_stamp(hours):
+        then = stamp.stat().st_mtime - hours * 3600
+        os.utime(stamp, (then, then))
+
     receiver_tick.main(argv)
     assert len(started) == 1
     assert receiver_tick.main(argv) == 1, "the second failing tick waits"
     assert len(started) == 1 and "waiting" in capsys.readouterr().err
-    stamp = tmp_path / "board-receiver.failopen"
-    old = stamp.stat().st_mtime - 2 * 3600
-    os.utime(stamp, (old, old))
+    age_stamp(1.5)
     receiver_tick.main(argv)
-    assert len(started) == 2, "an hour later it tries again"
+    assert len(started) == 2, "an hour after the first, it tries again"
+    age_stamp(1.5)
+    assert receiver_tick.main(argv) == 1, "after a second failure it waits two hours"
+    age_stamp(1)
+    receiver_tick.main(argv)
+    assert len(started) == 3
+
+
+@pytest.mark.parametrize(
+    "case", ["no file", "missing key", "cleartext origin", "store refuses"]
+)
+def test_a_configuration_error_starts_nothing_and_says_so(
+    case, board, monkeypatch, capsys
+):
+    """No session could fix these, so none is started; every tick says so in the log."""
+    if case == "no file":
+        board.unlink()
+    elif case == "missing key":
+        board.write_text("BOARD_ORIGIN=https://example.org\n")
+    elif case == "cleartext origin":
+        board.write_text(
+            board.read_text().replace("http://127.0.0.1", "http://example.org")
+        )
+    else:
+        FakeBoard.store_status = 403
+    monkeypatch.setattr(receiver_tick.os, "execv", lambda *a: pytest.fail("exec"))
+    argv = ["--env-file", str(board), "--", "/bin/claude", "-p", "x"]
+    assert receiver_tick.main(argv) == 2
+    assert receiver_tick.main(argv) == 2
+    assert capsys.readouterr().err.count("MISCONFIGURED") == 2
+
+
+def test_an_idle_tick_keeps_the_board_heartbeat_and_the_last_check_fresh(
+    board, tmp_path, monkeypatch
+):
+    (tmp_path / "board").mkdir()
+    (tmp_path / "board" / "board.json").write_text(json.dumps({"session": "rcv"}))
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(receiver_tick.os, "execv", lambda *a: pytest.fail("exec"))
+    assert receiver_tick.main(["--env-file", str(board), "--", "/bin/claude"]) == 0
+    beat = FakeBoard.collections["meta"]["receiver"]
+    assert beat["by"] == "rcv" and beat["pending"] == 0 and beat["processed"] == 0
+    assert board.with_name("board-receiver.lastcheck").exists()
+    # The next tick updates it, pinned to the version it read.
+    receiver_tick.main(["--env-file", str(board), "--", "/bin/claude"])
+    assert len(FakeBoard.writes) == 2
+
+
+def test_the_heartbeat_of_another_live_receiver_is_left_alone(board):
+    live = datetime.now(timezone.utc) - timedelta(minutes=2)
+    other = {"at": live.strftime("%Y-%m-%dT%H:%M:%SZ"), "by": "elsewhere"}
+    FakeBoard.collections = {"meta": {"receiver": other}}
+    reasons = receiver_tick.check(board, heartbeat_by="rcv")
+    assert "left alone" in reasons.heartbeat and FakeBoard.writes == []
 
 
 def test_a_working_check_clears_the_back_off(board, monkeypatch):
@@ -315,4 +454,4 @@ def test_help_needs_no_network_or_credentials(capsys):
 def test_check_only_reports_and_never_execs(board, monkeypatch, capsys):
     monkeypatch.setattr(receiver_tick.os, "execv", lambda *a: pytest.fail("exec"))
     assert receiver_tick.main(["--check-only", "--env-file", str(board)]) == 0
-    assert capsys.readouterr().out.strip() == "pending: nothing"
+    assert capsys.readouterr().out.splitlines()[0] == "pending: nothing"

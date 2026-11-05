@@ -6,27 +6,42 @@ the board store, with plain HTTP and no model, whether anything needs the receiv
 Only if something does (or the question cannot be answered) does it replace itself with
 the real command, ``claude -p <the receiver prompt>``.
 
-**Fail open.** A check that errors starts the session anyway, with the reason on stderr.
-A broken check that silently suppressed the receiver would be the failure this package
-exists to prevent: taps stored safely and never reaching GitHub, with nothing saying so.
+**Liveness.** Every successful check writes the board's ``meta/receiver`` heartbeat
+(the receiver's own document, under the session name from ``board/board.json``), so an
+idle board stays green and a dead job turns it amber after 20 minutes. It also touches a
+local ``board-receiver.lastcheck`` stamp, which ``ol receiver-job-status`` reports as
+"last check", separately from "last work" (the log, written only by ticks with work).
+
+**Fail closed on configuration, open on anything else.** A configuration error (no
+credentials file, a missing key, a cleartext origin, a refused sign-in, a 403 from the
+store) cannot be fixed by a session, so the tick starts none and says so in the log on
+every tick; the stale heartbeat turns the board amber. Any other failure (the store
+down, a malformed answer, a bug here) starts the session anyway, because a check that
+silently suppressed the receiver would be the failure this package exists to prevent.
+Repeated failures back off exponentially: one hour, then two, four, capped at six.
 
 This is the one module that talks to the network, to the owner's own board store (the
 HTTP API of ADR-009). Nothing imports it; ``import openloops`` never loads it.
 
 The work set is the one ``references/receiver.md`` defines: events with no receipt,
-``processing`` receipts older than 15 minutes, ``queued`` receipts, and ``failed``
-receipts marked transient. The sign-in is the one in ``references/receiver-http.md``.
+``processing`` receipts older than 15 minutes, and ``queued`` receipts and ``failed``
+receipts marked transient. Those last two are retried only once they are an hour old
+(:data:`RETRY_AFTER`): a receipt that waits on another machine, a busy worker or a
+lasting GitHub error would otherwise start a paid session every tick, all day, to change
+nothing. The sign-in is the one in ``references/receiver-http.md``.
 """
 
 from __future__ import annotations
 
 import http.cookiejar
+import ipaddress
 import json
 import os
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -34,7 +49,12 @@ from typing import Any
 __all__ = [
     "DFLT_ENV_FILE",
     "STALE_CLAIM",
+    "RETRY_AFTER",
+    "FAIL_OPEN_BACKOFF",
+    "FAIL_OPEN_CAP",
+    "ConfigError",
     "Pending",
+    "check",
     "pending_work",
     "read_env_file",
     "main",
@@ -43,12 +63,35 @@ __all__ = [
 DFLT_ENV_FILE = Path("~/.config/openloops/board-receiver.env")
 #: A ``processing`` receipt older than this is a sweep that died (receiver.md, section 0).
 STALE_CLAIM = timedelta(minutes=15)
+#: A ``queued`` or transiently ``failed`` receipt is retried only once it is this old.
+RETRY_AFTER = timedelta(hours=1)
+#: A heartbeat by another receiver younger than this means that one is live (receiver.md).
+LIVE_HEARTBEAT = timedelta(minutes=20)
+#: The board's own settings, relative to the job's working directory.
+DFLT_BOARD_JSON = Path("board") / "board.json"
+#: After a failed check starts a session, the next one waits this long, doubling with
+#: each further failure up to :data:`FAIL_OPEN_CAP`: a lasting fault must not start a
+#: paid session every tick, all day.
+FAIL_OPEN_BACKOFF = timedelta(hours=1)
+FAIL_OPEN_CAP = timedelta(hours=6)
 _TIMEOUT = 20
 _REQUIRED = ("BOARD_ORIGIN", "BOARD_API", "BOARD_EMAIL", "BOARD_PASSWORD")
+_LOOPBACK_NAMES = {"localhost"}
+
+
+class ConfigError(RuntimeError):
+    """The check cannot run as configured, and a session could not fix that either."""
 
 
 class Pending(list):
-    """The reasons the receiver is needed; empty means nothing to do."""
+    """The reasons the receiver is needed; empty means nothing to do.
+
+    ``total`` counts the items behind those reasons (the heartbeat's ``pending``);
+    ``heartbeat`` says what :func:`check` did with the heartbeat.
+    """
+
+    total: int = 0
+    heartbeat: str = ""
 
 
 def read_env_file(path: str | Path) -> dict[str, str]:
@@ -91,8 +134,12 @@ def pending_work(
     receipts: Mapping[str, Mapping[str, Any]],
     *,
     now: datetime | None = None,
+    retry_after: timedelta = RETRY_AFTER,
 ) -> Pending:
     """What needs the receiver, from the store's two collections (``id -> data``).
+
+    ``queued`` and transiently ``failed`` receipts count only once their ``at`` (or,
+    lacking one, ``claimedAt``) is older than *retry_after*; one with neither counts.
 
     >>> pending_work({'e1': {}}, {})
     ['1 event(s) without a receipt']
@@ -100,39 +147,71 @@ def pending_work(
     []
     """
     now = now or datetime.now(timezone.utc)
-    reasons = Pending()
 
+    def due(rec: Mapping[str, Any]) -> bool:
+        when = _when(rec.get("at") or rec.get("claimedAt"))
+        return when is None or now - when >= retry_after
+
+    reasons = Pending()
     unreceived = [e for e in outbox if e not in receipts]
     if unreceived:
         reasons.append(f"{len(unreceived)} event(s) without a receipt")
 
     stale = queued = transient = 0
-    for rid, rec in receipts.items():
+    for rec in receipts.values():
         status = rec.get("status")
         result = rec.get("result") or {}
         if status == "processing":
             claimed = _when(rec.get("claimedAt"))
             stale += claimed is None or now - claimed > STALE_CLAIM
         elif status == "queued":
-            queued += 1
+            queued += due(rec)
         elif status == "failed" and result.get("transient"):
-            transient += 1
+            transient += due(rec)
     for count, what in (
         (stale, "stale claim(s)"),
-        (queued, "queued receipt(s)"),
+        (queued, "queued receipt(s) due a retry"),
         (transient, "transient failure(s) to retry"),
     ):
         if count:
             reasons.append(f"{count} {what}")
-
+    reasons.total = len(unreceived) + stale + queued + transient
     return reasons
+
+
+def _checked_origin(origin: str) -> str:
+    """The origin, refused if it would send the password in clear to another host.
+
+    >>> _checked_origin('https://example.org/')
+    'https://example.org'
+    >>> _checked_origin('http://127.0.0.1:8000')
+    'http://127.0.0.1:8000'
+    >>> _checked_origin('http://example.org')  # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    openloops.receiver_tick.ConfigError: BOARD_ORIGIN http://example.org is not https...
+    """
+    origin = origin.rstrip("/")
+    parts = urllib.parse.urlsplit(origin)
+    if parts.scheme == "https":
+        return origin
+    host = parts.hostname or ""
+    try:
+        loopback = ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        loopback = host in _LOOPBACK_NAMES
+    if parts.scheme == "http" and loopback:
+        return origin
+    raise ConfigError(
+        f"BOARD_ORIGIN {origin} is not https: the password would travel in clear"
+    )
 
 
 class _Store:
     """The board store API over HTTP, signed in as the receiver's own account."""
 
     def __init__(self, env: Mapping[str, str], jar_path: Path):
-        self.origin = env["BOARD_ORIGIN"].rstrip("/")
+        self.origin = _checked_origin(env["BOARD_ORIGIN"])
         self.api = "/" + env["BOARD_API"].strip("/")
         self.env = env
         self.jar = http.cookiejar.MozillaCookieJar(str(jar_path))
@@ -141,7 +220,7 @@ class _Store:
                 self.jar.load(ignore_discard=True, ignore_expires=True)
             except (OSError, http.cookiejar.LoadError):
                 pass
-        #: With no saved session, sign in before the first listing rather than waiting
+        #: With no saved session, sign in before the first call rather than waiting
         #: for a 401: a host may answer an anonymous request with a 403 instead.
         self.has_session = len(self.jar) > 0
         self.opener = urllib.request.build_opener(
@@ -163,56 +242,170 @@ class _Store:
             data=body,
             headers={"X-CSRF-Token": csrf, "Content-Type": "application/json"},
         )
-        self._open(req)
+        try:
+            self._open(req)
+        except urllib.error.HTTPError as exc:
+            if exc.code in (401, 403):
+                raise ConfigError(
+                    f"sign-in refused ({exc.code}): check the credentials"
+                )
+            raise
+        self.has_session = True
+        old = os.umask(0o077)  # the jar holds a session: never readable by others
         try:
             self.jar.save(ignore_discard=True, ignore_expires=True)
             os.chmod(self.jar.filename, 0o600)
         except OSError:
             pass
+        finally:
+            os.umask(old)
 
-    def collection(self, name: str) -> dict[str, Any]:
-        url = f"{self.origin}{self.api}/{name}"
+    def _request(self, make: Callable[[], urllib.request.Request]) -> bytes:
+        """Open ``make()``, signing in again once on a 401. A 403 after a fresh sign-in
+        means the account lacks the ``receiver`` role: a configuration error."""
         if not self.has_session:
             self.sign_in()
-            self.has_session = True
         for attempt in (0, 1):
             try:
-                docs = json.loads(self._open(urllib.request.Request(url)))["docs"]
-                return {d["id"]: d["data"] for d in docs}
+                return self._open(make())
             except urllib.error.HTTPError as exc:
                 if exc.code in (401, 403) and attempt == 0:
                     self.sign_in()
                     continue
+                if exc.code == 403:
+                    raise ConfigError("the board store refused this account (403)")
                 raise
         raise RuntimeError("unreachable")
 
+    def _url(self, *parts: str) -> str:
+        return "/".join([f"{self.origin}{self.api}", *parts])
 
-def check(env_file: str | Path = DFLT_ENV_FILE) -> Pending:
-    """Ask the store whether anything needs the receiver. Raises if it cannot ask."""
-    env = read_env_file(Path(env_file).expanduser())
+    def collection(self, name: str) -> dict[str, Any]:
+        url = self._url(name)
+        docs = json.loads(self._request(lambda: urllib.request.Request(url)))["docs"]
+        return {d["id"]: d["data"] for d in docs}
+
+    def get(self, collection: str, doc_id: str) -> dict[str, Any] | None:
+        """One document (``{id, data, version}``), or ``None`` if there is none."""
+        url = self._url(collection, doc_id)
+        try:
+            return json.loads(self._request(lambda: urllib.request.Request(url)))
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                return None
+            raise
+
+    def put(
+        self, collection: str, doc_id: str, data: Mapping, *, version: str | None
+    ) -> bool:
+        """Write pinned to *version* (``None``: create-if-absent). ``False`` on a 412."""
+        url = self._url(collection, doc_id)
+        pin = {"If-Match": version} if version else {"If-None-Match": "*"}
+        headers = {"Content-Type": "application/json", **pin}
+        body = json.dumps(data).encode()
+        try:
+            self._request(
+                lambda: urllib.request.Request(
+                    url, data=body, method="PUT", headers=headers
+                )
+            )
+        except urllib.error.HTTPError as exc:
+            if exc.code == 412:
+                return False
+            raise
+        return True
+
+
+def _session_name(board_json: Path) -> str | None:
+    try:
+        return json.loads(board_json.read_text(encoding="utf-8")).get("session")
+    except (OSError, ValueError, AttributeError):
+        return None
+
+
+def _heartbeat(store: _Store, by: str, reasons: Pending, *, now: datetime) -> str:
+    """Write ``meta/receiver`` unless another live receiver owns it. Says what it did."""
+    current = store.get("meta", "receiver") or {}
+    data = current.get("data") or {}
+    stamp = _when(data.get("at"))
+    if data.get("by") not in (None, by) and stamp and now - stamp < LIVE_HEARTBEAT:
+        return f"heartbeat left alone: {data.get('by')} is live"
+    beat = {
+        "at": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "by": by,
+        "processed": 0,
+        "pending": reasons.total,
+    }
+    written = store.put("meta", "receiver", beat, version=current.get("version"))
+    return "heartbeat written" if written else "heartbeat skipped: a sweep wrote it"
+
+
+def check(
+    env_file: str | Path = DFLT_ENV_FILE,
+    *,
+    heartbeat_by: str | None = None,
+    now: datetime | None = None,
+) -> Pending:
+    """Ask the store whether anything needs the receiver. Raises if it cannot ask:
+    :class:`ConfigError` when no session could fix it, anything else otherwise.
+
+    With *heartbeat_by* (the board's session name) it also writes the ``meta/receiver``
+    heartbeat, and says what happened in the result's ``heartbeat``. A failed heartbeat
+    never fails the check: the board turning amber is how that shows.
+    """
+    path = Path(env_file).expanduser()
+    if not path.is_file():
+        raise ConfigError(f"{env_file} does not exist")
+    env = read_env_file(path)
     missing = [k for k in _REQUIRED if not env.get(k)]
     if missing:
-        raise RuntimeError(f"{env_file} lacks {', '.join(missing)}")
-    jar = Path(env_file).expanduser().with_name("board-receiver.cookies")
-    store = _Store(env, jar)
-    return pending_work(
-        store.collection("outbox"),
-        store.collection("receipts"),
+        raise ConfigError(f"{env_file} lacks {', '.join(missing)}")
+    now = now or datetime.now(timezone.utc)
+    store = _Store(env, path.with_name("board-receiver.cookies"))
+    reasons = pending_work(
+        store.collection("outbox"), store.collection("receipts"), now=now
     )
+    reasons.heartbeat = "heartbeat skipped: no session name in board/board.json"
+    if heartbeat_by:
+        try:
+            reasons.heartbeat = _heartbeat(store, heartbeat_by, reasons, now=now)
+        except Exception as exc:  # the check answered; the heartbeat is secondary
+            reasons.heartbeat = f"heartbeat failed: {type(exc).__name__}: {exc}"
+    return reasons
 
 
-#: After a failed check starts a session, wait this long before starting another one
-#: for the same reason: a lasting misconfiguration must not start a paid session every
-#: tick, all day.
-FAIL_OPEN_BACKOFF = timedelta(hours=1)
+def _backoff_wait(failures: int) -> timedelta:
+    """How long after the last fail-open start the next one may come.
+
+    >>> [_backoff_wait(n).total_seconds() / 3600 for n in (1, 2, 3, 4, 9)]
+    [1.0, 2.0, 4.0, 6.0, 6.0]
+    """
+    return min(FAIL_OPEN_BACKOFF * 2 ** max(failures - 1, 0), FAIL_OPEN_CAP)
+
+
+def _read_failures(stamp: Path) -> int:
+    """Sessions started for the current run of failures (0: none, or no stamp)."""
+    try:
+        return int(json.loads(stamp.read_text(encoding="utf-8"))["failures"])
+    except (OSError, ValueError, KeyError, TypeError):
+        return 1 if stamp.exists() else 0
+
 
 _USAGE = (
     "usage: python -m openloops.receiver_tick [--check-only] [--env-file FILE] "
-    "[-- COMMAND ...]\n"
-    "Asks the board store, with no model, whether the receiver has work; if so "
-    "(or if the question cannot be answered, at most once an hour) replaces itself "
-    "with COMMAND."
+    "[--board-json FILE] [-- COMMAND ...]\n"
+    "Asks the board store, with no model, whether the receiver has work, and writes "
+    "the board's heartbeat. If there is work, or the check failed for a reason a "
+    "session might get past (with an exponential back-off), replaces itself with "
+    "COMMAND. A configuration error starts nothing."
 )
+
+
+def _option(args: list[str], name: str, default: Path) -> Path | None:
+    if name not in args:
+        return default
+    at = args.index(name) + 1
+    return Path(args[at]) if at < len(args) else None
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -225,49 +418,62 @@ def main(argv: list[str] | None = None) -> int:
     if "--help" in args or "-h" in args:
         print(_USAGE)
         return 0
-    check_only = "--check-only" in args
-    env_file = DFLT_ENV_FILE
-    if "--env-file" in args:
-        at = args.index("--env-file") + 1
-        if at >= len(args):
-            print("--env-file needs a path", file=sys.stderr)
-            return 2
-        env_file = Path(args[at])
-    stamp = Path(env_file).expanduser().with_name("board-receiver.failopen")
+    check_only = "--check-only" in args or not command
+    env_file = _option(args, "--env-file", DFLT_ENV_FILE)
+    board_json = _option(args, "--board-json", DFLT_BOARD_JSON)
+    if env_file is None or board_json is None:
+        print("--env-file and --board-json need a path", file=sys.stderr)
+        return 2
+    here = env_file.expanduser()
+    stamp = here.with_name("board-receiver.failopen")
+    last_check = here.with_name("board-receiver.lastcheck")
 
+    failure = None
     try:
-        reasons = check(env_file)
-        failure = None
+        reasons = check(env_file, heartbeat_by=_session_name(board_json))
+    except ConfigError as exc:
+        print(
+            f"receiver check MISCONFIGURED, no session started: {exc}",
+            file=sys.stdout if check_only else sys.stderr,
+        )
+        return 2
     except Exception as exc:  # fail open: see the module docstring
         reasons, failure = Pending(), f"{type(exc).__name__}: {exc}"
 
-    if check_only or not command:
+    if check_only:
         if failure:
             print(f"check failed ({failure}); a tick would start the receiver anyway")
             return 1
         print("pending: " + ("; ".join(reasons) if reasons else "nothing"))
+        print(reasons.heartbeat)
         return 0
     if failure:
-        now = datetime.now(timezone.utc).timestamp()
+        failures = _read_failures(stamp)
         try:
-            recent = now - stamp.stat().st_mtime < FAIL_OPEN_BACKOFF.total_seconds()
+            since = datetime.now(timezone.utc).timestamp() - stamp.stat().st_mtime
         except OSError:
-            recent = False
-        if recent:
+            since = None
+        wait = _backoff_wait(failures)
+        if failures and since is not None and since < wait.total_seconds():
             print(
-                f"receiver check still failing ({failure}); a session was started "
-                "within the last hour, waiting",
+                f"receiver check still failing ({failure}); {failures} session(s) "
+                f"started for it already, the next after "
+                f"{wait.total_seconds() / 3600:g}h, waiting",
                 file=sys.stderr,
             )
             return 1
         print(f"receiver check failed, starting anyway: {failure}", file=sys.stderr)
         try:
-            stamp.touch()
+            stamp.write_text(json.dumps({"failures": failures + 1}), encoding="utf-8")
         except OSError:
             pass
     else:
         try:
             stamp.unlink()
+        except OSError:
+            pass
+        try:
+            last_check.touch()
         except OSError:
             pass
         if not reasons:

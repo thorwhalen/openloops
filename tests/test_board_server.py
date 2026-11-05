@@ -53,7 +53,9 @@ def test_nothing_is_served_without_a_role(client):
 
 
 def test_the_board_files_and_only_those(client):
-    assert client.get("/board/", headers=OWNER).text.startswith("<title>")
+    # A self-hosted board serves a full HTML document, not the Artifact's fragment.
+    page = client.get("/board/", headers=OWNER).text
+    assert page.lower().startswith("<!doctype html>") and "<title>" in page
     tasks = client.get("/board/tasks.json", headers=OWNER)
     assert tasks.json()[0]["id"] == "a/b#1"
     assert tasks.headers["cache-control"] == "no-store"
