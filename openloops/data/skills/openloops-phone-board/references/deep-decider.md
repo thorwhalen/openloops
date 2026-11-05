@@ -43,7 +43,7 @@ Write a JSON array to the output path. One item per decision:
 
 ## The board session then
 
-Writes each item into `questions/<org>` under `items.<docId>` (`docId` is the task id with `/` to `~` and `#` to `@`, as for any desk item). The owner's tap on any option is an `answer` event; the receiver handles it by the table in receiver.md and nothing else.
+Merges each item into `questions/<org>` under `items.<docId>`, never rewriting the whole document (other desk items live there; on a self-hosted board use the store calls of [receiver-http.md](receiver-http.md)) (`docId` is the task id with `/` to `~` and `#` to `@`, as for any desk item). The owner's tap on any option is an `answer` event; the receiver handles it by the table in receiver.md and nothing else.
 
 ## Not done here, on purpose
 

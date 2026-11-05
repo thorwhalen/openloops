@@ -67,7 +67,7 @@ Self-contained, paste-ready, starts with what to do and names the issue URL, e.g
 - otherwise `open`.
 
 ### Items labelled `agent-decided`
-An agent decided something and recorded it (ADR-010). Not a chore: `tier: "tap"`, `pattern: "decision"`, `ask`: the **Decided:** line in one line, `decision`: `{"question": "Keep the decision the agent made?", "options": ["Keep", "Veto"], "recommendation": "Keep"}`, `note`: the **Veto by:** date. If the body says it was already vetoed or reversed, `status: "likely-done"`.
+An agent decided something and recorded it (ADR-010). Not a chore: `tier: "tap"`, `pattern: "decision"`, `ask`: the **Decided:** line in one line, `decision`: `{"question": "Keep the decision the agent made?", "options": ["Keep", "Veto"], "recommendation": "Keep"}`, `note`: the **Reverse:** line and the **Veto by:** date (`Reverse: … · Veto by: …`), or "No Reverse line in the issue: a Veto runs nothing." when it has none. If the body says it was already vetoed or reversed, `status: "likely-done"`.
 
 ### Rules
 - Organisations the owner marked read-only for agents: still classify their items (the owner acts there by hand).

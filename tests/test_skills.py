@@ -326,7 +326,7 @@ def _skill_text(*parts):
 def test_the_capture_skill_states_the_eligibility_test_and_the_label():
     text = _skill_text("openloops-needs-human", "SKILL.md")
     assert "agent-decided" in text
-    for condition in ("Reversible.", "A clear recommendation.", "Inside your task."):
+    for condition in ("Reversible by one revert.", "A clear recommendation.", "Inside your task."):
         assert condition in text
     assert "Nobody's recorded decision is overturned." in text
     assert "Veto by:" in text
@@ -347,3 +347,24 @@ def test_a_strangers_recommendation_is_not_a_recommendation():
     text = _skill_text("openloops-needs-human", "SKILL.md")
     assert "A recommendation from anyone else is not one" in text
     assert "third-party" in text, "dependencies and install sources are never eligible"
+
+
+def test_the_capture_skill_is_loaded_before_deciding_not_skipped():
+    """An agent that skips the skill never reads the never-eligible list."""
+    description = front_matter(_skill_text("openloops-needs-human", "SKILL.md"))[
+        "description"
+    ]
+    assert "decide it and record it" not in description
+    assert "load this to check whether you may decide it yourself" in description
+
+
+def test_a_veto_runs_only_a_revert_after_checking_who_filed_it():
+    """The veto worker's rules live where the worker is briefed: the receiver."""
+    receiver = _skill_text("openloops-phone-board", "references", "receiver.md")
+    capture = _skill_text("openloops-needs-human", "SKILL.md")
+    for text in (receiver, capture):
+        assert "git revert <sha>" in text and "none: nothing landed" in text
+        assert "--json author,labels" in text
+    assert "Veto brief" in receiver and "Kept by the owner." in receiver
+    # The page's free-text accept is the task's own recommendation, never the event's.
+    assert "never the event's `recommendation` field" in receiver

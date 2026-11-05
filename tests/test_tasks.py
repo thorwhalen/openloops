@@ -343,3 +343,33 @@ def test_an_enriched_record_without_a_url_still_merges_with_its_heuristic_twin()
 def test_a_batch_glob_that_matches_nothing_is_an_error(tmp_path):
     with pytest.raises(FileNotFoundError):
         tasks.load_records([str(tmp_path / "out_*.json")])
+
+
+def test_an_agent_decided_card_shows_what_a_veto_would_run():
+    """The owner never vetoes blind: the Reverse and Veto-by lines are on the card."""
+    candidate = {
+        "url": "https://github.com/acme/w/issues/5",
+        "repo": "acme/w",
+        "title": "Decided: x",
+        "body": "**Decided:** x\n\n**Reverse:** `git revert abc1234`\n\n**Veto by:** 2026-11-08.",
+        "labels": ["agent-decided"],
+    }
+    note = tasks.heuristic_classify(candidate)["note"]
+    assert "Reverse: `git revert abc1234`" in note and "Veto by: 2026-11-08." in note
+    candidate["body"] = "**Decided:** x"
+    assert "a Veto runs nothing" in tasks.heuristic_classify(candidate)["note"]
+
+
+def test_all_kinds_on_the_cli_gathers_agent_decided_issues(monkeypatch):
+    from openloops import __main__ as cli
+
+    seen = {}
+
+    def fake(**kw):
+        seen.update(kw)
+        return {"counts": {"total": 0}, "owners": [], "saturated": [], "listed": True}
+
+    monkeypatch.setattr(cli.tools, "board_gather", fake)
+    cli.board_gather(all_kinds=True)
+    assert tasks.AGENT_DECIDED_LABEL in seen["searches"]
+    assert seen["review_prs"] is True

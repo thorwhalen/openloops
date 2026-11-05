@@ -583,6 +583,8 @@ DFLT_FALLBACK = Rule("other", "browser", 5, "")
 _NPM_PACKAGE = re.compile(r"npmjs\.com/package/(@[\w.-]+/[\w.-]+|[\w.-]+)")
 _PYPI_PROJECT = re.compile(r"pypi\.org/(?:project|manage/project)/([\w.-]+)")
 _RECOMMEND = re.compile(r"\*\*Recommend(?:ation|ed)?:?\*\*:?\s*(.+)", re.IGNORECASE)
+#: The lines of an ``agent-decided`` body the owner must see before tapping Veto (ADR-010).
+_AGENT_DECIDED_SHOWN = re.compile(r"^\*\*(Reverse|Veto by):\*\*\s*(.+)$", re.MULTILINE)
 _BOT_PR = re.compile(
     r"^(build\(deps|chore\(deps|bump )|\[bot\]|dependabot|renovate", re.IGNORECASE
 )
@@ -670,7 +672,7 @@ def heuristic_classify(
         links.append({"label": "PR: files changed", "url": url.rstrip("/") + "/files"})
     links.append({"label": "PR" if kind == "pr" else "Issue", "url": url})
 
-    decision = None
+    decision, note = None, None
     if agent_decided:
         # An agent already chose (ADR-010): the owner's only question is keep or veto.
         decision = {
@@ -678,6 +680,13 @@ def heuristic_classify(
             "options": ["Keep", "Veto"],
             "recommendation": "Keep",
         }
+        # What a Veto would run, on the card itself: the owner never vetoes blind.
+        note = (
+            " · ".join(
+                f"{k}: {v.strip()}" for k, v in _AGENT_DECIDED_SHOWN.findall(body)
+            )
+            or "No Reverse line in the issue: a Veto runs nothing."
+        )
     elif rule.pattern == "decision":
         recommended = _RECOMMEND.search(body)
         decision = {
@@ -700,6 +709,7 @@ def heuristic_classify(
             "minutes": rule.minutes,
             "links": links,
             "decision": decision,
+            "note": note,
             "prompt": f"Do what {url} asks, run its Verify line if it has one, and comment the result on it."
             if session
             else None,
