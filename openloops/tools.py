@@ -529,7 +529,7 @@ def board_gather(
     """Every open item that asks something of you, across owners: the board's input.
 
     Sweeps the ``label`` (``manual-task``) per owner with no 50-row cap, plus the named
-    ``searches`` (``decide``, ``needs-user``) and, with ``review_prs``, the PRs waiting
+    ``searches`` (``decide``, ``needs-user``, ``agent-decided``) and, with ``review_prs``, the PRs waiting
     on your review. ``out`` also writes the envelope there as JSON. Read-only.
 
     >>> board_gather(owners=['acme'], run_gh=lambda args, *, timeout: '[]')['listed']

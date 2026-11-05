@@ -252,3 +252,12 @@ def test_cards_offer_a_snooze_picker_and_the_recommendation_in_one_tap():
     # Same answer the Decide tab's star writes, so the receiver treats it the same way.
     assert "Do what's recommended" in page
     assert 'const ACCEPT = "Accept the recommendation"' in page
+
+
+def test_a_cards_own_options_are_answer_buttons():
+    """A Keep/Veto (or any optioned) card is answered on the card, with the option itself:
+    the receiver matches the answer against the task's options, so it must be one."""
+    page = (board.board_dir() / "index.html").read_text(encoding="utf-8")
+    assert 'act(t, "answer", { answer: o,' in page
+    # The free-text accept appears only when the recommendation is not one of the options.
+    assert "!opts.includes(rec)" in page

@@ -39,13 +39,74 @@ class FakeGh:
         if "prs" in args:
             key = "prs"
         elif "--label" in args:
-            key = "label"
+            label = args[args.index("--label") + 1]
+            key = "label" if label == "manual-task" else label
         else:
             key = args[-1]
         result = self.table.get((owner, key), [])
         if isinstance(result, Exception):
             raise result
         return json.dumps(result)
+
+
+def test_agent_decided_issues_are_gathered_by_label_and_become_a_keep_or_veto_card():
+    """ADR-010: an agent's recorded decision is a one-tap card, not a free-text question."""
+    decided = _row("acme/w", 9, "Decided: use the shorter retry window")
+    decided["labels"] = [{"name": "agent-decided"}]
+    gh = FakeGh({("acme", "agent-decided"): [decided]})
+    report = tasks.gather(owners=["acme"], searches=["agent-decided"], run_gh=gh)
+    assert [c["id"] for c in report["candidates"]] == ["acme/w#9"]
+    assert report["candidates"][0]["src"] == "agent-decided"
+    query = next(a for a in gh.calls if "agent-decided" in a)
+    assert query[query.index("--label") + 1] == "agent-decided"
+    assert "--match" not in query, "a label is not a text search"
+
+    record = tasks.heuristic_classify(report["candidates"][0])
+    assert (record["tier"], record["pattern"]) == ("tap", "decision")
+    assert record["decision"]["options"] == ["Keep", "Veto"]
+    assert record["decision"]["recommendation"] == "Keep"
+
+
+def test_an_agent_decided_issue_is_keep_or_veto_whichever_query_found_it_first():
+    """Deduplication keeps the first query that returned an issue (here: `decide`)."""
+    row = _row("acme/w", 9, "Decided: use the shorter retry window")
+    row["labels"] = [{"name": "agent-decided"}]
+    gh = FakeGh({("acme", "Decide"): [row], ("acme", "agent-decided"): [row]})
+    report = tasks.gather(
+        owners=["acme"], searches=["decide", "agent-decided"], run_gh=gh
+    )
+    (candidate,) = report["candidates"]
+    assert candidate["src"] == "decide"
+    assert tasks.heuristic_classify(candidate)["decision"]["options"] == [
+        "Keep",
+        "Veto",
+    ]
+
+
+def test_the_agent_decided_label_is_matched_case_insensitively():
+    candidate = {
+        "url": "https://github.com/acme/w/issues/5",
+        "repo": "acme/w",
+        "title": "Decided: x",
+        "body": "",
+        "labels": ["Agent-Decided"],
+    }
+    assert tasks.heuristic_classify(candidate)["decision"]["options"] == [
+        "Keep",
+        "Veto",
+    ]
+
+
+def test_a_decided_title_without_the_label_is_not_a_keep_or_veto_card():
+    plain = {
+        "url": "https://github.com/acme/w/issues/4",
+        "repo": "acme/w",
+        "title": "Decided: nothing yet",
+        "body": "",
+        "src": "label",
+        "labels": ["manual-task"],
+    }
+    assert tasks.heuristic_classify(plain)["decision"] is None
 
 
 def test_gather_queries_each_owner_separately_and_deduplicates_by_url():
@@ -282,3 +343,36 @@ def test_an_enriched_record_without_a_url_still_merges_with_its_heuristic_twin()
 def test_a_batch_glob_that_matches_nothing_is_an_error(tmp_path):
     with pytest.raises(FileNotFoundError):
         tasks.load_records([str(tmp_path / "out_*.json")])
+
+
+def test_an_agent_decided_card_shows_what_a_veto_would_run():
+    """The owner never vetoes blind: the Reverse and Veto-by lines are on the card."""
+    candidate = {
+        "url": "https://github.com/acme/w/issues/5",
+        "repo": "acme/w",
+        "title": "Decided: x",
+        "body": "**Decided:** x\n\n**Reverse:** `git revert abc1234`\n\n**Veto by:** 2026-11-08.",
+        "labels": ["agent-decided"],
+    }
+    note = tasks.heuristic_classify(candidate)["note"]
+    assert "Reverse: `git revert abc1234`" in note and "Veto by: 2026-11-08" in note
+    candidate["body"] = "**Decided:** x"
+    assert "a Veto reverts nothing" in tasks.heuristic_classify(candidate)["note"]
+    # A long body is cut before classification: a missing line there is unknown, not absent.
+    candidate["body"] = "**Decided:** x\n" + "y" * tasks.DFLT_BODY_CHARS
+    assert "not seen" in tasks.heuristic_classify(candidate)["note"]
+
+
+def test_all_kinds_on_the_cli_gathers_agent_decided_issues(monkeypatch):
+    from openloops import __main__ as cli
+
+    seen = {}
+
+    def fake(**kw):
+        seen.update(kw)
+        return {"counts": {"total": 0}, "owners": [], "saturated": [], "listed": True}
+
+    monkeypatch.setattr(cli.tools, "board_gather", fake)
+    cli.board_gather(all_kinds=True)
+    assert tasks.AGENT_DECIDED_LABEL in seen["searches"]
+    assert seen["review_prs"] is True

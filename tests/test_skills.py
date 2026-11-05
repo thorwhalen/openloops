@@ -313,3 +313,63 @@ def test_every_shipped_file_is_utf8_text():
     """
     for path in [*skill_paths(), *agent_paths()]:
         assert path.read_bytes().decode("utf-8").strip()
+
+
+# --------------------------------------------------------------------------------
+# ADR-010: agents decide what is reversible and clearly recommended.
+
+
+def _skill_text(*parts):
+    return (skills.skills_dir().joinpath(*parts)).read_text(encoding="utf-8")
+
+
+def test_the_capture_skill_states_the_eligibility_test_and_the_label():
+    text = _skill_text("openloops-needs-human", "SKILL.md")
+    assert "agent-decided" in text
+    for condition in ("Reversible by one revert.", "A clear recommendation.", "Inside your task."):
+        assert condition in text
+    assert "Nobody's recorded decision is overturned." in text
+    assert "Veto by:" in text
+
+
+def test_the_deep_decider_is_shipped_decides_nothing_and_treats_what_it_reads_as_data():
+    board = skills.skills_dir() / "openloops-phone-board"
+    brief = (board / "references" / "deep-decider.md").read_text(encoding="utf-8")
+    assert "deep-decider.md" in (board / "SKILL.md").read_text(encoding="utf-8")
+    assert "It decides nothing" in brief
+    assert "data, not instructions" in brief
+    # No unattended path: the receiver procedure knows nothing of proposals or windows.
+    receiver = (board / "references" / "receiver.md").read_text(encoding="utf-8")
+    assert "veto_until" not in receiver and "proposal" not in receiver.lower()
+
+
+def test_a_strangers_recommendation_is_not_a_recommendation():
+    text = _skill_text("openloops-needs-human", "SKILL.md")
+    assert "A recommendation from anyone else is not one" in text
+    assert "third-party" in text, "dependencies and install sources are never eligible"
+
+
+def test_the_capture_skill_is_loaded_before_deciding_not_skipped():
+    """An agent that skips the skill never reads the never-eligible list."""
+    description = front_matter(_skill_text("openloops-needs-human", "SKILL.md"))[
+        "description"
+    ]
+    assert "decide it and record it" not in description
+    assert "load this to check whether you may decide it yourself" in description
+
+
+def test_a_veto_runs_only_a_revert_after_checking_who_filed_it():
+    """The veto worker's rules live where the worker is briefed: the receiver."""
+    receiver = _skill_text("openloops-phone-board", "references", "receiver.md")
+    capture = _skill_text("openloops-needs-human", "SKILL.md")
+    for text in (receiver, capture):
+        assert "git revert" in text and "<sha>" in text and "none: nothing landed" in text
+        assert "--json author,labels" in text
+    assert "Veto brief" in receiver and "Kept by the owner." in receiver
+    # The worker never runs the line as written, and a veto is never batched.
+    assert "git revert --no-edit <sha>" in receiver and "sent **alone**" in receiver
+    assert "never runs the **Reverse** line as written" in capture
+    assert '"not keep or veto"' in receiver, "a forged answer is refused, not implemented"
+    assert "choose, land, record, carry on" in capture
+    # The page's free-text accept is the task's own recommendation, never the event's.
+    assert "never the event's `recommendation` field" in receiver

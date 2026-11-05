@@ -16,6 +16,7 @@ session identifiers that motivated it are not, and never will be — see
 | [ADR-007](007-the-two-seams.md) | The two seams, and what is deliberately not one | accepted |
 | [ADR-008](008-the-board-write-side-lives-in-a-skill.md) | The phone board's write side lives in a skill, not in code | accepted |
 | [ADR-009](009-a-self-hosted-board-store.md) | A self-hosted board: the store seam, the rules, the host's login | accepted |
+| [ADR-010](010-agents-decide-what-is-reversible-and-clear.md) | Agents decide what is reversible and clearly recommended; the owner can veto | accepted |
 
 ## Where these came from
 

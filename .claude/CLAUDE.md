@@ -70,9 +70,9 @@ pass, or ignore that one failure in a root sandbox.
 
 ## Docs & skills
 
-- ADRs: `docs/adr/001`–`009` (naming, release scope, public/private boundary, loop
+- ADRs: `docs/adr/001`–`010` (naming, release scope, public/private boundary, loop
   state vs process state, the digest-dated rule, periodic-job design, the two seams,
-  board write side in a skill, self-hosted board store).
+  board write side in a skill, self-hosted board store, agents decide what is reversible and clearly recommended).
 - Shipped skills/subagent: `.claude/skills/openloops`, `.claude/skills/openloops-needs-human`,
   `.claude/skills/openloops-phone-board`,
   `.claude/agents/openloops-sweep.md` (also documented via `openloops-sweep` skill).

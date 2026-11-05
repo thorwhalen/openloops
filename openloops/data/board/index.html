@@ -419,20 +419,26 @@ function card(t) {
       receipt(t.id)),
     el("p", { class: "ask" }, t.ask), el("p", { class: "orig" }, t.title)];
   if (t.note) kids.push(el("p", { class: "note-src" }, t.note));
+  const isOn = st === "done" || st === "skipped" || st === "snoozed";
+  const rec = t.decision?.recommendation, opts = t.decision?.options || [];
+  // A task's own options are its answers: each one is a tap, and the receiver matches it against these same options.
+  // Answered (or read-only) cards show the options as a list: changing an answer is Undo, then a new tap.
+  const pickOpt = o => act(t, "answer", { answer: o, question: t.decision.question || t.ask, recommendation: rec || null });
   if (t.decision) kids.push(el("div", { class: "decision" },
     t.decision.question ? el("div", {}, t.decision.question) : null,
-    t.decision.options?.length ? el("ul", {}, t.decision.options.map(o => el("li", {}, o))) : null,
-    el("div", { class: "rec" }, t.decision.recommendation ? "Recommended: " + t.decision.recommendation : "No recommendation in the issue")));
+    opts.length && !isOn && !readOnlyOrg ? el("div", { class: "opts", style: "display:grid;gap:6px" }, opts.map(o =>
+      el("button", { class: "btn" + (o === rec ? " good" : ""), disabled: !w, onclick: () => pickOpt(o) }, (o === rec ? "★ " : "") + o)))
+      : opts.length ? el("ul", {}, opts.map(o => el("li", {}, o))) : null,
+    el("div", { class: "rec" }, rec ? "Recommended: " + rec : "No recommendation in the issue")));
   if (t.prompt) kids.push(el("pre", { class: "prompt" }, t.prompt), el("div", { class: "sub" },
     el("button", { class: "btn primary", disabled: !w || d.ran, onclick: () => act(t, "run", { prompt: t.prompt, machine: t.machine || null }) }, d.ran ? "Agent asked" : "Have an agent do it"),
     el("button", { class: "btn", onclick: () => copy(t.prompt, "Prompt copied") }, "Copy prompt")));
   if (t.unblocks?.length) kids.push(el("p", { class: "small" }, "Unblocks: " + t.unblocks.join(" · ")));
   if (t.links?.length > 1) kids.push(el("div", { class: "links" }, t.links.slice(1).map(l => el("a", { href: l.url, target: "_blank", rel: "noopener" }, l.label))));
   kids.push(...noteBox(key, t.id, "Note for " + t.id));
-  const isOn = st === "done" || st === "skipped" || st === "snoozed";
-  const rec = t.decision?.recommendation;
-  // Exactly what the Decide tab's ★ writes, so the receiver posts it and dispatches the follow-up.
-  if (rec && !isOn) kids.push(el("button", { class: "btn primary", disabled: !w, onclick: () => act(t, "answer", { answer: ACCEPT, question: t.decision.question || t.ask, recommendation: rec }) }, "Do what's recommended"));
+  // Only when the options are not already buttons: the recommendation is free text, so the
+  // receiver reads ACCEPT as "the task's own decision.recommendation".
+  if (rec && !isOn && !opts.includes(rec)) kids.push(el("button", { class: "btn primary", disabled: !w, onclick: () => act(t, "answer", { answer: ACCEPT, question: t.decision.question || t.ask, recommendation: rec }) }, "Do what's recommended"));
   kids.push(el("div", { class: "actions" },
     open ? el("a", { class: "btn primary", href: open, target: "_blank", rel: "noopener" }, "Open") : el("span", { class: "btn" }, "No link"),
     el("button", { class: "btn good", disabled: !w, onclick: () => st === "done" ? undo(t) : act(t, "done") }, st === "done" ? "Undo" : "Done"),

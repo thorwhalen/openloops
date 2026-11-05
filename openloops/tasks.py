@@ -216,10 +216,15 @@ def _id_of(url: str) -> str:
 
 #: The search API's own per-query ceiling. A query that returns this many is saturated.
 DFLT_GATHER_LIMIT = 1000
+#: The label an agent files a decision it made itself under (ADR-010).
+AGENT_DECIDED_LABEL = "agent-decided"
 #: Extra searches beyond the label, by name: (search terms, the field they match).
+#: A ``label`` match is a label name rather than text: ``agent-decided`` issues are the
+#: record of a decision an agent made and the owner can veto (ADR-010).
 DFLT_SEARCHES = {
     "decide": ("Decide", "title"),
     "needs-user": ('"Needs the user"', "body"),
+    AGENT_DECIDED_LABEL: (AGENT_DECIDED_LABEL, "label"),
 }
 #: Environment override for repositories to leave out: owner/name globs, comma- or
 #: space-separated (``acme/secret-*``, ``other-org/*``).
@@ -321,6 +326,8 @@ def gather(
         )
         for name in searches:
             terms, match = DFLT_SEARCHES[name]
+            by = ["--label", terms] if match == "label" else ["--match", match]
+            tail = [] if match == "label" else ["--", terms]
             queries.append(
                 (
                     owner,
@@ -329,12 +336,10 @@ def gather(
                         "search",
                         "issues",
                         *base,
-                        "--match",
-                        match,
+                        *by,
                         "--json",
                         ",".join(_ISSUE_FIELDS),
-                        "--",
-                        terms,
+                        *tail,
                     ],
                 )
             )
@@ -578,6 +583,31 @@ DFLT_FALLBACK = Rule("other", "browser", 5, "")
 _NPM_PACKAGE = re.compile(r"npmjs\.com/package/(@[\w.-]+/[\w.-]+|[\w.-]+)")
 _PYPI_PROJECT = re.compile(r"pypi\.org/(?:project|manage/project)/([\w.-]+)")
 _RECOMMEND = re.compile(r"\*\*Recommend(?:ation|ed)?:?\*\*:?\s*(.+)", re.IGNORECASE)
+#: What an ``agent-decided`` body says a Veto would undo, and by when (ADR-010). One line
+#: each (``[ \t]``, never across a newline); the Veto-by value stops at its first sentence.
+_AGENT_DECIDED_REVERSE = re.compile(r"^\*\*Reverse:\*\*[ \t]*(\S.*)$", re.MULTILINE)
+_AGENT_DECIDED_VETO_BY = re.compile(r"^\*\*Veto by:\*\*[ \t]*([^.\n]+)", re.MULTILINE)
+
+
+def _agent_decided_note(body: str) -> str:
+    """The card line that tells the owner what a Veto would undo, so they never veto blind.
+
+    >>> _agent_decided_note("**Reverse:** `git revert abc1234`\\n**Veto by:** 2026-11-08. To veto")
+    'Reverse: `git revert abc1234` · Veto by: 2026-11-08'
+    >>> _agent_decided_note("**Reverse:**\\n**Veto by:** 2026-11-08.")
+    'No Reverse line in the issue: a Veto reverts nothing · Veto by: 2026-11-08'
+    """
+    reverse = _AGENT_DECIDED_REVERSE.search(body)
+    veto_by = _AGENT_DECIDED_VETO_BY.search(body)
+    if reverse:
+        head = f"Reverse: {reverse[1].strip()}"
+    elif len(body) >= DFLT_BODY_CHARS:  # cut before the line: unknown, not absent
+        head = "Reverse line not seen (long issue): open it before vetoing"
+    else:
+        head = "No Reverse line in the issue: a Veto reverts nothing"
+    return head + (f" · Veto by: {veto_by[1].strip()}" if veto_by else "")
+
+
 _BOT_PR = re.compile(
     r"^(build\(deps|chore\(deps|bump )|\[bot\]|dependabot|renovate", re.IGNORECASE
 )
@@ -609,7 +639,14 @@ def heuristic_classify(
     kind = "pr" if "/pull/" in url else "issue"
     text = f"{title}\n{body}"
 
-    if kind == "pr":
+    # By label, not by which query found it first: deduplication keeps the first query
+    # that returned an issue, and the `decide` title search can return it too.
+    agent_decided = AGENT_DECIDED_LABEL in (
+        str(lab).lower() for lab in candidate.get("labels") or ()
+    )
+    if agent_decided:
+        rule = Rule("decision", "tap", 1, "")  # keep or veto: one tap
+    elif kind == "pr":
         rule = (
             Rule("merge-bot-pr", "tap", 2, "")
             if _BOT_PR.search(title)
@@ -658,8 +695,17 @@ def heuristic_classify(
         links.append({"label": "PR: files changed", "url": url.rstrip("/") + "/files"})
     links.append({"label": "PR" if kind == "pr" else "Issue", "url": url})
 
-    decision = None
-    if rule.pattern == "decision":
+    decision, note = None, None
+    if agent_decided:
+        # An agent already chose (ADR-010): the owner's only question is keep or veto.
+        decision = {
+            "question": "Keep the decision the agent made?",
+            "options": ["Keep", "Veto"],
+            "recommendation": "Keep",
+        }
+        # What a Veto would undo, on the card itself: the owner never vetoes blind.
+        note = _agent_decided_note(body)
+    elif rule.pattern == "decision":
         recommended = _RECOMMEND.search(body)
         decision = {
             "question": title,
@@ -681,6 +727,7 @@ def heuristic_classify(
             "minutes": rule.minutes,
             "links": links,
             "decision": decision,
+            "note": note,
             "prompt": f"Do what {url} asks, run its Verify line if it has one, and comment the result on it."
             if session
             else None,
