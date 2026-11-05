@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=785bba28"></script>
+    <script src="../_static/documentation_options.js?v=dc233e31"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.26" />
+  <meta name="docsearch:version" content="0.1.27" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -331,6 +331,7 @@
 <li class="toctree-l2 current active"><a aria-current="page" class="current reference internal" href="#">openloops.job</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.obligations.html">openloops.obligations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.publications.html">openloops.publications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.receiver_tick.html">openloops.receiver_tick</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.skills.html">openloops.skills</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.store.html">openloops.store</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.tasks.html">openloops.tasks</a></li>
@@ -424,6 +425,12 @@ the same command, and <a class="reference internal" href="#openloops.job.install
 <tr class="row-even"><td><p><a class="reference internal" href="#openloops.job.DFLT_INTERVAL" title="openloops.job.DFLT_INTERVAL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DFLT_INTERVAL</span></code></a></p></td>
 <td><p>Seconds between ticks.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.job.RECEIVER_LABEL" title="openloops.job.RECEIVER_LABEL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RECEIVER_LABEL</span></code></a></p></td>
+<td><p>launchd label of the board-receiver job (ADR-011).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.job.RECEIVER_INTERVAL" title="openloops.job.RECEIVER_INTERVAL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RECEIVER_INTERVAL</span></code></a></p></td>
+<td><p>Seconds between receiver ticks.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -433,10 +440,16 @@ the same command, and <a class="reference internal" href="#openloops.job.install
 <tr class="row-odd"><td><p><a class="reference internal" href="#openloops.job.install" title="openloops.job.install"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install</span></code></a>(*[, label, interval, dry_run])</p></td>
 <td><p>Install (or replace) the periodic sync job.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.job.install_receiver" title="openloops.job.install_receiver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install_receiver</span></code></a>(work_dir, *[, dry_run])</p></td>
+<td><p>Install (or replace) the board-receiver job.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.job.receiver_job_spec" title="openloops.job.receiver_job_spec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">receiver_job_spec</span></code></a>(work_dir, *[, claude, ...])</p></td>
+<td><p>The receiver job as data: program arguments, environment, plist.</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#openloops.job.uninstall" title="openloops.job.uninstall"><code class="xref py py-obj docutils literal notranslate"><span class="pre">uninstall</span></code></a>(*[, label])</p></td>
 <td><p>Unload the job and remove its plist.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.job.job_status" title="openloops.job.job_status"><code class="xref py py-obj docutils literal notranslate"><span class="pre">job_status</span></code></a>(*[, label])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.job.job_status" title="openloops.job.job_status"><code class="xref py py-obj docutils literal notranslate"><span class="pre">job_status</span></code></a>(*[, label, env_file])</p></td>
 <td><p>Installed? loaded? and — the question that matters — when did it last write?</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#openloops.job.plist_xml" title="openloops.job.plist_xml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plist_xml</span></code></a>(*, label, program_args, env, ...)</p></td>
@@ -459,6 +472,19 @@ full scan of the transcript directory for no gain.</p>
 <dd><p>launchd job label. Also the plist filename and the log filename.</p>
 </dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="openloops.job.RECEIVER_INTERVAL">
+<span class="sig-prename descclassname"><span class="pre">openloops.job.</span></span><span class="sig-name descname"><span class="pre">RECEIVER_INTERVAL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">300</span></span><a class="headerlink" href="#openloops.job.RECEIVER_INTERVAL" title="Link to this definition">#</a></dt>
+<dd><p>Seconds between receiver ticks. A tick that finds nothing pending costs a few HTTP
+calls and no model, so this can be as short as the phone board’s latency wants.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="openloops.job.RECEIVER_LABEL">
+<span class="sig-prename descclassname"><span class="pre">openloops.job.</span></span><span class="sig-name descname"><span class="pre">RECEIVER_LABEL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'openloops.board-receiver'</span></span><a class="headerlink" href="#openloops.job.RECEIVER_LABEL" title="Link to this definition">#</a></dt>
+<dd><p>launchd label of the board-receiver job (ADR-011).</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="openloops.job.install">
 <span class="sig-prename descclassname"><span class="pre">openloops.job.</span></span><span class="sig-name descname"><span class="pre">install</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'openloops.sync'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">900</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/job.html#install"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.job.install" title="Link to this definition">#</a></dt>
@@ -473,12 +499,27 @@ the same silence as a job with nothing to do.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="openloops.job.install_receiver">
+<span class="sig-prename descclassname"><span class="pre">openloops.job.</span></span><span class="sig-name descname"><span class="pre">install_receiver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">work_dir</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/job.html#install_receiver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.job.install_receiver" title="Link to this definition">#</a></dt>
+<dd><p>Install (or replace) the board-receiver job. Returns the paths it wrote.</p>
+<p><code class="docutils literal notranslate"><span class="pre">kwargs</span></code> are those of <a class="reference internal" href="#openloops.job.receiver_job_spec" title="openloops.job.receiver_job_spec"><code class="xref py py-func docutils literal notranslate"><span class="pre">receiver_job_spec()</span></code></a>. A dry run builds and returns the
+plist without touching launchd and without requiring the credentials file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="openloops.job.job_status">
-<span class="sig-prename descclassname"><span class="pre">openloops.job.</span></span><span class="sig-name descname"><span class="pre">job_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'openloops.sync'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/job.html#job_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.job.job_status" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openloops.job.</span></span><span class="sig-name descname"><span class="pre">job_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'openloops.sync'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PosixPath('~/.config/openloops/board-receiver.env')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/job.html#job_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.job.job_status" title="Link to this definition">#</a></dt>
 <dd><p>Installed? loaded? and — the question that matters — when did it last write?</p>
 <p><code class="docutils literal notranslate"><span class="pre">launchctl</span> <span class="pre">list</span></code> says the job is registered, which is not the same as the job
 doing anything. The cache’s modification time is the only evidence that a tick
-completed, so it is reported alongside.</p>
+completed, so it is reported alongside. For the receiver, <code class="docutils literal notranslate"><span class="pre">last_check</span></code> is the
+last tick whose check succeeded (a stamp beside <em>env_file</em>) and <code class="docutils literal notranslate"><span class="pre">last_write</span></code> the
+last tick that had work (its log).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>]</span></p>
@@ -488,7 +529,7 @@ completed, so it is reported alongside.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openloops.job.plist_xml">
-<span class="sig-prename descclassname"><span class="pre">openloops.job.</span></span><span class="sig-name descname"><span class="pre">plist_xml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">program_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/job.html#plist_xml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.job.plist_xml" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openloops.job.</span></span><span class="sig-name descname"><span class="pre">plist_xml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">program_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/job.html#plist_xml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.job.plist_xml" title="Link to this definition">#</a></dt>
 <dd><p>The launchd property list, as text. Pure, so it can be tested on any platform.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xml</span> <span class="o">=</span> <span class="n">plist_xml</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">'x'</span><span class="p">,</span> <span class="n">program_args</span><span class="o">=</span><span class="p">[</span><span class="s1">'a'</span><span class="p">],</span> <span class="n">env</span><span class="o">=</span><span class="p">{</span><span class="s1">'HOME'</span><span class="p">:</span> <span class="s1">'/h'</span><span class="p">},</span>
 <span class="gp">... </span>                <span class="n">interval</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">log_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">'/tmp/x.log'</span><span class="p">))</span>
@@ -499,6 +540,24 @@ completed, so it is reported alongside.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.job.receiver_job_spec">
+<span class="sig-prename descclassname"><span class="pre">openloops.job.</span></span><span class="sig-name descname"><span class="pre">receiver_job_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">work_dir</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">claude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sonnet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_budget_usd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_tools</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Bash(gh:*)</span> <span class="pre">Bash(curl:*)</span> <span class="pre">Bash(python3:*)</span> <span class="pre">Bash(crowsnest:*)</span> <span class="pre">Bash(mkdir:*)</span> <span class="pre">Bash(date:*)</span> <span class="pre">Bash(set:*)</span> <span class="pre">Bash(umask:*)</span> <span class="pre">Bash(source:*)</span> <span class="pre">Bash(jq:*)</span> <span class="pre">Bash(cat:*)</span> <span class="pre">Bash(ls:*)</span> <span class="pre">Bash(shasum:*)</span> <span class="pre">Bash(vm_stat:*)</span> <span class="pre">Bash(sysctl:*)</span> <span class="pre">Read</span> <span class="pre">Write</span> <span class="pre">Edit</span> <span class="pre">Glob</span> <span class="pre">Grep</span> <span class="pre">Skill'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PosixPath('~/.config/openloops/board-receiver.env')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'openloops.board-receiver'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">require_claude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/job.html#receiver_job_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.job.receiver_job_spec" title="Link to this definition">#</a></dt>
+<dd><p>The receiver job as data: program arguments, environment, plist. Pure but for
+looking up where <code class="docutils literal notranslate"><span class="pre">claude</span></code> and <code class="docutils literal notranslate"><span class="pre">node</span></code> are, so it can be tested anywhere.</p>
+<p>The job runs <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">openloops.receiver_tick</span></code>, which asks the board store
+whether anything is pending and only then replaces itself with <code class="docutils literal notranslate"><span class="pre">claude</span> <span class="pre">-p</span></code> and the
+packaged receiver prompt. The credentials stay in <em>env_file</em>; nothing about them
+is in the plist, the arguments or the environment (<code class="docutils literal notranslate"><span class="pre">PASSED_THROUGH</span></code> names none).
+With <code class="docutils literal notranslate"><span class="pre">require_claude=False</span></code> (a dry run) a missing <code class="docutils literal notranslate"><span class="pre">claude</span></code> is shown as a bare
+name instead of refused.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>]</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -565,9 +624,13 @@ completed, so it is reported alongside.</p>
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.DFLT_INTERVAL"><code class="docutils literal notranslate"><span class="pre">DFLT_INTERVAL</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.DFLT_LABEL"><code class="docutils literal notranslate"><span class="pre">DFLT_LABEL</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.RECEIVER_INTERVAL"><code class="docutils literal notranslate"><span class="pre">RECEIVER_INTERVAL</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.RECEIVER_LABEL"><code class="docutils literal notranslate"><span class="pre">RECEIVER_LABEL</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.install"><code class="docutils literal notranslate"><span class="pre">install()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.install_receiver"><code class="docutils literal notranslate"><span class="pre">install_receiver()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.job_status"><code class="docutils literal notranslate"><span class="pre">job_status()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.plist_xml"><code class="docutils literal notranslate"><span class="pre">plist_xml()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.receiver_job_spec"><code class="docutils literal notranslate"><span class="pre">receiver_job_spec()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.uninstall"><code class="docutils literal notranslate"><span class="pre">uninstall()</span></code></a></li>
 </ul>
   </nav></div>

@@ -17,6 +17,7 @@
 - [openloops.job](openloops.job.html.md): The periodic job: launchd runs &#96;ol sync&#96;, writes, and exits. No daemon.
 - [openloops.obligations](openloops.obligations.html.md): What you still owe your agents — re-checked against the world before it is shown.
 - [openloops.publications](openloops.publications.html.md): What your agents handed you lately: recently published annals documents, per session.
+- [openloops.receiver_tick](openloops.receiver_tick.html.md): One tick of the board-receiver job: check for work without a model, then hand over.
 - [openloops.skills](openloops.skills.html.md): The agent-facing surface: two skills, one subagent, and the command that installs them.
 - [openloops.store](openloops.store.html.md): Where digests live, and where the change-detection cache lives — two different things.
 - [openloops.tasks](openloops.tasks.html.md): Everything you could act on, as one list of task records: gather, classify, merge.

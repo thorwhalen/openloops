@@ -10,12 +10,16 @@ openloops.job
    
       DFLT_LABEL
       DFLT_INTERVAL
+      RECEIVER_LABEL
+      RECEIVER_INTERVAL
    
    .. rubric:: Functions
 
    .. autosummary::
    
       install
+      install_receiver
+      receiver_job_spec
       uninstall
       job_status
       plist_xml

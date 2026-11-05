@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=785bba28"></script>
+    <script src="_static/documentation_options.js?v=dc233e31"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -57,7 +57,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.26" />
+  <meta name="docsearch:version" content="0.1.27" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -980,14 +980,17 @@ ol<span class="w"> </span>board-build<span class="w"> </span>work/board<span cla
 <p><code class="docutils literal notranslate"><span class="pre">board-gather</span></code> queries each owner separately with no 50-row cap and reports a query that hits the search API’s ceiling as <code class="docutils literal notranslate"><span class="pre">saturated</span></code> rather than truncating it; <code class="docutils literal notranslate"><span class="pre">--exclude-repos</span> <span class="pre">'org/*'</span></code> (or <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_EXCLUDE_REPOS</span></code>) keeps repositories off the board. <code class="docutils literal notranslate"><span class="pre">board-classify</span></code> is a deterministic heuristic with no model; <code class="docutils literal notranslate"><span class="pre">--enriched</span> <span class="pre">'batches/out_*.json'</span></code> lays records written by the shipped classifier brief over it. <code class="docutils literal notranslate"><span class="pre">board-build</span></code> writes only into the directory you name: the board holds titles from your repositories, so keep it out of any repo.</p>
 <p>The taps on the page become GitHub comments, closed issues and dispatched workers only through a Claude session following the <code class="docutils literal notranslate"><span class="pre">openloops-phone-board</span></code> skill. openloops code never does it (<a class="reference internal" href="#docs/adr/008-the-board-write-side-lives-in-a-skill.md"><span class="xref myst">ADR-008</span></a>).</p>
 <p><strong>On your own website.</strong> <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">board-build</span> <span class="pre">--store</span> <span class="pre">http</span> <span class="pre">--api</span> <span class="pre">/your/prefix/board-store</span></code> wires the page to a small document-store API instead of the Artifact store. <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">openloops[server]</span></code> adds <code class="docutils literal notranslate"><span class="pre">openloops.board_server.mk_app</span></code>, a FastAPI app serving the board files and that API under the store rules of <code class="docutils literal notranslate"><span class="pre">openloops.board_store</span></code> (events immutable, drafts newest-wins, receipts written only by the receiver, which never writes events outside a migration import). It authenticates nobody: put it behind your own login and map each identity to <code class="docutils literal notranslate"><span class="pre">viewer</span></code> (you) or <code class="docutils literal notranslate"><span class="pre">receiver</span></code> (the receiving session’s account) in its <code class="docutils literal notranslate"><span class="pre">role_of</span></code> (<a class="reference internal" href="#docs/adr/009-a-self-hosted-board-store.md"><span class="xref myst">ADR-009</span></a>).</p>
+<p><strong>A receiver on a timer (macOS).</strong> <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">install-receiver-job</span> <span class="pre">WORK_DIR</span></code> installs a launchd job that, every five minutes, asks a self-hosted board store over HTTPS, with no model, whether any tap is waiting, and when none is, writes the board’s heartbeat. Only when something is waiting does it start <code class="docutils literal notranslate"><span class="pre">claude</span> <span class="pre">-p</span></code> with the receiver procedure, capped at <code class="docutils literal notranslate"><span class="pre">--max-budget-usd</span></code> (that tick’s session only, not the workers it dispatches). Credentials stay in <code class="docutils literal notranslate"><span class="pre">~/.config/openloops/board-receiver.env</span></code> (mode 600), never in the job. Check with <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">-m</span> <span class="pre">openloops.receiver_tick</span> <span class="pre">--check-only</span></code> and <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">receiver-job-status</span></code>; remove with <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">uninstall-receiver-job</span></code>. This is the one part of openloops that reaches the network or starts a model, and only once you install it (<a class="reference internal" href="#docs/adr/011-the-board-receiver-is-a-periodic-job-with-a-free-check.md"><span class="xref myst">ADR-011</span></a>).</p>
 </section>
 <section id="turning-it-off">
 <h2>Turning it off<a class="headerlink" href="#turning-it-off" title="Link to this heading">#</a></h2>
 <p>Nothing here runs unless you type it, or an agent you installed a skill for does. There
-is one exception, and it is opt-in: <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">install-job</span></code> puts the digest sync on a timer.
-Check with <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">job-status</span></code>; if it says the plist is absent, nothing of openloops is
-running in the background at all.</p>
+are two exceptions, both opt-in: <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">install-job</span></code> puts the digest sync on a timer, and
+<code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">install-receiver-job</span></code> runs a phone board’s receiver on one. Check with
+<code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">job-status</span></code> and <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">receiver-job-status</span></code>; if both say the plist is absent, nothing
+of openloops is running in the background at all.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ol<span class="w"> </span>uninstall-job<span class="w">            </span><span class="c1"># stop the timer, if you ever installed it</span>
+ol<span class="w"> </span>uninstall-receiver-job<span class="w">   </span><span class="c1"># stop the board receiver, likewise</span>
 rm<span class="w"> </span>-rf<span class="w"> </span>~/.claude/skills/openloops<span class="w"> </span>~/.claude/skills/openloops-needs-human<span class="w"> </span><span class="se">\</span>
 <span class="w">       </span>~/.claude/agents/openloops-sweep.md<span class="w">      </span><span class="c1"># the skills are three symlinks</span>
 pip<span class="w"> </span>uninstall<span class="w"> </span>openloops<span class="w">     </span><span class="c1"># remove the package</span>
@@ -1183,7 +1186,7 @@ they are the two ways a tool like this becomes a liar.</p></li>
 </section>
 </section>
 
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-05 12:31 UTC from <a href="https://github.com/thorwhalen/openloops/commit/81a0d39a25e8ab5c31b460cc955403e5ead59984">81a0d39</a> (main) · openloops 0.1.26 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-05 12:43 UTC from <a href="https://github.com/thorwhalen/openloops/commit/f0ff4175029346f1f86878fa52fa3d6a38bf5f55">f0ff417</a> (main) · openloops 0.1.27 · <a href="about-this-build.html">about this build</a></p>
 
                 </article>
               

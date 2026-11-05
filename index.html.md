@@ -623,15 +623,19 @@ The taps on the page become GitHub comments, closed issues and dispatched worker
 
 **On your own website.** `ol board-build --store http --api /your/prefix/board-store` wires the page to a small document-store API instead of the Artifact store. `pip install openloops[server]` adds `openloops.board_server.mk_app`, a FastAPI app serving the board files and that API under the store rules of `openloops.board_store` (events immutable, drafts newest-wins, receipts written only by the receiver, which never writes events outside a migration import). It authenticates nobody: put it behind your own login and map each identity to `viewer` (you) or `receiver` (the receiving session’s account) in its `role_of` ([ADR-009]()).
 
+**A receiver on a timer (macOS).** `ol install-receiver-job WORK_DIR` installs a launchd job that, every five minutes, asks a self-hosted board store over HTTPS, with no model, whether any tap is waiting, and when none is, writes the board’s heartbeat. Only when something is waiting does it start `claude -p` with the receiver procedure, capped at `--max-budget-usd` (that tick’s session only, not the workers it dispatches). Credentials stay in `~/.config/openloops/board-receiver.env` (mode 600), never in the job. Check with `python3 -m openloops.receiver_tick --check-only` and `ol receiver-job-status`; remove with `ol uninstall-receiver-job`. This is the one part of openloops that reaches the network or starts a model, and only once you install it ([ADR-011]()).
+
 ## Turning it off
 
 Nothing here runs unless you type it, or an agent you installed a skill for does. There
-is one exception, and it is opt-in: `ol install-job` puts the digest sync on a timer.
-Check with `ol job-status`; if it says the plist is absent, nothing of openloops is
-running in the background at all.
+are two exceptions, both opt-in: `ol install-job` puts the digest sync on a timer, and
+`ol install-receiver-job` runs a phone board’s receiver on one. Check with
+`ol job-status` and `ol receiver-job-status`; if both say the plist is absent, nothing
+of openloops is running in the background at all.
 
 ```bash
 ol uninstall-job            # stop the timer, if you ever installed it
+ol uninstall-receiver-job   # stop the board receiver, likewise
 rm -rf ~/.claude/skills/openloops ~/.claude/skills/openloops-needs-human \
        ~/.claude/agents/openloops-sweep.md      # the skills are three symlinks
 pip uninstall openloops     # remove the package

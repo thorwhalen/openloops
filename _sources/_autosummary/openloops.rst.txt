@@ -78,6 +78,7 @@
    job
    obligations
    publications
+   receiver_tick
    skills
    store
    tasks

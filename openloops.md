@@ -1,4 +1,4 @@
-> built 2026-11-05 12:31 UTC from 81a0d39 (main) · openloops 0.1.26. Details: build_info.json
+> built 2026-11-05 12:43 UTC from f0ff417 (main) · openloops 0.1.27. Details: build_info.json
 
 # index.html.md
 
@@ -627,15 +627,19 @@ The taps on the page become GitHub comments, closed issues and dispatched worker
 
 **On your own website.** `ol board-build --store http --api /your/prefix/board-store` wires the page to a small document-store API instead of the Artifact store. `pip install openloops[server]` adds `openloops.board_server.mk_app`, a FastAPI app serving the board files and that API under the store rules of `openloops.board_store` (events immutable, drafts newest-wins, receipts written only by the receiver, which never writes events outside a migration import). It authenticates nobody: put it behind your own login and map each identity to `viewer` (you) or `receiver` (the receiving session’s account) in its `role_of` ([ADR-009]()).
 
+**A receiver on a timer (macOS).** `ol install-receiver-job WORK_DIR` installs a launchd job that, every five minutes, asks a self-hosted board store over HTTPS, with no model, whether any tap is waiting, and when none is, writes the board’s heartbeat. Only when something is waiting does it start `claude -p` with the receiver procedure, capped at `--max-budget-usd` (that tick’s session only, not the workers it dispatches). Credentials stay in `~/.config/openloops/board-receiver.env` (mode 600), never in the job. Check with `python3 -m openloops.receiver_tick --check-only` and `ol receiver-job-status`; remove with `ol uninstall-receiver-job`. This is the one part of openloops that reaches the network or starts a model, and only once you install it ([ADR-011]()).
+
 ## Turning it off
 
 Nothing here runs unless you type it, or an agent you installed a skill for does. There
-is one exception, and it is opt-in: `ol install-job` puts the digest sync on a timer.
-Check with `ol job-status`; if it says the plist is absent, nothing of openloops is
-running in the background at all.
+are two exceptions, both opt-in: `ol install-job` puts the digest sync on a timer, and
+`ol install-receiver-job` runs a phone board’s receiver on one. Check with
+`ol job-status` and `ol receiver-job-status`; if both say the plist is absent, nothing
+of openloops is running in the background at all.
 
 ```bash
 ol uninstall-job            # stop the timer, if you ever installed it
+ol uninstall-receiver-job   # stop the board receiver, likewise
 rm -rf ~/.claude/skills/openloops ~/.claude/skills/openloops-needs-human \
        ~/.claude/agents/openloops-sweep.md      # the skills are three symlinks
 pip uninstall openloops     # remove the package
@@ -2330,6 +2334,9 @@ Claude Code writes a JSONL transcript for every session and deletes it after abo
 month. openloops reads those transcripts, writes one short dated markdown digest per
 session, and keeps the digests. Nothing here calls a model, reaches the network, or
 needs an account: it reads files you already have and writes files you already own.
+(One opt-in exception: `openloops.receiver_tick`, run only by the board-receiver job
+you install with `ol install-receiver-job`, signs in to your own board store and may
+start a `claude` session. Nothing imports it, so `import openloops` never loads it.)
 
 ```pycon
 >>> import openloops
@@ -3484,23 +3491,24 @@ which is what makes it safe to suggest when someone suspects a stale digest.
 
 ### Modules
 
-| [`base`](_autosummary/openloops.base.html.md#module-openloops.base)                 | Data structures shared across openloops: what a session is, and what a digest is.       |
-|---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| [`blockers`](_autosummary/openloops.blockers.html.md#module-openloops.blockers)         | The other kind of open loop: the one that points at a repository, not at a person.      |
-| [`board`](_autosummary/openloops.board.html.md#module-openloops.board)               | The phone task board: task records in, a static page and its data files out.            |
-| [`board_server`](_autosummary/openloops.board_server.html.md#module-openloops.board_server) | An optional web app for a self-hosted phone board: the page, its files, its store API.  |
-| [`board_store`](_autosummary/openloops.board_store.html.md#module-openloops.board_store)   | The board store's rules, for a self-hosted phone board: who may write what, and how.    |
-| [`dashboard`](_autosummary/openloops.dashboard.html.md#module-openloops.dashboard)       | One page you can look at instead of reading three command outputs.                      |
-| [`digest`](_autosummary/openloops.digest.html.md#module-openloops.digest)             | Rendering one session into one dated markdown digest.                                   |
-| [`egress`](_autosummary/openloops.egress.html.md#module-openloops.egress)             | The egress choke point: nothing leaves openloops carrying a home path or a secret.      |
-| [`job`](_autosummary/openloops.job.html.md#module-openloops.job)                   | The periodic job: launchd runs `ol sync`, writes, and exits.                            |
-| [`obligations`](_autosummary/openloops.obligations.html.md#module-openloops.obligations)   | What you still owe your agents — re-checked against the world before it is shown.       |
-| [`publications`](_autosummary/openloops.publications.html.md#module-openloops.publications) | What your agents handed you lately: recently published annals documents, per session.   |
-| [`skills`](_autosummary/openloops.skills.html.md#module-openloops.skills)             | The agent-facing surface: two skills, one subagent, and the command that installs them. |
-| [`store`](_autosummary/openloops.store.html.md#module-openloops.store)               | Where digests live, and where the change-detection cache lives — two different things.  |
-| [`tasks`](_autosummary/openloops.tasks.html.md#module-openloops.tasks)               | Everything you could act on, as one list of task records: gather, classify, merge.      |
-| [`tools`](_autosummary/openloops.tools.html.md#module-openloops.tools)               | The package's single list of operations: plain functions, JSON-ready dicts.             |
-| [`transcripts`](_autosummary/openloops.transcripts.html.md#module-openloops.transcripts)   | The default `transcript_source`: a direct reader of Claude Code's on-disk state.        |
+| [`base`](_autosummary/openloops.base.html.md#module-openloops.base)                   | Data structures shared across openloops: what a session is, and what a digest is.       |
+|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| [`blockers`](_autosummary/openloops.blockers.html.md#module-openloops.blockers)           | The other kind of open loop: the one that points at a repository, not at a person.      |
+| [`board`](_autosummary/openloops.board.html.md#module-openloops.board)                 | The phone task board: task records in, a static page and its data files out.            |
+| [`board_server`](_autosummary/openloops.board_server.html.md#module-openloops.board_server)   | An optional web app for a self-hosted phone board: the page, its files, its store API.  |
+| [`board_store`](_autosummary/openloops.board_store.html.md#module-openloops.board_store)     | The board store's rules, for a self-hosted phone board: who may write what, and how.    |
+| [`dashboard`](_autosummary/openloops.dashboard.html.md#module-openloops.dashboard)         | One page you can look at instead of reading three command outputs.                      |
+| [`digest`](_autosummary/openloops.digest.html.md#module-openloops.digest)               | Rendering one session into one dated markdown digest.                                   |
+| [`egress`](_autosummary/openloops.egress.html.md#module-openloops.egress)               | The egress choke point: nothing leaves openloops carrying a home path or a secret.      |
+| [`job`](_autosummary/openloops.job.html.md#module-openloops.job)                     | The periodic job: launchd runs `ol sync`, writes, and exits.                            |
+| [`obligations`](_autosummary/openloops.obligations.html.md#module-openloops.obligations)     | What you still owe your agents — re-checked against the world before it is shown.       |
+| [`publications`](_autosummary/openloops.publications.html.md#module-openloops.publications)   | What your agents handed you lately: recently published annals documents, per session.   |
+| [`receiver_tick`](_autosummary/openloops.receiver_tick.html.md#module-openloops.receiver_tick) | One tick of the board-receiver job: check for work without a model, then hand over.     |
+| [`skills`](_autosummary/openloops.skills.html.md#module-openloops.skills)               | The agent-facing surface: two skills, one subagent, and the command that installs them. |
+| [`store`](_autosummary/openloops.store.html.md#module-openloops.store)                 | Where digests live, and where the change-detection cache lives — two different things.  |
+| [`tasks`](_autosummary/openloops.tasks.html.md#module-openloops.tasks)                 | Everything you could act on, as one list of task records: gather, classify, merge.      |
+| [`tools`](_autosummary/openloops.tools.html.md#module-openloops.tools)                 | The package's single list of operations: plain functions, JSON-ready dicts.             |
+| [`transcripts`](_autosummary/openloops.transcripts.html.md#module-openloops.transcripts)     | The default `transcript_source`: a direct reader of Claude Code's on-disk state.        |
 
 
 # _autosummary/openloops.job.html.md
@@ -3525,17 +3533,21 @@ the same command, and [`install()`](_autosummary/openloops.job.html.md#openloops
 
 ### Module Attributes
 
-| [`DFLT_LABEL`](_autosummary/openloops.job.html.md#openloops.job.DFLT_LABEL)    | launchd job label.     |
-|----------------------------------------------------------------|------------------------|
-| [`DFLT_INTERVAL`](_autosummary/openloops.job.html.md#openloops.job.DFLT_INTERVAL) | Seconds between ticks. |
+| [`DFLT_LABEL`](_autosummary/openloops.job.html.md#openloops.job.DFLT_LABEL)        | launchd job label.                                 |
+|--------------------------------------------------------------------|----------------------------------------------------|
+| [`DFLT_INTERVAL`](_autosummary/openloops.job.html.md#openloops.job.DFLT_INTERVAL)     | Seconds between ticks.                             |
+| [`RECEIVER_LABEL`](_autosummary/openloops.job.html.md#openloops.job.RECEIVER_LABEL)    | launchd label of the board-receiver job (ADR-011). |
+| [`RECEIVER_INTERVAL`](_autosummary/openloops.job.html.md#openloops.job.RECEIVER_INTERVAL) | Seconds between receiver ticks.                    |
 
 ### Functions
 
-| [`install`](_autosummary/openloops.job.html.md#openloops.job.install)(\*[, label, interval, dry_run])      | Install (or replace) the periodic sync job.                                  |
-|-----------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
-| [`uninstall`](_autosummary/openloops.job.html.md#openloops.job.uninstall)(\*[, label])                       | Unload the job and remove its plist.                                         |
-| [`job_status`](_autosummary/openloops.job.html.md#openloops.job.job_status)(\*[, label])                      | Installed? loaded? and — the question that matters — when did it last write? |
-| [`plist_xml`](_autosummary/openloops.job.html.md#openloops.job.plist_xml)(\*, label, program_args, env, ...) | The launchd property list, as text.                                          |
+| [`install`](_autosummary/openloops.job.html.md#openloops.job.install)(\*[, label, interval, dry_run])        | Install (or replace) the periodic sync job.                                  |
+|-------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
+| [`install_receiver`](_autosummary/openloops.job.html.md#openloops.job.install_receiver)(work_dir, \*[, dry_run])      | Install (or replace) the board-receiver job.                                 |
+| [`receiver_job_spec`](_autosummary/openloops.job.html.md#openloops.job.receiver_job_spec)(work_dir, \*[, claude, ...]) | The receiver job as data: program arguments, environment, plist.             |
+| [`uninstall`](_autosummary/openloops.job.html.md#openloops.job.uninstall)(\*[, label])                         | Unload the job and remove its plist.                                         |
+| [`job_status`](_autosummary/openloops.job.html.md#openloops.job.job_status)(\*[, label, env_file])              | Installed? loaded? and — the question that matters — when did it last write? |
+| [`plist_xml`](_autosummary/openloops.job.html.md#openloops.job.plist_xml)(\*, label, program_args, env, ...)   | The launchd property list, as text.                                          |
 
 ### openloops.job.DFLT_INTERVAL *= 900*
 
@@ -3547,6 +3559,15 @@ full scan of the transcript directory for no gain.
 
 launchd job label. Also the plist filename and the log filename.
 
+### openloops.job.RECEIVER_INTERVAL *= 300*
+
+Seconds between receiver ticks. A tick that finds nothing pending costs a few HTTP
+calls and no model, so this can be as short as the phone board’s latency wants.
+
+### openloops.job.RECEIVER_LABEL *= 'openloops.board-receiver'*
+
+launchd label of the board-receiver job (ADR-011).
+
 ### openloops.job.install(, label='openloops.sync', interval=900, dry_run=False)
 
 Install (or replace) the periodic sync job. Returns the paths it wrote.
@@ -3557,18 +3578,30 @@ the same silence as a job with nothing to do.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
-### openloops.job.job_status(, label='openloops.sync')
+### openloops.job.install_receiver(work_dir, , dry_run=False, \*\*kwargs)
+
+Install (or replace) the board-receiver job. Returns the paths it wrote.
+
+`kwargs` are those of [`receiver_job_spec()`](_autosummary/openloops.job.html.md#openloops.job.receiver_job_spec). A dry run builds and returns the
+plist without touching launchd and without requiring the credentials file.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+### openloops.job.job_status(, label='openloops.sync', env_file=PosixPath('~/.config/openloops/board-receiver.env'))
 
 Installed? loaded? and — the question that matters — when did it last write?
 
 `launchctl list` says the job is registered, which is not the same as the job
 doing anything. The cache’s modification time is the only evidence that a tick
-completed, so it is reported alongside.
+completed, so it is reported alongside. For the receiver, `last_check` is the
+last tick whose check succeeded (a stamp beside *env_file*) and `last_write` the
+last tick that had work (its log).
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`object`](https://docs.python.org/3/builtins/functions.html#object)]
 
-### openloops.job.plist_xml(, label, program_args, env, interval, log_path)
+### openloops.job.plist_xml(, label, program_args, env, interval, log_path, working_dir=None)
 
 The launchd property list, as text. Pure, so it can be tested on any platform.
 
@@ -3581,6 +3614,21 @@ True
 
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### openloops.job.receiver_job_spec(work_dir, , claude=None, model='sonnet', max_budget_usd=1.0, allowed_tools='Bash(gh:\*) Bash(curl:\*) Bash(python3:\*) Bash(crowsnest:\*) Bash(mkdir:\*) Bash(date:\*) Bash(set:\*) Bash(umask:\*) Bash(source:\*) Bash(jq:\*) Bash(cat:\*) Bash(ls:\*) Bash(shasum:\*) Bash(vm_stat:\*) Bash(sysctl:\*) Read Write Edit Glob Grep Skill', env_file=PosixPath('~/.config/openloops/board-receiver.env'), interval=300, label='openloops.board-receiver', require_claude=True)
+
+The receiver job as data: program arguments, environment, plist. Pure but for
+looking up where `claude` and `node` are, so it can be tested anywhere.
+
+The job runs `python -m openloops.receiver_tick`, which asks the board store
+whether anything is pending and only then replaces itself with `claude -p` and the
+packaged receiver prompt. The credentials stay in *env_file*; nothing about them
+is in the plist, the arguments or the environment (`PASSED_THROUGH` names none).
+With `require_claude=False` (a dry run) a missing `claude` is shown as a bare
+name instead of refused.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`object`](https://docs.python.org/3/builtins/functions.html#object)]
 
 ### openloops.job.uninstall(, label='openloops.sync')
 
@@ -4026,6 +4074,159 @@ must not be mistaken for “none were published”.
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+
+# _autosummary/openloops.receiver_tick.html.md
+
+# openloops.receiver_tick
+
+One tick of the board-receiver job: check for work without a model, then hand over.
+
+ADR-011. A launchd `StartInterval` job runs this every few minutes. Starting a Claude
+session on every tick would cost money while nothing is pending, so the tick first asks
+the board store, with plain HTTP and no model, whether anything needs the receiver.
+Only if something does (or the question cannot be answered) does it replace itself with
+the real command, `claude -p <the receiver prompt>`.
+
+**Liveness.** Every successful check writes the board’s `meta/receiver` heartbeat
+(the receiver’s own document, under the session name from `board/board.json`), so an
+idle board stays green and a dead job turns it amber after 20 minutes. It also touches a
+local `board-receiver.lastcheck` stamp, which `ol receiver-job-status` reports as
+“last check”, separately from “last work” (the log, written only by ticks with work).
+
+**Fail closed on configuration, open on anything else.** A configuration error (no
+credentials file, a missing key, a cleartext origin, a refused sign-in, a 403 from the
+store) cannot be fixed by a session, so the tick starts none and says so in the log on
+every tick; the stale heartbeat turns the board amber. Any other failure (the store
+down, a malformed answer, a bug here) starts the session anyway, because a check that
+silently suppressed the receiver would be the failure this package exists to prevent.
+Repeated failures back off exponentially: one hour, then two, four, capped at six.
+
+This is the one module that talks to the network, to the owner’s own board store (the
+HTTP API of ADR-009). Nothing imports it; `import openloops` never loads it.
+
+The work set is the one `references/receiver.md` defines: events with no receipt,
+`processing` receipts older than 15 minutes, and `queued` receipts and `failed`
+receipts marked transient. Those last two are retried only once they are an hour old
+([`RETRY_AFTER`](_autosummary/openloops.receiver_tick.html.md#openloops.receiver_tick.RETRY_AFTER)): a receipt that waits on another machine, a busy worker or a
+lasting GitHub error would otherwise start a paid session every tick, all day, to change
+nothing. The sign-in is the one in `references/receiver-http.md`.
+
+### Module Attributes
+
+| [`STALE_CLAIM`](_autosummary/openloops.receiver_tick.html.md#openloops.receiver_tick.STALE_CLAIM)       | A `processing` receipt older than this is a sweep that died (receiver.md, section 0).                                                                                                             |
+|--------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`RETRY_AFTER`](_autosummary/openloops.receiver_tick.html.md#openloops.receiver_tick.RETRY_AFTER)       | A `queued` or transiently `failed` receipt is retried only once it is this old.                                                                                                                   |
+| [`FAIL_OPEN_BACKOFF`](_autosummary/openloops.receiver_tick.html.md#openloops.receiver_tick.FAIL_OPEN_BACKOFF) | After a failed check starts a session, the next one waits this long, doubling with each further failure up to `FAIL_OPEN_CAP`: a lasting fault must not start a paid session every tick, all day. |
+
+### Functions
+
+| [`check`](_autosummary/openloops.receiver_tick.html.md#openloops.receiver_tick.check)([env_file, heartbeat_by, now])           | Ask the store whether anything needs the receiver.                              |
+|-------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| [`pending_work`](_autosummary/openloops.receiver_tick.html.md#openloops.receiver_tick.pending_work)(outbox, receipts, \*[, now, ...]) | What needs the receiver, from the store's two collections (`id -> data`).       |
+| [`read_env_file`](_autosummary/openloops.receiver_tick.html.md#openloops.receiver_tick.read_env_file)(path)                            | `KEY=VALUE` / `export KEY=VALUE` lines of an env file, parsed, never executed.  |
+| [`main`](_autosummary/openloops.receiver_tick.html.md#openloops.receiver_tick.main)([argv])                                   | `python -m openloops.receiver_tick [--check-only] [--env-file F] [-- CMD ...]`. |
+
+### Classes
+
+| [`Pending`](_autosummary/openloops.receiver_tick.html.md#openloops.receiver_tick.Pending)([iterable])   | The reasons the receiver is needed; empty means nothing to do.   |
+|------------------------------------------------------------------------|------------------------------------------------------------------|
+
+### Exceptions
+
+| [`ConfigError`](_autosummary/openloops.receiver_tick.html.md#openloops.receiver_tick.ConfigError)   | The check cannot run as configured, and a session could not fix that either.   |
+|----------------------------------------------------------------|--------------------------------------------------------------------------------|
+
+### *exception* openloops.receiver_tick.ConfigError
+
+Bases: [`RuntimeError`](https://docs.python.org/3/builtins/exceptions.html#RuntimeError)
+
+The check cannot run as configured, and a session could not fix that either.
+
+### openloops.receiver_tick.FAIL_OPEN_BACKOFF *= datetime.timedelta(seconds=3600)*
+
+After a failed check starts a session, the next one waits this long, doubling with
+each further failure up to `FAIL_OPEN_CAP`: a lasting fault must not start a
+paid session every tick, all day.
+
+### *class* openloops.receiver_tick.Pending(iterable=(),)
+
+Bases: [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)
+
+The reasons the receiver is needed; empty means nothing to do.
+
+`total` counts the items behind those reasons (the heartbeat’s `pending`);
+`heartbeat` says what [`check()`](_autosummary/openloops.receiver_tick.html.md#openloops.receiver_tick.check) did with the heartbeat.
+
+#### keys *: [frozenset](https://docs.python.org/3/builtins/stdtypes.html#frozenset)* *= frozenset({})*
+
+The ids behind the reasons, so a start that would see the same set again backs off.
+
+#### other_live *: [str](https://docs.python.org/3/builtins/stdtypes.html#str) | [None](https://docs.python.org/3/builtins/constants.html#None)* *= None*
+
+a session started now would stop at once.
+
+* **Type:**
+  Another receiver whose heartbeat is live
+
+### openloops.receiver_tick.RETRY_AFTER *= datetime.timedelta(seconds=3600)*
+
+A `queued` or transiently `failed` receipt is retried only once it is this old.
+
+### openloops.receiver_tick.STALE_CLAIM *= datetime.timedelta(seconds=900)*
+
+A `processing` receipt older than this is a sweep that died (receiver.md, section 0).
+
+### openloops.receiver_tick.check(env_file=PosixPath('~/.config/openloops/board-receiver.env'), , heartbeat_by=None, now=None)
+
+Ask the store whether anything needs the receiver. Raises if it cannot ask:
+[`ConfigError`](_autosummary/openloops.receiver_tick.html.md#openloops.receiver_tick.ConfigError) when no session could fix it, anything else otherwise.
+
+With *heartbeat_by* (the board’s session name) it also writes the `meta/receiver`
+heartbeat, and says what happened in the result’s `heartbeat`. A failed heartbeat
+never fails the check: the board turning amber is how that shows.
+
+* **Return type:**
+  [`Pending`](_autosummary/openloops.receiver_tick.html.md#openloops.receiver_tick.Pending)
+
+### openloops.receiver_tick.main(argv=None)
+
+`python -m openloops.receiver_tick [--check-only] [--env-file F] [-- CMD ...]`.
+
+* **Return type:**
+  [`int`](https://docs.python.org/3/builtins/functions.html#int)
+
+### openloops.receiver_tick.pending_work(outbox, receipts, , now=None, retry_after=datetime.timedelta(seconds=3600))
+
+What needs the receiver, from the store’s two collections (`id -> data`).
+
+`queued` and transiently `failed` receipts count only once their `at` (or,
+lacking one, `claimedAt`) is older than *retry_after*; one with neither counts.
+
+```pycon
+>>> pending_work({'e1': {}}, {})
+['1 event(s) without a receipt']
+>>> pending_work({'e1': {}}, {'e1': {'status': 'posted'}})
+[]
+```
+
+* **Return type:**
+  [`Pending`](_autosummary/openloops.receiver_tick.html.md#openloops.receiver_tick.Pending)
+
+### openloops.receiver_tick.read_env_file(path)
+
+`KEY=VALUE` / `export KEY=VALUE` lines of an env file, parsed, never executed.
+
+```pycon
+>>> import tempfile, pathlib
+>>> f = pathlib.Path(tempfile.mkdtemp()) / 'e'
+>>> _ = f.write_text("# c\nexport A='x y'\nB=2\n\nbad line\n")
+>>> read_env_file(f)
+{'A': 'x y', 'B': '2'}
+```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 
 # _autosummary/openloops.skills.html.md
@@ -5152,18 +5353,16 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-11-05 12:31 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/81a0d39a25e8ab5c31b460cc955403e5ead59984"><code>81a0d39</code></a> on branch <code>main</code>, for **openloops 0.1.26** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-05 12:43 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/f0ff4175029346f1f86878fa52fa3d6a38bf5f55"><code>f0ff417</code></a> on branch <code>main</code>, for **openloops 0.1.27** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.1.26) is behind the latest release on PyPI (0.1.27): `pip install openloops` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/81a0d39a25e8ab5c31b460cc955403e5ead59984"><code>81a0d39a25e8ab5c31b460cc955403e5ead59984</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/f0ff4175029346f1f86878fa52fa3d6a38bf5f55"><code>f0ff4175029346f1f86878fa52fa3d6a38bf5f55</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -5174,9 +5373,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/42027611096">42027611096</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/42029372532">42029372532</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>81a0d39a25e8ab5c31b460cc955403e5ead59984</code> (in the history of the built commit) |
+| Event commit | <code>f0ff4175029346f1f86878fa52fa3d6a38bf5f55</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -5201,13 +5400,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.27/">0.1.27</a>, newer than the documented version (0.1.26).
+Latest release: <a href="https://pypi.org/project/openloops/0.1.27/">0.1.27</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 81a0d39a25e8ab5c31b460cc955403e5ead59984
+git checkout f0ff4175029346f1f86878fa52fa3d6a38bf5f55
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

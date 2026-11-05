@@ -6,6 +6,9 @@ Claude Code writes a JSONL transcript for every session and deletes it after abo
 month. openloops reads those transcripts, writes one short dated markdown digest per
 session, and keeps the digests. Nothing here calls a model, reaches the network, or
 needs an account: it reads files you already have and writes files you already own.
+(One opt-in exception: `openloops.receiver_tick`, run only by the board-receiver job
+you install with `ol install-receiver-job`, signs in to your own board store and may
+start a `claude` session. Nothing imports it, so `import openloops` never loads it.)
 
 ```pycon
 >>> import openloops
@@ -1160,20 +1163,21 @@ which is what makes it safe to suggest when someone suspects a stale digest.
 
 ### Modules
 
-| [`base`](openloops.base.html.md#module-openloops.base)                 | Data structures shared across openloops: what a session is, and what a digest is.       |
-|---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| [`blockers`](openloops.blockers.html.md#module-openloops.blockers)         | The other kind of open loop: the one that points at a repository, not at a person.      |
-| [`board`](openloops.board.html.md#module-openloops.board)               | The phone task board: task records in, a static page and its data files out.            |
-| [`board_server`](openloops.board_server.html.md#module-openloops.board_server) | An optional web app for a self-hosted phone board: the page, its files, its store API.  |
-| [`board_store`](openloops.board_store.html.md#module-openloops.board_store)   | The board store's rules, for a self-hosted phone board: who may write what, and how.    |
-| [`dashboard`](openloops.dashboard.html.md#module-openloops.dashboard)       | One page you can look at instead of reading three command outputs.                      |
-| [`digest`](openloops.digest.html.md#module-openloops.digest)             | Rendering one session into one dated markdown digest.                                   |
-| [`egress`](openloops.egress.html.md#module-openloops.egress)             | The egress choke point: nothing leaves openloops carrying a home path or a secret.      |
-| [`job`](openloops.job.html.md#module-openloops.job)                   | The periodic job: launchd runs `ol sync`, writes, and exits.                            |
-| [`obligations`](openloops.obligations.html.md#module-openloops.obligations)   | What you still owe your agents — re-checked against the world before it is shown.       |
-| [`publications`](openloops.publications.html.md#module-openloops.publications) | What your agents handed you lately: recently published annals documents, per session.   |
-| [`skills`](openloops.skills.html.md#module-openloops.skills)             | The agent-facing surface: two skills, one subagent, and the command that installs them. |
-| [`store`](openloops.store.html.md#module-openloops.store)               | Where digests live, and where the change-detection cache lives — two different things.  |
-| [`tasks`](openloops.tasks.html.md#module-openloops.tasks)               | Everything you could act on, as one list of task records: gather, classify, merge.      |
-| [`tools`](openloops.tools.html.md#module-openloops.tools)               | The package's single list of operations: plain functions, JSON-ready dicts.             |
-| [`transcripts`](openloops.transcripts.html.md#module-openloops.transcripts)   | The default `transcript_source`: a direct reader of Claude Code's on-disk state.        |
+| [`base`](openloops.base.html.md#module-openloops.base)                   | Data structures shared across openloops: what a session is, and what a digest is.       |
+|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| [`blockers`](openloops.blockers.html.md#module-openloops.blockers)           | The other kind of open loop: the one that points at a repository, not at a person.      |
+| [`board`](openloops.board.html.md#module-openloops.board)                 | The phone task board: task records in, a static page and its data files out.            |
+| [`board_server`](openloops.board_server.html.md#module-openloops.board_server)   | An optional web app for a self-hosted phone board: the page, its files, its store API.  |
+| [`board_store`](openloops.board_store.html.md#module-openloops.board_store)     | The board store's rules, for a self-hosted phone board: who may write what, and how.    |
+| [`dashboard`](openloops.dashboard.html.md#module-openloops.dashboard)         | One page you can look at instead of reading three command outputs.                      |
+| [`digest`](openloops.digest.html.md#module-openloops.digest)               | Rendering one session into one dated markdown digest.                                   |
+| [`egress`](openloops.egress.html.md#module-openloops.egress)               | The egress choke point: nothing leaves openloops carrying a home path or a secret.      |
+| [`job`](openloops.job.html.md#module-openloops.job)                     | The periodic job: launchd runs `ol sync`, writes, and exits.                            |
+| [`obligations`](openloops.obligations.html.md#module-openloops.obligations)     | What you still owe your agents — re-checked against the world before it is shown.       |
+| [`publications`](openloops.publications.html.md#module-openloops.publications)   | What your agents handed you lately: recently published annals documents, per session.   |
+| [`receiver_tick`](openloops.receiver_tick.html.md#module-openloops.receiver_tick) | One tick of the board-receiver job: check for work without a model, then hand over.     |
+| [`skills`](openloops.skills.html.md#module-openloops.skills)               | The agent-facing surface: two skills, one subagent, and the command that installs them. |
+| [`store`](openloops.store.html.md#module-openloops.store)                 | Where digests live, and where the change-detection cache lives — two different things.  |
+| [`tasks`](openloops.tasks.html.md#module-openloops.tasks)                 | Everything you could act on, as one list of task records: gather, classify, merge.      |
+| [`tools`](openloops.tools.html.md#module-openloops.tools)                 | The package's single list of operations: plain functions, JSON-ready dicts.             |
+| [`transcripts`](openloops.transcripts.html.md#module-openloops.transcripts)     | The default `transcript_source`: a direct reader of Claude Code's on-disk state.        |

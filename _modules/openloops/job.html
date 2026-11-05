@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../../_static/documentation_options.js?v=785bba28"></script>
+    <script src="../../_static/documentation_options.js?v=dc233e31"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.26" />
+  <meta name="docsearch:version" content="0.1.27" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -732,6 +732,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
@@ -741,7 +742,11 @@ window.runMermaid = runMermaid;</script>
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">"DFLT_LABEL"</span><span class="p">,</span>
     <span class="s2">"DFLT_INTERVAL"</span><span class="p">,</span>
+    <span class="s2">"RECEIVER_LABEL"</span><span class="p">,</span>
+    <span class="s2">"RECEIVER_INTERVAL"</span><span class="p">,</span>
     <span class="s2">"install"</span><span class="p">,</span>
+    <span class="s2">"install_receiver"</span><span class="p">,</span>
+    <span class="s2">"receiver_job_spec"</span><span class="p">,</span>
     <span class="s2">"uninstall"</span><span class="p">,</span>
     <span class="s2">"job_status"</span><span class="p">,</span>
     <span class="s2">"plist_xml"</span><span class="p">,</span>
@@ -767,6 +772,61 @@ window.runMermaid = runMermaid;</script>
 <span class="p">)</span>
 
 
+<span class="c1">#: launchd label of the board-receiver job (ADR-011).</span>
+<span class="n">RECEIVER_LABEL</span> <span class="o">=</span> <span class="s2">"openloops.board-receiver"</span>
+
+<span class="c1">#: Seconds between receiver ticks. A tick that finds nothing pending costs a few HTTP</span>
+<span class="c1">#: calls and no model, so this can be as short as the phone board's latency wants.</span>
+<span class="n">RECEIVER_INTERVAL</span> <span class="o">=</span> <span class="mi">300</span>
+
+<span class="c1">#: Tools the unattended receiver session may use without asking. Bash is limited to the</span>
+<span class="c1">#: commands the receiver procedure runs (`gh`, `curl`, `python3`, the worker dispatch,</span>
+<span class="c1">#: and the shell steps of the sign-in); everything else is refused, not asked about.</span>
+<span class="c1">#: `python3` is still arbitrary code, so the real guard is the prompt's rule that</span>
+<span class="c1">#: GitHub and store text is data. Widen with `ol install-receiver-job --allowed-tools`.</span>
+<span class="n">RECEIVER_TOOLS</span> <span class="o">=</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="o">*</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"Bash(</span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2">:*)"</span>
+            <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="s2">"gh"</span><span class="p">,</span>
+                <span class="s2">"curl"</span><span class="p">,</span>
+                <span class="s2">"python3"</span><span class="p">,</span>
+                <span class="s2">"crowsnest"</span><span class="p">,</span>
+                <span class="s2">"mkdir"</span><span class="p">,</span>
+                <span class="s2">"date"</span><span class="p">,</span>
+                <span class="s2">"set"</span><span class="p">,</span>
+                <span class="s2">"umask"</span><span class="p">,</span>
+                <span class="s2">"source"</span><span class="p">,</span>
+                <span class="s2">"jq"</span><span class="p">,</span>
+                <span class="s2">"cat"</span><span class="p">,</span>
+                <span class="s2">"ls"</span><span class="p">,</span>
+                <span class="s2">"shasum"</span><span class="p">,</span>
+                <span class="s2">"vm_stat"</span><span class="p">,</span>
+                <span class="s2">"sysctl"</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">),</span>
+        <span class="s2">"Read"</span><span class="p">,</span>
+        <span class="s2">"Write"</span><span class="p">,</span>
+        <span class="s2">"Edit"</span><span class="p">,</span>
+        <span class="s2">"Glob"</span><span class="p">,</span>
+        <span class="s2">"Grep"</span><span class="p">,</span>
+        <span class="s2">"Skill"</span><span class="p">,</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+
+<span class="c1">#: Environment variables the receiver session reads, passed through like the others.</span>
+<span class="n">RECEIVER_PASSED_THROUGH</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"OPENLOOPS_OWNERS"</span><span class="p">,</span>
+    <span class="s2">"OPENLOOPS_READ_ONLY_ORGS"</span><span class="p">,</span>
+    <span class="s2">"OPENLOOPS_EXCLUDE_REPOS"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1">#: Where the receiver's credentials live (receiver-http.md). Read by the job, never</span>
+<span class="c1">#: written into the plist.</span>
+<span class="n">RECEIVER_ENV_FILE</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"~/.config/openloops/board-receiver.env"</span><span class="p">)</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_esc</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"&amp;"</span><span class="p">,</span> <span class="s2">"&amp;amp;"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"&lt;"</span><span class="p">,</span> <span class="s2">"&amp;lt;"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"&gt;"</span><span class="p">,</span> <span class="s2">"&amp;gt;"</span><span class="p">)</span>
 
@@ -780,6 +840,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">env</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
     <span class="n">interval</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">log_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">working_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""The launchd property list, as text. Pure, so it can be tested on any platform.</span>
 
@@ -792,6 +853,11 @@ window.runMermaid = runMermaid;</script>
     <span class="n">env_items</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">"        &lt;key&gt;</span><span class="si">{</span><span class="n">_esc</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/key&gt;</span><span class="se">\n</span><span class="s2">        &lt;string&gt;</span><span class="si">{</span><span class="n">_esc</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/string&gt;"</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="n">cwd</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"    &lt;key&gt;WorkingDirectory&lt;/key&gt;</span><span class="se">\n</span><span class="s2">    &lt;string&gt;</span><span class="si">{</span><span class="n">_esc</span><span class="p">(</span><span class="n">working_dir</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/string&gt;</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="k">if</span> <span class="n">working_dir</span>
+        <span class="k">else</span> <span class="s2">""</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">"""&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
 <span class="s2">&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"</span>
@@ -808,7 +874,7 @@ window.runMermaid = runMermaid;</script>
 <span class="s2">    &lt;dict&gt;</span>
 <span class="si">{</span><span class="n">env_items</span><span class="si">}</span>
 <span class="s2">    &lt;/dict&gt;</span>
-<span class="s2">    &lt;key&gt;StartInterval&lt;/key&gt;</span>
+<span class="si">{</span><span class="n">cwd</span><span class="si">}</span><span class="s2">    &lt;key&gt;StartInterval&lt;/key&gt;</span>
 <span class="s2">    &lt;integer&gt;</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/integer&gt;</span>
 <span class="s2">    &lt;key&gt;RunAtLoad&lt;/key&gt;</span>
 <span class="s2">    &lt;true/&gt;</span>
@@ -885,6 +951,28 @@ window.runMermaid = runMermaid;</script>
     <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">"plist"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">plist_path</span><span class="p">),</span> <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">log_path</span><span class="p">),</span> <span class="s2">"xml"</span><span class="p">:</span> <span class="n">xml</span><span class="p">}</span>
 
+    <span class="n">_bootstrap</span><span class="p">(</span>
+        <span class="n">label</span><span class="p">,</span>
+        <span class="n">plist_path</span><span class="p">,</span>
+        <span class="n">log_path</span><span class="p">,</span>
+        <span class="n">xml</span><span class="p">,</span>
+        <span class="n">smoke</span><span class="o">=</span><span class="p">[[</span><span class="o">*</span><span class="n">args</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="s2">"openloops"</span><span class="p">,</span> <span class="s2">"--help"</span><span class="p">]],</span>
+        <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"plist"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">plist_path</span><span class="p">),</span> <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">log_path</span><span class="p">),</span> <span class="s2">"interval"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">interval</span><span class="p">)}</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_bootstrap</span><span class="p">(</span>
+    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">plist_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">log_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">xml</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">smoke</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+    <span class="n">env</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Write the plist, (re)load it, and prove the command can start under *env*."""</span>
     <span class="n">plist_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">log_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">plist_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">xml</span><span class="p">)</span>
@@ -901,20 +989,173 @@ window.runMermaid = runMermaid;</script>
             <span class="sa">f</span><span class="s2">"wrote </span><span class="si">{</span><span class="n">plist_path</span><span class="si">}</span><span class="s2"> but launchctl bootstrap failed: "</span>
             <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="p">(</span><span class="n">loaded</span><span class="o">.</span><span class="n">stderr</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">loaded</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
-    <span class="n">smoke</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-        <span class="p">[</span><span class="o">*</span><span class="n">args</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="s2">"openloops"</span><span class="p">,</span> <span class="s2">"--help"</span><span class="p">],</span>
-        <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
-        <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">timeout</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="k">if</span> <span class="n">smoke</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">"installed </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">, but the command cannot run under the pinned "</span>
-            <span class="sa">f</span><span class="s2">"environment — it would fail silently every tick:</span><span class="se">\n</span><span class="s2">"</span>
-            <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="p">(</span><span class="n">smoke</span><span class="o">.</span><span class="n">stderr</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">smoke</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()[:</span><span class="mi">400</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">smoke</span><span class="p">:</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="n">command</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">120</span>
         <span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">"plist"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">plist_path</span><span class="p">),</span> <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">log_path</span><span class="p">),</span> <span class="s2">"interval"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">interval</span><span class="p">)}</span></div>
+        <span class="k">if</span> <span class="n">check</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"installed </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">, but `</span><span class="si">{</span><span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">command</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span><span class="si">}</span><span class="s2">` cannot run under "</span>
+                <span class="sa">f</span><span class="s2">"the pinned environment — it would fail silently every tick:</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="p">(</span><span class="n">check</span><span class="o">.</span><span class="n">stderr</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">check</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()[:</span><span class="mi">400</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+            <span class="p">)</span>
+
+
+<span class="c1">#: The receiver's procedure, as packaged: the prompt points here rather than at an</span>
+<span class="c1">#: installed skill, so a job never depends on `ol install-skills` having run.</span>
+<span class="n">RECEIVER_REFERENCES</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"data"</span> <span class="o">/</span> <span class="s2">"skills"</span> <span class="o">/</span> <span class="s2">"openloops-phone-board"</span> <span class="o">/</span> <span class="s2">"references"</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_receiver_prompt</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"data"</span> <span class="o">/</span> <span class="s2">"board"</span> <span class="o">/</span> <span class="s2">"receiver-prompt.md"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span>
+        <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"</span><span class="si">{references}</span><span class="s2">"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">RECEIVER_REFERENCES</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="receiver_job_spec">
+<a class="viewcode-back" href="../../_autosummary/openloops.job.html#openloops.job.receiver_job_spec">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">receiver_job_spec</span><span class="p">(</span>
+    <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">claude</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"sonnet"</span><span class="p">,</span>
+    <span class="n">max_budget_usd</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">allowed_tools</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">RECEIVER_TOOLS</span><span class="p">,</span>
+    <span class="n">env_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">RECEIVER_ENV_FILE</span><span class="p">,</span>
+    <span class="n">interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">RECEIVER_INTERVAL</span><span class="p">,</span>
+    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">RECEIVER_LABEL</span><span class="p">,</span>
+    <span class="n">require_claude</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The receiver job as data: program arguments, environment, plist. Pure but for</span>
+<span class="sd">    looking up where ``claude`` and ``node`` are, so it can be tested anywhere.</span>
+
+<span class="sd">    The job runs ``python -m openloops.receiver_tick``, which asks the board store</span>
+<span class="sd">    whether anything is pending and only then replaces itself with ``claude -p`` and the</span>
+<span class="sd">    packaged receiver prompt. The credentials stay in *env_file*; nothing about them</span>
+<span class="sd">    is in the plist, the arguments or the environment (``PASSED_THROUGH`` names none).</span>
+<span class="sd">    With ``require_claude=False`` (a dry run) a missing ``claude`` is shown as a bare</span>
+<span class="sd">    name instead of refused.</span>
+<span class="sd">    """</span>
+    <span class="n">claude_path</span> <span class="o">=</span> <span class="n">claude</span> <span class="ow">or</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">"claude"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">claude_path</span><span class="p">:</span>
+        <span class="c1"># Not resolved: `claude` is usually a symlink to a versioned file that an</span>
+        <span class="c1"># update deletes, and the link is what keeps pointing at the current one.</span>
+        <span class="n">claude_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">claude_path</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">require_claude</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+            <span class="s2">"`claude` is not on PATH: install Claude Code, or pass its absolute path"</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">claude_path</span> <span class="o">=</span> <span class="s2">"claude"</span>
+    <span class="n">work</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">work_dir</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="n">env_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">env_file</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">job_environment</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">RECEIVER_PASSED_THROUGH</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">var</span><span class="p">):</span>
+            <span class="n">env</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+    <span class="c1"># claude is a node script: launchd's PATH finds neither it nor node unless told.</span>
+    <span class="n">extra</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">claude_path</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">)]</span>
+    <span class="n">node</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">"node"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">node</span><span class="p">:</span>
+        <span class="n">extra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">))</span>
+    <span class="n">env</span><span class="p">[</span><span class="s2">"PATH"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">":"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">([</span><span class="o">*</span><span class="n">extra</span><span class="p">,</span> <span class="o">*</span><span class="n">env</span><span class="p">[</span><span class="s2">"PATH"</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">":"</span><span class="p">)]))</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span>
+        <span class="s2">"-m"</span><span class="p">,</span>
+        <span class="s2">"openloops.receiver_tick"</span><span class="p">,</span>
+        <span class="s2">"--env-file"</span><span class="p">,</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">env_path</span><span class="p">),</span>
+        <span class="s2">"--"</span><span class="p">,</span>
+        <span class="n">claude_path</span><span class="p">,</span>
+        <span class="s2">"-p"</span><span class="p">,</span>
+        <span class="n">_receiver_prompt</span><span class="p">(),</span>
+        <span class="s2">"--model"</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="s2">"--allowedTools"</span><span class="p">,</span>
+        <span class="n">allowed_tools</span><span class="p">,</span>
+        <span class="s2">"--max-budget-usd"</span><span class="p">,</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">max_budget_usd</span><span class="p">),</span>
+    <span class="p">]</span>
+    <span class="n">log_path</span> <span class="o">=</span> <span class="n">_log_path</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"label"</span><span class="p">:</span> <span class="n">label</span><span class="p">,</span>
+        <span class="s2">"claude"</span><span class="p">:</span> <span class="n">claude_path</span><span class="p">,</span>
+        <span class="s2">"program_args"</span><span class="p">:</span> <span class="n">args</span><span class="p">,</span>
+        <span class="s2">"env"</span><span class="p">:</span> <span class="n">env</span><span class="p">,</span>
+        <span class="s2">"interval"</span><span class="p">:</span> <span class="n">interval</span><span class="p">,</span>
+        <span class="s2">"work_dir"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">work</span><span class="p">),</span>
+        <span class="s2">"env_file"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">env_path</span><span class="p">),</span>
+        <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">log_path</span><span class="p">),</span>
+        <span class="s2">"plist"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">_plist_path</span><span class="p">(</span><span class="n">label</span><span class="p">)),</span>
+        <span class="s2">"xml"</span><span class="p">:</span> <span class="n">plist_xml</span><span class="p">(</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="n">program_args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+            <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
+            <span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span>
+            <span class="n">log_path</span><span class="o">=</span><span class="n">log_path</span><span class="p">,</span>
+            <span class="n">working_dir</span><span class="o">=</span><span class="n">work</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">}</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_receiver_inputs</span><span class="p">(</span><span class="n">work</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">env_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Refuse an install that would fail silently on every tick."""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">work</span> <span class="o">/</span> <span class="s2">"board"</span> <span class="o">/</span> <span class="s2">"tasks.json"</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">work</span><span class="si">}</span><span class="s2"> has no board/tasks.json: pass the board's working directory "</span>
+            <span class="s2">"(the one `ol board-build` wrote into)"</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">env_file</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">env_file</span><span class="si">}</span><span class="s2"> does not exist. Create it (BOARD_ORIGIN, BOARD_API, "</span>
+            <span class="s2">"BOARD_EMAIL, BOARD_PASSWORD; see the phone-board skill's "</span>
+            <span class="s2">"references/receiver-http.md) and `chmod 600` it"</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">env_file</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mode</span> <span class="o">&amp;</span> <span class="mo">0o077</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">env_file</span><span class="si">}</span><span class="s2"> is readable by others: `chmod 600 </span><span class="si">{</span><span class="n">env_file</span><span class="si">}</span><span class="s2">` first"</span>
+        <span class="p">)</span>
+
+
+<div class="viewcode-block" id="install_receiver">
+<a class="viewcode-back" href="../../_autosummary/openloops.job.html#openloops.job.install_receiver">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">install_receiver</span><span class="p">(</span>
+    <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Install (or replace) the board-receiver job. Returns the paths it wrote.</span>
+
+<span class="sd">    ``kwargs`` are those of :func:`receiver_job_spec`. A dry run builds and returns the</span>
+<span class="sd">    plist without touching launchd and without requiring the credentials file.</span>
+<span class="sd">    """</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">receiver_job_spec</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">require_claude</span><span class="o">=</span><span class="ow">not</span> <span class="n">dry_run</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"plist"</span><span class="p">,</span> <span class="s2">"log"</span><span class="p">,</span> <span class="s2">"xml"</span><span class="p">)}</span>
+    <span class="n">_check_receiver_inputs</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"work_dir"</span><span class="p">])),</span> <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"env_file"</span><span class="p">])))</span>
+    <span class="n">_require_macos</span><span class="p">()</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"label"</span><span class="p">])</span>
+    <span class="n">_bootstrap</span><span class="p">(</span>
+        <span class="n">label</span><span class="p">,</span>
+        <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"plist"</span><span class="p">])),</span>
+        <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"log"</span><span class="p">])),</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"xml"</span><span class="p">]),</span>
+        <span class="n">smoke</span><span class="o">=</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-m"</span><span class="p">,</span> <span class="s2">"openloops.receiver_tick"</span><span class="p">,</span> <span class="s2">"--help"</span><span class="p">],</span>
+            <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"claude"</span><span class="p">]),</span> <span class="s2">"--version"</span><span class="p">],</span>
+        <span class="p">],</span>
+        <span class="n">env</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"env"</span><span class="p">]),</span>  <span class="c1"># type: ignore[arg-type]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"plist"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"plist"</span><span class="p">]),</span>
+        <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"log"</span><span class="p">]),</span>
+        <span class="s2">"interval"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"interval"</span><span class="p">]),</span>
+    <span class="p">}</span></div>
 
 
 
@@ -936,12 +1177,16 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="job_status">
 <a class="viewcode-back" href="../../_autosummary/openloops.job.html#openloops.job.job_status">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">job_status</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DFLT_LABEL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">job_status</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DFLT_LABEL</span><span class="p">,</span> <span class="n">env_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">RECEIVER_ENV_FILE</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Installed? loaded? and — the question that matters — when did it last write?</span>
 
 <span class="sd">    ``launchctl list`` says the job is registered, which is not the same as the job</span>
 <span class="sd">    doing anything. The cache's modification time is the only evidence that a tick</span>
-<span class="sd">    completed, so it is reported alongside.</span>
+<span class="sd">    completed, so it is reported alongside. For the receiver, ``last_check`` is the</span>
+<span class="sd">    last tick whose check succeeded (a stamp beside *env_file*) and ``last_write`` the</span>
+<span class="sd">    last tick that had work (its log).</span>
 <span class="sd">    """</span>
     <span class="n">plist_path</span> <span class="o">=</span> <span class="n">_plist_path</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
     <span class="n">loaded</span> <span class="o">=</span> <span class="kc">None</span>
@@ -951,14 +1196,25 @@ window.runMermaid = runMermaid;</script>
         <span class="p">)</span>
         <span class="n">loaded</span> <span class="o">=</span> <span class="n">listed</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
     <span class="n">cache</span> <span class="o">=</span> <span class="n">sync_state_path</span><span class="p">()</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">_log_path</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+    <span class="n">last_check</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">label</span> <span class="o">==</span> <span class="n">RECEIVER_LABEL</span><span class="p">:</span>
+        <span class="c1"># The log is touched only when a tick had work; a successful check touches its</span>
+        <span class="c1"># own stamp and writes the board's `meta/receiver` heartbeat.</span>
+        <span class="n">evidence</span> <span class="o">=</span> <span class="n">log</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span> <span class="k">if</span> <span class="n">log</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">stamp</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">env_file</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="s2">"board-receiver.lastcheck"</span><span class="p">)</span>
+        <span class="n">last_check</span> <span class="o">=</span> <span class="n">stamp</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span> <span class="k">if</span> <span class="n">stamp</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">evidence</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span> <span class="k">if</span> <span class="n">cache</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"last_check"</span><span class="p">:</span> <span class="n">last_check</span><span class="p">,</span>
         <span class="s2">"label"</span><span class="p">:</span> <span class="n">label</span><span class="p">,</span>
         <span class="s2">"platform_supported"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">"darwin"</span><span class="p">,</span>
         <span class="s2">"plist"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">plist_path</span><span class="p">),</span>
         <span class="s2">"installed"</span><span class="p">:</span> <span class="n">plist_path</span><span class="o">.</span><span class="n">exists</span><span class="p">(),</span>
         <span class="s2">"loaded"</span><span class="p">:</span> <span class="n">loaded</span><span class="p">,</span>
-        <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">_log_path</span><span class="p">(</span><span class="n">label</span><span class="p">)),</span>
-        <span class="s2">"last_write"</span><span class="p">:</span> <span class="n">cache</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span> <span class="k">if</span> <span class="n">cache</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">log</span><span class="p">),</span>
+        <span class="s2">"last_write"</span><span class="p">:</span> <span class="n">evidence</span><span class="p">,</span>
         <span class="s2">"state_dir"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">state_dir</span><span class="p">()),</span>
     <span class="p">}</span></div>
 
