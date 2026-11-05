@@ -1,4 +1,4 @@
-> built 2026-11-02 15:36 UTC from 81d89ea (main) · openloops 0.1.25. Details: build_info.json
+> built 2026-11-05 12:31 UTC from 81a0d39 (main) · openloops 0.1.26. Details: build_info.json
 
 # index.html.md
 
@@ -4490,9 +4490,11 @@ comments, closes, labels or approves anything.
 |----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
 | [`Task`](_autosummary/openloops.tasks.html.md#openloops.tasks.Task)(id[, url, kind, org, repo, title, ask, ...]) | One thing the human could act on.                                           |
 
-### openloops.tasks.DFLT_SEARCHES *= {'decide': ('Decide', 'title'), 'needs-user': ('"Needs the user"', 'body')}*
+### openloops.tasks.DFLT_SEARCHES *= {'agent-decided': ('agent-decided', 'label'), 'decide': ('Decide', 'title'), 'needs-user': ('"Needs the user"', 'body')}*
 
 (search terms, the field they match).
+A `label` match is a label name rather than text: `agent-decided` issues are the
+record of a decision an agent made and the owner can veto (ADR-010).
 
 * **Type:**
   Extra searches beyond the label, by name
@@ -4789,7 +4791,7 @@ record for the same item. `out` writes the merged records there.
 Every open item that asks something of you, across owners: the board’s input.
 
 Sweeps the `label` (`manual-task`) per owner with no 50-row cap, plus the named
-`searches` (`decide`, `needs-user`) and, with `review_prs`, the PRs waiting
+`searches` (`decide`, `needs-user`, `agent-decided`) and, with `review_prs`, the PRs waiting
 on your review. `out` also writes the envelope there as JSON. Read-only.
 
 ```pycon
@@ -5150,16 +5152,18 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-11-02 15:36 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/81d89eab43c7eb5c26871820edffbc159a880495"><code>81d89ea</code></a> on branch <code>main</code>, for **openloops 0.1.25** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-05 12:31 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/81a0d39a25e8ab5c31b460cc955403e5ead59984"><code>81a0d39</code></a> on branch <code>main</code>, for **openloops 0.1.26** (from <code>pyproject.toml</code>).
 
-#### NOTE
-Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
+#### WARNING
+The documentation and the package may be misaligned:
+
+- The documented version (0.1.26) is behind the latest release on PyPI (0.1.27): `pip install openloops` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/81d89eab43c7eb5c26871820edffbc159a880495"><code>81d89eab43c7eb5c26871820edffbc159a880495</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/81a0d39a25e8ab5c31b460cc955403e5ead59984"><code>81a0d39a25e8ab5c31b460cc955403e5ead59984</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -5170,9 +5174,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/41472969778">41472969778</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/42027611096">42027611096</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>81d89eab43c7eb5c26871820edffbc159a880495</code> (in the history of the built commit) |
+| Event commit | <code>81a0d39a25e8ab5c31b460cc955403e5ead59984</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -5197,13 +5201,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.25/">0.1.25</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.27/">0.1.27</a>, newer than the documented version (0.1.26).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 81d89eab43c7eb5c26871820edffbc159a880495
+git checkout 81a0d39a25e8ab5c31b460cc955403e5ead59984
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
@@ -5237,7 +5241,7 @@ Source: [`openloops/data/skills/openloops`](https://github.com/thorwhalen/openlo
 
 ### `openloops-needs-human`
 
-Use the moment you are blocked on the human and cannot finish on your own: a secret or API key only they can set; a command only they can run (a deploy, a `sudo`, a step your permissions refuse); access you do not have; a purchase, an approval, a decision only they can make; or a decision ALREADY RECORDED – an ADR, a convention, a default – that is now in your way or looks wrong given what you now know. Files the blocker as a `manual-task` GitHub issue in the affected repo, carrying a shell predicate, so the obligation outlives the session instead of dying in a message nobody re-reads and `ol owed` can re-check it later. Triggers on: ‘I can’t do this without you’, ‘you’ll need to run this’, ‘this needs your credentials’, ‘blocked on’, ‘someone has to decide’, ‘I don’t have access to’, ‘the ADR says X but’, or any point where the honest next step is to hand the work back. File it BEFORE writing the hand-back message, not instead of it. Skip when you could do the thing yourself.
+Use the moment you are blocked on the human and cannot finish on your own: a secret or API key only they can set; a command only they can run (a deploy, a `sudo`, a step your permissions refuse); access you do not have; a purchase, an approval, a decision only they can make; or a RECORDED decision (an ADR, a convention, a default) that is now in your way or looks wrong. Files the blocker as a `manual-task` GitHub issue in the affected repo, with a shell predicate, so the obligation outlives the session and `ol owed` can re-check it. Triggers on: ‘I can’t do this without you’, ‘you’ll need to run this’, ‘this needs your credentials’, ‘blocked on’, ‘someone has to decide’, ‘I don’t have access to’, ‘the ADR says X but’, or any honest hand-back. File it BEFORE writing the hand-back message, not instead of it. Skip only when you could do it yourself. Before handing back a decision, load this to check whether you may decide it yourself and record it as an `agent-decided` issue.
 
 ```bash
 gh skill install thorwhalen/openloops openloops-needs-human --agent claude-code

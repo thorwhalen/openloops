@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../../_static/documentation_options.js?v=4fa33042"></script>
+    <script src="../../_static/documentation_options.js?v=785bba28"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.25" />
+  <meta name="docsearch:version" content="0.1.26" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -939,10 +939,15 @@ window.runMermaid = runMermaid;</script>
 
 <span class="c1">#: The search API's own per-query ceiling. A query that returns this many is saturated.</span>
 <span class="n">DFLT_GATHER_LIMIT</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="c1">#: The label an agent files a decision it made itself under (ADR-010).</span>
+<span class="n">AGENT_DECIDED_LABEL</span> <span class="o">=</span> <span class="s2">"agent-decided"</span>
 <span class="c1">#: Extra searches beyond the label, by name: (search terms, the field they match).</span>
+<span class="c1">#: A ``label`` match is a label name rather than text: ``agent-decided`` issues are the</span>
+<span class="c1">#: record of a decision an agent made and the owner can veto (ADR-010).</span>
 <span class="n">DFLT_SEARCHES</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">"decide"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"Decide"</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">),</span>
     <span class="s2">"needs-user"</span><span class="p">:</span> <span class="p">(</span><span class="s1">'"Needs the user"'</span><span class="p">,</span> <span class="s2">"body"</span><span class="p">),</span>
+    <span class="n">AGENT_DECIDED_LABEL</span><span class="p">:</span> <span class="p">(</span><span class="n">AGENT_DECIDED_LABEL</span><span class="p">,</span> <span class="s2">"label"</span><span class="p">),</span>
 <span class="p">}</span>
 <span class="c1">#: Environment override for repositories to leave out: owner/name globs, comma- or</span>
 <span class="c1">#: space-separated (``acme/secret-*``, ``other-org/*``).</span>
@@ -1046,6 +1051,8 @@ window.runMermaid = runMermaid;</script>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">searches</span><span class="p">:</span>
             <span class="n">terms</span><span class="p">,</span> <span class="n">match</span> <span class="o">=</span> <span class="n">DFLT_SEARCHES</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">by</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"--label"</span><span class="p">,</span> <span class="n">terms</span><span class="p">]</span> <span class="k">if</span> <span class="n">match</span> <span class="o">==</span> <span class="s2">"label"</span> <span class="k">else</span> <span class="p">[</span><span class="s2">"--match"</span><span class="p">,</span> <span class="n">match</span><span class="p">]</span>
+            <span class="n">tail</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">match</span> <span class="o">==</span> <span class="s2">"label"</span> <span class="k">else</span> <span class="p">[</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">terms</span><span class="p">]</span>
             <span class="n">queries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="p">(</span>
                     <span class="n">owner</span><span class="p">,</span>
@@ -1054,12 +1061,10 @@ window.runMermaid = runMermaid;</script>
                         <span class="s2">"search"</span><span class="p">,</span>
                         <span class="s2">"issues"</span><span class="p">,</span>
                         <span class="o">*</span><span class="n">base</span><span class="p">,</span>
-                        <span class="s2">"--match"</span><span class="p">,</span>
-                        <span class="n">match</span><span class="p">,</span>
+                        <span class="o">*</span><span class="n">by</span><span class="p">,</span>
                         <span class="s2">"--json"</span><span class="p">,</span>
                         <span class="s2">","</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_ISSUE_FIELDS</span><span class="p">),</span>
-                        <span class="s2">"--"</span><span class="p">,</span>
-                        <span class="n">terms</span><span class="p">,</span>
+                        <span class="o">*</span><span class="n">tail</span><span class="p">,</span>
                     <span class="p">],</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -1316,6 +1321,31 @@ window.runMermaid = runMermaid;</script>
 <span class="n">_NPM_PACKAGE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"npmjs\.com/package/(@[\w.-]+/[\w.-]+|[\w.-]+)"</span><span class="p">)</span>
 <span class="n">_PYPI_PROJECT</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"pypi\.org/(?:project|manage/project)/([\w.-]+)"</span><span class="p">)</span>
 <span class="n">_RECOMMEND</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\*\*Recommend(?:ation|ed)?:?\*\*:?\s*(.+)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="c1">#: What an ``agent-decided`` body says a Veto would undo, and by when (ADR-010). One line</span>
+<span class="c1">#: each (``[ \t]``, never across a newline); the Veto-by value stops at its first sentence.</span>
+<span class="n">_AGENT_DECIDED_REVERSE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"^\*\*Reverse:\*\*[ \t]*(\S.*)$"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+<span class="n">_AGENT_DECIDED_VETO_BY</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"^\*\*Veto by:\*\*[ \t]*([^.\n]+)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_agent_decided_note</span><span class="p">(</span><span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The card line that tells the owner what a Veto would undo, so they never veto blind.</span>
+
+<span class="sd">    &gt;&gt;&gt; _agent_decided_note("**Reverse:** `git revert abc1234`\\n**Veto by:** 2026-11-08. To veto")</span>
+<span class="sd">    'Reverse: `git revert abc1234` · Veto by: 2026-11-08'</span>
+<span class="sd">    &gt;&gt;&gt; _agent_decided_note("**Reverse:**\\n**Veto by:** 2026-11-08.")</span>
+<span class="sd">    'No Reverse line in the issue: a Veto reverts nothing · Veto by: 2026-11-08'</span>
+<span class="sd">    """</span>
+    <span class="n">reverse</span> <span class="o">=</span> <span class="n">_AGENT_DECIDED_REVERSE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+    <span class="n">veto_by</span> <span class="o">=</span> <span class="n">_AGENT_DECIDED_VETO_BY</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">reverse</span><span class="p">:</span>
+        <span class="n">head</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Reverse: </span><span class="si">{</span><span class="n">reverse</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">DFLT_BODY_CHARS</span><span class="p">:</span>  <span class="c1"># cut before the line: unknown, not absent</span>
+        <span class="n">head</span> <span class="o">=</span> <span class="s2">"Reverse line not seen (long issue): open it before vetoing"</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">head</span> <span class="o">=</span> <span class="s2">"No Reverse line in the issue: a Veto reverts nothing"</span>
+    <span class="k">return</span> <span class="n">head</span> <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">" · Veto by: </span><span class="si">{</span><span class="n">veto_by</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">veto_by</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+
+
 <span class="n">_BOT_PR</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
     <span class="sa">r</span><span class="s2">"^(build\(deps|chore\(deps|bump )|\[bot\]|dependabot|renovate"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span>
 <span class="p">)</span>
@@ -1349,7 +1379,14 @@ window.runMermaid = runMermaid;</script>
     <span class="n">kind</span> <span class="o">=</span> <span class="s2">"pr"</span> <span class="k">if</span> <span class="s2">"/pull/"</span> <span class="ow">in</span> <span class="n">url</span> <span class="k">else</span> <span class="s2">"issue"</span>
     <span class="n">text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="s2">"</span>
 
-    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"pr"</span><span class="p">:</span>
+    <span class="c1"># By label, not by which query found it first: deduplication keeps the first query</span>
+    <span class="c1"># that returned an issue, and the `decide` title search can return it too.</span>
+    <span class="n">agent_decided</span> <span class="o">=</span> <span class="n">AGENT_DECIDED_LABEL</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">lab</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="n">candidate</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"labels"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">()</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">agent_decided</span><span class="p">:</span>
+        <span class="n">rule</span> <span class="o">=</span> <span class="n">Rule</span><span class="p">(</span><span class="s2">"decision"</span><span class="p">,</span> <span class="s2">"tap"</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>  <span class="c1"># keep or veto: one tap</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"pr"</span><span class="p">:</span>
         <span class="n">rule</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">Rule</span><span class="p">(</span><span class="s2">"merge-bot-pr"</span><span class="p">,</span> <span class="s2">"tap"</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">_BOT_PR</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
@@ -1398,8 +1435,17 @@ window.runMermaid = runMermaid;</script>
         <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"label"</span><span class="p">:</span> <span class="s2">"PR: files changed"</span><span class="p">,</span> <span class="s2">"url"</span><span class="p">:</span> <span class="n">url</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"/files"</span><span class="p">})</span>
     <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"label"</span><span class="p">:</span> <span class="s2">"PR"</span> <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"pr"</span> <span class="k">else</span> <span class="s2">"Issue"</span><span class="p">,</span> <span class="s2">"url"</span><span class="p">:</span> <span class="n">url</span><span class="p">})</span>
 
-    <span class="n">decision</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">rule</span><span class="o">.</span><span class="n">pattern</span> <span class="o">==</span> <span class="s2">"decision"</span><span class="p">:</span>
+    <span class="n">decision</span><span class="p">,</span> <span class="n">note</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">agent_decided</span><span class="p">:</span>
+        <span class="c1"># An agent already chose (ADR-010): the owner's only question is keep or veto.</span>
+        <span class="n">decision</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"question"</span><span class="p">:</span> <span class="s2">"Keep the decision the agent made?"</span><span class="p">,</span>
+            <span class="s2">"options"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Keep"</span><span class="p">,</span> <span class="s2">"Veto"</span><span class="p">],</span>
+            <span class="s2">"recommendation"</span><span class="p">:</span> <span class="s2">"Keep"</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="c1"># What a Veto would undo, on the card itself: the owner never vetoes blind.</span>
+        <span class="n">note</span> <span class="o">=</span> <span class="n">_agent_decided_note</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rule</span><span class="o">.</span><span class="n">pattern</span> <span class="o">==</span> <span class="s2">"decision"</span><span class="p">:</span>
         <span class="n">recommended</span> <span class="o">=</span> <span class="n">_RECOMMEND</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
         <span class="n">decision</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">"question"</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span>
@@ -1421,6 +1467,7 @@ window.runMermaid = runMermaid;</script>
             <span class="s2">"minutes"</span><span class="p">:</span> <span class="n">rule</span><span class="o">.</span><span class="n">minutes</span><span class="p">,</span>
             <span class="s2">"links"</span><span class="p">:</span> <span class="n">links</span><span class="p">,</span>
             <span class="s2">"decision"</span><span class="p">:</span> <span class="n">decision</span><span class="p">,</span>
+            <span class="s2">"note"</span><span class="p">:</span> <span class="n">note</span><span class="p">,</span>
             <span class="s2">"prompt"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Do what </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2"> asks, run its Verify line if it has one, and comment the result on it."</span>
             <span class="k">if</span> <span class="n">session</span>
             <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>

@@ -71,9 +71,11 @@ comments, closes, labels or approves anything.
 |----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
 | [`Task`](#openloops.tasks.Task)(id[, url, kind, org, repo, title, ask, ...]) | One thing the human could act on.                                           |
 
-### openloops.tasks.DFLT_SEARCHES *= {'decide': ('Decide', 'title'), 'needs-user': ('"Needs the user"', 'body')}*
+### openloops.tasks.DFLT_SEARCHES *= {'agent-decided': ('agent-decided', 'label'), 'decide': ('Decide', 'title'), 'needs-user': ('"Needs the user"', 'body')}*
 
 (search terms, the field they match).
+A `label` match is a label name rather than text: `agent-decided` issues are the
+record of a decision an agent made and the owner can veto (ADR-010).
 
 * **Type:**
   Extra searches beyond the label, by name

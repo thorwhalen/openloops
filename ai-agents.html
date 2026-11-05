@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=4fa33042"></script>
+    <script src="_static/documentation_options.js?v=785bba28"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -57,7 +57,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.25" />
+  <meta name="docsearch:version" content="0.1.26" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -392,7 +392,7 @@ machine-readable copies of this documentation.</p>
 </section>
 <section id="openloops-needs-human">
 <h3><code class="docutils literal notranslate"><span class="pre">openloops-needs-human</span></code><a class="headerlink" href="#openloops-needs-human" title="Link to this heading">#</a></h3>
-<p>Use the moment you are blocked on the human and cannot finish on your own: a secret or API key only they can set; a command only they can run (a deploy, a <code class="docutils literal notranslate"><span class="pre">sudo</span></code>, a step your permissions refuse); access you do not have; a purchase, an approval, a decision only they can make; or a decision ALREADY RECORDED – an ADR, a convention, a default – that is now in your way or looks wrong given what you now know. Files the blocker as a <code class="docutils literal notranslate"><span class="pre">manual-task</span></code> GitHub issue in the affected repo, carrying a shell predicate, so the obligation outlives the session instead of dying in a message nobody re-reads and <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code> can re-check it later. Triggers on: ‘I can’t do this without you’, ‘you’ll need to run this’, ‘this needs your credentials’, ‘blocked on’, ‘someone has to decide’, ‘I don’t have access to’, ‘the ADR says X but’, or any point where the honest next step is to hand the work back. File it BEFORE writing the hand-back message, not instead of it. Skip when you could do the thing yourself.</p>
+<p>Use the moment you are blocked on the human and cannot finish on your own: a secret or API key only they can set; a command only they can run (a deploy, a <code class="docutils literal notranslate"><span class="pre">sudo</span></code>, a step your permissions refuse); access you do not have; a purchase, an approval, a decision only they can make; or a RECORDED decision (an ADR, a convention, a default) that is now in your way or looks wrong. Files the blocker as a <code class="docutils literal notranslate"><span class="pre">manual-task</span></code> GitHub issue in the affected repo, with a shell predicate, so the obligation outlives the session and <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">owed</span></code> can re-check it. Triggers on: ‘I can’t do this without you’, ‘you’ll need to run this’, ‘this needs your credentials’, ‘blocked on’, ‘someone has to decide’, ‘I don’t have access to’, ‘the ADR says X but’, or any honest hand-back. File it BEFORE writing the hand-back message, not instead of it. Skip only when you could do it yourself. Before handing back a decision, load this to check whether you may decide it yourself and record it as an <code class="docutils literal notranslate"><span class="pre">agent-decided</span></code> issue.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gh<span class="w"> </span>skill<span class="w"> </span>install<span class="w"> </span>thorwhalen/openloops<span class="w"> </span>openloops-needs-human<span class="w"> </span>--agent<span class="w"> </span>claude-code
 </pre></div>
 </div>

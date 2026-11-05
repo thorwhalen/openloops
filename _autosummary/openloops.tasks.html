@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=4fa33042"></script>
+    <script src="../_static/documentation_options.js?v=785bba28"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.25" />
+  <meta name="docsearch:version" content="0.1.26" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -507,8 +507,10 @@ comments, closes, labels or approves anything.</p>
 </div>
 <dl class="py data">
 <dt class="sig sig-object py" id="openloops.tasks.DFLT_SEARCHES">
-<span class="sig-prename descclassname"><span class="pre">openloops.tasks.</span></span><span class="sig-name descname"><span class="pre">DFLT_SEARCHES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'decide':</span> <span class="pre">('Decide',</span> <span class="pre">'title'),</span> <span class="pre">'needs-user':</span> <span class="pre">('&quot;Needs</span> <span class="pre">the</span> <span class="pre">user&quot;',</span> <span class="pre">'body')}</span></span><a class="headerlink" href="#openloops.tasks.DFLT_SEARCHES" title="Link to this definition">#</a></dt>
-<dd><p>(search terms, the field they match).</p>
+<span class="sig-prename descclassname"><span class="pre">openloops.tasks.</span></span><span class="sig-name descname"><span class="pre">DFLT_SEARCHES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'agent-decided':</span> <span class="pre">('agent-decided',</span> <span class="pre">'label'),</span> <span class="pre">'decide':</span> <span class="pre">('Decide',</span> <span class="pre">'title'),</span> <span class="pre">'needs-user':</span> <span class="pre">('&quot;Needs</span> <span class="pre">the</span> <span class="pre">user&quot;',</span> <span class="pre">'body')}</span></span><a class="headerlink" href="#openloops.tasks.DFLT_SEARCHES" title="Link to this definition">#</a></dt>
+<dd><p>(search terms, the field they match).
+A <code class="docutils literal notranslate"><span class="pre">label</span></code> match is a label name rather than text: <code class="docutils literal notranslate"><span class="pre">agent-decided</span></code> issues are the
+record of a decision an agent made and the owner can veto (ADR-010).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Extra searches beyond the label, by name</p>
