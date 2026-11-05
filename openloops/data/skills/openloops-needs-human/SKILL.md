@@ -108,7 +108,7 @@ A decision is **yours to make** only when **all five** hold:
    only that row). Anything else, including a client's or another team's repo: file a
    `manual-task` as step 2 says, or decide nothing.
 
-If all five hold: **choose, record, carry on.** Do not stop and do not file a
+If all five hold: **choose, land, record, carry on.** Record it once the change has landed, so the Reverse line can name the commit; if you must record it first, edit the Reverse line to `git revert <sha>` in the same session the commit lands, because a `none: nothing landed` that stays after a landing turns a veto into nothing. Do not stop and do not file a
 `manual-task`. If any one does not hold, the rest of this skill applies.
 
 **Record it as an issue labelled `agent-decided`** (create the label the same way as
@@ -136,8 +136,8 @@ is the documented answer):
 **Reverse:** `git revert <sha>` (the commit on the default branch that carries it), or `none: nothing landed`. Nothing else: a veto worker runs this line only in one of those two forms.
 
 **Veto by:** <date, three days from today>. To veto, answer **Veto** on the board, which
-sends a worker that checks this issue's author and label and then runs only the
-**Reverse** line above (or say
+sends a worker that checks this issue's author and label and then reverts only the
+commit the **Reverse** line names (or say
 so yourself in a comment here; a comment counts only if the owner wrote it by hand, not an agent filing under their
 login and not one carrying a `ptb:` marker). A
 vetoed decision is reversed; one nobody vetoes stands, and the owner closes it with
@@ -146,14 +146,17 @@ vetoed decision is reversed; one nobody vetoes stands, and the owner closes it w
 
 Title: `Decided: <the choice>`, under about 70 characters, past tense, same egress rules.
 
-**After a veto**, the session that finds it (the board's worker, or the next session in
-that repo) checks with `gh issue view N --json author,labels` that the issue still
-carries the `agent-decided` label **and** was opened by the owner's own login (a label
-alone proves nothing: an issue template can apply it to a stranger's issue). Then it
-reads the **Reverse** line and runs it only if it is exactly `git revert <sha>` of a
-commit on the default branch, or `none: nothing landed`; anything else, it runs nothing
-and files a `manual-task`. It comments what it did and closes the issue. It
-does not argue with the veto and it does not decide the same thing again.
+**After a veto**, the board's receiver sends a worker a fixed brief (the phone-board
+skill's `receiver.md`, "Veto brief"); a session in that repo that finds a veto by hand
+follows the same steps. It checks with `gh issue view N --json author,labels` that the
+issue still carries the `agent-decided` label **and** was opened by the owner's own login
+(a label alone proves nothing: an issue template can apply it to a stranger's issue). It
+never runs the **Reverse** line as written: it takes the sha alone, checks it is a hex sha
+on the default branch, and runs `git revert --no-edit <sha>` itself. For `none: nothing
+landed` it first looks for anything that did land for the issue; if something did, or
+the line is in any other form, it runs nothing, files a `manual-task`, and leaves the
+issue open. Then it comments what it did and closes the issue. It does not argue with
+the veto and it does not decide the same thing again.
 
 **A preference where any reasonable choice works is still not filed**: pick one, say
 which in your closing message, and carry on. An `agent-decided` issue is for a real

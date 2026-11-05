@@ -583,8 +583,31 @@ DFLT_FALLBACK = Rule("other", "browser", 5, "")
 _NPM_PACKAGE = re.compile(r"npmjs\.com/package/(@[\w.-]+/[\w.-]+|[\w.-]+)")
 _PYPI_PROJECT = re.compile(r"pypi\.org/(?:project|manage/project)/([\w.-]+)")
 _RECOMMEND = re.compile(r"\*\*Recommend(?:ation|ed)?:?\*\*:?\s*(.+)", re.IGNORECASE)
-#: The lines of an ``agent-decided`` body the owner must see before tapping Veto (ADR-010).
-_AGENT_DECIDED_SHOWN = re.compile(r"^\*\*(Reverse|Veto by):\*\*\s*(.+)$", re.MULTILINE)
+#: What an ``agent-decided`` body says a Veto would undo, and by when (ADR-010). One line
+#: each (``[ \t]``, never across a newline); the Veto-by value stops at its first sentence.
+_AGENT_DECIDED_REVERSE = re.compile(r"^\*\*Reverse:\*\*[ \t]*(\S.*)$", re.MULTILINE)
+_AGENT_DECIDED_VETO_BY = re.compile(r"^\*\*Veto by:\*\*[ \t]*([^.\n]+)", re.MULTILINE)
+
+
+def _agent_decided_note(body: str) -> str:
+    """The card line that tells the owner what a Veto would undo, so they never veto blind.
+
+    >>> _agent_decided_note("**Reverse:** `git revert abc1234`\\n**Veto by:** 2026-11-08. To veto")
+    'Reverse: `git revert abc1234` · Veto by: 2026-11-08'
+    >>> _agent_decided_note("**Reverse:**\\n**Veto by:** 2026-11-08.")
+    'No Reverse line in the issue: a Veto reverts nothing · Veto by: 2026-11-08'
+    """
+    reverse = _AGENT_DECIDED_REVERSE.search(body)
+    veto_by = _AGENT_DECIDED_VETO_BY.search(body)
+    if reverse:
+        head = f"Reverse: {reverse[1].strip()}"
+    elif len(body) >= DFLT_BODY_CHARS:  # cut before the line: unknown, not absent
+        head = "Reverse line not seen (long issue): open it before vetoing"
+    else:
+        head = "No Reverse line in the issue: a Veto reverts nothing"
+    return head + (f" · Veto by: {veto_by[1].strip()}" if veto_by else "")
+
+
 _BOT_PR = re.compile(
     r"^(build\(deps|chore\(deps|bump )|\[bot\]|dependabot|renovate", re.IGNORECASE
 )
@@ -680,13 +703,8 @@ def heuristic_classify(
             "options": ["Keep", "Veto"],
             "recommendation": "Keep",
         }
-        # What a Veto would run, on the card itself: the owner never vetoes blind.
-        note = (
-            " · ".join(
-                f"{k}: {v.strip()}" for k, v in _AGENT_DECIDED_SHOWN.findall(body)
-            )
-            or "No Reverse line in the issue: a Veto runs nothing."
-        )
+        # What a Veto would undo, on the card itself: the owner never vetoes blind.
+        note = _agent_decided_note(body)
     elif rule.pattern == "decision":
         recommended = _RECOMMEND.search(body)
         decision = {

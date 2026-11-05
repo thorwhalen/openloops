@@ -422,11 +422,12 @@ function card(t) {
   const isOn = st === "done" || st === "skipped" || st === "snoozed";
   const rec = t.decision?.recommendation, opts = t.decision?.options || [];
   // A task's own options are its answers: each one is a tap, and the receiver matches it against these same options.
-  const pickOpt = o => { if (o === d.answered) return; act(t, "answer", { answer: o, question: t.decision.question || t.ask, recommendation: rec || null }) };
+  // Answered (or read-only) cards show the options as a list: changing an answer is Undo, then a new tap.
+  const pickOpt = o => act(t, "answer", { answer: o, question: t.decision.question || t.ask, recommendation: rec || null });
   if (t.decision) kids.push(el("div", { class: "decision" },
     t.decision.question ? el("div", {}, t.decision.question) : null,
-    opts.length && !isOn ? el("div", { class: "opts", style: "display:grid;gap:6px" }, opts.map(o =>
-      el("button", { class: "btn" + (d.answered === o ? " primary" : o === rec ? " good" : ""), disabled: !w, onclick: () => pickOpt(o) }, (o === rec ? "★ " : "") + o)))
+    opts.length && !isOn && !readOnlyOrg ? el("div", { class: "opts", style: "display:grid;gap:6px" }, opts.map(o =>
+      el("button", { class: "btn" + (o === rec ? " good" : ""), disabled: !w, onclick: () => pickOpt(o) }, (o === rec ? "★ " : "") + o)))
       : opts.length ? el("ul", {}, opts.map(o => el("li", {}, o))) : null,
     el("div", { class: "rec" }, rec ? "Recommended: " + rec : "No recommendation in the issue")));
   if (t.prompt) kids.push(el("pre", { class: "prompt" }, t.prompt), el("div", { class: "sub" },

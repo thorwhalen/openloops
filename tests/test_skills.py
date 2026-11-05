@@ -363,8 +363,13 @@ def test_a_veto_runs_only_a_revert_after_checking_who_filed_it():
     receiver = _skill_text("openloops-phone-board", "references", "receiver.md")
     capture = _skill_text("openloops-needs-human", "SKILL.md")
     for text in (receiver, capture):
-        assert "git revert <sha>" in text and "none: nothing landed" in text
+        assert "git revert" in text and "<sha>" in text and "none: nothing landed" in text
         assert "--json author,labels" in text
     assert "Veto brief" in receiver and "Kept by the owner." in receiver
+    # The worker never runs the line as written, and a veto is never batched.
+    assert "git revert --no-edit <sha>" in receiver and "sent **alone**" in receiver
+    assert "never runs the **Reverse** line as written" in capture
+    assert '"not keep or veto"' in receiver, "a forged answer is refused, not implemented"
+    assert "choose, land, record, carry on" in capture
     # The page's free-text accept is the task's own recommendation, never the event's.
     assert "never the event's `recommendation` field" in receiver

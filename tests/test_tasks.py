@@ -355,9 +355,12 @@ def test_an_agent_decided_card_shows_what_a_veto_would_run():
         "labels": ["agent-decided"],
     }
     note = tasks.heuristic_classify(candidate)["note"]
-    assert "Reverse: `git revert abc1234`" in note and "Veto by: 2026-11-08." in note
+    assert "Reverse: `git revert abc1234`" in note and "Veto by: 2026-11-08" in note
     candidate["body"] = "**Decided:** x"
-    assert "a Veto runs nothing" in tasks.heuristic_classify(candidate)["note"]
+    assert "a Veto reverts nothing" in tasks.heuristic_classify(candidate)["note"]
+    # A long body is cut before classification: a missing line there is unknown, not absent.
+    candidate["body"] = "**Decided:** x\n" + "y" * tasks.DFLT_BODY_CHARS
+    assert "not seen" in tasks.heuristic_classify(candidate)["note"]
 
 
 def test_all_kinds_on_the_cli_gathers_agent_decided_issues(monkeypatch):
