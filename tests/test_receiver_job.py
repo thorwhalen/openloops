@@ -299,8 +299,11 @@ def test_the_check_signs_in_once_reads_the_store_and_reuses_the_cookie(board):
 
 
 def test_a_tick_with_nothing_pending_never_starts_the_session(
-    board, monkeypatch, capsys
+    board, tmp_path, monkeypatch, capsys
 ):
+    (tmp_path / "board").mkdir()
+    (tmp_path / "board" / "board.json").write_text(json.dumps({"session": "rcv"}))
+    monkeypatch.chdir(tmp_path)
     started = []
     monkeypatch.setattr(receiver_tick.os, "execv", lambda *a: started.append(a))
     code = receiver_tick.main(
@@ -455,3 +458,61 @@ def test_check_only_reports_and_never_execs(board, monkeypatch, capsys):
     monkeypatch.setattr(receiver_tick.os, "execv", lambda *a: pytest.fail("exec"))
     assert receiver_tick.main(["--check-only", "--env-file", str(board)]) == 0
     assert capsys.readouterr().out.splitlines()[0] == "pending: nothing"
+
+
+def test_a_board_without_a_session_name_says_so_instead_of_going_amber_silently(
+    board, monkeypatch, capsys
+):
+    monkeypatch.setattr(receiver_tick.os, "execv", lambda *a: pytest.fail("exec"))
+    receiver_tick.main(["--env-file", str(board), "--", "/bin/claude"])
+    assert "no session name" in capsys.readouterr().err
+
+
+def test_with_work_pending_the_heartbeat_is_the_sessions_to_write(
+    board, tmp_path, monkeypatch
+):
+    """A session that cannot run must leave the board amber, not a green lie."""
+    FakeBoard.collections = {"outbox": {"e1": {"action": "done"}}}
+    reasons = receiver_tick.check(board, heartbeat_by="rcv")
+    assert reasons and "left to the session" in reasons.heartbeat
+    assert FakeBoard.writes == []
+
+
+def test_an_idle_heartbeat_keeps_the_last_sweeps_processed_count(board):
+    FakeBoard.collections = {"meta": {"receiver": {"by": "rcv", "processed": 7}}}
+    receiver_tick.check(board, heartbeat_by="rcv")
+    assert FakeBoard.collections["meta"]["receiver"]["processed"] == 7
+
+
+def test_work_pending_while_another_receiver_is_live_starts_nothing(
+    board, tmp_path, monkeypatch, capsys
+):
+    """That session would stop at once (receiver.md, one receiver per board)."""
+    live = datetime.now(timezone.utc) - timedelta(minutes=2)
+    FakeBoard.collections = {
+        "outbox": {"e1": {"action": "done"}},
+        "meta": {"receiver": {"at": live.strftime("%Y-%m-%dT%H:%M:%SZ"), "by": "x"}},
+    }
+    (tmp_path / "board").mkdir()
+    (tmp_path / "board" / "board.json").write_text(json.dumps({"session": "rcv"}))
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(receiver_tick.os, "execv", lambda *a: pytest.fail("exec"))
+    assert receiver_tick.main(["--env-file", str(board), "--", "/bin/claude"]) == 0
+    assert "x is the live receiver" in capsys.readouterr().err
+
+
+def test_the_same_work_twice_in_a_row_backs_off_new_work_does_not(
+    board, monkeypatch
+):
+    """A session that changed nothing (budget hit, a refused command) is not
+    restarted every tick for the same events."""
+    started = []
+    monkeypatch.setattr(receiver_tick.os, "execv", lambda *a: started.append(a))
+    argv = ["--env-file", str(board), "--", "/bin/claude"]
+    FakeBoard.collections = {"outbox": {"e1": {"action": "done"}}}
+    receiver_tick.main(argv)
+    receiver_tick.main(argv)
+    assert len(started) == 1
+    FakeBoard.collections["outbox"]["e2"] = {"action": "done"}
+    receiver_tick.main(argv)
+    assert len(started) == 2

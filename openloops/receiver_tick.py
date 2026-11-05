@@ -34,6 +34,7 @@ nothing. The sign-in is the one in ``references/receiver-http.md``.
 from __future__ import annotations
 
 import http.cookiejar
+import hashlib
 import ipaddress
 import json
 import os
@@ -92,6 +93,10 @@ class Pending(list):
 
     total: int = 0
     heartbeat: str = ""
+    #: The ids behind the reasons, so a start that would see the same set again backs off.
+    keys: frozenset = frozenset()
+    #: Another receiver whose heartbeat is live: a session started now would stop at once.
+    other_live: str | None = None
 
 
 def read_env_file(path: str | Path) -> dict[str, str]:
@@ -158,16 +163,23 @@ def pending_work(
         reasons.append(f"{len(unreceived)} event(s) without a receipt")
 
     stale = queued = transient = 0
-    for rec in receipts.values():
+    due_ids: list[str] = []
+    for key, rec in receipts.items():
         status = rec.get("status")
         result = rec.get("result") or {}
+        hit = False
         if status == "processing":
             claimed = _when(rec.get("claimedAt"))
-            stale += claimed is None or now - claimed > STALE_CLAIM
+            hit = claimed is None or now - claimed > STALE_CLAIM
+            stale += hit
         elif status == "queued":
-            queued += due(rec)
+            hit = due(rec)
+            queued += hit
         elif status == "failed" and result.get("transient"):
-            transient += due(rec)
+            hit = due(rec)
+            transient += hit
+        if hit:
+            due_ids.append(key)
     for count, what in (
         (stale, "stale claim(s)"),
         (queued, "queued receipt(s) due a retry"),
@@ -176,6 +188,7 @@ def pending_work(
         if count:
             reasons.append(f"{count} {what}")
     reasons.total = len(unreceived) + stale + queued + transient
+    reasons.keys = frozenset(unreceived) | frozenset(due_ids)
     return reasons
 
 
@@ -324,16 +337,26 @@ def _session_name(board_json: Path) -> str | None:
 
 
 def _heartbeat(store: _Store, by: str, reasons: Pending, *, now: datetime) -> str:
-    """Write ``meta/receiver`` unless another live receiver owns it. Says what it did."""
+    """Write ``meta/receiver`` when nothing is pending, unless another live receiver
+    owns it (then ``reasons.other_live`` names it). Says what it did.
+
+    With work pending it never writes: the session does, so a session that cannot run
+    (an expired login, a refused tool) leaves the board amber instead of a green lie.
+    """
     current = store.get("meta", "receiver") or {}
     data = current.get("data") or {}
     stamp = _when(data.get("at"))
-    if data.get("by") not in (None, by) and stamp and now - stamp < LIVE_HEARTBEAT:
-        return f"heartbeat left alone: {data.get('by')} is live"
+    owner = data.get("by")
+    # An unreadable stamp from another receiver is treated as live: never overwrite it.
+    if owner not in (None, by) and (stamp is None or now - stamp < LIVE_HEARTBEAT):
+        reasons.other_live = str(owner)
+        return f"heartbeat left alone: {owner} is live"
+    if reasons:
+        return "heartbeat left to the session: work is pending"
     beat = {
         "at": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "by": by,
-        "processed": 0,
+        "processed": data.get("processed", 0),  # the last sweep's count, kept
         "pending": reasons.total,
     }
     written = store.put("meta", "receiver", beat, version=current.get("version"))
@@ -391,6 +414,50 @@ def _read_failures(stamp: Path) -> int:
         return 1 if stamp.exists() else 0
 
 
+def _same_work_too_soon(
+    stamp: Path, keys: frozenset, *, now: float | None = None
+) -> bool:
+    """Back off when a session would start for exactly the work the last one left.
+
+    A session that ran but changed nothing (it hit its budget, a command was refused)
+    would otherwise be restarted every tick for the same events. Different work starts
+    at once; the same work waits 1h, 2h, 4h, then every 6h. Records this start.
+
+    >>> import tempfile, pathlib
+    >>> s = pathlib.Path(tempfile.mkdtemp()) / 'w'
+    >>> _same_work_too_soon(s, frozenset({'e1'}), now=0)
+    False
+    >>> _same_work_too_soon(s, frozenset({'e1'}), now=60)
+    True
+    >>> _same_work_too_soon(s, frozenset({'e2'}), now=120)
+    False
+    """
+    now = datetime.now(timezone.utc).timestamp() if now is None else now
+    sig = hashlib.sha256("\n".join(sorted(keys)).encode()).hexdigest()[:16]
+    try:
+        last = json.loads(stamp.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        last = {}
+    starts = int(last.get("starts", 0)) if last.get("sig") == sig else 0
+    if (
+        starts
+        and now - float(last.get("at", 0)) < _backoff_wait(starts).total_seconds()
+    ):
+        print(
+            f"same pending work as the last {starts} session(s); next try after "
+            f"{_backoff_wait(starts).total_seconds() / 3600:g}h",
+            file=sys.stderr,
+        )
+        return True
+    try:
+        stamp.write_text(
+            json.dumps({"sig": sig, "at": now, "starts": starts + 1}), encoding="utf-8"
+        )
+    except OSError:
+        pass
+    return False
+
+
 _USAGE = (
     "usage: python -m openloops.receiver_tick [--check-only] [--env-file FILE] "
     "[--board-json FILE] [-- COMMAND ...]\n"
@@ -426,6 +493,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     here = env_file.expanduser()
     stamp = here.with_name("board-receiver.failopen")
+    same_work = here.with_name("board-receiver.lastwork")
     last_check = here.with_name("board-receiver.lastcheck")
 
     failure = None
@@ -476,8 +544,21 @@ def main(argv: list[str] | None = None) -> int:
             last_check.touch()
         except OSError:
             pass
+        if reasons.heartbeat.startswith("heartbeat skipped: no session"):
+            print(
+                f"receiver: {reasons.heartbeat}; the board will show amber",
+                file=sys.stderr,
+            )
         if not reasons:
             return 0  # idle: say nothing, so the log is touched only by ticks with work
+        if reasons.other_live:
+            print(
+                f"pending, but {reasons.other_live} is the live receiver; not starting",
+                file=sys.stderr,
+            )
+            return 0
+        if _same_work_too_soon(same_work, reasons.keys):
+            return 0
         print("pending: " + "; ".join(reasons), file=sys.stderr)
     try:
         os.execv(command[0], command)

@@ -84,6 +84,12 @@ RECEIVER_TOOLS = " ".join(
                 "set",
                 "umask",
                 "source",
+                "jq",
+                "cat",
+                "ls",
+                "shasum",
+                "vm_stat",
+                "sysctl",
             )
         ),
         "Read",
