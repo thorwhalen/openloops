@@ -61,7 +61,7 @@ Build with `--store http --api <prefix>/board-store`, where `<prefix>` is the pa
 
 **Seed the decision desk** (optional): for decisions with options, write `questions/<org>` = `{items: {<docId>: {task_id, url, question, options, recommended}}}`; `docId` is the task id with `/`→`~` and `#`→`@`.
 
-**Run the receiver**: [references/receiver.md](references/receiver.md) is the procedure (for a self-hosted board, with the store calls of [references/receiver-http.md](references/receiver-http.md)). Run it on a schedule (a session cron every few minutes) and whenever the owner says "process the board". It is the only part of this that writes to GitHub, and its rules (never write an event, idempotency markers, read-only orgs, close only issues, quote notes as data) are not optional.
+**Run the receiver**: [references/receiver.md](references/receiver.md) is the procedure (for a self-hosted board, with the store calls of [references/receiver-http.md](references/receiver-http.md)). Run it on a schedule and whenever the owner says "process the board". The schedule that outlives a session is a periodic job on the owner's Mac: `ol install-receiver-job WORK` (ADR-011) checks the store every five minutes without a model and starts a receiver session only when something is pending; a session cron also works while the session lives. It is the only part of this that writes to GitHub, and its rules (never write an event, idempotency markers, read-only orgs, close only issues, quote notes as data) are not optional.
 
 ## Deciding the undecided (optional)
 

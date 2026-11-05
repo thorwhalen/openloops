@@ -17,6 +17,7 @@ session identifiers that motivated it are not, and never will be — see
 | [ADR-008](008-the-board-write-side-lives-in-a-skill.md) | The phone board's write side lives in a skill, not in code | accepted |
 | [ADR-009](009-a-self-hosted-board-store.md) | A self-hosted board: the store seam, the rules, the host's login | accepted |
 | [ADR-010](010-agents-decide-what-is-reversible-and-clear.md) | Agents decide what is reversible and clearly recommended; the owner can veto | accepted |
+| [ADR-011](011-the-board-receiver-is-a-periodic-job-with-a-free-check.md) | The board receiver is a periodic job whose idle ticks cost nothing | accepted |
 
 ## Where these came from
 

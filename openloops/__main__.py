@@ -435,6 +435,71 @@ def job_status():
     )
 
 
+def install_receiver_job(
+    work_dir: str,
+    *,
+    model: str = "sonnet",
+    interval: int = _job.RECEIVER_INTERVAL,
+    max_budget_usd: float = 1.0,
+    allowed_tools: str = _job.RECEIVER_TOOLS,
+    dry_run: bool = False,
+):
+    """Install the phone-board receiver job (macOS launchd; ADR-011).
+
+    Every `interval` seconds it asks the board store, without a model, whether anything
+    is pending (and writes the board's heartbeat), and only then starts `claude -p`
+    with the receiver prompt in WORK_DIR (the directory `ol board-build` wrote into).
+    Needs the receiver's credentials file (`~/.config/openloops/board-receiver.env`,
+    mode 600). `--max-budget-usd` caps the tick's own session, not the workers it
+    dispatches. `--allowed-tools` replaces the session's tool allowlist. `--dry-run`
+    prints the plist.
+    """
+    result = _job.install_receiver(
+        work_dir,
+        model=model,
+        interval=interval,
+        max_budget_usd=max_budget_usd,
+        allowed_tools=allowed_tools,
+        dry_run=dry_run,
+    )
+    if dry_run:
+        return result["xml"]
+    return (
+        f"installed {_job.RECEIVER_LABEL} every {result['interval']}s\n"
+        f"  plist: {result['plist']}\n  log:   {result['log']}\n"
+        "check by hand any time: python3 -m openloops.receiver_tick --check-only"
+    )
+
+
+def uninstall_receiver_job():
+    """Unload and remove the phone-board receiver job."""
+    result = _job.uninstall(label=_job.RECEIVER_LABEL)
+    removed = result["removed"] == "true"
+    return f"{'removed' if removed else 'nothing to remove at'} {result['plist']}"
+
+
+def receiver_job_status():
+    """Is the receiver job installed and loaded, when did a check last succeed, and when
+    did a tick last have work?
+
+    "last check" is every tick whose check reached the store (it also keeps the board's
+    heartbeat green); "last work" is the log, touched only by ticks that found work or
+    failed. A recent check with old work is an idle board; an old check is a dead job.
+    """
+    info = _job.job_status(label=_job.RECEIVER_LABEL)
+    return "\n".join(
+        [
+            f"label      {info['label']}",
+            f"platform   {'supported' if info['platform_supported'] else 'NOT macOS'}",
+            f"plist      {info['plist']} ({'present' if info['installed'] else 'ABSENT'})",
+            f"loaded     {info['loaded']}",
+            f"last check {_age(info['last_check'])}",
+            f"last work  {_age(info['last_write'])}",
+            f"log        {info['log']}",
+        ]
+    )
+
+
 def published(*, limit: int = 20, session: str = None):
     """What your agents handed you lately: recent annals documents, with their sessions.
 
@@ -567,6 +632,9 @@ _commands = [
     install_job,
     uninstall_job,
     job_status,
+    install_receiver_job,
+    uninstall_receiver_job,
+    receiver_job_status,
 ]
 
 
