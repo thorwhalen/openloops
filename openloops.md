@@ -1,4 +1,4 @@
-> built 2026-11-10 07:58 UTC from f191a43 (main) · openloops 0.1.28. Details: build_info.json
+> built 2026-11-10 12:15 UTC from dc590f6 (main) · openloops 0.1.29. Details: build_info.json
 
 # index.html.md
 
@@ -1591,9 +1591,14 @@ lock is process-local only, which is right for a single-process server.
 * **Return type:**
   [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`None`](https://docs.python.org/3/builtins/constants.html#None)]
 
-### openloops.board_server.mk_app(, board_dir, store_root, role_of, max_bytes=65536, title='openloops board')
+### openloops.board_server.mk_app(, board_dir, store_root, role_of, max_bytes=65536, title='openloops board', files=('tasks.json', 'runs.json', 'board.json', 'index.html', 'kit.html'))
 
 The board’s FastAPI app. `role_of` is the only authorisation it has.
+
+`files` names the only files `GET /board/{name}` hands out (default: what
+`ol board-build` writes). Another page that wants the same store rules over its own
+published files (a desk serving `snapshot.json`) passes its own names; `index.html`
+is always one of them, since `GET /board/` serves it.
 
 
 # _autosummary/openloops.board_store.html.md
@@ -5390,7 +5395,7 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-11-10 07:58 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/f191a43ea61047f34af298a9f762f530a916e316"><code>f191a43</code></a> on branch <code>main</code>, for **openloops 0.1.28** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-10 12:15 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/dc590f676df63572bb67d3e4fb66f61080200560"><code>dc590f6</code></a> on branch <code>main</code>, for **openloops 0.1.29** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -5399,7 +5404,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/f191a43ea61047f34af298a9f762f530a916e316"><code>f191a43ea61047f34af298a9f762f530a916e316</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/dc590f676df63572bb67d3e4fb66f61080200560"><code>dc590f676df63572bb67d3e4fb66f61080200560</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -5410,9 +5415,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/42778870782">42778870782</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/42813965363">42813965363</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>f191a43ea61047f34af298a9f762f530a916e316</code> (in the history of the built commit) |
+| Event commit | <code>dc590f676df63572bb67d3e4fb66f61080200560</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -5437,13 +5442,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.28/">0.1.28</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.29/">0.1.29</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout f191a43ea61047f34af298a9f762f530a916e316
+git checkout dc590f676df63572bb67d3e4fb66f61080200560
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

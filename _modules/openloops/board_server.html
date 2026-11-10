@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../../_static/documentation_options.js?v=34399df3"></script>
+    <script src="../../_static/documentation_options.js?v=904119ea"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.28" />
+  <meta name="docsearch:version" content="0.1.29" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -746,7 +746,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
@@ -817,13 +817,25 @@ window.runMermaid = runMermaid;</script>
     <span class="n">role_of</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">],</span>
     <span class="n">max_bytes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_MAX_BYTES</span><span class="p">,</span>
     <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"openloops board"</span><span class="p">,</span>
+    <span class="n">files</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">BOARD_FILES</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">"""The board's FastAPI app. ``role_of`` is the only authorisation it has."""</span>
+<span class="w">    </span><span class="sd">"""The board's FastAPI app. ``role_of`` is the only authorisation it has.</span>
+
+<span class="sd">    ``files`` names the only files ``GET /board/{name}`` hands out (default: what</span>
+<span class="sd">    ``ol board-build`` writes). Another page that wants the same store rules over its own</span>
+<span class="sd">    published files (a desk serving ``snapshot.json``) passes its own names; ``index.html``</span>
+<span class="sd">    is always one of them, since ``GET /board/`` serves it.</span>
+<span class="sd">    """</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">HTTPException</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileResponse</span><span class="p">,</span> <span class="n">JSONResponse</span><span class="p">,</span> <span class="n">RedirectResponse</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">starlette.concurrency</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_in_threadpool</span>
 
     <span class="n">board</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">board_dir</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"files is a collection of names, not one name: pass (name,)"</span><span class="p">)</span>
+    <span class="n">served</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">|</span> <span class="p">{</span><span class="s2">"index.html"</span><span class="p">}</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="s2">"/"</span> <span class="ow">in</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">served</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"files must be plain names, not paths: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">served</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">store_root</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
     <span class="n">store</span> <span class="o">=</span> <span class="n">board_docs_store</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
     <span class="n">lock_path</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="n">_LOCK_NAME</span>
@@ -904,8 +916,8 @@ window.runMermaid = runMermaid;</script>
     <span class="k">def</span><span class="w"> </span><span class="nf">board_file</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
         <span class="n">require_role</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">board</span> <span class="o">/</span> <span class="n">name</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">BOARD_FILES</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="mi">404</span><span class="p">,</span> <span class="s2">"no such board file"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">served</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="mi">404</span><span class="p">,</span> <span class="s2">"no such file"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">FileResponse</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">NO_STORE</span><span class="p">)</span>
 
     <span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/board-store/</span><span class="si">{collection}</span><span class="s2">"</span><span class="p">)</span>

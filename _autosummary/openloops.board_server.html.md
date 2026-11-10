@@ -57,6 +57,11 @@ lock is process-local only, which is right for a single-process server.
 * **Return type:**
   [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`None`](https://docs.python.org/3/builtins/constants.html#None)]
 
-### openloops.board_server.mk_app(, board_dir, store_root, role_of, max_bytes=65536, title='openloops board')
+### openloops.board_server.mk_app(, board_dir, store_root, role_of, max_bytes=65536, title='openloops board', files=('tasks.json', 'runs.json', 'board.json', 'index.html', 'kit.html'))
 
 The board’s FastAPI app. `role_of` is the only authorisation it has.
+
+`files` names the only files `GET /board/{name}` hands out (default: what
+`ol board-build` writes). Another page that wants the same store rules over its own
+published files (a desk serving `snapshot.json`) passes its own names; `index.html`
+is always one of them, since `GET /board/` serves it.
