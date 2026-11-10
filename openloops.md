@@ -1,4 +1,4 @@
-> built 2026-11-05 12:43 UTC from f0ff417 (main) · openloops 0.1.27. Details: build_info.json
+> built 2026-11-10 07:58 UTC from f191a43 (main) · openloops 0.1.28. Details: build_info.json
 
 # index.html.md
 
@@ -4459,7 +4459,7 @@ worker is killed mid-write or the disk fills, and readers can see a half-written
 a rename never shows either. Keys are POSIX relative paths (`outbox/e1.json`);
 a key that would leave `root` is refused.
 
-### *class* openloops.store.Utf8TextFiles(\*args, delete_func=None, write_open_kwargs=None, \*\*kwargs)
+### *class* openloops.store.Utf8TextFiles(\*args, delete_func=None, write_open_kwargs=None, write_func=None, \*\*kwargs)
 
 Bases: `PrefixRelativizationMixin`, `Store`
 
@@ -4675,15 +4675,16 @@ comments, closes, labels or approves anything.
 
 ### Functions
 
-| [`classify`](_autosummary/openloops.tasks.html.md#openloops.tasks.classify)(candidates, \*[, classifier])          | One normalised record per candidate, through `classifier`.                       |
-|--------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
-| [`gather`](_autosummary/openloops.tasks.html.md#openloops.tasks.gather)(\*[, owners, exclude_owners, ...])       | Every open item that asks something of the human, across `owners`, deduplicated. |
-| [`github_settings_url`](_autosummary/openloops.tasks.html.md#openloops.tasks.github_settings_url)(repo, section)              | A repository settings page (a key of `GITHUB_SETTINGS`).                         |
-| [`heuristic_classify`](_autosummary/openloops.tasks.html.md#openloops.tasks.heuristic_classify)(candidate, \*[, rules, ...]) | A task record from a gathered candidate, by patterns alone.                      |
-| [`load_records`](_autosummary/openloops.tasks.html.md#openloops.tasks.load_records)(paths)                             | The records in JSON files (each a list, or an envelope with `candidates`).       |
-| [`merge_records`](_autosummary/openloops.tasks.html.md#openloops.tasks.merge_records)(\*sources)                        | Records from several sources, one per item, later sources winning.               |
-| [`npm_access_url`](_autosummary/openloops.tasks.html.md#openloops.tasks.npm_access_url)(package)                         | npm package settings: trusted publisher, publishing access, 2FA requirement.     |
-| [`pypi_publishing_url`](_autosummary/openloops.tasks.html.md#openloops.tasks.pypi_publishing_url)([project])                  | PyPI trusted publishers: a project's page, or the pending-publisher page.        |
+| [`apply_reviews`](_autosummary/openloops.tasks.html.md#openloops.tasks.apply_reviews)(records, reviews)                 | Set only `review` on records, from `{id, review}` overlays; nothing else changes.   |
+|--------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| [`classify`](_autosummary/openloops.tasks.html.md#openloops.tasks.classify)(candidates, \*[, classifier])          | One normalised record per candidate, through `classifier`.                          |
+| [`gather`](_autosummary/openloops.tasks.html.md#openloops.tasks.gather)(\*[, owners, exclude_owners, ...])       | Every open item that asks something of the human, across `owners`, deduplicated.    |
+| [`github_settings_url`](_autosummary/openloops.tasks.html.md#openloops.tasks.github_settings_url)(repo, section)              | A repository settings page (a key of `GITHUB_SETTINGS`).                            |
+| [`heuristic_classify`](_autosummary/openloops.tasks.html.md#openloops.tasks.heuristic_classify)(candidate, \*[, rules, ...]) | A task record from a gathered candidate, by patterns alone.                         |
+| [`load_records`](_autosummary/openloops.tasks.html.md#openloops.tasks.load_records)(paths)                             | The records in JSON files (each a list, or an envelope with `candidates`).          |
+| [`merge_records`](_autosummary/openloops.tasks.html.md#openloops.tasks.merge_records)(\*sources)                        | Records from several sources, one per item, later sources winning.                  |
+| [`npm_access_url`](_autosummary/openloops.tasks.html.md#openloops.tasks.npm_access_url)(package)                         | npm package settings: trusted publisher, publishing access, 2FA requirement.        |
+| [`pypi_publishing_url`](_autosummary/openloops.tasks.html.md#openloops.tasks.pypi_publishing_url)([project])                  | PyPI trusted publishers: a project's page, or the pending-publisher page.           |
 
 ### Classes
 
@@ -4730,7 +4731,7 @@ Alias for field number 1
 
 Whether the item still asks anything of the human.
 
-### openloops.tasks.TASK_FIELDS *= ('id', 'url', 'kind', 'org', 'repo', 'title', 'ask', 'tier', 'minutes', 'links', 'decision', 'prompt', 'machine', 'unblocks', 'pattern', 'pattern_key', 'status', 'note', 'source', 'created')*
+### openloops.tasks.TASK_FIELDS *= ('id', 'url', 'kind', 'org', 'repo', 'title', 'ask', 'tier', 'minutes', 'links', 'decision', 'prompt', 'machine', 'unblocks', 'pattern', 'pattern_key', 'status', 'note', 'source', 'created', 'review')*
 
 Every key on every record, in schema order.
 
@@ -4738,7 +4739,7 @@ Every key on every record, in schema order.
 
 Where the human does the thing, cheapest first. The board sorts and filters on it.
 
-### *class* openloops.tasks.Task(id, url=None, kind='issue', org=None, repo=None, title='', ask='', tier='session', minutes=None, links=list(), decision=None, prompt=None, machine=None, unblocks=list(), pattern='other', pattern_key=None, status='open', note=None, source=None, created=None)
+### *class* openloops.tasks.Task(id, url=None, kind='issue', org=None, repo=None, title='', ask='', tier='session', minutes=None, links=list(), decision=None, prompt=None, machine=None, unblocks=list(), pattern='other', pattern_key=None, status='open', note=None, source=None, created=None, review=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -4748,6 +4749,14 @@ One thing the human could act on. Every record carries every field.
 `{label, url}` with the item itself last; `prompt` is a paste-ready request for
 a coding session (session tier). `source` says how the item was found and
 `created` when it was opened (`YYYY-MM-DD`).
+
+`review` is `{verdict, disagreement_risk, reason, concerns}` or `None`:
+`verdict` one of `REVIEW_VERDICTS` (the gate’s route),
+`disagreement_risk` one of `REVIEW_RISKS`, `reason` a string and
+`concerns` a list of `{concern, stance, severity, reason}` with `stance` in
+`REVIEW_STANCES` and `severity` in `REVIEW_SEVERITIES`. It is written
+by a separate, external preference step at board-build time; this package only
+carries it (normalised, never raising) and the board page shows it.
 
 ```pycon
 >>> Task.from_mapping({'id': 'a/b#1', 'tier': 'nope', 'pattern': 'x'}).tier
@@ -4771,6 +4780,25 @@ sloppy classifier record must not sink a board of three hundred.
 
 * **Return type:**
   [`Task`](_autosummary/openloops.tasks.html.md#openloops.tasks.Task)
+
+### openloops.tasks.apply_reviews(records, reviews)
+
+Set only `review` on records, from `{id, review}` overlays; nothing else changes.
+
+Overlays match by `id` or by GitHub URL (ids derived as [`Task`](_autosummary/openloops.tasks.html.md#openloops.tasks.Task) does); an
+overlay for an id no record has is ignored. The review is normalised.
+
+```pycon
+>>> recs = [{'id': 'a/b#1', 'tier': 'tap'}]
+>>> out = apply_reviews(recs, [{'url': 'https://github.com/a/b/issues/1',
+...                             'review': {'disagreement_risk': 'low'}},
+...                            {'id': 'x/y#9', 'review': {'disagreement_risk': 'high'}}])
+>>> [(r['tier'], r['review']['disagreement_risk']) for r in out]
+[('tap', 'low')]
+```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
 
 ### openloops.tasks.classify(candidates, \*, classifier=<function heuristic_classify>)
 
@@ -4861,13 +4889,21 @@ Records from several sources, one per item, later sources winning.
 Keyed by `id` (derived from the URL for a GitHub item, so the two sources agree);
 a record with no id and no URL is dropped. A later record replaces the
 earlier one whole, except that an empty `url` or `created` is filled from it:
-the classifier brief reads threads, the gatherer knows dates.
+the classifier brief reads threads, the gatherer knows dates. A `review` is kept
+when the later record has no `review` key and the same `decision`; a later
+record with the key (even `null`) replaces it, and a changed decision drops it.
 
 ```pycon
 >>> heuristic = [{'id': 'a/b#1', 'url': 'u1', 'tier': 'browser', 'created': '2026-01-02'}]
 >>> enriched = [{'id': 'a/b#1', 'url': 'u1', 'tier': 'tap', 'ask': 'Say yes'}]
 >>> [(r['tier'], r['ask'], r['created']) for r in merge_records(heuristic, enriched)]
 [('tap', 'Say yes', '2026-01-02')]
+>>> kept = [{'id': 'a/b#1', 'url': 'u1', 'review': {'disagreement_risk': 'low'}}]
+>>> merge_records(kept, enriched)[0]['review']['disagreement_risk']
+'low'
+>>> newer = [{'id': 'a/b#1', 'url': 'u1', 'review': {'disagreement_risk': 'high'}}]
+>>> merge_records(kept, newer)[0]['review']['disagreement_risk']
+'high'
 ```
 
 * **Return type:**
@@ -4962,12 +4998,13 @@ itself failed — must not be readable as “nothing is waiting”.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.tools.board_build(, records, out_dir, candidates=None, run_specs=None, run_extras=None, title='Phone Task Board', session=None, read_only_orgs=None, machine=None, store='artifact', api=None, moved_to=None)
+### openloops.tools.board_build(, records, out_dir, candidates=None, reviews=None, run_specs=None, run_extras=None, title='Phone Task Board', session=None, read_only_orgs=None, machine=None, store='artifact', api=None, moved_to=None)
 
 Write the phone task board (page, `tasks.json`, `runs.json`) into `out_dir`.
 
 `records` are task-record JSON files (globs allowed); `candidates` supply the
-creation dates; `run_specs` replaces the packaged run specs and `run_extras` (a
+creation dates; `reviews` are `{id, review}` record files (globs allowed) that
+set only each matching record’s `review`; `run_specs` replaces the packaged run specs and `run_extras` (a
 JSON object keyed by run) overlays deployment-specific prompts and tables. Writes
 only into `out_dir`; publishing and the receiving side are the skill’s job.
 `store='http'` with `api` wires the page to a self-hosted board store API
@@ -5353,7 +5390,7 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-11-05 12:43 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/f0ff4175029346f1f86878fa52fa3d6a38bf5f55"><code>f0ff417</code></a> on branch <code>main</code>, for **openloops 0.1.27** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-10 07:58 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/f191a43ea61047f34af298a9f762f530a916e316"><code>f191a43</code></a> on branch <code>main</code>, for **openloops 0.1.28** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -5362,7 +5399,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/f0ff4175029346f1f86878fa52fa3d6a38bf5f55"><code>f0ff4175029346f1f86878fa52fa3d6a38bf5f55</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/f191a43ea61047f34af298a9f762f530a916e316"><code>f191a43ea61047f34af298a9f762f530a916e316</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -5373,9 +5410,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/42029372532">42029372532</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/42778870782">42778870782</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>f0ff4175029346f1f86878fa52fa3d6a38bf5f55</code> (in the history of the built commit) |
+| Event commit | <code>f191a43ea61047f34af298a9f762f530a916e316</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -5384,7 +5421,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 | epythet  | 0.2.22  |
 | Sphinx   | 9.1.1   |
 | docutils | 0.22.4  |
-| Python   | 3.12.15 |
+| Python   | 3.12.16 |
 
 ## Configuration as resolved
 
@@ -5400,13 +5437,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.27/">0.1.27</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.28/">0.1.28</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout f0ff4175029346f1f86878fa52fa3d6a38bf5f55
+git checkout f191a43ea61047f34af298a9f762f530a916e316
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

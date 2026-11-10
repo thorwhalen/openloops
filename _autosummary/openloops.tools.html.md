@@ -60,12 +60,13 @@ itself failed — must not be readable as “nothing is waiting”.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.tools.board_build(, records, out_dir, candidates=None, run_specs=None, run_extras=None, title='Phone Task Board', session=None, read_only_orgs=None, machine=None, store='artifact', api=None, moved_to=None)
+### openloops.tools.board_build(, records, out_dir, candidates=None, reviews=None, run_specs=None, run_extras=None, title='Phone Task Board', session=None, read_only_orgs=None, machine=None, store='artifact', api=None, moved_to=None)
 
 Write the phone task board (page, `tasks.json`, `runs.json`) into `out_dir`.
 
 `records` are task-record JSON files (globs allowed); `candidates` supply the
-creation dates; `run_specs` replaces the packaged run specs and `run_extras` (a
+creation dates; `reviews` are `{id, review}` record files (globs allowed) that
+set only each matching record’s `review`; `run_specs` replaces the packaged run specs and `run_extras` (a
 JSON object keyed by run) overlays deployment-specific prompts and tables. Writes
 only into `out_dir`; publishing and the receiving side are the skill’s job.
 `store='http'` with `api` wires the page to a self-hosted board store API

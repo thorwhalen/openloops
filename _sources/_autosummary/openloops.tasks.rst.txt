@@ -18,6 +18,7 @@ openloops.tasks
 
    .. autosummary::
    
+      apply_reviews
       classify
       gather
       github_settings_url

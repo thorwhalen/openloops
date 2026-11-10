@@ -58,7 +58,7 @@ worker is killed mid-write or the disk fills, and readers can see a half-written
 a rename never shows either. Keys are POSIX relative paths (`outbox/e1.json`);
 a key that would leave `root` is refused.
 
-### *class* openloops.store.Utf8TextFiles(\*args, delete_func=None, write_open_kwargs=None, \*\*kwargs)
+### *class* openloops.store.Utf8TextFiles(\*args, delete_func=None, write_open_kwargs=None, write_func=None, \*\*kwargs)
 
 Bases: `PrefixRelativizationMixin`, `Store`
 

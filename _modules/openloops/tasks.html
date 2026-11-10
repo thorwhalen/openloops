@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../../_static/documentation_options.js?v=dc233e31"></script>
+    <script src="../../_static/documentation_options.js?v=34399df3"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.27" />
+  <meta name="docsearch:version" content="0.1.28" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -782,6 +782,7 @@ window.runMermaid = runMermaid;</script>
     <span class="s2">"PATTERNS"</span><span class="p">,</span>
     <span class="s2">"STATUSES"</span><span class="p">,</span>
     <span class="s2">"TASK_FIELDS"</span><span class="p">,</span>
+    <span class="s2">"apply_reviews"</span><span class="p">,</span>
     <span class="s2">"TIERS"</span><span class="p">,</span>
     <span class="s2">"Rule"</span><span class="p">,</span>
     <span class="s2">"Task"</span><span class="p">,</span>
@@ -826,6 +827,11 @@ window.runMermaid = runMermaid;</script>
     <span class="s2">"other"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">KINDS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"issue"</span><span class="p">,</span> <span class="s2">"pr"</span><span class="p">)</span>
+<span class="c1">#: The preference step's vocabularies for :attr:`Task.review`.</span>
+<span class="n">REVIEW_VERDICTS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"auto"</span><span class="p">,</span> <span class="s2">"shown"</span><span class="p">,</span> <span class="s2">"logged"</span><span class="p">)</span>
+<span class="n">REVIEW_RISKS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"low"</span><span class="p">,</span> <span class="s2">"medium"</span><span class="p">,</span> <span class="s2">"high"</span><span class="p">,</span> <span class="s2">"uncalibrated"</span><span class="p">)</span>
+<span class="n">REVIEW_STANCES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"fine"</span><span class="p">,</span> <span class="s2">"caution"</span><span class="p">,</span> <span class="s2">"object"</span><span class="p">)</span>
+<span class="n">REVIEW_SEVERITIES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"blocker"</span><span class="p">,</span> <span class="s2">"major"</span><span class="p">,</span> <span class="s2">"minor"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Task">
@@ -838,6 +844,14 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ``{label, url}`` with the item itself last; ``prompt`` is a paste-ready request for</span>
 <span class="sd">    a coding session (session tier). ``source`` says how the item was found and</span>
 <span class="sd">    ``created`` when it was opened (``YYYY-MM-DD``).</span>
+
+<span class="sd">    ``review`` is ``{verdict, disagreement_risk, reason, concerns}`` or ``None``:</span>
+<span class="sd">    ``verdict`` one of :data:`REVIEW_VERDICTS` (the gate's route),</span>
+<span class="sd">    ``disagreement_risk`` one of :data:`REVIEW_RISKS`, ``reason`` a string and</span>
+<span class="sd">    ``concerns`` a list of ``{concern, stance, severity, reason}`` with ``stance`` in</span>
+<span class="sd">    :data:`REVIEW_STANCES` and ``severity`` in :data:`REVIEW_SEVERITIES`. It is written</span>
+<span class="sd">    by a separate, external preference step at board-build time; this package only</span>
+<span class="sd">    carries it (normalised, never raising) and the board page shows it.</span>
 
 <span class="sd">    &gt;&gt;&gt; Task.from_mapping({'id': 'a/b#1', 'tier': 'nope', 'pattern': 'x'}).tier</span>
 <span class="sd">    'session'</span>
@@ -863,6 +877,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">note</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">created</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">review</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="Task.from_mapping">
 <a class="viewcode-back" href="../../_autosummary/openloops.tasks.html#openloops.tasks.Task.from_mapping">[docs]</a>
@@ -896,6 +911,7 @@ window.runMermaid = runMermaid;</script>
             <span class="n">task</span><span class="o">.</span><span class="n">kind</span> <span class="o">=</span> <span class="s2">"pr"</span> <span class="k">if</span> <span class="s2">"/pull/"</span> <span class="ow">in</span> <span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">url</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"issue"</span>
         <span class="n">task</span><span class="o">.</span><span class="n">links</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">links</span> <span class="ow">or</span> <span class="p">[])</span>
         <span class="n">task</span><span class="o">.</span><span class="n">unblocks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">unblocks</span> <span class="ow">or</span> <span class="p">[])</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">review</span> <span class="o">=</span> <span class="n">_clean_review</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">review</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">task</span></div>
 
 
@@ -913,6 +929,46 @@ window.runMermaid = runMermaid;</script>
 
 
 <span class="n">_GITHUB_ITEM</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"https://github\.com/([^/]+/[^/]+)/(?:issues|pull)/(\d+)"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_str_or_none</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_in_or_none</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">vocabulary</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">vocabulary</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_clean_review</span><span class="p">(</span><span class="n">review</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Normalise a preference annotation; anything unusable becomes ``None``, never an error.</span>
+
+<span class="sd">    &gt;&gt;&gt; _clean_review({'disagreement_risk': 'high', 'junk': 1})</span>
+<span class="sd">    {'verdict': None, 'disagreement_risk': 'high', 'reason': None, 'concerns': []}</span>
+<span class="sd">    &gt;&gt;&gt; _clean_review({'disagreement_risk': 'sure'}) is None</span>
+<span class="sd">    True</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">review</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">concerns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">raw</span> <span class="o">=</span> <span class="n">review</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"concerns"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">raw</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="k">else</span> <span class="p">():</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"concern"</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="n">concerns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">"concern"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                    <span class="s2">"stance"</span><span class="p">:</span> <span class="n">_in_or_none</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"stance"</span><span class="p">),</span> <span class="n">REVIEW_STANCES</span><span class="p">),</span>
+                    <span class="s2">"severity"</span><span class="p">:</span> <span class="n">_in_or_none</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"severity"</span><span class="p">),</span> <span class="n">REVIEW_SEVERITIES</span><span class="p">),</span>
+                    <span class="s2">"reason"</span><span class="p">:</span> <span class="n">_str_or_none</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"reason"</span><span class="p">)),</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+    <span class="n">cleaned</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"verdict"</span><span class="p">:</span> <span class="n">_in_or_none</span><span class="p">(</span><span class="n">review</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"verdict"</span><span class="p">),</span> <span class="n">REVIEW_VERDICTS</span><span class="p">),</span>
+        <span class="s2">"disagreement_risk"</span><span class="p">:</span> <span class="n">_in_or_none</span><span class="p">(</span><span class="n">review</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"disagreement_risk"</span><span class="p">),</span> <span class="n">REVIEW_RISKS</span><span class="p">),</span>
+        <span class="s2">"reason"</span><span class="p">:</span> <span class="n">_str_or_none</span><span class="p">(</span><span class="n">review</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"reason"</span><span class="p">)),</span>
+        <span class="s2">"concerns"</span><span class="p">:</span> <span class="n">concerns</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">cleaned</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">cleaned</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="k">else</span> <span class="kc">None</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_int_or_none</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
@@ -1527,12 +1583,20 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    Keyed by ``id`` (derived from the URL for a GitHub item, so the two sources agree);</span>
 <span class="sd">    a record with no id and no URL is dropped. A later record replaces the</span>
 <span class="sd">    earlier one whole, except that an empty ``url`` or ``created`` is filled from it:</span>
-<span class="sd">    the classifier brief reads threads, the gatherer knows dates.</span>
+<span class="sd">    the classifier brief reads threads, the gatherer knows dates. A ``review`` is kept</span>
+<span class="sd">    when the later record has no ``review`` key and the same ``decision``; a later</span>
+<span class="sd">    record with the key (even ``null``) replaces it, and a changed decision drops it.</span>
 
 <span class="sd">    &gt;&gt;&gt; heuristic = [{'id': 'a/b#1', 'url': 'u1', 'tier': 'browser', 'created': '2026-01-02'}]</span>
 <span class="sd">    &gt;&gt;&gt; enriched = [{'id': 'a/b#1', 'url': 'u1', 'tier': 'tap', 'ask': 'Say yes'}]</span>
 <span class="sd">    &gt;&gt;&gt; [(r['tier'], r['ask'], r['created']) for r in merge_records(heuristic, enriched)]</span>
 <span class="sd">    [('tap', 'Say yes', '2026-01-02')]</span>
+<span class="sd">    &gt;&gt;&gt; kept = [{'id': 'a/b#1', 'url': 'u1', 'review': {'disagreement_risk': 'low'}}]</span>
+<span class="sd">    &gt;&gt;&gt; merge_records(kept, enriched)[0]['review']['disagreement_risk']</span>
+<span class="sd">    'low'</span>
+<span class="sd">    &gt;&gt;&gt; newer = [{'id': 'a/b#1', 'url': 'u1', 'review': {'disagreement_risk': 'high'}}]</span>
+<span class="sd">    &gt;&gt;&gt; merge_records(kept, newer)[0]['review']['disagreement_risk']</span>
+<span class="sd">    'high'</span>
 <span class="sd">    """</span>
     <span class="n">merged</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">:</span>
@@ -1545,8 +1609,52 @@ window.runMermaid = runMermaid;</script>
             <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"url"</span><span class="p">,</span> <span class="s2">"created"</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">earlier</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">task</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
                     <span class="n">task</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">earlier</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="c1"># A review survives a reclassification only if the later record is silent</span>
+            <span class="c1"># about it (no key at all; an explicit null clears) and the decision it</span>
+            <span class="c1"># annotated is unchanged.</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">earlier</span>
+                <span class="ow">and</span> <span class="s2">"review"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">record</span>
+                <span class="ow">and</span> <span class="n">task</span><span class="p">[</span><span class="s2">"decision"</span><span class="p">]</span> <span class="o">==</span> <span class="n">earlier</span><span class="p">[</span><span class="s2">"decision"</span><span class="p">]</span>
+            <span class="p">):</span>
+                <span class="n">task</span><span class="p">[</span><span class="s2">"review"</span><span class="p">]</span> <span class="o">=</span> <span class="n">earlier</span><span class="p">[</span><span class="s2">"review"</span><span class="p">]</span>
             <span class="n">merged</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">task</span>
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">merged</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="apply_reviews">
+<a class="viewcode-back" href="../../_autosummary/openloops.tasks.html#openloops.tasks.apply_reviews">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_reviews</span><span class="p">(</span>
+    <span class="n">records</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span> <span class="n">reviews</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Set only ``review`` on records, from ``{id, review}`` overlays; nothing else changes.</span>
+
+<span class="sd">    Overlays match by ``id`` or by GitHub URL (ids derived as :class:`Task` does); an</span>
+<span class="sd">    overlay for an id no record has is ignored. The review is normalised.</span>
+
+<span class="sd">    &gt;&gt;&gt; recs = [{'id': 'a/b#1', 'tier': 'tap'}]</span>
+<span class="sd">    &gt;&gt;&gt; out = apply_reviews(recs, [{'url': 'https://github.com/a/b/issues/1',</span>
+<span class="sd">    ...                             'review': {'disagreement_risk': 'low'}},</span>
+<span class="sd">    ...                            {'id': 'x/y#9', 'review': {'disagreement_risk': 'high'}}])</span>
+<span class="sd">    &gt;&gt;&gt; [(r['tier'], r['review']['disagreement_risk']) for r in out]</span>
+<span class="sd">    [('tap', 'low')]</span>
+<span class="sd">    """</span>
+    <span class="n">by_id</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">overlay</span> <span class="ow">in</span> <span class="n">reviews</span><span class="p">:</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">overlay</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"url"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">_id_of</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="k">if</span> <span class="n">_GITHUB_ITEM</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="k">else</span> <span class="n">overlay</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"id"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">url</span>
+        <span class="k">if</span> <span class="n">key</span><span class="p">:</span>
+            <span class="n">by_id</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_clean_review</span><span class="p">(</span><span class="n">overlay</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"review"</span><span class="p">))</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"url"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">_id_of</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="k">if</span> <span class="n">_GITHUB_ITEM</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="k">else</span> <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"id"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">url</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">by_id</span><span class="p">:</span>
+            <span class="n">record</span><span class="p">[</span><span class="s2">"review"</span><span class="p">]</span> <span class="o">=</span> <span class="n">by_id</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
 
 
 

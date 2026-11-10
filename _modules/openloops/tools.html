@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../../_static/documentation_options.js?v=dc233e31"></script>
+    <script src="../../_static/documentation_options.js?v=34399df3"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.27" />
+  <meta name="docsearch:version" content="0.1.28" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -1327,6 +1327,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">records</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">out_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">candidates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">reviews</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">run_specs</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">run_extras</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">_board</span><span class="o">.</span><span class="n">DFLT_TITLE</span><span class="p">,</span>
@@ -1340,7 +1341,8 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="sd">"""Write the phone task board (page, ``tasks.json``, ``runs.json``) into ``out_dir``.</span>
 
 <span class="sd">    ``records`` are task-record JSON files (globs allowed); ``candidates`` supply the</span>
-<span class="sd">    creation dates; ``run_specs`` replaces the packaged run specs and ``run_extras`` (a</span>
+<span class="sd">    creation dates; ``reviews`` are ``{id, review}`` record files (globs allowed) that</span>
+<span class="sd">    set only each matching record's ``review``; ``run_specs`` replaces the packaged run specs and ``run_extras`` (a</span>
 <span class="sd">    JSON object keyed by run) overlays deployment-specific prompts and tables. Writes</span>
 <span class="sd">    only into ``out_dir``; publishing and the receiving side are the skill's job.</span>
 <span class="sd">    ``store='http'`` with ``api`` wires the page to a self-hosted board store API</span>
@@ -1352,7 +1354,10 @@ window.runMermaid = runMermaid;</script>
         <span class="k">else</span> <span class="kc">None</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">_board</span><span class="o">.</span><span class="n">build_board</span><span class="p">(</span>
-        <span class="n">_tasks</span><span class="o">.</span><span class="n">merge_records</span><span class="p">(</span><span class="n">_tasks</span><span class="o">.</span><span class="n">load_records</span><span class="p">(</span><span class="n">records</span><span class="p">)),</span>
+        <span class="n">_tasks</span><span class="o">.</span><span class="n">apply_reviews</span><span class="p">(</span>
+            <span class="n">_tasks</span><span class="o">.</span><span class="n">merge_records</span><span class="p">(</span><span class="n">_tasks</span><span class="o">.</span><span class="n">load_records</span><span class="p">(</span><span class="n">records</span><span class="p">)),</span>
+            <span class="n">_tasks</span><span class="o">.</span><span class="n">load_records</span><span class="p">(</span><span class="n">reviews</span> <span class="ow">or</span> <span class="p">[]),</span>
+        <span class="p">),</span>
         <span class="n">Path</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(),</span>
         <span class="n">candidates</span><span class="o">=</span><span class="n">_tasks</span><span class="o">.</span><span class="n">load_records</span><span class="p">(</span><span class="n">candidates</span> <span class="ow">or</span> <span class="p">[]),</span>
         <span class="n">specs</span><span class="o">=</span><span class="n">_board</span><span class="o">.</span><span class="n">run_specs</span><span class="p">(</span><span class="n">run_specs</span><span class="p">)</span> <span class="k">if</span> <span class="n">run_specs</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
