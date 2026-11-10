@@ -579,6 +579,7 @@ def board_build(
     out_dir: str,
     *records: str,
     candidates: str = None,
+    reviews: str = None,
     run_specs: str = None,
     run_extras: str = None,
     title: str = "Phone Task Board",
@@ -594,12 +595,14 @@ def board_build(
     Publish the directory as an Artifact with the `db` capability, or with
     `--store http --api <base>` serve it yourself beside a board store API (see
     `openloops.board_store`). `--moved-to URL` builds a page that forwards to a new
-    board. The `openloops-phone-board` skill covers publishing and the receiving side.
+    board. `--reviews 'batches/rev_*.json'` sets only the `review` of matching records
+    from `{id, review}` files. The `openloops-phone-board` skill covers publishing and the receiving side.
     """
     result = tools.board_build(
         records=list(records),
         out_dir=out_dir,
         candidates=_words(candidates),
+        reviews=_words(reviews),
         run_specs=run_specs,
         run_extras=run_extras,
         title=title,

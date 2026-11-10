@@ -61,6 +61,9 @@ main { display: grid; gap: 12px; padding-top: 14px }
 .decision { border-left: 3px solid var(--accent); padding: 4px 0 4px 10px; display: grid; gap: 4px; font-size: .92rem }
 .decision ul { margin: 0; padding-left: 18px }
 .decision .rec { font-weight: 700 }
+.decision .rv { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px }
+.risk { border: 1px solid currentColor; border-radius: 999px; padding: 1px 8px; font: 600 .75rem var(--f-body) }
+.risk-low { color: var(--done) } .risk-medium { color: var(--warn) } .risk-high { color: var(--physical) } .risk-uncalibrated { color: var(--muted) }
 pre.prompt { margin: 0; padding: 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; font: 400 .8rem/1.45 var(--f-mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 9.5em; overflow: auto }
 .links { display: flex; flex-wrap: wrap; gap: 6px }
 .links a { font-size: .85rem; color: var(--accent); text-decoration: none; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; overflow-wrap: anywhere }
@@ -328,6 +331,19 @@ function el(tag, attrs = {}, ...kids) {
   for (const k of kids.flat()) if (k != null) e.append(k.nodeType ? k : document.createTextNode(String(k)));
   return e;
 }
+// The preference annotation is untrusted text: el() sets textContent only, never innerHTML.
+const VERDICT_SAID = { shown: "held for you", auto: "acted", logged: "logged" };
+function reviewLines(r) {
+  if (!r) return null;
+  const risk = r.disagreement_risk, cs = r.concerns || [];
+  const flagged = cs.filter(c => c.stance && c.stance !== "fine");
+  const none = flagged.some(c => c.stance === "object") ? "No objection predicted by the preference model" : "No objection predicted";
+  const why = risk === "medium" || risk === "high" ? "The preference model thinks you may disagree because " + (r.reason || "(no reason given)") : { low: none, uncalibrated: "No preference verdict" }[risk];
+  const line = flagged.map(c => c.concern + ": " + c.stance + (c.severity ? " (" + c.severity + ")" : ""));
+  return el("div", { class: "small" },
+    el("div", { class: "rv" }, risk ? el("span", { class: "risk risk-" + risk }, risk) : null, VERDICT_SAID[r.verdict] ? el("span", {}, VERDICT_SAID[r.verdict] + " ·") : null, why ? el("span", {}, why) : null),
+    line.length ? el("div", {}, line.join(" · ")) : null);
+}
 function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 2600) }
 async function copy(text, done) {
   try { await navigator.clipboard.writeText(text); toast(done) }
@@ -429,7 +445,9 @@ function card(t) {
     opts.length && !isOn && !readOnlyOrg ? el("div", { class: "opts", style: "display:grid;gap:6px" }, opts.map(o =>
       el("button", { class: "btn" + (o === rec ? " good" : ""), disabled: !w, onclick: () => pickOpt(o) }, (o === rec ? "★ " : "") + o)))
       : opts.length ? el("ul", {}, opts.map(o => el("li", {}, o))) : null,
-    el("div", { class: "rec" }, rec ? "Recommended: " + rec : "No recommendation in the issue")));
+    el("div", { class: "rec" }, rec ? "Recommended: " + rec : "No recommendation in the issue"),
+    reviewLines(t.review)));
+  else if (t.review) kids.push(reviewLines(t.review));
   if (t.prompt) kids.push(el("pre", { class: "prompt" }, t.prompt), el("div", { class: "sub" },
     el("button", { class: "btn primary", disabled: !w || d.ran, onclick: () => act(t, "run", { prompt: t.prompt, machine: t.machine || null }) }, d.ran ? "Agent asked" : "Have an agent do it"),
     el("button", { class: "btn", onclick: () => copy(t.prompt, "Prompt copied") }, "Copy prompt")));
@@ -476,6 +494,7 @@ function viewDesk(m) {
     return el("article", { class: "card" + (acted.has(q.task_id) ? " acted" : "") },
       el("div", { class: "meta" }, el("span", { class: "tier tap" }, "Answer"), el("span", {}, q.task_id), q.impact ? el("span", { class: "flag ok" }, `unblocks ${q.impact}`) : null, receipt(q.task_id)),
       el("p", { class: "ask" }, q.question), q.context ? el("p", { class: "note-src" }, q.context) : null,
+      reviewLines(t.review),
       q.url ? el("div", { class: "links" }, el("a", { href: q.url, target: "_blank", rel: "noopener" }, "Read the issue")) : null,
       ...noteBox(key, q.task_id, "Note with your answer"),
       el("div", { style: "display:grid;gap:6px" }, [...(q.options || []), "You decide"].map(o =>

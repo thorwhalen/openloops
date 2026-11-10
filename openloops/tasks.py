@@ -68,6 +68,7 @@ __all__ = [
     "PATTERNS",
     "STATUSES",
     "TASK_FIELDS",
+    "apply_reviews",
     "TIERS",
     "Rule",
     "Task",
@@ -112,6 +113,11 @@ PATTERNS = (
     "other",
 )
 KINDS = ("issue", "pr")
+#: The preference step's vocabularies for :attr:`Task.review`.
+REVIEW_VERDICTS = ("auto", "shown", "logged")
+REVIEW_RISKS = ("low", "medium", "high", "uncalibrated")
+REVIEW_STANCES = ("fine", "caution", "object")
+REVIEW_SEVERITIES = ("blocker", "major", "minor")
 
 
 @dataclass
@@ -122,6 +128,14 @@ class Task:
     ``{label, url}`` with the item itself last; ``prompt`` is a paste-ready request for
     a coding session (session tier). ``source`` says how the item was found and
     ``created`` when it was opened (``YYYY-MM-DD``).
+
+    ``review`` is ``{verdict, disagreement_risk, reason, concerns}`` or ``None``:
+    ``verdict`` one of :data:`REVIEW_VERDICTS` (the gate's route),
+    ``disagreement_risk`` one of :data:`REVIEW_RISKS`, ``reason`` a string and
+    ``concerns`` a list of ``{concern, stance, severity, reason}`` with ``stance`` in
+    :data:`REVIEW_STANCES` and ``severity`` in :data:`REVIEW_SEVERITIES`. It is written
+    by a separate, external preference step at board-build time; this package only
+    carries it (normalised, never raising) and the board page shows it.
 
     >>> Task.from_mapping({'id': 'a/b#1', 'tier': 'nope', 'pattern': 'x'}).tier
     'session'
@@ -147,6 +161,7 @@ class Task:
     note: str | None = None
     source: str | None = None
     created: str | None = None
+    review: dict[str, Any] | None = None
 
     @classmethod
     def from_mapping(cls, record: Mapping[str, Any]) -> Task:
@@ -178,6 +193,7 @@ class Task:
             task.kind = "pr" if "/pull/" in (task.url or "") else "issue"
         task.links = list(task.links or [])
         task.unblocks = list(task.unblocks or [])
+        task.review = _clean_review(task.review)
         return task
 
     def as_dict(self) -> dict[str, Any]:
@@ -190,6 +206,46 @@ TASK_FIELDS = tuple(f.name for f in fields(Task))
 
 
 _GITHUB_ITEM = re.compile(r"https://github\.com/([^/]+/[^/]+)/(?:issues|pull)/(\d+)")
+
+
+def _str_or_none(value: Any) -> str | None:
+    return value if isinstance(value, str) and value else None
+
+
+def _in_or_none(value: Any, vocabulary: tuple[str, ...]) -> str | None:
+    return value if isinstance(value, str) and value in vocabulary else None
+
+
+def _clean_review(review: Any) -> dict[str, Any] | None:
+    """Normalise a preference annotation; anything unusable becomes ``None``, never an error.
+
+    >>> _clean_review({'disagreement_risk': 'high', 'junk': 1})
+    {'verdict': None, 'disagreement_risk': 'high', 'reason': None, 'concerns': []}
+    >>> _clean_review({'disagreement_risk': 'sure'}) is None
+    True
+    """
+    if not isinstance(review, Mapping):
+        return None
+    concerns = []
+    raw = review.get("concerns")
+    for item in raw if isinstance(raw, (list, tuple)) else ():
+        name = item.get("concern") if isinstance(item, Mapping) else None
+        if isinstance(name, str) and name.strip():
+            concerns.append(
+                {
+                    "concern": name,
+                    "stance": _in_or_none(item.get("stance"), REVIEW_STANCES),
+                    "severity": _in_or_none(item.get("severity"), REVIEW_SEVERITIES),
+                    "reason": _str_or_none(item.get("reason")),
+                }
+            )
+    cleaned = {
+        "verdict": _in_or_none(review.get("verdict"), REVIEW_VERDICTS),
+        "disagreement_risk": _in_or_none(review.get("disagreement_risk"), REVIEW_RISKS),
+        "reason": _str_or_none(review.get("reason")),
+        "concerns": concerns,
+    }
+    return cleaned if any(cleaned.values()) else None
 
 
 def _int_or_none(value: Any) -> int | None:
@@ -781,12 +837,20 @@ def merge_records(*sources: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]
     Keyed by ``id`` (derived from the URL for a GitHub item, so the two sources agree);
     a record with no id and no URL is dropped. A later record replaces the
     earlier one whole, except that an empty ``url`` or ``created`` is filled from it:
-    the classifier brief reads threads, the gatherer knows dates.
+    the classifier brief reads threads, the gatherer knows dates. A ``review`` is kept
+    when the later record has no ``review`` key and the same ``decision``; a later
+    record with the key (even ``null``) replaces it, and a changed decision drops it.
 
     >>> heuristic = [{'id': 'a/b#1', 'url': 'u1', 'tier': 'browser', 'created': '2026-01-02'}]
     >>> enriched = [{'id': 'a/b#1', 'url': 'u1', 'tier': 'tap', 'ask': 'Say yes'}]
     >>> [(r['tier'], r['ask'], r['created']) for r in merge_records(heuristic, enriched)]
     [('tap', 'Say yes', '2026-01-02')]
+    >>> kept = [{'id': 'a/b#1', 'url': 'u1', 'review': {'disagreement_risk': 'low'}}]
+    >>> merge_records(kept, enriched)[0]['review']['disagreement_risk']
+    'low'
+    >>> newer = [{'id': 'a/b#1', 'url': 'u1', 'review': {'disagreement_risk': 'high'}}]
+    >>> merge_records(kept, newer)[0]['review']['disagreement_risk']
+    'high'
     """
     merged: dict[str, dict[str, Any]] = {}
     for source in sources:
@@ -799,8 +863,49 @@ def merge_records(*sources: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]
             for name in ("url", "created"):
                 if earlier and not task[name]:
                     task[name] = earlier[name]
+            # A review survives a reclassification only if the later record is silent
+            # about it (no key at all; an explicit null clears) and the decision it
+            # annotated is unchanged.
+            if (
+                earlier
+                and "review" not in record
+                and task["decision"] == earlier["decision"]
+            ):
+                task["review"] = earlier["review"]
             merged[key] = task
     return list(merged.values())
+
+
+def apply_reviews(
+    records: Iterable[Mapping[str, Any]], reviews: Iterable[Mapping[str, Any]]
+) -> list[dict[str, Any]]:
+    """Set only ``review`` on records, from ``{id, review}`` overlays; nothing else changes.
+
+    Overlays match by ``id`` or by GitHub URL (ids derived as :class:`Task` does); an
+    overlay for an id no record has is ignored. The review is normalised.
+
+    >>> recs = [{'id': 'a/b#1', 'tier': 'tap'}]
+    >>> out = apply_reviews(recs, [{'url': 'https://github.com/a/b/issues/1',
+    ...                             'review': {'disagreement_risk': 'low'}},
+    ...                            {'id': 'x/y#9', 'review': {'disagreement_risk': 'high'}}])
+    >>> [(r['tier'], r['review']['disagreement_risk']) for r in out]
+    [('tap', 'low')]
+    """
+    by_id: dict[str, dict[str, Any] | None] = {}
+    for overlay in reviews:
+        url = overlay.get("url") or ""
+        key = _id_of(url) if _GITHUB_ITEM.match(url) else overlay.get("id") or url
+        if key:
+            by_id[key] = _clean_review(overlay.get("review"))
+    out = []
+    for record in records:
+        record = dict(record)
+        url = record.get("url") or ""
+        key = _id_of(url) if _GITHUB_ITEM.match(url) else record.get("id") or url
+        if key in by_id:
+            record["review"] = by_id[key]
+        out.append(record)
+    return out
 
 
 def load_records(paths: Iterable[str | Path]) -> list[dict[str, Any]]:

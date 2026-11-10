@@ -261,3 +261,40 @@ def test_a_cards_own_options_are_answer_buttons():
     assert 'act(t, "answer", { answer: o,' in page
     # The free-text accept appears only when the recommendation is not one of the options.
     assert "!opts.includes(rec)" in page
+
+
+def test_the_page_renders_the_review_as_text_only():
+    page = (board.board_dir() / "index.html").read_text(encoding="utf-8")
+    start = page.index("function reviewLines")
+    assert "innerHTML" not in page[start : start + 1400]
+    assert page.count("reviewLines(t.review)") >= 3
+
+
+def test_board_build_reviews_overlay_sets_only_the_review(tmp_path):
+    recs = tmp_path / "r.json"
+    recs.write_text(
+        json.dumps(
+            [{"url": "https://github.com/a/b/issues/1", "tier": "tap", "ask": "Do it"}]
+        )
+    )
+    rev = tmp_path / "rev_1.json"
+    rev.write_text(
+        json.dumps(
+            [
+                {"id": "a/b#1", "review": {"disagreement_risk": "high", "reason": "x"}},
+                {"id": "zz/zz#9", "review": {"disagreement_risk": "low"}},
+            ]
+        )
+    )
+    main(
+        [
+            "board-build",
+            str(tmp_path / "b"),
+            str(recs),
+            "--reviews",
+            str(tmp_path / "rev_*.json"),
+        ]
+    )
+    (task,) = json.loads((tmp_path / "b" / "tasks.json").read_text())
+    assert task["tier"] == "tap" and task["ask"] == "Do it"
+    assert task["review"]["disagreement_risk"] == "high"

@@ -581,6 +581,7 @@ def board_build(
     records: list[str],
     out_dir: str,
     candidates: list[str] | None = None,
+    reviews: list[str] | None = None,
     run_specs: str | None = None,
     run_extras: str | None = None,
     title: str = _board.DFLT_TITLE,
@@ -594,7 +595,8 @@ def board_build(
     """Write the phone task board (page, ``tasks.json``, ``runs.json``) into ``out_dir``.
 
     ``records`` are task-record JSON files (globs allowed); ``candidates`` supply the
-    creation dates; ``run_specs`` replaces the packaged run specs and ``run_extras`` (a
+    creation dates; ``reviews`` are ``{id, review}`` record files (globs allowed) that
+    set only each matching record's ``review``; ``run_specs`` replaces the packaged run specs and ``run_extras`` (a
     JSON object keyed by run) overlays deployment-specific prompts and tables. Writes
     only into ``out_dir``; publishing and the receiving side are the skill's job.
     ``store='http'`` with ``api`` wires the page to a self-hosted board store API
@@ -606,7 +608,10 @@ def board_build(
         else None
     )
     return _board.build_board(
-        _tasks.merge_records(_tasks.load_records(records)),
+        _tasks.apply_reviews(
+            _tasks.merge_records(_tasks.load_records(records)),
+            _tasks.load_records(reviews or []),
+        ),
         Path(out_dir).expanduser(),
         candidates=_tasks.load_records(candidates or []),
         specs=_board.run_specs(run_specs) if run_specs else None,
