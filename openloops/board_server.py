@@ -32,7 +32,7 @@ for the migration, delete it after. The receiver's credentials cannot open it.
 import contextlib
 import hashlib
 import threading
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from pathlib import Path
 from typing import Any
 
@@ -98,13 +98,25 @@ def mk_app(
     role_of: Callable[[Any], str | None],
     max_bytes: int = DFLT_MAX_BYTES,
     title: str = "openloops board",
+    files: Iterable[str] = BOARD_FILES,
 ):
-    """The board's FastAPI app. ``role_of`` is the only authorisation it has."""
+    """The board's FastAPI app. ``role_of`` is the only authorisation it has.
+
+    ``files`` names the only files ``GET /board/{name}`` hands out (default: what
+    ``ol board-build`` writes). Another page that wants the same store rules over its own
+    published files (a desk serving ``snapshot.json``) passes its own names; ``index.html``
+    is always one of them, since ``GET /board/`` serves it.
+    """
     from fastapi import FastAPI, HTTPException, Request, Response
     from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
     from starlette.concurrency import run_in_threadpool
 
     board = Path(board_dir).expanduser()
+    if isinstance(files, str):
+        raise TypeError("files is a collection of names, not one name: pass (name,)")
+    served = frozenset(files) | {"index.html"}
+    if any("/" in name or name.startswith(".") for name in served):
+        raise ValueError(f"files must be plain names, not paths: {sorted(served)}")
     root = Path(store_root).expanduser()
     store = board_docs_store(root)
     lock_path = root / _LOCK_NAME
@@ -185,8 +197,8 @@ def mk_app(
     def board_file(name: str, request: Request):
         require_role(request)
         path = board / name
-        if name not in BOARD_FILES or not path.is_file():
-            raise HTTPException(404, "no such board file")
+        if name not in served or not path.is_file():
+            raise HTTPException(404, "no such file")
         return FileResponse(path, headers=NO_STORE)
 
     @app.get("/board-store/{collection}")

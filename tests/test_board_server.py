@@ -209,3 +209,43 @@ def test_board_responses_refuse_framing_and_sniffing(client):
         assert headers["content-security-policy"] == "frame-ancestors 'none'"
         assert headers["x-frame-options"] == "DENY"
         assert headers["x-content-type-options"] == "nosniff"
+
+
+def test_another_page_can_serve_its_own_files_with_the_same_store_rules(tmp_path):
+    # A desk publishes snapshot.json; the board's own file list must not leak into it.
+    desk = tmp_path / "desk"
+    desk.mkdir()
+    (desk / "index.html").write_text("<!doctype html><title>desk</title>")
+    (desk / "snapshot.json").write_text('{"items": []}')
+    (desk / "tasks.json").write_text("[]")
+    app = mk_app(
+        board_dir=desk,
+        store_root=tmp_path / "store",
+        role_of=lambda request: "viewer",
+        files=("snapshot.json",),
+    )
+    c = TestClient(app)
+    assert c.get("/board/snapshot.json").json() == {"items": []}
+    assert c.get("/board/").text.startswith("<!doctype html>")
+    assert c.get("/board/tasks.json").status_code == 404
+    assert c.put("/board-store/outbox/e1", json={"verb": "later"}).status_code == 200
+
+
+@pytest.mark.parametrize(
+    "files, error",
+    [
+        (("../secret",), ValueError),
+        (("..",), ValueError),
+        ((".import-open",), ValueError),
+        ((".lock",), ValueError),
+        ("snapshot.json", TypeError),
+    ],
+)
+def test_files_must_be_plain_names(tmp_path, files, error):
+    with pytest.raises(error):
+        mk_app(
+            board_dir=tmp_path,
+            store_root=tmp_path / "s",
+            role_of=lambda r: "viewer",
+            files=files,
+        )
