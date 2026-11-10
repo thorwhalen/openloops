@@ -231,11 +231,21 @@ def test_another_page_can_serve_its_own_files_with_the_same_store_rules(tmp_path
     assert c.put("/board-store/outbox/e1", json={"verb": "later"}).status_code == 200
 
 
-def test_files_must_be_plain_names(tmp_path):
-    with pytest.raises(ValueError):
+@pytest.mark.parametrize(
+    "files, error",
+    [
+        (("../secret",), ValueError),
+        (("..",), ValueError),
+        ((".import-open",), ValueError),
+        ((".lock",), ValueError),
+        ("snapshot.json", TypeError),
+    ],
+)
+def test_files_must_be_plain_names(tmp_path, files, error):
+    with pytest.raises(error):
         mk_app(
             board_dir=tmp_path,
             store_root=tmp_path / "s",
             role_of=lambda r: "viewer",
-            files=("../secret",),
+            files=files,
         )

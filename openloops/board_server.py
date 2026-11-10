@@ -112,6 +112,8 @@ def mk_app(
     from starlette.concurrency import run_in_threadpool
 
     board = Path(board_dir).expanduser()
+    if isinstance(files, str):
+        raise TypeError("files is a collection of names, not one name: pass (name,)")
     served = frozenset(files) | {"index.html"}
     if any("/" in name or name.startswith(".") for name in served):
         raise ValueError(f"files must be plain names, not paths: {sorted(served)}")
@@ -196,7 +198,7 @@ def mk_app(
         require_role(request)
         path = board / name
         if name not in served or not path.is_file():
-            raise HTTPException(404, "no such board file")
+            raise HTTPException(404, "no such file")
         return FileResponse(path, headers=NO_STORE)
 
     @app.get("/board-store/{collection}")
