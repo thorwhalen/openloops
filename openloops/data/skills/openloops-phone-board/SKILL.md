@@ -43,6 +43,8 @@ ol board-build WORK/board WORK/records.json -c WORK/candidates.json \
   --session <this session's name> --read-only-orgs <orgs never to comment in> --machine <default machine>
 ```
 
+The preference step (a separate, external one) writes `{id, review}` records and passes them with `--reviews 'WORK/reviews_*.json'` (globs allowed): each sets only the `review` of the record with that id or GitHub URL, and unknown ids are ignored. Never pass them as an `--enriched` source, which replaces whole records.
+
 Writes `index.html`, `kit.html`, `tasks.json`, `runs.json`, `board.json`. Always pass `--read-only-orgs` for every organisation agents must never write to: the page hides closing for those orgs (and for all orgs if `board.json` fails to load), and the receiver unions this list with the one the owner gave it directly. Runs come from the packaged run specs; `--run-specs FILE` replaces them and `--run-extras FILE` overlays per-run additions (a JSON object keyed by run: `title`, `why`, `steps`, `prompt`, `machine`, a `packages` table, and `absorb: ["npm-first-publish"]` to fold another run into this one). Edit `kit.html` in the output if the owner needs deployment-specific advice; it is the page's "Phone kit" tab.
 
 ## 4. Publish and receive

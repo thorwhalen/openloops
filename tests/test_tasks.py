@@ -376,3 +376,112 @@ def test_all_kinds_on_the_cli_gathers_agent_decided_issues(monkeypatch):
     cli.board_gather(all_kinds=True)
     assert tasks.AGENT_DECIDED_LABEL in seen["searches"]
     assert seen["review_prs"] is True
+
+
+def test_review_garbage_normalises_to_none():
+    for bad in ("nope", 3, ["x"], {}, {"junk": 1}, {"disagreement_risk": "sure"}):
+        assert tasks.Task.from_mapping({"id": "a/b#1", "review": bad}).review is None
+
+
+def test_review_keeps_only_the_vocabulary():
+    review = tasks.Task.from_mapping(
+        {
+            "id": "a/b#1",
+            "review": {
+                "verdict": "shown",
+                "disagreement_risk": "medium",
+                "reason": 5,
+                "junk": 1,
+                "concerns": [
+                    {
+                        "concern": "cost",
+                        "stance": "caution",
+                        "severity": "major",
+                        "x": 1,
+                    },
+                    {"concern": "tone", "stance": "weird", "severity": "huge"},
+                    {"stance": "object"},
+                    "str",
+                ],
+            },
+        }
+    ).review
+    assert review == {
+        "verdict": "shown",
+        "disagreement_risk": "medium",
+        "reason": None,
+        "concerns": [
+            {
+                "concern": "cost",
+                "stance": "caution",
+                "severity": "major",
+                "reason": None,
+            },
+            {"concern": "tone", "stance": None, "severity": None, "reason": None},
+        ],
+    }
+
+
+def test_merge_carries_a_review_forward_and_a_later_one_replaces_it():
+    first = {"id": "a/b#1", "review": {"disagreement_risk": "low"}}
+    bare = {"id": "a/b#1", "tier": "tap"}
+    newer = {"id": "a/b#1", "review": {"disagreement_risk": "high", "reason": "r"}}
+    kept = tasks.merge_records([first], [bare])[0]
+    assert kept["tier"] == "tap" and kept["review"]["disagreement_risk"] == "low"
+    assert (
+        tasks.merge_records([first], [newer])[0]["review"]["disagreement_risk"]
+        == "high"
+    )
+
+
+def test_review_round_trips_through_as_dict():
+    once = tasks.Task.from_mapping(
+        {"id": "a/b#1", "review": {"disagreement_risk": "high", "reason": "r"}}
+    ).as_dict()
+    assert tasks.Task.from_mapping(once).as_dict() == once
+
+
+def test_merge_explicit_null_review_clears_and_changed_decision_drops():
+    first = {"id": "a/b#1", "review": {"disagreement_risk": "low"}}
+    assert (
+        tasks.merge_records([first], [{"id": "a/b#1", "review": None}])[0]["review"]
+        is None
+    )
+    d1 = {
+        "id": "a/b#1",
+        "decision": {"question": "q", "options": ["A"]},
+        "review": first["review"],
+    }
+    same = {"id": "a/b#1", "decision": {"question": "q", "options": ["A"]}}
+    changed = {"id": "a/b#1", "decision": {"question": "q", "options": ["B"]}}
+    assert tasks.merge_records([d1], [same])[0]["review"]["disagreement_risk"] == "low"
+    assert tasks.merge_records([d1], [changed])[0]["review"] is None
+
+
+def test_apply_reviews_sets_only_review_and_ignores_unknown_ids():
+    recs = [{"id": "a/b#1", "tier": "tap", "ask": "A", "decision": {"question": "q"}}]
+    out = tasks.apply_reviews(
+        recs,
+        [
+            {"id": "a/b#1", "review": {"disagreement_risk": "low"}},
+            {"id": "n/o#2", "review": {"disagreement_risk": "high"}},
+        ],
+    )
+    assert len(out) == 1 and out[0]["review"]["disagreement_risk"] == "low"
+    assert {k: v for k, v in out[0].items() if k != "review"} == recs[0]
+
+
+def test_review_verdict_validated_and_blank_concern_dropped():
+    r = tasks.Task.from_mapping(
+        {
+            "id": "a/b#1",
+            "review": {
+                "verdict": "maybe",
+                "disagreement_risk": "low",
+                "concerns": [{"concern": "  "}, {"concern": ""}],
+            },
+        }
+    ).review
+    assert r["verdict"] is None and r["concerns"] == []
+    ok = tasks.Task.from_mapping({"id": "a/b#1", "review": {"verdict": "shown"}}).review
+    assert ok["verdict"] == "shown"

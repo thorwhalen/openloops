@@ -31,6 +31,7 @@ You get a batch file (JSON list of candidate GitHub issues/PRs). For **each** it
   "pattern_key": "widget",           // e.g. the npm/PyPI package name or service; null if none
   "status": "open",                      // open | likely-done | not-for-user | stale
   "note": "<= 200 chars: caveats, e.g. which comment says it is half-done"
+  // Also in the schema: "review" (the preference annotation). Leave it out: a separate step writes it.
 }
 ```
 
