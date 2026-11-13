@@ -143,7 +143,6 @@ from openloops.store import (
     state_dir,
 )
 from openloops._sync import retained, sync
-from openloops.tools import ls, show, status
 from openloops.transcripts import ClaudeCodeTranscripts, parse_session
 
 __all__ = [
@@ -204,3 +203,16 @@ __all__ = [
     "status",
     "sync",
 ]
+
+
+def __getattr__(name):
+    """``ls``, ``show`` and ``status`` load ``openloops.tools`` on first use (PEP 562).
+
+    tools imports this package's submodules, so importing it from here made a cycle that
+    two threads importing openloops at once could hit half-built (_equerry#34).
+    """
+    if name in ("ls", "show", "status"):
+        from openloops import tools
+
+        return getattr(tools, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
