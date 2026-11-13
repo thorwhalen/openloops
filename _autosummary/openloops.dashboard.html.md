@@ -3,7 +3,7 @@
 One page you can look at instead of reading three command outputs.
 
 [`render_dashboard()`](#openloops.dashboard.render_dashboard) takes what [`openloops.owed()`](openloops.html.md#openloops.owed), [`openloops.blocked()`](openloops.html.md#openloops.blocked)
-and [`openloops.ls()`](openloops.html.md#openloops.ls) returned and renders a single self-contained HTML document —
+and `openloops.ls()` returned and renders a single self-contained HTML document —
 no stylesheet, no script, no font and no request to anywhere. That is not decoration:
 the page is meant to be published, and a published page runs no `gh`, shells out to
 nothing and reaches no network.
@@ -219,7 +219,7 @@ unquoted attribute, so they are the two that must be literals or already safe.
 The three envelopes as one self-contained HTML page. No network, no script.
 
 `owed` and `blocked` are the envelopes [`openloops.owed()`](openloops.html.md#openloops.owed) and
-[`openloops.blocked()`](openloops.html.md#openloops.blocked) return; `sessions` is the list [`openloops.ls()`](openloops.html.md#openloops.ls)
+[`openloops.blocked()`](openloops.html.md#openloops.blocked) return; `sessions` is the list `openloops.ls()`
 returns. All three may be empty mappings, and an envelope whose `listed` is
 `False` renders as `?` throughout rather than as zero.
 

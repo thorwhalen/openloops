@@ -1,4 +1,4 @@
-> built 2026-11-10 12:15 UTC from dc590f6 (main) · openloops 0.1.29. Details: build_info.json
+> built 2026-11-13 18:00 UTC from d8be25a (main) · openloops 0.1.30. Details: build_info.json
 
 # index.html.md
 
@@ -1736,7 +1736,7 @@ write that loses to a newer one is a 412, so a caller who pinned learns it lost.
 One page you can look at instead of reading three command outputs.
 
 [`render_dashboard()`](_autosummary/openloops.dashboard.html.md#openloops.dashboard.render_dashboard) takes what [`openloops.owed()`](_autosummary/openloops.html.md#openloops.owed), [`openloops.blocked()`](_autosummary/openloops.html.md#openloops.blocked)
-and [`openloops.ls()`](_autosummary/openloops.html.md#openloops.ls) returned and renders a single self-contained HTML document —
+and `openloops.ls()` returned and renders a single self-contained HTML document —
 no stylesheet, no script, no font and no request to anywhere. That is not decoration:
 the page is meant to be published, and a published page runs no `gh`, shells out to
 nothing and reaches no network.
@@ -1952,7 +1952,7 @@ unquoted attribute, so they are the two that must be literals or already safe.
 The three envelopes as one self-contained HTML page. No network, no script.
 
 `owed` and `blocked` are the envelopes [`openloops.owed()`](_autosummary/openloops.html.md#openloops.owed) and
-[`openloops.blocked()`](_autosummary/openloops.html.md#openloops.blocked) return; `sessions` is the list [`openloops.ls()`](_autosummary/openloops.html.md#openloops.ls)
+[`openloops.blocked()`](_autosummary/openloops.html.md#openloops.blocked) return; `sessions` is the list `openloops.ls()`
 returns. All three may be empty mappings, and an envelope whose `listed` is
 `False` renders as `?` throughout rather than as zero.
 
@@ -2452,7 +2452,7 @@ event log, no cross-repo links, no session model, and no write path of any kind.
 | [`gh_issues`](_autosummary/openloops.html.md#openloops.gh_issues)(\*, owners[, label, state, limit, ...])  | The default `issues_source`: the open `manual-task` issues, from `gh`.                                                |
 | [`headline_counts`](_autosummary/openloops.html.md#openloops.headline_counts)(owed, blocked, sessions)           | The four figures across the top of the page.                                                                          |
 | [`install_skills`](_autosummary/openloops.html.md#openloops.install_skills)(\*[, target, only, copy, ...])      | Make the bundled skills and subagent visible to an agent host.                                                        |
-| [`ls`](_autosummary/openloops.html.md#openloops.ls)(\*[, state, source, project, confidence, ...])  | The digests in the store, newest last-turn first.                                                                     |
+| `ls`(\*[, state, source, project, confidence, ...])                                                 | The digests in the store, newest last-turn first.                                                                     |
 | [`make_digest`](_autosummary/openloops.html.md#openloops.make_digest)(session, verdict, \*, source[, ...])   | Render, scrub, and key one digest.                                                                                    |
 | [`owed`](_autosummary/openloops.html.md#openloops.owed)(\*[, verify, owners, trusted_owners, ...])    | The open `manual-task` obligations, each re-checked against the world.                                                |
 | [`parse_session`](_autosummary/openloops.html.md#openloops.parse_session)(records, \*[, key])                  | Read one transcript's records into a [`Session`](_autosummary/openloops.base.html.md#openloops.base.Session). |
@@ -2462,10 +2462,10 @@ event log, no cross-repo links, no session model, and no write path of any kind.
 | [`retained`](_autosummary/openloops.html.md#openloops.retained)(store, sessions, \*[, source])            | Digest keys whose session no longer has a transcript — the retention surplus.                                         |
 | [`scrub`](_autosummary/openloops.html.md#openloops.scrub)(text, \*[, aliases, where])                  | Rewrite paths and raise on credentials.                                                                               |
 | [`shell_predicate`](_autosummary/openloops.html.md#openloops.shell_predicate)(command, \*[, timeout])            | The default `run_predicate`: run the command in a subshell, bounded in time.                                          |
-| [`show`](_autosummary/openloops.html.md#openloops.show)(session, \*[, source, digests_store])         | One digest in full, found by session id or by a unique prefix of one.                                                 |
+| `show`(session, \*[, source, digests_store])                                                        | One digest in full, found by session id or by a unique prefix of one.                                                 |
 | [`skills_dir`](_autosummary/openloops.html.md#openloops.skills_dir)()                                       | The bundled skills directory, inside the installed package.                                                           |
 | [`state_dir`](_autosummary/openloops.html.md#openloops.state_dir)()                                        | Where per-machine caches and job logs go.                                                                             |
-| [`status`](_autosummary/openloops.html.md#openloops.status)(\*[, source, since_days, ...])              | Where everything is, how much of it there is, and how stale the cache is.                                             |
+| `status`(\*[, source, since_days, ...])                                                             | Where everything is, how much of it there is, and how stale the cache is.                                             |
 | [`sync`](_autosummary/openloops.html.md#openloops.sync)(\*[, transcript_source, digests_store, ...])  | Bring the digest store up to date with the sessions, and say what changed.                                            |
 
 ### Classes
@@ -3111,28 +3111,6 @@ the capture skill out.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.ls(, state='open', source=None, project=None, confidence=None, limit=20, digests_store=None)
-
-The digests in the store, newest last-turn first.
-
-`state` is `open`, `archive` or `all`. `source`, `project` and
-`confidence` narrow by the digest’s own header fields. Each row is that front
-matter plus its key.
-
-`confidence='high'` is the one worth knowing about: most sessions land in `open`,
-and a good few of those are open only because nothing said otherwise. Filtering to
-`high` leaves the ones where the session itself said something.
-
-```pycon
->>> rows = ls(digests_store={'m/open/s1.md':
-...     '---\nsession: s1\nstate: open\nlast_turn: T9\n---\n'})
->>> rows[0]['session'], rows[0]['key']
-('s1', 'm/open/s1.md')
-```
-
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
-
 ### openloops.make_digest(session, verdict, , source, aliases=None)
 
 Render, scrub, and key one digest.
@@ -3332,7 +3310,7 @@ True
 The three envelopes as one self-contained HTML page. No network, no script.
 
 `owed` and `blocked` are the envelopes [`openloops.owed()`](_autosummary/openloops.html.md#openloops.owed) and
-[`openloops.blocked()`](_autosummary/openloops.html.md#openloops.blocked) return; `sessions` is the list [`openloops.ls()`](_autosummary/openloops.html.md#openloops.ls)
+[`openloops.blocked()`](_autosummary/openloops.html.md#openloops.blocked) return; `sessions` is the list `openloops.ls()`
 returns. All three may be empty mappings, and an envelope whose `listed` is
 `False` renders as `?` throughout rather than as zero.
 
@@ -3421,23 +3399,6 @@ True
 * **Return type:**
   [`PredicateOutcome`](_autosummary/openloops.obligations.html.md#openloops.obligations.PredicateOutcome)
 
-### openloops.show(session, , source=None, digests_store=None)
-
-One digest in full, found by session id or by a unique prefix of one.
-
-An exact id always wins over a prefix, so a session whose id happens to be a prefix
-of another stays reachable. `source` narrows a store that several machines write
-into, where the same session can legitimately appear more than once.
-
-```pycon
->>> store = {'m/open/abcdef.md': '---\nsession: abcdef\n---\nbody'}
->>> show('abc', digests_store=store)['key']
-'m/open/abcdef.md'
-```
-
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
-
 ### openloops.skills_dir()
 
 The bundled skills directory, inside the installed package.
@@ -3457,18 +3418,6 @@ it elsewhere means “clear the cache” can never be mistyped into “delete th
 
 * **Return type:**
   [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)
-
-### openloops.status(, source=None, since_days=None, digests_store=None, transcript_source=None)
-
-Where everything is, how much of it there is, and how stale the cache is.
-
-Reports the cache’s age because a read served from a cache that nothing has
-refreshed is the failure openloops is built to avoid — a periodic job that died
-leaves a confident, months-old answer behind, and the only defence is saying how
-old the answer is.
-
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 ### openloops.sync(, transcript_source=None, digests_store=None, source=None, since_days=None, state_dir=None, force=False)
 
@@ -5395,7 +5344,7 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-11-10 12:15 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/dc590f676df63572bb67d3e4fb66f61080200560"><code>dc590f6</code></a> on branch <code>main</code>, for **openloops 0.1.29** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-13 18:00 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/d8be25a7c65db9a29979a5a60728414a82cbaed5"><code>d8be25a</code></a> on branch <code>main</code>, for **openloops 0.1.30** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -5404,7 +5353,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/dc590f676df63572bb67d3e4fb66f61080200560"><code>dc590f676df63572bb67d3e4fb66f61080200560</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/d8be25a7c65db9a29979a5a60728414a82cbaed5"><code>d8be25a7c65db9a29979a5a60728414a82cbaed5</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -5415,9 +5364,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/42813965363">42813965363</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/43478070696">43478070696</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>dc590f676df63572bb67d3e4fb66f61080200560</code> (in the history of the built commit) |
+| Event commit | <code>d8be25a7c65db9a29979a5a60728414a82cbaed5</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -5442,13 +5391,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.29/">0.1.29</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.30/">0.1.30</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout dc590f676df63572bb67d3e4fb66f61080200560
+git checkout d8be25a7c65db9a29979a5a60728414a82cbaed5
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

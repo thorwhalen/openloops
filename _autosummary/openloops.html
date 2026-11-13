@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=904119ea"></script>
+    <script src="../_static/documentation_options.js?v=73657eb8"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.29" />
+  <meta name="docsearch:version" content="0.1.30" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -533,7 +533,7 @@ event log, no cross-repo links, no session model, and no write path of any kind.
 <tr class="row-odd"><td><p><a class="reference internal" href="#openloops.install_skills" title="openloops.install_skills"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install_skills</span></code></a>(*[, target, only, copy, ...])</p></td>
 <td><p>Make the bundled skills and subagent visible to an agent host.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#openloops.ls" title="openloops.ls"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ls</span></code></a>(*[, state, source, project, confidence, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ls</span></code>(*[, state, source, project, confidence, ...])</p></td>
 <td><p>The digests in the store, newest last-turn first.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#openloops.make_digest" title="openloops.make_digest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_digest</span></code></a>(session, verdict, *, source[, ...])</p></td>
@@ -563,7 +563,7 @@ event log, no cross-repo links, no session model, and no write path of any kind.
 <tr class="row-odd"><td><p><a class="reference internal" href="#openloops.shell_predicate" title="openloops.shell_predicate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shell_predicate</span></code></a>(command, *[, timeout])</p></td>
 <td><p>The default <code class="docutils literal notranslate"><span class="pre">run_predicate</span></code>: run the command in a subshell, bounded in time.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#openloops.show" title="openloops.show"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show</span></code></a>(session, *[, source, digests_store])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">show</span></code>(session, *[, source, digests_store])</p></td>
 <td><p>One digest in full, found by session id or by a unique prefix of one.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#openloops.skills_dir" title="openloops.skills_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skills_dir</span></code></a>()</p></td>
@@ -572,7 +572,7 @@ event log, no cross-repo links, no session model, and no write path of any kind.
 <tr class="row-even"><td><p><a class="reference internal" href="#openloops.state_dir" title="openloops.state_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state_dir</span></code></a>()</p></td>
 <td><p>Where per-machine caches and job logs go.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.status" title="openloops.status"><code class="xref py py-obj docutils literal notranslate"><span class="pre">status</span></code></a>(*[, source, since_days, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">status</span></code>(*[, source, since_days, ...])</p></td>
 <td><p>Where everything is, how much of it there is, and how stale the cache is.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#openloops.sync" title="openloops.sync"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sync</span></code></a>(*[, transcript_source, digests_store, ...])</p></td>
@@ -1359,29 +1359,6 @@ the capture skill out.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="openloops.ls">
-<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">ls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'open'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digests_store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/tools.html#ls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.ls" title="Link to this definition">#</a></dt>
-<dd><p>The digests in the store, newest last-turn first.</p>
-<p><code class="docutils literal notranslate"><span class="pre">state</span></code> is <code class="docutils literal notranslate"><span class="pre">open</span></code>, <code class="docutils literal notranslate"><span class="pre">archive</span></code> or <code class="docutils literal notranslate"><span class="pre">all</span></code>. <code class="docutils literal notranslate"><span class="pre">source</span></code>, <code class="docutils literal notranslate"><span class="pre">project</span></code> and
-<code class="docutils literal notranslate"><span class="pre">confidence</span></code> narrow by the digest’s own header fields. Each row is that front
-matter plus its key.</p>
-<p><code class="docutils literal notranslate"><span class="pre">confidence='high'</span></code> is the one worth knowing about: most sessions land in <code class="docutils literal notranslate"><span class="pre">open</span></code>,
-and a good few of those are open only because nothing said otherwise. Filtering to
-<code class="docutils literal notranslate"><span class="pre">high</span></code> leaves the ones where the session itself said something.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rows</span> <span class="o">=</span> <span class="n">ls</span><span class="p">(</span><span class="n">digests_store</span><span class="o">=</span><span class="p">{</span><span class="s1">'m/open/s1.md'</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="s1">'---</span><span class="se">\n</span><span class="s1">session: s1</span><span class="se">\n</span><span class="s1">state: open</span><span class="se">\n</span><span class="s1">last_turn: T9</span><span class="se">\n</span><span class="s1">---</span><span class="se">\n</span><span class="s1">'</span><span class="p">})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">'session'</span><span class="p">],</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">'key'</span><span class="p">]</span>
-<span class="go">('s1', 'm/open/s1.md')</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]</span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="openloops.make_digest">
 <span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">make_digest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verdict</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/digest.html#make_digest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.make_digest" title="Link to this definition">#</a></dt>
 <dd><p>Render, scrub, and key one digest.</p>
@@ -1579,7 +1556,7 @@ Code blocks, quoted lines and table rows are skipped.</p>
 <span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">render_dashboard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">owed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blocked</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sessions</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">made_at</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Open</span> <span class="pre">Loops</span> <span class="pre">Board'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_sessions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standalone</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">published</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">published_per_session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/dashboard.html#render_dashboard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.render_dashboard" title="Link to this definition">#</a></dt>
 <dd><p>The three envelopes as one self-contained HTML page. No network, no script.</p>
 <p><code class="docutils literal notranslate"><span class="pre">owed</span></code> and <code class="docutils literal notranslate"><span class="pre">blocked</span></code> are the envelopes <a class="reference internal" href="#openloops.owed" title="openloops.owed"><code class="xref py py-func docutils literal notranslate"><span class="pre">openloops.owed()</span></code></a> and
-<a class="reference internal" href="#openloops.blocked" title="openloops.blocked"><code class="xref py py-func docutils literal notranslate"><span class="pre">openloops.blocked()</span></code></a> return; <code class="docutils literal notranslate"><span class="pre">sessions</span></code> is the list <a class="reference internal" href="#openloops.ls" title="openloops.ls"><code class="xref py py-func docutils literal notranslate"><span class="pre">openloops.ls()</span></code></a>
+<a class="reference internal" href="#openloops.blocked" title="openloops.blocked"><code class="xref py py-func docutils literal notranslate"><span class="pre">openloops.blocked()</span></code></a> return; <code class="docutils literal notranslate"><span class="pre">sessions</span></code> is the list <code class="xref py py-func docutils literal notranslate"><span class="pre">openloops.ls()</span></code>
 returns. All three may be empty mappings, and an envelope whose <code class="docutils literal notranslate"><span class="pre">listed</span></code> is
 <code class="docutils literal notranslate"><span class="pre">False</span></code> renders as <code class="docutils literal notranslate"><span class="pre">?</span></code> throughout rather than as zero.</p>
 <p><code class="docutils literal notranslate"><span class="pre">made_at</span></code> is the moment the snapshot was taken and is printed in the largest type
@@ -1672,25 +1649,6 @@ an exit status — a timeout, a shell that would not start — comes back as
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="openloops.show">
-<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digests_store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/tools.html#show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.show" title="Link to this definition">#</a></dt>
-<dd><p>One digest in full, found by session id or by a unique prefix of one.</p>
-<p>An exact id always wins over a prefix, so a session whose id happens to be a prefix
-of another stays reachable. <code class="docutils literal notranslate"><span class="pre">source</span></code> narrows a store that several machines write
-into, where the same session can legitimately appear more than once.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">store</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'m/open/abcdef.md'</span><span class="p">:</span> <span class="s1">'---</span><span class="se">\n</span><span class="s1">session: abcdef</span><span class="se">\n</span><span class="s1">---</span><span class="se">\n</span><span class="s1">body'</span><span class="p">}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">show</span><span class="p">(</span><span class="s1">'abc'</span><span class="p">,</span> <span class="n">digests_store</span><span class="o">=</span><span class="n">store</span><span class="p">)[</span><span class="s1">'key'</span><span class="p">]</span>
-<span class="go">'m/open/abcdef.md'</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="openloops.skills_dir">
 <span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">skills_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/skills.html#skills_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.skills_dir" title="Link to this definition">#</a></dt>
 <dd><p>The bundled skills directory, inside the installed package.</p>
@@ -1712,21 +1670,6 @@ it elsewhere means “clear the cache” can never be mistyped into “delete th
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openloops.status">
-<span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">since_days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digests_store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transcript_source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/tools.html#status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.status" title="Link to this definition">#</a></dt>
-<dd><p>Where everything is, how much of it there is, and how stale the cache is.</p>
-<p>Reports the cache’s age because a read served from a cache that nothing has
-refreshed is the failure openloops is built to avoid — a periodic job that died
-leaves a confident, months-old answer behind, and the only defence is saying how
-old the answer is.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1931,7 +1874,6 @@ which is what makes it safe to suggest when someone suspects a stale digest.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.gh_issues"><code class="docutils literal notranslate"><span class="pre">gh_issues()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.headline_counts"><code class="docutils literal notranslate"><span class="pre">headline_counts()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.install_skills"><code class="docutils literal notranslate"><span class="pre">install_skills()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.ls"><code class="docutils literal notranslate"><span class="pre">ls()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.make_digest"><code class="docutils literal notranslate"><span class="pre">make_digest()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.owed"><code class="docutils literal notranslate"><span class="pre">owed()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.parse_session"><code class="docutils literal notranslate"><span class="pre">parse_session()</span></code></a></li>
@@ -1942,10 +1884,8 @@ which is what makes it safe to suggest when someone suspects a stale digest.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.retained"><code class="docutils literal notranslate"><span class="pre">retained()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.scrub"><code class="docutils literal notranslate"><span class="pre">scrub()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.shell_predicate"><code class="docutils literal notranslate"><span class="pre">shell_predicate()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.skills_dir"><code class="docutils literal notranslate"><span class="pre">skills_dir()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.state_dir"><code class="docutils literal notranslate"><span class="pre">state_dir()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.status"><code class="docutils literal notranslate"><span class="pre">status()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.sync"><code class="docutils literal notranslate"><span class="pre">sync()</span></code></a></li>
 </ul>
   </nav></div>

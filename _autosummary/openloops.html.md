@@ -119,7 +119,7 @@ event log, no cross-repo links, no session model, and no write path of any kind.
 | [`gh_issues`](#openloops.gh_issues)(\*, owners[, label, state, limit, ...])  | The default `issues_source`: the open `manual-task` issues, from `gh`.                                                |
 | [`headline_counts`](#openloops.headline_counts)(owed, blocked, sessions)           | The four figures across the top of the page.                                                                          |
 | [`install_skills`](#openloops.install_skills)(\*[, target, only, copy, ...])      | Make the bundled skills and subagent visible to an agent host.                                                        |
-| [`ls`](#openloops.ls)(\*[, state, source, project, confidence, ...])  | The digests in the store, newest last-turn first.                                                                     |
+| `ls`(\*[, state, source, project, confidence, ...])                                                 | The digests in the store, newest last-turn first.                                                                     |
 | [`make_digest`](#openloops.make_digest)(session, verdict, \*, source[, ...])   | Render, scrub, and key one digest.                                                                                    |
 | [`owed`](#openloops.owed)(\*[, verify, owners, trusted_owners, ...])    | The open `manual-task` obligations, each re-checked against the world.                                                |
 | [`parse_session`](#openloops.parse_session)(records, \*[, key])                  | Read one transcript's records into a [`Session`](openloops.base.html.md#openloops.base.Session). |
@@ -129,10 +129,10 @@ event log, no cross-repo links, no session model, and no write path of any kind.
 | [`retained`](#openloops.retained)(store, sessions, \*[, source])            | Digest keys whose session no longer has a transcript — the retention surplus.                                         |
 | [`scrub`](#openloops.scrub)(text, \*[, aliases, where])                  | Rewrite paths and raise on credentials.                                                                               |
 | [`shell_predicate`](#openloops.shell_predicate)(command, \*[, timeout])            | The default `run_predicate`: run the command in a subshell, bounded in time.                                          |
-| [`show`](#openloops.show)(session, \*[, source, digests_store])         | One digest in full, found by session id or by a unique prefix of one.                                                 |
+| `show`(session, \*[, source, digests_store])                                                        | One digest in full, found by session id or by a unique prefix of one.                                                 |
 | [`skills_dir`](#openloops.skills_dir)()                                       | The bundled skills directory, inside the installed package.                                                           |
 | [`state_dir`](#openloops.state_dir)()                                        | Where per-machine caches and job logs go.                                                                             |
-| [`status`](#openloops.status)(\*[, source, since_days, ...])              | Where everything is, how much of it there is, and how stale the cache is.                                             |
+| `status`(\*[, source, since_days, ...])                                                             | Where everything is, how much of it there is, and how stale the cache is.                                             |
 | [`sync`](#openloops.sync)(\*[, transcript_source, digests_store, ...])  | Bring the digest store up to date with the sessions, and say what changed.                                            |
 
 ### Classes
@@ -778,28 +778,6 @@ the capture skill out.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.ls(, state='open', source=None, project=None, confidence=None, limit=20, digests_store=None)
-
-The digests in the store, newest last-turn first.
-
-`state` is `open`, `archive` or `all`. `source`, `project` and
-`confidence` narrow by the digest’s own header fields. Each row is that front
-matter plus its key.
-
-`confidence='high'` is the one worth knowing about: most sessions land in `open`,
-and a good few of those are open only because nothing said otherwise. Filtering to
-`high` leaves the ones where the session itself said something.
-
-```pycon
->>> rows = ls(digests_store={'m/open/s1.md':
-...     '---\nsession: s1\nstate: open\nlast_turn: T9\n---\n'})
->>> rows[0]['session'], rows[0]['key']
-('s1', 'm/open/s1.md')
-```
-
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
-
 ### openloops.make_digest(session, verdict, , source, aliases=None)
 
 Render, scrub, and key one digest.
@@ -999,7 +977,7 @@ True
 The three envelopes as one self-contained HTML page. No network, no script.
 
 `owed` and `blocked` are the envelopes [`openloops.owed()`](#openloops.owed) and
-[`openloops.blocked()`](#openloops.blocked) return; `sessions` is the list [`openloops.ls()`](#openloops.ls)
+[`openloops.blocked()`](#openloops.blocked) return; `sessions` is the list `openloops.ls()`
 returns. All three may be empty mappings, and an envelope whose `listed` is
 `False` renders as `?` throughout rather than as zero.
 
@@ -1088,23 +1066,6 @@ True
 * **Return type:**
   [`PredicateOutcome`](openloops.obligations.html.md#openloops.obligations.PredicateOutcome)
 
-### openloops.show(session, , source=None, digests_store=None)
-
-One digest in full, found by session id or by a unique prefix of one.
-
-An exact id always wins over a prefix, so a session whose id happens to be a prefix
-of another stays reachable. `source` narrows a store that several machines write
-into, where the same session can legitimately appear more than once.
-
-```pycon
->>> store = {'m/open/abcdef.md': '---\nsession: abcdef\n---\nbody'}
->>> show('abc', digests_store=store)['key']
-'m/open/abcdef.md'
-```
-
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
-
 ### openloops.skills_dir()
 
 The bundled skills directory, inside the installed package.
@@ -1124,18 +1085,6 @@ it elsewhere means “clear the cache” can never be mistyped into “delete th
 
 * **Return type:**
   [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)
-
-### openloops.status(, source=None, since_days=None, digests_store=None, transcript_source=None)
-
-Where everything is, how much of it there is, and how stale the cache is.
-
-Reports the cache’s age because a read served from a cache that nothing has
-refreshed is the failure openloops is built to avoid — a periodic job that died
-leaves a confident, months-old answer behind, and the only defence is saying how
-old the answer is.
-
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 ### openloops.sync(, transcript_source=None, digests_store=None, source=None, since_days=None, state_dir=None, force=False)
 
