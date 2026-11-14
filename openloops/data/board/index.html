@@ -139,6 +139,10 @@ const SCHEMA = 3;
 const TIERS = ["tap", "browser", "session", "physical", "mac-only"];
 const TIER_LABEL = { tap: "Tap", browser: "Browser", session: "Session", physical: "Physical", "mac-only": "Mac only" };
 const TIMES = [{ k: "2", label: "≤ 2 min", max: 2 }, { k: "5", label: "≤ 5 min", max: 5 }, { k: "15", label: "≤ 15 min", max: 15 }];
+/* "Opened" filter: [key, label, () => the Date a task must have been opened on or after]. A week starts on Monday, on this phone's clock. */
+const OPENED = [
+  { k: "week", label: "Opened this week", since: () => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return d } },
+  { k: "7d", label: "Last 7 days", since: () => new Date(Date.now() - 7 * 86400e3) }];
 const SHOWS = [{ k: "todo", label: "To do" }, { k: "maybe", label: "Maybe done" }, { k: "snoozed", label: "Snoozed" }, { k: "done", label: "Done" }, { k: "skipped", label: "Skipped" }];
 /* Deployment settings come from board.json, written by `ol board build` next to this page. */
 let SESSION = "the board session", READ_ONLY_ORGS = [], RUN_MACHINE = null, CONFIG_OK = false, MOVED_TO = null;
@@ -165,7 +169,9 @@ const inflight = new Set(), draftTimers = {}, acted = new Set(), armed = {};
 /* ---------- browser journal ---------- */
 function load(k, d) { try { const v = localStorage.getItem("ptb:" + k); return v == null ? d : JSON.parse(v) } catch { storageOk = false; return d } }
 function save(k, v) { try { localStorage.setItem("ptb:" + k, JSON.stringify(v)); return true } catch { storageOk = false; return false } }
-const ui = load("ui", { tiers: ["tap", "browser", "session", "physical"], orgs: [], time: null, show: "todo" });
+const ui = load("ui", { tiers: ["tap", "browser", "session", "physical"], orgs: [], time: null, opened: null, show: "todo" });
+/* A link can pre-select the "Opened" filter: `?opened=week` or `?opened=7d`. The link wins over the saved choice on every load. */
+{ const q = new URLSearchParams(location.search).get("opened"); if (OPENED.some(o => o.k === q)) ui.opened = q }
 let pending = load("pending3", {});   // path -> body, waiting for the store to confirm
 let stuck = load("stuck3", {});       // path -> {body, code}: the store refused it for good
 let drafts = load("drafts3", {});     // key -> {text, at}
@@ -406,6 +412,8 @@ function filtersBar() {
   f.append(el("span", { class: "sep" }));
   for (const tm of TIMES) f.append(chip(tm.label, ui.time === tm.k, () => ui.time = ui.time === tm.k ? null : tm.k));
   f.append(el("span", { class: "sep" }));
+  for (const o of OPENED) f.append(chip(o.label, ui.opened === o.k, () => ui.opened = ui.opened === o.k ? null : o.k));
+  f.append(el("span", { class: "sep" }));
   for (const o of [...new Set(TASKS.map(t => t.org))].sort()) f.append(chip(o, ui.orgs.includes(o), () => ui.orgs = ui.orgs.includes(o) ? ui.orgs.filter(x => x !== o) : [...ui.orgs, o]));
 }
 
@@ -476,7 +484,9 @@ function card(t) {
 
 function viewTasks(m) {
   const tm = TIMES.find(x => x.k === ui.time);
-  const list = TASKS.filter(t => (stOf(t) === ui.show || acted.has(t.id)) && ui.tiers.includes(t.tier) && (!ui.orgs.length || ui.orgs.includes(t.org)) && (!tm || (t.minutes ?? 99) <= tm.max)).sort((a, b) => score(a) - score(b));
+  const since = OPENED.find(x => x.k === ui.opened)?.since();
+  const list = TASKS.filter(t => (stOf(t) === ui.show || acted.has(t.id)) && ui.tiers.includes(t.tier) && (!ui.orgs.length || ui.orgs.includes(t.org)) && (!tm || (t.minutes ?? 99) <= tm.max) && (!since || (t.created && new Date(t.created) >= since)))
+    .sort(since ? (a, b) => new Date(b.created) - new Date(a.created) : (a, b) => score(a) - score(b));
   m.replaceChildren(...(list.length ? list.map(card) : [el("p", { class: "empty" }, "Nothing matches these filters. Tap a tier or a status above to widen them.")]));
 }
 
@@ -556,7 +566,7 @@ function render() {
   for (const k of ["tasks", "desk", "runs", "kit"]) $("#v-" + k).setAttribute("aria-current", k === v ? "page" : "false");
   $("#filters").hidden = v !== "tasks";
   const VIEW = { tasks: "Tasks", desk: "Decide", runs: "Runs", kit: "Phone kit" }[v] || "Tasks";
-  const nf = (ui.tiers.length !== 4 ? 1 : 0) + ui.orgs.length + (ui.time ? 1 : 0);
+  const nf = (ui.tiers.length !== 4 ? 1 : 0) + ui.orgs.length + (ui.time ? 1 : 0) + (ui.opened ? 1 : 0);
   $("#navlabel").textContent = v === "tasks" ? `${VIEW} · ${SHOWS.find(x => x.k === ui.show)?.label || ""}${nf ? ` · ${nf} filter${nf > 1 ? "s" : ""}` : ""}` : VIEW;
   $("#tally").textContent = `${TASKS.filter(t => stOf(t) === "todo").length} to do · ${TASKS.filter(t => stOf(t) === "done").length} done`;
   syncLine(); filtersBar();
