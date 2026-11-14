@@ -43,6 +43,7 @@ nav.views a[aria-current="page"] { background: var(--accent); color: var(--accen
 .filters { display: flex; gap: 6px; overflow-x: auto; padding-block: 10px 2px; scrollbar-width: none }
 .filters::-webkit-scrollbar { display: none }
 .chip { flex: none; border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 999px; padding: 8px 12px; font: 600 .85rem var(--f-body); min-height: 38px; cursor: pointer }
+@media (pointer: coarse) { .chip { min-height: 44px } }
 .chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg) }
 .chip .n { font: 400 .75rem var(--f-mono); opacity: .75; margin-left: 4px }
 .sep { flex: none; width: 1px; background: var(--line); margin: 4px 2px }
@@ -139,6 +140,14 @@ const SCHEMA = 3;
 const TIERS = ["tap", "browser", "session", "physical", "mac-only"];
 const TIER_LABEL = { tap: "Tap", browser: "Browser", session: "Session", physical: "Physical", "mac-only": "Mac only" };
 const TIMES = [{ k: "2", label: "≤ 2 min", max: 2 }, { k: "5", label: "≤ 5 min", max: 5 }, { k: "15", label: "≤ 15 min", max: 15 }];
+/* "Opened" filter: key, label, and the first day (local midnight) a task may have been opened on. A week starts on Monday, on this phone's clock.
+   One chip offers "this week"; "7d" is reached by a link (`?opened=7d`) or from the empty state, for the days when the week has only just begun. */
+const OPENED = [
+  { k: "week", label: "Opened this week", since: () => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return d } },
+  { k: "7d", label: "Opened in the last 7 days", since: () => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - 7); return d } }];
+/* A task's `created` is a day with no time (YYYY-MM-DD). Read it as a local day: `new Date("2026-01-05")` is UTC midnight, which west of UTC is the day before. */
+const openedDay = s => { const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(s || ""); return m ? new Date(+m[1], m[2] - 1, +m[3]) : null };
+const fmtDay = d => d.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
 const SHOWS = [{ k: "todo", label: "To do" }, { k: "maybe", label: "Maybe done" }, { k: "snoozed", label: "Snoozed" }, { k: "done", label: "Done" }, { k: "skipped", label: "Skipped" }];
 /* Deployment settings come from board.json, written by `ol board build` next to this page. */
 let SESSION = "the board session", READ_ONLY_ORGS = [], RUN_MACHINE = null, CONFIG_OK = false, MOVED_TO = null;
@@ -165,7 +174,16 @@ const inflight = new Set(), draftTimers = {}, acted = new Set(), armed = {};
 /* ---------- browser journal ---------- */
 function load(k, d) { try { const v = localStorage.getItem("ptb:" + k); return v == null ? d : JSON.parse(v) } catch { storageOk = false; return d } }
 function save(k, v) { try { localStorage.setItem("ptb:" + k, JSON.stringify(v)); return true } catch { storageOk = false; return false } }
-const ui = load("ui", { tiers: ["tap", "browser", "session", "physical"], orgs: [], time: null, show: "todo" });
+const ui = load("ui", { tiers: ["tap", "browser", "session", "physical"], orgs: [], time: null, opened: null, show: "todo" });
+/* A link can pre-select the "Opened" filter: `?opened=week` or `?opened=7d`. It means "opened then and still to do", so it also
+   selects To do unless the link names a status (`&show=snoozed`). Changing the filter rewrites the address (setOpened), so a
+   reload, or a home-screen icon made from the link, never brings back a filter that was switched off. */
+{ const q = new URLSearchParams(location.search), o = q.get("opened"); if (OPENED.some(x => x.k === o)) { ui.opened = o; ui.show = SHOWS.some(x => x.k === q.get("show")) ? q.get("show") : "todo" } }
+function setOpened(k) {
+  ui.opened = k;
+  const u = new URL(location.href); if (k) u.searchParams.set("opened", k); else u.searchParams.delete("opened");
+  u.searchParams.delete("show"); history.replaceState(null, "", u);
+}
 let pending = load("pending3", {});   // path -> body, waiting for the store to confirm
 let stuck = load("stuck3", {});       // path -> {body, code}: the store refused it for good
 let drafts = load("drafts3", {});     // key -> {text, at}
@@ -402,6 +420,8 @@ function filtersBar() {
   const chip = (label, on, fn, n) => el("button", { class: "chip", "aria-pressed": String(on), onclick: () => { fn(); acted.clear(); save("ui", ui); render() } }, label, n != null ? el("span", { class: "n" }, n) : null);
   for (const s of SHOWS) f.append(chip(s.label, ui.show === s.k, () => ui.show = s.k, count(s.k)));
   f.append(el("span", { class: "sep" }));
+  { const o = OPENED.find(x => x.k === ui.opened) || OPENED[0]; f.append(chip(o.label, !!ui.opened, () => setOpened(ui.opened ? null : o.k))) }
+  f.append(el("span", { class: "sep" }));
   for (const tier of TIERS) f.append(chip(TIER_LABEL[tier], ui.tiers.includes(tier), () => ui.tiers = ui.tiers.includes(tier) ? ui.tiers.filter(x => x !== tier) : [...ui.tiers, tier]));
   f.append(el("span", { class: "sep" }));
   for (const tm of TIMES) f.append(chip(tm.label, ui.time === tm.k, () => ui.time = ui.time === tm.k ? null : tm.k));
@@ -476,8 +496,17 @@ function card(t) {
 
 function viewTasks(m) {
   const tm = TIMES.find(x => x.k === ui.time);
-  const list = TASKS.filter(t => (stOf(t) === ui.show || acted.has(t.id)) && ui.tiers.includes(t.tier) && (!ui.orgs.length || ui.orgs.includes(t.org)) && (!tm || (t.minutes ?? 99) <= tm.max)).sort((a, b) => score(a) - score(b));
-  m.replaceChildren(...(list.length ? list.map(card) : [el("p", { class: "empty" }, "Nothing matches these filters. Tap a tier or a status above to widen them.")]));
+  const op = OPENED.find(x => x.k === ui.opened), since = op?.since();
+  const onOrAfter = t => { const d = openedDay(t.created); return !!d && d >= since };
+  const list = TASKS.filter(t => (stOf(t) === ui.show || acted.has(t.id)) && ui.tiers.includes(t.tier) && (!ui.orgs.length || ui.orgs.includes(t.org)) && (!tm || (t.minutes ?? 99) <= tm.max) && (!since || onOrAfter(t)))
+    .sort(since ? (a, b) => openedDay(b.created) - openedDay(a.created) : (a, b) => score(a) - score(b));
+  if (!since) { m.replaceChildren(...(list.length ? list.map(card) : [el("p", { class: "empty" }, "Nothing matches these filters. Tap a tier or a status above to widen them.")])); return }
+  /* With the "Opened" filter on, the page says which day it counts from and that the order changed; an empty list names the date as the cause. */
+  const widen = k => el("button", { class: "btn", onclick: () => { setOpened(k); acted.clear(); save("ui", ui); render() } }, k ? "Show the last 7 days" : "Show all dates");
+  const label = SHOWS.find(x => x.k === ui.show)?.label || "this list";
+  m.replaceChildren(...(list.length
+    ? [el("p", { class: "small" }, `Opened since ${fmtDay(since)} · ${list.length} · newest first`), ...list.map(card)]
+    : [el("div", { class: "empty" }, el("p", {}, `Nothing opened since ${fmtDay(since)} is in ${label}.`), el("p", {}, op.k === "week" ? widen("7d") : null, " ", widen(null)))]));
 }
 
 function viewDesk(m) {
@@ -556,7 +585,7 @@ function render() {
   for (const k of ["tasks", "desk", "runs", "kit"]) $("#v-" + k).setAttribute("aria-current", k === v ? "page" : "false");
   $("#filters").hidden = v !== "tasks";
   const VIEW = { tasks: "Tasks", desk: "Decide", runs: "Runs", kit: "Phone kit" }[v] || "Tasks";
-  const nf = (ui.tiers.length !== 4 ? 1 : 0) + ui.orgs.length + (ui.time ? 1 : 0);
+  const nf = (ui.tiers.length !== 4 ? 1 : 0) + ui.orgs.length + (ui.time ? 1 : 0) + (ui.opened ? 1 : 0);
   $("#navlabel").textContent = v === "tasks" ? `${VIEW} · ${SHOWS.find(x => x.k === ui.show)?.label || ""}${nf ? ` · ${nf} filter${nf > 1 ? "s" : ""}` : ""}` : VIEW;
   $("#tally").textContent = `${TASKS.filter(t => stOf(t) === "todo").length} to do · ${TASKS.filter(t => stOf(t) === "done").length} done`;
   syncLine(); filtersBar();

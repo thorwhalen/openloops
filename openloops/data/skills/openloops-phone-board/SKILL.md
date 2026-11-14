@@ -69,6 +69,10 @@ Build with `--store http --api <prefix>/board-store`, where `<prefix>` is the pa
 
 For decisions that state options but no recommendation, run the deep decider ([references/deep-decider.md](references/deep-decider.md)): a subagent reads each one and puts a starred pick, or the trade-offs when only the owner can settle it, on the decision desk. It decides nothing: the owner's tap is the decision. Decisions an agent already made on its own under the `needs-human` rule are `agent-decided` issues: `ol board-gather --all-kinds` gathers them as Keep/Veto cards.
 
+## What the owner can filter by
+
+The Tasks view's chips filter by status (To do, Maybe done, Snoozed, Done, Skipped), by when the item was opened ("Opened this week", from Monday on the phone's clock; newest first while on), by tier, minutes needed and organisation. A link can pre-select the opened filter and To do with it: `<board address>?opened=week` is the answer to "what was opened this week and is still open"; `?opened=7d` counts back seven days instead, and `&show=snoozed` picks another status. The filter only sees what the last rebuild gathered, so rebuild first when the board is older than the window asked about.
+
 ## Rebuilding
 
 Rerun stages 1 to 3 into the same `WORK/board` and republish (Artifact) or copy the files to the server's board directory (self-hosted). The receiver trusts only these files, never the store, for where an action happens and what a run dispatches; an event for a task that a rebuild removed is refused. Task ids are stable (`owner/repo#N`), so events already in the store keep pointing at the right cards.
