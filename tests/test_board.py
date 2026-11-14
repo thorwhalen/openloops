@@ -301,14 +301,20 @@ def test_board_build_reviews_overlay_sets_only_the_review(tmp_path):
 
 
 def test_the_page_can_show_only_what_was_opened_this_week():
-    """An "Opened" filter (this week, from Monday; or the last 7 days), which a link can
-    pre-select with `?opened=week`, so "what is new and still open" is one address."""
+    """An "Opened this week" chip (from Monday), which a link can pre-select with
+    `?opened=week`, so "what is new and still to do" is one address."""
     page = (board.board_dir() / "index.html").read_text(encoding="utf-8")
     assert '{ k: "week", label: "Opened this week"' in page
-    assert '{ k: "7d", label: "Last 7 days"' in page
+    assert '{ k: "7d", label: "Opened in the last 7 days"' in page
     # Monday-based week start, on the phone's clock.
     assert "d.getDate() - (d.getDay() + 6) % 7" in page
-    assert 'new URLSearchParams(location.search).get("opened")' in page
-    # A task with no creation date never passes the filter, and the filter counts in the header.
-    assert "(!since || (t.created && new Date(t.created) >= since))" in page
+    # `created` has no time: it is read as a local day, never as UTC midnight.
+    assert "new Date(+m[1], m[2] - 1, +m[3])" in page
+    filt = page[page.index("function viewTasks") :][:1800]
+    assert "new Date(t.created)" not in filt and "onOrAfter(t)" in filt
+    # The link selects To do as well, and switching the filter off rewrites the address.
+    assert 'ui.show = SHOWS.some(x => x.k === q.get("show")) ? q.get("show") : "todo"' in page
+    assert 'u.searchParams.delete("opened")' in page and "history.replaceState" in page
+    # The page says what the filter did: the day it counts from, and why a list is empty.
+    assert "newest first" in page and "Nothing opened since" in page
     assert "(ui.opened ? 1 : 0)" in page

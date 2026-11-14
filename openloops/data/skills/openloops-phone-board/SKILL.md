@@ -71,7 +71,7 @@ For decisions that state options but no recommendation, run the deep decider ([r
 
 ## What the owner can filter by
 
-The Tasks view's chips filter by status (To do, Maybe done, Snoozed, Done, Skipped), tier, minutes needed, when the item was opened ("Opened this week", from Monday on the phone's clock, or "Last 7 days"; newest first while on) and organisation. A link can pre-select the opened filter: `<board address>?opened=week` (or `?opened=7d`) is the answer to "what was opened this week and is still open". It can only show what the last rebuild gathered, so rebuild first when the board is older than the window asked about.
+The Tasks view's chips filter by status (To do, Maybe done, Snoozed, Done, Skipped), by when the item was opened ("Opened this week", from Monday on the phone's clock; newest first while on), by tier, minutes needed and organisation. A link can pre-select the opened filter and To do with it: `<board address>?opened=week` is the answer to "what was opened this week and is still open"; `?opened=7d` counts back seven days instead, and `&show=snoozed` picks another status. The filter only sees what the last rebuild gathered, so rebuild first when the board is older than the window asked about.
 
 ## Rebuilding
 
