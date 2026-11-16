@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=d71dfaa1"></script>
+    <script src="../_static/documentation_options.js?v=e0e570cb"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.31" />
+  <meta name="docsearch:version" content="0.1.32" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -460,6 +460,9 @@ directly.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#openloops.skills.HOST_ENV_VAR" title="openloops.skills.HOST_ENV_VAR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HOST_ENV_VAR</span></code></a></p></td>
 <td><p>Where Claude Code keeps skills and subagents, and the variable that relocates it.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.skills.ALIASES" title="openloops.skills.ALIASES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ALIASES</span></code></a></p></td>
+<td><p>Bare names that standing instructions point at, mapped from the shipped skill that should answer to them.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -493,6 +496,16 @@ directly.</p>
 </tbody>
 </table>
 </div>
+<dl class="py data">
+<dt class="sig sig-object py" id="openloops.skills.ALIASES">
+<span class="sig-prename descclassname"><span class="pre">openloops.skills.</span></span><span class="sig-name descname"><span class="pre">ALIASES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'openloops-needs-human':</span> <span class="pre">'needs-human'}</span></span><a class="headerlink" href="#openloops.skills.ALIASES" title="Link to this definition">#</a></dt>
+<dd><p>Bare names that standing instructions point at, mapped from the shipped skill that
+should answer to them. Nothing else installs these, so an older copy of the same rule
+(a research checkout predating this package) silently wins when a session loads
+<code class="docutils literal notranslate"><span class="pre">needs-human</span></code> – <a class="reference internal" href="#openloops.skills.install_skills" title="openloops.skills.install_skills"><code class="xref py py-func docutils literal notranslate"><span class="pre">install_skills()</span></code></a> reports that. It does not install the alias:
+a second folder over one SKILL.md would give two skills the same triggers.</p>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="openloops.skills.Asset">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.skills.</span></span><span class="sig-name descname"><span class="pre">Asset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/skills.html#Asset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.skills.Asset" title="Link to this definition">#</a></dt>
@@ -580,6 +593,9 @@ which is the only way to see what a run would do <em>before</em> it does it.</p>
 own capture skill, adapted to your own fleet, and a second one competing for the same
 triggers is worse than either alone – so take the reader and the subagent and leave
 the capture skill out.</p>
+<p>The plan’s <code class="docutils literal notranslate"><span class="pre">shadowed</span></code> list names any bare-named skill (<code class="docutils literal notranslate"><span class="pre">needs-human</span></code>) that
+resolves somewhere other than the shipped copy, and whether its text matches ours;
+nothing is changed on its account.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plan</span> <span class="o">=</span> <span class="n">install_skills</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="s1">'/nonexistent/host'</span><span class="p">,</span> <span class="n">only</span><span class="o">=</span><span class="p">[</span><span class="s1">'openloops'</span><span class="p">],</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">plan</span><span class="p">[</span><span class="s1">'actions'</span><span class="p">]]</span>
 <span class="go">['openloops']</span>
@@ -661,6 +677,7 @@ from a wheel, an editable install, a zip and a virtualenv without being told whi
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.skills.ALIASES"><code class="docutils literal notranslate"><span class="pre">ALIASES</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.skills.Asset"><code class="docutils literal notranslate"><span class="pre">Asset</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.skills.Asset.destination"><code class="docutils literal notranslate"><span class="pre">Asset.destination()</span></code></a></li>
 </ul>

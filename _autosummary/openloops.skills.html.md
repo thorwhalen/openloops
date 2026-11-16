@@ -46,8 +46,9 @@ directly.
 
 ### Module Attributes
 
-| [`HOST_ENV_VAR`](#openloops.skills.HOST_ENV_VAR)   | Where Claude Code keeps skills and subagents, and the variable that relocates it.   |
-|-----------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| [`HOST_ENV_VAR`](#openloops.skills.HOST_ENV_VAR)   | Where Claude Code keeps skills and subagents, and the variable that relocates it.                         |
+|-----------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| [`ALIASES`](#openloops.skills.ALIASES)        | Bare names that standing instructions point at, mapped from the shipped skill that should answer to them. |
 
 ### Functions
 
@@ -62,6 +63,14 @@ directly.
 
 | [`Asset`](#openloops.skills.Asset)(kind, name, source)   | One installable thing: a skill directory or a subagent file.   |
 |------------------------------------------------------------------------------|----------------------------------------------------------------|
+
+### openloops.skills.ALIASES *= {'openloops-needs-human': 'needs-human'}*
+
+Bare names that standing instructions point at, mapped from the shipped skill that
+should answer to them. Nothing else installs these, so an older copy of the same rule
+(a research checkout predating this package) silently wins when a session loads
+`needs-human` – [`install_skills()`](#openloops.skills.install_skills) reports that. It does not install the alias:
+a second folder over one SKILL.md would give two skills the same triggers.
 
 ### *class* openloops.skills.Asset(kind, name, source)
 
@@ -135,6 +144,10 @@ Nothing that is already there is overwritten: an occupied destination reads
 own capture skill, adapted to your own fleet, and a second one competing for the same
 triggers is worse than either alone – so take the reader and the subagent and leave
 the capture skill out.
+
+The plan’s `shadowed` list names any bare-named skill (`needs-human`) that
+resolves somewhere other than the shipped copy, and whether its text matches ours;
+nothing is changed on its account.
 
 ```pycon
 >>> plan = install_skills(target='/nonexistent/host', only=['openloops'], dry_run=True)

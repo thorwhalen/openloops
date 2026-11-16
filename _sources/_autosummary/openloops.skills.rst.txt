@@ -9,6 +9,7 @@ openloops.skills
    .. autosummary::
    
       HOST_ENV_VAR
+      ALIASES
    
    .. rubric:: Functions
 

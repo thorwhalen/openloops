@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=d71dfaa1"></script>
+    <script src="../_static/documentation_options.js?v=e0e570cb"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.31" />
+  <meta name="docsearch:version" content="0.1.32" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -1339,6 +1339,9 @@ which is the only way to see what a run would do <em>before</em> it does it.</p>
 own capture skill, adapted to your own fleet, and a second one competing for the same
 triggers is worse than either alone – so take the reader and the subagent and leave
 the capture skill out.</p>
+<p>The plan’s <code class="docutils literal notranslate"><span class="pre">shadowed</span></code> list names any bare-named skill (<code class="docutils literal notranslate"><span class="pre">needs-human</span></code>) that
+resolves somewhere other than the shipped copy, and whether its text matches ours;
+nothing is changed on its account.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plan</span> <span class="o">=</span> <span class="n">install_skills</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="s1">'/nonexistent/host'</span><span class="p">,</span> <span class="n">only</span><span class="o">=</span><span class="p">[</span><span class="s1">'openloops'</span><span class="p">],</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">plan</span><span class="p">[</span><span class="s1">'actions'</span><span class="p">]]</span>
 <span class="go">['openloops']</span>

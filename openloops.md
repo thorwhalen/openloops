@@ -1,4 +1,4 @@
-> built 2026-11-14 10:23 UTC from e2ae6ac (main) · openloops 0.1.31. Details: build_info.json
+> built 2026-11-16 05:39 UTC from fad4cc7 (main) · openloops 0.1.32. Details: build_info.json
 
 # index.html.md
 
@@ -3094,6 +3094,10 @@ own capture skill, adapted to your own fleet, and a second one competing for the
 triggers is worse than either alone – so take the reader and the subagent and leave
 the capture skill out.
 
+The plan’s `shadowed` list names any bare-named skill (`needs-human`) that
+resolves somewhere other than the shipped copy, and whether its text matches ours;
+nothing is changed on its account.
+
 ```pycon
 >>> plan = install_skills(target='/nonexistent/host', only=['openloops'], dry_run=True)
 >>> [row['name'] for row in plan['actions']]
@@ -4233,8 +4237,9 @@ directly.
 
 ### Module Attributes
 
-| [`HOST_ENV_VAR`](_autosummary/openloops.skills.html.md#openloops.skills.HOST_ENV_VAR)   | Where Claude Code keeps skills and subagents, and the variable that relocates it.   |
-|-----------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| [`HOST_ENV_VAR`](_autosummary/openloops.skills.html.md#openloops.skills.HOST_ENV_VAR)   | Where Claude Code keeps skills and subagents, and the variable that relocates it.                         |
+|-----------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| [`ALIASES`](_autosummary/openloops.skills.html.md#openloops.skills.ALIASES)        | Bare names that standing instructions point at, mapped from the shipped skill that should answer to them. |
 
 ### Functions
 
@@ -4249,6 +4254,14 @@ directly.
 
 | [`Asset`](_autosummary/openloops.skills.html.md#openloops.skills.Asset)(kind, name, source)   | One installable thing: a skill directory or a subagent file.   |
 |------------------------------------------------------------------------------|----------------------------------------------------------------|
+
+### openloops.skills.ALIASES *= {'openloops-needs-human': 'needs-human'}*
+
+Bare names that standing instructions point at, mapped from the shipped skill that
+should answer to them. Nothing else installs these, so an older copy of the same rule
+(a research checkout predating this package) silently wins when a session loads
+`needs-human` – [`install_skills()`](_autosummary/openloops.skills.html.md#openloops.skills.install_skills) reports that. It does not install the alias:
+a second folder over one SKILL.md would give two skills the same triggers.
 
 ### *class* openloops.skills.Asset(kind, name, source)
 
@@ -4322,6 +4335,10 @@ Nothing that is already there is overwritten: an occupied destination reads
 own capture skill, adapted to your own fleet, and a second one competing for the same
 triggers is worse than either alone – so take the reader and the subagent and leave
 the capture skill out.
+
+The plan’s `shadowed` list names any bare-named skill (`needs-human`) that
+resolves somewhere other than the shipped copy, and whether its text matches ours;
+nothing is changed on its account.
 
 ```pycon
 >>> plan = install_skills(target='/nonexistent/host', only=['openloops'], dry_run=True)
@@ -5344,18 +5361,16 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-11-14 10:23 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/e2ae6acb36cfb34545802392f69e258bb80eeca2"><code>e2ae6ac</code></a> on branch <code>main</code>, for **openloops 0.1.31** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-16 05:39 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/fad4cc759235d1be984fff26f6f9ac0914d51773"><code>fad4cc7</code></a> on branch <code>main</code>, for **openloops 0.1.32** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.1.31) is behind the latest release on PyPI (0.1.32): `pip install openloops` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/e2ae6acb36cfb34545802392f69e258bb80eeca2"><code>e2ae6acb36cfb34545802392f69e258bb80eeca2</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/fad4cc759235d1be984fff26f6f9ac0914d51773"><code>fad4cc759235d1be984fff26f6f9ac0914d51773</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -5366,9 +5381,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/43584872089">43584872089</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/43811489934">43811489934</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>e2ae6acb36cfb34545802392f69e258bb80eeca2</code> (in the history of the built commit) |
+| Event commit | <code>fad4cc759235d1be984fff26f6f9ac0914d51773</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -5393,13 +5408,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.32/">0.1.32</a>, newer than the documented version (0.1.31).
+Latest release: <a href="https://pypi.org/project/openloops/0.1.32/">0.1.32</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout e2ae6acb36cfb34545802392f69e258bb80eeca2
+git checkout fad4cc759235d1be984fff26f6f9ac0914d51773
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

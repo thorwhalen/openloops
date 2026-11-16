@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../../_static/documentation_options.js?v=d71dfaa1"></script>
+    <script src="../../_static/documentation_options.js?v=e0e570cb"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.31" />
+  <meta name="docsearch:version" content="0.1.32" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -766,11 +766,13 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"ALIASES"</span><span class="p">,</span>
     <span class="s2">"HOST_ENV_VAR"</span><span class="p">,</span>
     <span class="s2">"Asset"</span><span class="p">,</span>
     <span class="s2">"agents_dir"</span><span class="p">,</span>
@@ -785,6 +787,13 @@ window.runMermaid = runMermaid;</script>
 <span class="c1">#: for a reason, and an installer that ignores it writes to a directory nobody reads.</span>
 <span class="n">HOST_ENV_VAR</span> <span class="o">=</span> <span class="s2">"CLAUDE_CONFIG_DIR"</span>
 <span class="n">DFLT_HOST</span> <span class="o">=</span> <span class="s2">"~/.claude"</span>
+
+<span class="c1">#: Bare names that standing instructions point at, mapped from the shipped skill that</span>
+<span class="c1">#: should answer to them. Nothing else installs these, so an older copy of the same rule</span>
+<span class="c1">#: (a research checkout predating this package) silently wins when a session loads</span>
+<span class="c1">#: ``needs-human`` -- :func:`install_skills` reports that. It does not install the alias:</span>
+<span class="c1">#: a second folder over one SKILL.md would give two skills the same triggers.</span>
+<span class="n">ALIASES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"openloops-needs-human"</span><span class="p">:</span> <span class="s2">"needs-human"</span><span class="p">}</span>
 
 <span class="c1">#: Where each kind of asset lands under the host directory. A skill is a *directory*</span>
 <span class="c1">#: (it may carry ``references/``); a subagent is a single markdown file.</span>
@@ -957,6 +966,48 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="s2">"conflict"</span><span class="p">,</span> <span class="s2">"something else with this name is already there"</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_body</span><span class="p">(</span><span class="n">skill_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A skill's text minus its ``name:`` line, which legitimately differs under an alias."""</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="n">skill_dir</span> <span class="o">/</span> <span class="s2">"SKILL.md"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">""</span>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"name:"</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_shadows</span><span class="p">(</span><span class="n">assets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Asset</span><span class="p">],</span> <span class="n">host</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Report each bare alias name that exists in the host and is not our shipped copy.</span>
+
+<span class="sd">    Read-only. ``same_text`` compares bodies, so a reader can tell "a stale duplicate"</span>
+<span class="sd">    from "a different edition of the same rule" before choosing which one to keep.</span>
+<span class="sd">    """</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">asset</span> <span class="ow">in</span> <span class="n">assets</span><span class="p">:</span>
+        <span class="n">alias</span> <span class="o">=</span> <span class="n">ALIASES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">asset</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">asset</span><span class="o">.</span><span class="n">kind</span> <span class="o">!=</span> <span class="s2">"skill"</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">alias</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="n">host</span> <span class="o">/</span> <span class="n">_HOST_SUBDIR</span><span class="p">[</span><span class="s2">"skill"</span><span class="p">]</span> <span class="o">/</span> <span class="n">alias</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="n">found</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()):</span>
+            <span class="k">continue</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">resolved</span> <span class="o">=</span> <span class="n">found</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="n">resolved</span> <span class="o">=</span> <span class="n">found</span>
+        <span class="k">if</span> <span class="n">resolved</span> <span class="o">==</span> <span class="n">asset</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="ow">or</span> <span class="n">_identical</span><span class="p">(</span><span class="n">asset</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">found</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"name"</span><span class="p">:</span> <span class="n">alias</span><span class="p">,</span>
+                <span class="s2">"shadows"</span><span class="p">:</span> <span class="n">asset</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s2">"path"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">found</span><span class="p">),</span>
+                <span class="s2">"resolves_to"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">resolved</span><span class="p">),</span>
+                <span class="s2">"dangling"</span><span class="p">:</span> <span class="ow">not</span> <span class="n">resolved</span><span class="o">.</span><span class="n">exists</span><span class="p">(),</span>
+                <span class="s2">"same_text"</span><span class="p">:</span> <span class="n">_body</span><span class="p">(</span><span class="n">resolved</span><span class="p">)</span> <span class="o">==</span> <span class="n">_body</span><span class="p">(</span><span class="n">asset</span><span class="o">.</span><span class="n">source</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">rows</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_remove</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span> <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
         <span class="n">path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
@@ -992,6 +1043,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    triggers is worse than either alone -- so take the reader and the subagent and leave</span>
 <span class="sd">    the capture skill out.</span>
 
+<span class="sd">    The plan's ``shadowed`` list names any bare-named skill (``needs-human``) that</span>
+<span class="sd">    resolves somewhere other than the shipped copy, and whether its text matches ours;</span>
+<span class="sd">    nothing is changed on its account.</span>
+
 <span class="sd">    &gt;&gt;&gt; plan = install_skills(target='/nonexistent/host', only=['openloops'], dry_run=True)</span>
 <span class="sd">    &gt;&gt;&gt; [row['name'] for row in plan['actions']]</span>
 <span class="sd">    ['openloops']</span>
@@ -1016,6 +1071,7 @@ window.runMermaid = runMermaid;</script>
                 <span class="sa">f</span><span class="s2">"available: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">known</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
         <span class="n">assets</span> <span class="o">=</span> <span class="p">[</span><span class="n">asset</span> <span class="k">for</span> <span class="n">asset</span> <span class="ow">in</span> <span class="n">assets</span> <span class="k">if</span> <span class="n">asset</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">wanted</span><span class="p">]</span>
+    <span class="n">shadowed</span> <span class="o">=</span> <span class="n">_shadows</span><span class="p">(</span><span class="n">assets</span><span class="p">,</span> <span class="n">host</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">asset</span> <span class="ow">in</span> <span class="n">assets</span><span class="p">:</span>
         <span class="n">destination</span> <span class="o">=</span> <span class="n">asset</span><span class="o">.</span><span class="n">destination</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
         <span class="n">action</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="n">_verdict</span><span class="p">(</span><span class="n">asset</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
@@ -1061,6 +1117,7 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"dry_run"</span><span class="p">:</span> <span class="n">dry_run</span><span class="p">,</span>
         <span class="s2">"actions"</span><span class="p">:</span> <span class="n">rows</span><span class="p">,</span>
         <span class="s2">"counts"</span><span class="p">:</span> <span class="n">counts</span><span class="p">,</span>
+        <span class="s2">"shadowed"</span><span class="p">:</span> <span class="n">shadowed</span><span class="p">,</span>
     <span class="p">}</span></div>
 
 

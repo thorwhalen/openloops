@@ -761,6 +761,10 @@ own capture skill, adapted to your own fleet, and a second one competing for the
 triggers is worse than either alone – so take the reader and the subagent and leave
 the capture skill out.
 
+The plan’s `shadowed` list names any bare-named skill (`needs-human`) that
+resolves somewhere other than the shipped copy, and whether its text matches ours;
+nothing is changed on its account.
+
 ```pycon
 >>> plan = install_skills(target='/nonexistent/host', only=['openloops'], dry_run=True)
 >>> [row['name'] for row in plan['actions']]
