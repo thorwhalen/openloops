@@ -373,3 +373,61 @@ def test_a_veto_runs_only_a_revert_after_checking_who_filed_it():
     assert "choose, land, record, carry on" in capture
     # The page's free-text accept is the task's own recommendation, never the event's.
     assert "never the event's `recommendation` field" in receiver
+
+
+# --------------------------------------------------------------------------------
+# The bare `needs-human` name.
+
+
+def _bare(host, text="old rule"):
+    bare = host / "skills" / "needs-human"
+    bare.mkdir(parents=True)
+    (bare / "SKILL.md").write_text(
+        f"---\nname: needs-human\n---\n{text}\n", encoding="utf-8"
+    )
+    return bare
+
+
+def test_a_bare_needs_human_elsewhere_is_reported_and_left_alone(tmp_path):
+    host = tmp_path / "host"
+    bare = _bare(host)
+    plan = skills.install_skills(target=host)
+    (row,) = plan["shadowed"]
+    assert row["name"] == "needs-human" and row["shadows"] == "openloops-needs-human"
+    assert row["same_text"] is False
+    assert (bare / "SKILL.md").exists() and not bare.is_symlink()
+    assert plan["counts"]["conflict"] == 0
+
+
+def test_a_copy_identical_to_ours_is_not_a_shadow_and_a_dangling_link_is_flagged(tmp_path):
+    host = tmp_path / "host"
+    skills.install_skills(target=host, copy=True)
+    import shutil
+
+    shutil.copytree(host / "skills" / "openloops-needs-human", host / "skills" / "needs-human")
+    assert skills.install_skills(target=host, copy=True)["shadowed"] == []
+    shutil.rmtree(host / "skills" / "needs-human")
+    try:
+        os.symlink(tmp_path / "gone", host / "skills" / "needs-human")
+    except (OSError, NotImplementedError):
+        pytest.skip("no symlinks")
+    (row,) = skills.install_skills(target=host)["shadowed"]
+    assert row["dangling"] and not row["same_text"]
+
+
+def test_same_text_ignores_only_the_name_line(tmp_path):
+    host = tmp_path / "host"
+    src = skills.skills_dir() / "openloops-needs-human" / "SKILL.md"
+    bare = host / "skills" / "needs-human"
+    bare.mkdir(parents=True)
+    text = src.read_text(encoding="utf-8").replace("name: openloops-needs-human", "name: needs-human", 1)
+    (bare / "SKILL.md").write_text(text, encoding="utf-8")
+    (row,) = skills.install_skills(target=host)["shadowed"]
+    assert row["same_text"] is True
+    (bare / "SKILL.md").write_text(text.replace("description:", "description: x", 1), encoding="utf-8")
+    (row,) = skills.install_skills(target=host)["shadowed"]
+    assert row["same_text"] is False
+
+
+def test_no_shadow_when_the_bare_name_is_absent(tmp_path):
+    assert skills.install_skills(target=tmp_path / "h", dry_run=True)["shadowed"] == []
