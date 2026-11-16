@@ -12,6 +12,7 @@ openloops.job
       DFLT_INTERVAL
       RECEIVER_LABEL
       RECEIVER_INTERVAL
+      REFRESH_LABEL
    
    .. rubric:: Functions
 

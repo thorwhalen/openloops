@@ -70,6 +70,7 @@
    base
    blockers
    board
+   board_refresh
    board_server
    board_store
    dashboard

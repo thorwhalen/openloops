@@ -27,14 +27,15 @@ data anywhere near the repository: where the board lives is the caller’s choic
 
 ### Functions
 
-| [`as_document`](#openloops.board.as_document)(fragment)                    | The page as a full HTML document, for hosting outside a claude.ai Artifact.    |
-|-------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| [`board_dir`](#openloops.board.board_dir)()                              | Where the page template and the default run specs ship, inside the package.    |
-| [`build_board`](#openloops.board.build_board)(records, out_dir, \*[, ...]) | Write the board's five files into `out_dir` and say what went in.              |
-| [`group_runs`](#openloops.board.group_runs)(tasks, \*[, specs, extras])   | Repeated chores grouped into runs, ordered as the specs are.                   |
-| [`join_created`](#openloops.board.join_created)(tasks, candidates)          | Fill each record's missing `created` from the gathered candidate with its URL. |
-| [`run_specs`](#openloops.board.run_specs)([path])                        | The run specs: one per pattern, in display order.                              |
-| [`sort_tasks`](#openloops.board.sort_tasks)(tasks)                        | Cheapest first: by tier, then by minutes per thing the item unblocks.          |
+| [`as_document`](#openloops.board.as_document)(fragment)                    | The page as a full HTML document, for hosting outside a claude.ai Artifact.         |
+|-------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| [`board_dir`](#openloops.board.board_dir)()                              | Where the page template and the default run specs ship, inside the package.         |
+| [`build_board`](#openloops.board.build_board)(records, out_dir, \*[, ...]) | Write the board's five files into `out_dir` and say what went in.                   |
+| [`group_runs`](#openloops.board.group_runs)(tasks, \*[, specs, extras])   | Repeated chores grouped into runs, ordered as the specs are.                        |
+| [`join_created`](#openloops.board.join_created)(tasks, candidates)          | Fill each record's missing `created` from the gathered candidate with its URL.      |
+| [`run_extras`](#openloops.board.run_extras)([path])                       | The deployment's run extras (a JSON object keyed by run), or `None` without a path. |
+| [`run_specs`](#openloops.board.run_specs)([path])                        | The run specs: one per pattern, in display order.                                   |
+| [`sort_tasks`](#openloops.board.sort_tasks)(tasks)                        | Cheapest first: by tier, then by minutes per thing the item unblocks.               |
 
 ### openloops.board.as_document(fragment)
 
@@ -106,6 +107,18 @@ Fill each record’s missing `created` from the gathered candidate with its URL.
 
 * **Return type:**
   [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
+
+### openloops.board.run_extras(path=None)
+
+The deployment’s run extras (a JSON object keyed by run), or `None` without a path.
+
+```pycon
+>>> run_extras() is None
+True
+```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)] | [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
 ### openloops.board.run_specs(path=None)
 

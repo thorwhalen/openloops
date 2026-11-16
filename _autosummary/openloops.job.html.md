@@ -18,11 +18,12 @@ the same command, and [`install()`](#openloops.job.install) says so rather than 
 
 ### Module Attributes
 
-| [`DFLT_LABEL`](#openloops.job.DFLT_LABEL)        | launchd job label.                                 |
-|--------------------------------------------------------------------|----------------------------------------------------|
-| [`DFLT_INTERVAL`](#openloops.job.DFLT_INTERVAL)     | Seconds between ticks.                             |
-| [`RECEIVER_LABEL`](#openloops.job.RECEIVER_LABEL)    | launchd label of the board-receiver job (ADR-011). |
-| [`RECEIVER_INTERVAL`](#openloops.job.RECEIVER_INTERVAL) | Seconds between receiver ticks.                    |
+| [`DFLT_LABEL`](#openloops.job.DFLT_LABEL)        | launchd job label.                                                                           |
+|--------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
+| [`DFLT_INTERVAL`](#openloops.job.DFLT_INTERVAL)     | Seconds between ticks.                                                                       |
+| [`RECEIVER_LABEL`](#openloops.job.RECEIVER_LABEL)    | launchd label of the board-receiver job (ADR-011).                                           |
+| [`RECEIVER_INTERVAL`](#openloops.job.RECEIVER_INTERVAL) | Seconds between receiver ticks.                                                              |
+| [`REFRESH_LABEL`](#openloops.job.REFRESH_LABEL)     | no model, so it can run often; six hours keeps the board within a day of GitHub with margin. |
 
 ### Functions
 
@@ -52,6 +53,14 @@ calls and no model, so this can be as short as the phone board’s latency wants
 ### openloops.job.RECEIVER_LABEL *= 'openloops.board-receiver'*
 
 launchd label of the board-receiver job (ADR-011).
+
+### openloops.job.REFRESH_LABEL *= 'openloops.board-refresh'*
+
+no model, so it can
+run often; six hours keeps the board within a day of GitHub with margin.
+
+* **Type:**
+  The board-rebuild job (`ol board-refresh` on a timer; issue #39)
 
 ### openloops.job.install(, label='openloops.sync', interval=900, dry_run=False)
 

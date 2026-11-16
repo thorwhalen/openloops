@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="alternate" type="text/markdown" href="board_refresh.html.md">
+<link rel="describedby" href="../../llms.txt" type="text/markdown">
+    <title>openloops.board_refresh &#8212; openloops</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/epythet.css?v=93ea43a0" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../../_static/documentation_options.js?v=1c946a6c"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=fd10adb8"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+let closeModal = () => {};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if (false) {
+                                        addZoomToSvgs(d3.selectAll("").select(function() {
+                                            return this.querySelector("svg");
+                                        }));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if (false) {
+        const mermaids_to_add_zoom = 0 === -1 ? mermaids_active.length : 0;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("").select(function() {
+                return this.querySelector("svg");
+            });
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if (!true) return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = "\u26f6";
+        fullscreenBtn.style.opacity = "50%";
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scrollX, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.display = 'block';
+
+                if (false) {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+
+
+const load = async () => {
+    initStyles();
+
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...{"startOnLoad": false},
+                ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...{"startOnLoad": false},
+    ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openloops/board_refresh';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.36" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">openloops</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../ai-agents.html">
+    For AI agents
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/thorwhalen/openloops" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../ai-agents.html">
+    For AI agents
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/thorwhalen/openloops" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">openloops.board_refresh</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for openloops.board_refresh</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Keep the phone board within a day of GitHub, without a session remembering to.</span>
+
+<span class="sd">The board (:mod:`openloops.board`) is built by hand once: gather, classify, build. Left</span>
+<span class="sd">alone it goes stale (a board built 2026-10-27 was still that build on 2026-11-09, with</span>
+<span class="sd">210 of its 420 cards closed and 222 new items missing). :func:`refresh_board` is the</span>
+<span class="sd">rebuild as one deterministic, model-free step meant to run from a timer (``ol</span>
+<span class="sd">install-refresh-job``) or by hand (``ol board-refresh WORK``):</span>
+
+<span class="sd">1. gather the open items (:func:`openloops.tasks.gather`) over the scope saved in</span>
+<span class="sd">   ``WORK/refresh.json`` (flags given on the command line are saved there first, and</span>
+<span class="sd">   what ``OPENLOOPS_OWNERS``/``OPENLOOPS_EXCLUDE_REPOS`` or the default owners resolve</span>
+<span class="sd">   to is saved as explicit lists, so a timer without that environment sweeps the same</span>
+<span class="sd">   scope: :func:`pin_env_scope`);</span>
+<span class="sd">2. merge them with the live ``WORK/board/tasks.json`` (:func:`merge_refresh`, pure):</span>
+<span class="sd">   the earlier record of every id still open is kept, with its title and url</span>
+<span class="sd">   refreshed from GitHub and nothing re-classified; each new id gets the free</span>
+<span class="sd">   heuristic record;</span>
+<span class="sd">3. if nothing opened, closed or was retitled, stop (``rebuilt: False``);</span>
+<span class="sd">4. otherwise rebuild into a temporary directory and move each file into place</span>
+<span class="sd">   (``os.replace``: the receiver job reads ``tasks.json`` at any moment); the new ids</span>
+<span class="sd">   accumulate in ``WORK/new-items.json`` for a session's classifier brief;</span>
+<span class="sd">5. publish (a directory, or ``host:dir`` through ``scp``) whenever the local board's</span>
+<span class="sd">   files differ from the last ones published, and only then record it.</span>
+
+<span class="sd">Guards, because a wrong rebuild is worse than a stale one:</span>
+
+<span class="sd">* an incomplete sweep (``listed: false``) never rebuilds;</span>
+<span class="sd">* a saturated sweep (some search hit its cap) adds but never closes;</span>
+<span class="sd">* closing more than ``max_close_fraction`` of a board of at least</span>
+<span class="sd">  :data:`GUARD_MIN_LIVE` cards is refused unless ``force``: those closes are withheld</span>
+<span class="sd">  (and named in ``refresh.json``), while additions and retitles still go through, so</span>
+<span class="sd">  a refusal never freezes the board;</span>
+<span class="sd">* a ``tasks.json``, ``board.json`` or ``refresh.json`` that exists but does not parse</span>
+<span class="sd">  (or, for ``refresh.json``, holds a value of the wrong shape) raises rather than being</span>
+<span class="sd">  read as empty, and a first run with no ``board.json`` raises rather than publishing</span>
+<span class="sd">  default settings;</span>
+<span class="sd">* an owner-edited ``kit.html`` (one that differs from the packaged template) is kept.</span>
+
+<span class="sd">A board whose page keeps its state in a claude.ai Artifact cannot be republished from</span>
+<span class="sd">here: the result says ``needs_republish: True`` and a session republishes it.</span>
+
+<span class="sd">What it touches: GitHub through ``gather`` (read-only); files under ``WORK``; and, when</span>
+<span class="sd">publishing, the destination directory or the remote host (``scp`` with the user's own</span>
+<span class="sd">keys). It never calls a model.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops</span><span class="w"> </span><span class="kn">import</span> <span class="n">board</span> <span class="k">as</span> <span class="n">_board</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops</span><span class="w"> </span><span class="kn">import</span> <span class="n">obligations</span> <span class="k">as</span> <span class="n">_obligations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops</span><span class="w"> </span><span class="kn">import</span> <span class="n">tasks</span> <span class="k">as</span> <span class="n">_tasks</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"DFLT_MAX_CLOSE_FRACTION"</span><span class="p">,</span>
+    <span class="s2">"GUARD_MIN_LIVE"</span><span class="p">,</span>
+    <span class="s2">"NEW_ITEMS_FILE"</span><span class="p">,</span>
+    <span class="s2">"PublishError"</span><span class="p">,</span>
+    <span class="s2">"STATE_FILE"</span><span class="p">,</span>
+    <span class="s2">"RefreshPlan"</span><span class="p">,</span>
+    <span class="s2">"dir_publisher"</span><span class="p">,</span>
+    <span class="s2">"is_remote_destination"</span><span class="p">,</span>
+    <span class="s2">"load_state"</span><span class="p">,</span>
+    <span class="s2">"merge_refresh"</span><span class="p">,</span>
+    <span class="s2">"pin_env_scope"</span><span class="p">,</span>
+    <span class="s2">"plan_refresh"</span><span class="p">,</span>
+    <span class="s2">"refresh_board"</span><span class="p">,</span>
+    <span class="s2">"remember_scope"</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1">#: Where the items that got only the heuristic record are listed, for a classifier brief.</span>
+<span class="n">NEW_ITEMS_FILE</span> <span class="o">=</span> <span class="s2">"new-items.json"</span>
+<span class="c1">#: The gathered envelope of the last rebuild, which `board-build -c` reads for dates.</span>
+<span class="n">CANDIDATES_FILE</span> <span class="o">=</span> <span class="s2">"candidates.json"</span>
+<span class="c1">#: The refresh's own state: the gather scope, run specs/extras, where to publish, and</span>
+<span class="c1">#: the hash of the ``tasks.json`` last published.</span>
+<span class="n">STATE_FILE</span> <span class="o">=</span> <span class="s2">"refresh.json"</span>
+<span class="c1">#: A rebuild may close at most this fraction of the live cards without ``force``...</span>
+<span class="n">DFLT_MAX_CLOSE_FRACTION</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="c1">#: ...once the board has at least this many cards (a small board may empty legitimately).</span>
+<span class="n">GUARD_MIN_LIVE</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="c1">#: What a kept record takes from the fresh sweep. Everything else is the earlier record.</span>
+<span class="n">REFRESHED_FIELDS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"title"</span><span class="p">,</span> <span class="s2">"url"</span><span class="p">)</span>
+<span class="c1">#: What ``refresh.json`` remembers between runs, and the default of each.</span>
+<span class="n">DFLT_SCOPE</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"owners"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">"exclude_owners"</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s2">"exclude_repos"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">"searches"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">_tasks</span><span class="o">.</span><span class="n">DFLT_SEARCHES</span><span class="p">),</span>
+    <span class="s2">"review_prs"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">"run_specs"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">"run_extras"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">"publish_to"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="c1">#: Scope values that are local paths, saved absolute so the timer (another cwd) finds them.</span>
+<span class="n">_PATH_KEYS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"run_specs"</span><span class="p">,</span> <span class="s2">"run_extras"</span><span class="p">)</span>
+<span class="c1">#: The JSON shape each scope value in ``refresh.json`` must have (``None`` = may be null).</span>
+<span class="n">_STR_LIST_KEYS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"owners"</span><span class="p">,</span> <span class="s2">"exclude_owners"</span><span class="p">,</span> <span class="s2">"exclude_repos"</span><span class="p">)</span>
+<span class="n">_STR_KEYS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"publish_to"</span><span class="p">,</span> <span class="s2">"run_specs"</span><span class="p">,</span> <span class="s2">"run_extras"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="PublishError">
+<a class="viewcode-back" href="../../_autosummary/openloops.board_refresh.html#openloops.board_refresh.PublishError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PublishError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Publishing the rebuilt board failed. The local board is in place; the next run</span>
+<span class="sd">    retries, because the published marker is recorded only after a success."""</span></div>
+
+
+
+<div class="viewcode-block" id="RefreshPlan">
+<a class="viewcode-back" href="../../_autosummary/openloops.board_refresh.html#openloops.board_refresh.RefreshPlan">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RefreshPlan</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""What a fresh sweep changes relative to the live board.</span>
+
+<span class="sd">    ``withheld`` are ids missing from a saturated sweep, kept rather than closed;</span>
+<span class="sd">    ``updated`` are kept ids whose title or url changed on GitHub.</span>
+<span class="sd">    """</span>
+
+    <span class="n">kept</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="n">added</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="n">closed</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="n">withheld</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="n">updated</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">changed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">added</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">closed</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">updated</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="plan_refresh">
+<a class="viewcode-back" href="../../_autosummary/openloops.board_refresh.html#openloops.board_refresh.plan_refresh">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plan_refresh</span><span class="p">(</span><span class="n">current</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">previous</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">RefreshPlan</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Diff the ids now open against the ids on the live board.</span>
+
+<span class="sd">    &gt;&gt;&gt; plan = plan_refresh(['a#1', 'a#2', 'a#4'], ['a#1', 'a#3'])</span>
+<span class="sd">    &gt;&gt;&gt; plan.kept, plan.added, plan.closed, plan.changed</span>
+<span class="sd">    (('a#1',), ('a#2', 'a#4'), ('a#3',), True)</span>
+<span class="sd">    &gt;&gt;&gt; plan_refresh(['a#1'], ['a#1']).changed</span>
+<span class="sd">    False</span>
+<span class="sd">    """</span>
+    <span class="n">now</span><span class="p">,</span> <span class="n">before</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">current</span><span class="p">)),</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">previous</span><span class="p">))</span>
+    <span class="n">now_set</span><span class="p">,</span> <span class="n">before_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">now</span><span class="p">),</span> <span class="nb">set</span><span class="p">(</span><span class="n">before</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">RefreshPlan</span><span class="p">(</span>
+        <span class="n">kept</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">now</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">before_set</span><span class="p">),</span>
+        <span class="n">added</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">now</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">before_set</span><span class="p">),</span>
+        <span class="n">closed</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">before</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">now_set</span><span class="p">),</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="merge_refresh">
+<a class="viewcode-back" href="../../_autosummary/openloops.board_refresh.html#openloops.board_refresh.merge_refresh">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">merge_refresh</span><span class="p">(</span>
+    <span class="n">live</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+    <span class="n">candidates</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">saturated</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+    <span class="n">withhold_closes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span> <span class="n">RefreshPlan</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The rebuild's records, the new candidates, and the plan. No I/O.</span>
+
+<span class="sd">    Every id still open keeps its earlier record (never re-classified), with</span>
+<span class="sd">    :data:`REFRESHED_FIELDS` taken from the sweep; new ids get the heuristic record. A</span>
+<span class="sd">    ``saturated`` sweep did not list everything, so an id it did not see is kept</span>
+<span class="sd">    (``withheld``), never closed; ``withhold_closes`` does the same for a sweep whose</span>
+<span class="sd">    closes were refused.</span>
+
+<span class="sd">    &gt;&gt;&gt; live = [{'id': 'a/b#1', 'title': 'Old', 'ask': 'ENRICHED'}, {'id': 'a/b#2'}]</span>
+<span class="sd">    &gt;&gt;&gt; seen = [{'id': 'a/b#1', 'title': 'New', 'url': 'https://github.com/a/b/issues/1'}]</span>
+<span class="sd">    &gt;&gt;&gt; records, fresh, plan = merge_refresh(live, seen)</span>
+<span class="sd">    &gt;&gt;&gt; [(r['id'], r['title'], r['ask']) for r in records], plan.closed, plan.updated</span>
+<span class="sd">    ([('a/b#1', 'New', 'ENRICHED')], ('a/b#2',), ('a/b#1',))</span>
+<span class="sd">    &gt;&gt;&gt; records, _, plan = merge_refresh(live, seen, saturated=['label:manual-task'])</span>
+<span class="sd">    &gt;&gt;&gt; [r['id'] for r in records], plan.closed, plan.withheld</span>
+<span class="sd">    (['a/b#1', 'a/b#2'], (), ('a/b#2',))</span>
+<span class="sd">    """</span>
+    <span class="n">raw</span> <span class="o">=</span> <span class="n">plan_refresh</span><span class="p">((</span><span class="n">c</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">),</span> <span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">live</span><span class="p">))</span>
+    <span class="n">earlier</span> <span class="o">=</span> <span class="p">{</span><span class="n">t</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]:</span> <span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">live</span><span class="p">}</span>
+    <span class="n">by_id</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]:</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">}</span>
+
+    <span class="n">kept</span><span class="p">,</span> <span class="n">updated</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">raw</span><span class="o">.</span><span class="n">kept</span><span class="p">:</span>
+        <span class="n">fresh_fields</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">by_id</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">REFRESHED_FIELDS</span> <span class="k">if</span> <span class="n">by_id</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)}</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">earlier</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="o">**</span><span class="n">fresh_fields</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">record</span> <span class="o">!=</span> <span class="n">earlier</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="n">updated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">kept</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+    <span class="n">withhold</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">saturated</span><span class="p">)</span> <span class="ow">or</span> <span class="n">withhold_closes</span>
+    <span class="n">withheld</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">closed</span> <span class="k">if</span> <span class="n">withhold</span> <span class="k">else</span> <span class="p">()</span>
+    <span class="n">fresh</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">by_id</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">raw</span><span class="o">.</span><span class="n">added</span><span class="p">]</span>
+    <span class="n">records</span> <span class="o">=</span> <span class="n">kept</span> <span class="o">+</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">earlier</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">withheld</span><span class="p">]</span> <span class="o">+</span> <span class="n">_tasks</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">fresh</span><span class="p">)</span>
+    <span class="n">plan</span> <span class="o">=</span> <span class="n">RefreshPlan</span><span class="p">(</span>
+        <span class="n">kept</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">kept</span><span class="p">,</span>
+        <span class="n">added</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">added</span><span class="p">,</span>
+        <span class="n">closed</span><span class="o">=</span><span class="p">()</span> <span class="k">if</span> <span class="n">withhold</span> <span class="k">else</span> <span class="n">raw</span><span class="o">.</span><span class="n">closed</span><span class="p">,</span>
+        <span class="n">withheld</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">withheld</span><span class="p">),</span>
+        <span class="n">updated</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">updated</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">records</span><span class="p">,</span> <span class="n">fresh</span><span class="p">,</span> <span class="n">plan</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_refusal</span><span class="p">(</span>
+    <span class="n">plan</span><span class="p">:</span> <span class="n">RefreshPlan</span><span class="p">,</span> <span class="n">n_live</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">max_close_fraction</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">remedy</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Why closing this much of the board should not go ahead, if it should not."""</span>
+    <span class="k">if</span> <span class="n">n_live</span> <span class="o">&gt;=</span> <span class="n">GUARD_MIN_LIVE</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">plan</span><span class="o">.</span><span class="n">closed</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_close_fraction</span> <span class="o">*</span> <span class="n">n_live</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"the sweep would close </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">plan</span><span class="o">.</span><span class="n">closed</span><span class="p">)</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">n_live</span><span class="si">}</span><span class="s2"> cards (more than "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">max_close_fraction</span><span class="si">:</span><span class="s2">.0%</span><span class="si">}</span><span class="s2">); those closes were withheld (additions and "</span>
+            <span class="sa">f</span><span class="s2">"retitles still apply). If they are real, run `</span><span class="si">{</span><span class="n">remedy</span><span class="si">}</span><span class="s2">`"</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># Files: missing is empty, corrupt is an error, writes are atomic.</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_json</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``default`` when ``path`` is missing; its content when it parses as ``kind``; else raise.</span>
+
+<span class="sd">    A file that exists but cannot be read is never treated as empty: that would rebuild</span>
+<span class="sd">    the board from nothing and drop every enrichment, silently.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">default</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> exists but is not valid JSON (</span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">); fix or remove it, the "</span>
+            <span class="s2">"refresh will not treat it as empty"</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> should hold a JSON </span><span class="si">{</span><span class="s1">'object'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">kind</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="nb">dict</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'list'</span><span class="si">}</span><span class="s2">, "</span>
+            <span class="sa">f</span><span class="s2">"found </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_write_json</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Write ``data`` to ``path`` atomically (a temp file beside it, then ``os.replace``)."""</span>
+    <span class="n">_replace_text</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_replace_text</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">fd</span><span class="p">,</span> <span class="n">tmp</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">".</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">os</span><span class="o">.</span><span class="n">fdopen</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+        <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">raise</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_live_tasks</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+    <span class="n">tasks</span> <span class="o">=</span> <span class="n">_read_json</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">[],</span> <span class="n">kind</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">bad</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tasks</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"id"</span><span class="p">),</span> <span class="nb">str</span><span class="p">))</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">bad</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span><span class="si">}</span><span class="s2"> entries that are not task records with an 'id' "</span>
+            <span class="sa">f</span><span class="s2">"(first: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">bad</span><span class="p">[</span><span class="mi">0</span><span class="p">])[:</span><span class="mi">80</span><span class="p">]</span><span class="si">}</span><span class="s2">)"</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">tasks</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_board_settings</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="n">settings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> not found: build the board once by hand (`ol board-gather`, "</span>
+            <span class="s2">"`ol board-classify`, `ol board-build WORK/board ...`) so its settings are "</span>
+            <span class="s2">"known; the refresh never builds or publishes a board with default settings"</span>
+        <span class="p">)</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">_read_json</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">{},</span> <span class="n">kind</span><span class="o">=</span><span class="nb">dict</span><span class="p">),</span> <span class="o">**</span><span class="p">(</span><span class="n">settings</span> <span class="ow">or</span> <span class="p">{})}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"store"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{},</span> <span class="n">Mapping</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">: 'store' should be an object, not </span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="s1">'store'</span><span class="p">]</span><span class="si">!r}</span><span class="s2">"</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">config</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_sha256</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span> <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_board_digest</span><span class="p">(</span><span class="n">board_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One hash over every published board file (``None`` before the first build).</span>
+
+<span class="sd">    Every file counts, not only ``tasks.json``: a ``board.json`` or ``runs.json`` edit,</span>
+<span class="sd">    an edited ``kit.html`` or a forced rebuild must reach the destination too.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">board_dir</span> <span class="o">/</span> <span class="s2">"tasks.json"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">_board</span><span class="o">.</span><span class="n">BOARD_FILES</span><span class="p">):</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="se">\0</span><span class="si">{</span><span class="n">_sha256</span><span class="p">(</span><span class="n">board_dir</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">''</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">h</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_str_list</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_state</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Raise a ``ValueError`` naming the first scope value of the wrong shape."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrong</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s2"> should be </span><span class="si">{</span><span class="n">expected</span><span class="si">}</span><span class="s2">, found </span><span class="si">{</span><span class="n">state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">!r}</span><span class="s2">; fix it or "</span>
+            <span class="s2">"remove the key (a flag given on the next run sets it again)"</span>
+        <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_STR_LIST_KEYS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_str_list</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="n">key</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="n">wrong</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s2">"a list of strings (or null)"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">"searches"</span> <span class="ow">in</span> <span class="n">state</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_str_list</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">"searches"</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="n">wrong</span><span class="p">(</span><span class="s2">"searches"</span><span class="p">,</span> <span class="s2">"a list of strings (or absent, for every search)"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_STR_KEYS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">wrong</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s2">"a string (or null)"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">"review_prs"</span> <span class="ow">in</span> <span class="n">state</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">"review_prs"</span><span class="p">],</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">wrong</span><span class="p">(</span><span class="s2">"review_prs"</span><span class="p">,</span> <span class="s2">"true or false"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="load_state">
+<a class="viewcode-back" href="../../_autosummary/openloops.board_refresh.html#openloops.board_refresh.load_state">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_state</span><span class="p">(</span><span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""``WORK/refresh.json``: ``{}`` when missing, an error when it exists but is</span>
+<span class="sd">    unreadable or holds a scope value of the wrong shape."""</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">work_dir</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span> <span class="o">/</span> <span class="n">STATE_FILE</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">_read_json</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">{},</span> <span class="n">kind</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">_check_state</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">state</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_save_state</span><span class="p">(</span><span class="n">work</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">_write_json</span><span class="p">(</span><span class="n">work</span> <span class="o">/</span> <span class="n">STATE_FILE</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">state</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalise</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_PATH_KEYS</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">"publish_to"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_remote_destination</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+
+<div class="viewcode-block" id="remember_scope">
+<a class="viewcode-back" href="../../_autosummary/openloops.board_refresh.html#openloops.board_refresh.remember_scope">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">remember_scope</span><span class="p">(</span><span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="o">**</span><span class="n">given</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Save the ``given`` scope values (``None`` = not given) into ``WORK/refresh.json``.</span>
+
+<span class="sd">    Returns the full scope: what was saved, then defaults. Both ``ol board-refresh``</span>
+<span class="sd">    and ``ol install-refresh-job`` go through here, so the timer needs only ``WORK``.</span>
+
+<span class="sd">    &gt;&gt;&gt; import tempfile</span>
+<span class="sd">    &gt;&gt;&gt; with tempfile.TemporaryDirectory() as tmp:</span>
+<span class="sd">    ...     _ = remember_scope(tmp, owners=['me'])</span>
+<span class="sd">    ...     scope = remember_scope(tmp, exclude_repos=None)</span>
+<span class="sd">    &gt;&gt;&gt; scope['owners'], scope['review_prs']</span>
+<span class="sd">    (['me'], True)</span>
+<span class="sd">    """</span>
+    <span class="n">unknown</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">given</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">DFLT_SCOPE</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">unknown</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"not a refresh scope setting: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">work</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">work_dir</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">load_state</span><span class="p">(</span><span class="n">work</span><span class="p">)</span>
+    <span class="n">updates</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">_normalise</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">given</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">!=</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">updates</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">state</span><span class="p">,</span> <span class="o">**</span><span class="n">updates</span><span class="p">}</span>
+        <span class="n">_save_state</span><span class="p">(</span><span class="n">work</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">default</span> <span class="ow">in</span> <span class="n">DFLT_SCOPE</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_words</span><span class="p">(</span><span class="n">raw</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[,\s]+"</span><span class="p">,</span> <span class="n">raw</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="pin_env_scope">
+<a class="viewcode-back" href="../../_autosummary/openloops.board_refresh.html#openloops.board_refresh.pin_env_scope">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">pin_env_scope</span><span class="p">(</span>
+    <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">environ</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">resolve_owners</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Save what the environment makes the sweep's scope into ``WORK/refresh.json``.</span>
+
+<span class="sd">    A launchd timer does not get the shell's ``OPENLOOPS_OWNERS`` or</span>
+<span class="sd">    ``OPENLOOPS_EXCLUDE_REPOS``, so a scope that lives only there would make the timer</span>
+<span class="sd">    sweep a different set of repositories than a run by hand (and could put an excluded</span>
+<span class="sd">    client repo on the board). Each is written as an explicit list, but only where</span>
+<span class="sd">    ``refresh.json`` has no value yet (a flag given earlier, or an earlier pin, wins).</span>
+<span class="sd">    With no ``OPENLOOPS_OWNERS``, ``resolve_owners`` (e.g.</span>
+<span class="sd">    :func:`openloops.obligations.configured_owners`) supplies the default owners; when</span>
+<span class="sd">    it is not given they stay unset here and the first sweep's resolved owners are</span>
+<span class="sd">    pinned instead. Returns what was saved.</span>
+
+<span class="sd">    &gt;&gt;&gt; import tempfile</span>
+<span class="sd">    &gt;&gt;&gt; with tempfile.TemporaryDirectory() as tmp:</span>
+<span class="sd">    ...     env = {'OPENLOOPS_OWNERS': 'me, org', 'OPENLOOPS_EXCLUDE_REPOS': 'org/x-*'}</span>
+<span class="sd">    ...     first = pin_env_scope(tmp, environ=env)</span>
+<span class="sd">    ...     second = pin_env_scope(tmp, environ={'OPENLOOPS_OWNERS': 'other'})</span>
+<span class="sd">    &gt;&gt;&gt; first, second</span>
+<span class="sd">    ({'owners': ['me', 'org'], 'exclude_repos': ['org/x-*']}, {})</span>
+<span class="sd">    """</span>
+    <span class="n">environ</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="k">if</span> <span class="n">environ</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">environ</span>
+    <span class="n">work</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">work_dir</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">load_state</span><span class="p">(</span><span class="n">work</span><span class="p">)</span>
+    <span class="n">pins</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"owners"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">owners</span> <span class="o">=</span> <span class="n">_words</span><span class="p">(</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_obligations</span><span class="o">.</span><span class="n">OWNERS_ENV_VAR</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">owners</span> <span class="ow">and</span> <span class="n">resolve_owners</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">owners</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">resolve_owners</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">owners</span><span class="p">:</span>
+            <span class="n">pins</span><span class="p">[</span><span class="s2">"owners"</span><span class="p">]</span> <span class="o">=</span> <span class="n">owners</span>
+    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"exclude_repos"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">globs</span> <span class="o">=</span> <span class="n">_words</span><span class="p">(</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_tasks</span><span class="o">.</span><span class="n">EXCLUDE_ENV_VAR</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">globs</span><span class="p">:</span>
+            <span class="n">pins</span><span class="p">[</span><span class="s2">"exclude_repos"</span><span class="p">]</span> <span class="o">=</span> <span class="n">globs</span>
+    <span class="k">if</span> <span class="n">pins</span><span class="p">:</span>
+        <span class="n">_save_state</span><span class="p">(</span><span class="n">work</span><span class="p">,</span> <span class="p">{</span><span class="o">**</span><span class="n">state</span><span class="p">,</span> <span class="o">**</span><span class="n">pins</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">pins</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># Publishing.</span>
+
+
+<div class="viewcode-block" id="is_remote_destination">
+<a class="viewcode-back" href="../../_autosummary/openloops.board_refresh.html#openloops.board_refresh.is_remote_destination">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_remote_destination</span><span class="p">(</span><span class="n">destination</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether ``destination`` names ``host:dir`` (for ``scp``) rather than a local path.</span>
+
+<span class="sd">    Remote only when the text before the first colon is a plausible host (non-empty, no</span>
+<span class="sd">    ``/`` or ``\\``, not a one-letter Windows drive such as ``C:``) and the whole thing</span>
+<span class="sd">    is not an existing local path.</span>
+
+<span class="sd">    &gt;&gt;&gt; [is_remote_destination(d) for d in ('tw:/srv/board', 'me@host:board')]</span>
+<span class="sd">    [True, True]</span>
+<span class="sd">    &gt;&gt;&gt; [is_remote_destination(d) for d in (r'C:\\Users\\x\\dest', '/tmp/a:b', 'board')]</span>
+<span class="sd">    [False, False, False]</span>
+<span class="sd">    """</span>
+    <span class="n">head</span><span class="p">,</span> <span class="n">colon</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">destination</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">colon</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">head</span> <span class="ow">or</span> <span class="s2">"/"</span> <span class="ow">in</span> <span class="n">head</span> <span class="ow">or</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">"</span> <span class="ow">in</span> <span class="n">head</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">head</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">head</span><span class="o">.</span><span class="n">isalpha</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="dir_publisher">
+<a class="viewcode-back" href="../../_autosummary/openloops.board_refresh.html#openloops.board_refresh.dir_publisher">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">dir_publisher</span><span class="p">(</span><span class="n">destination</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">300</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Path</span><span class="p">],</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""A publisher that copies the board's files to ``destination``.</span>
+
+<span class="sd">    ``destination`` is a directory, or ``host:dir`` (see</span>
+<span class="sd">    :func:`is_remote_destination`), which goes through ``scp -o BatchMode=yes`` (never a</span>
+<span class="sd">    password prompt that would hang a timer) with ``timeout`` seconds. A local copy</span>
+<span class="sd">    replaces each file atomically; the remote copy does not (``scp`` writes in place),</span>
+<span class="sd">    so a reader on the host can, for a moment, see a partly written file. A failure</span>
+<span class="sd">    raises, so a timer's log says the board did not move.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">publish</span><span class="p">(</span><span class="n">board_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">board_dir</span> <span class="o">/</span> <span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_board</span><span class="o">.</span><span class="n">BOARD_FILES</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">is_remote_destination</span><span class="p">(</span><span class="n">destination</span><span class="p">):</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="s2">"scp"</span><span class="p">,</span>
+                    <span class="s2">"-q"</span><span class="p">,</span>
+                    <span class="s2">"-o"</span><span class="p">,</span>
+                    <span class="s2">"BatchMode=yes"</span><span class="p">,</span>
+                    <span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">files</span><span class="p">),</span>
+                    <span class="n">destination</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"/"</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+        <span class="n">target</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">fd</span><span class="p">,</span> <span class="n">tmp</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">".</span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">tmp</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">target</span> <span class="o">/</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">publish</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># The I/O shell.</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_install_board</span><span class="p">(</span><span class="n">built</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">board_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Move a freshly built board into place, file by file, ``tasks.json`` last.</span>
+
+<span class="sd">    ``kit.html`` is left alone when the live one differs from the packaged template:</span>
+<span class="sd">    the owner edited it.</span>
+<span class="sd">    """</span>
+    <span class="n">board_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">kit</span> <span class="o">=</span> <span class="n">board_dir</span> <span class="o">/</span> <span class="s2">"kit.html"</span>
+    <span class="n">packaged_kit</span> <span class="o">=</span> <span class="p">(</span><span class="n">_board</span><span class="o">.</span><span class="n">board_dir</span><span class="p">()</span> <span class="o">/</span> <span class="s2">"kit.html"</span><span class="p">)</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">_board</span><span class="o">.</span><span class="n">BOARD_FILES</span> <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="s2">"tasks.json"</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">"tasks.json"</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">"kit.html"</span> <span class="ow">and</span> <span class="n">kit</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="n">kit</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span> <span class="o">!=</span> <span class="n">packaged_kit</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">built</span> <span class="o">/</span> <span class="n">name</span><span class="p">,</span> <span class="n">board_dir</span> <span class="o">/</span> <span class="n">name</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_record_refusal</span><span class="p">(</span><span class="n">work</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">refused</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Name the withheld closes in ``refresh.json``, or clear them once none are refused."""</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">load_state</span><span class="p">(</span><span class="n">work</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">refused</span><span class="p">:</span>
+        <span class="n">update</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"refused_closes"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">refused</span><span class="p">),</span> <span class="s2">"refused_close_ids"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">refused</span><span class="p">)}</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">!=</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">update</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">_save_state</span><span class="p">(</span><span class="n">work</span><span class="p">,</span> <span class="p">{</span><span class="o">**</span><span class="n">state</span><span class="p">,</span> <span class="o">**</span><span class="n">update</span><span class="p">})</span>
+    <span class="k">elif</span> <span class="s2">"refused_closes"</span> <span class="ow">in</span> <span class="n">state</span> <span class="ow">or</span> <span class="s2">"refused_close_ids"</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
+        <span class="n">_save_state</span><span class="p">(</span>
+            <span class="n">work</span><span class="p">,</span>
+            <span class="p">{</span>
+                <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"refused_closes"</span><span class="p">,</span> <span class="s2">"refused_close_ids"</span><span class="p">)</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_accumulated_new_items</span><span class="p">(</span>
+    <span class="n">previous</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">fresh</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span> <span class="n">open_ids</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""The previous list's items still open, then the fresh ones, once each by id."""</span>
+    <span class="n">merged</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="p">[</span><span class="o">*</span><span class="n">previous</span><span class="p">,</span> <span class="o">*</span><span class="n">fresh</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"id"</span><span class="p">)</span> <span class="ow">in</span> <span class="n">open_ids</span><span class="p">:</span>
+            <span class="n">merged</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">merged</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">"id"</span><span class="p">],</span> <span class="p">{}),</span> <span class="o">**</span><span class="n">item</span><span class="p">}</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">merged</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+
+<div class="viewcode-block" id="refresh_board">
+<a class="viewcode-back" href="../../_autosummary/openloops.board_refresh.html#openloops.board_refresh.refresh_board">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">refresh_board</span><span class="p">(</span>
+    <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">owners</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">exclude_owners</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">exclude_repos</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">searches</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">review_prs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">run_specs</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">run_extras</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">publish_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">max_close_fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DFLT_MAX_CLOSE_FRACTION</span><span class="p">,</span>
+    <span class="n">publish</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Path</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">gather</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">_tasks</span><span class="o">.</span><span class="n">gather</span><span class="p">,</span>
+    <span class="n">settings</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Rebuild ``WORK/board`` when the set of open items changed. Returns what happened.</span>
+
+<span class="sd">    The scope keywords (``owners`` to ``publish_to``) are saved into</span>
+<span class="sd">    ``WORK/refresh.json`` when given and read from it when not (:func:`remember_scope`);</span>
+<span class="sd">    their defaults are every kind of item and PRs awaiting review, like</span>
+<span class="sd">    ``board-gather --all-kinds``. ``run_specs``/``run_extras`` are passed to every</span>
+<span class="sd">    rebuild, as ``board-build`` takes them. ``force`` rebuilds even when nothing</span>
+<span class="sd">    changed and overrides the close guard (never the incomplete-sweep one). What the</span>
+<span class="sd">    environment sets (``OPENLOOPS_OWNERS``, ``OPENLOOPS_EXCLUDE_REPOS``) and, failing</span>
+<span class="sd">    that, the owners the sweep resolved, are pinned into ``refresh.json`` where it has no</span>
+<span class="sd">    value yet (:func:`pin_env_scope`).</span>
+<span class="sd">    ``publish`` replaces the publisher built from ``publish_to`` (see</span>
+<span class="sd">    :func:`dir_publisher`); ``gather`` replaces the sweep; ``settings`` override the</span>
+<span class="sd">    existing ``board.json`` (and are required when there is none).</span>
+
+<span class="sd">    ``status`` is ``rebuilt``, ``unchanged``, ``incomplete``, ``partial`` (rebuilt with</span>
+<span class="sd">    additions/retitles while a mass close was refused) or ``refused`` (a mass close was</span>
+<span class="sd">    refused and nothing else changed). Refused closes are withheld, never dropped:</span>
+<span class="sd">    ``refused_closes`` (a count) and ``refused_close_ids`` are returned and kept in</span>
+<span class="sd">    ``refresh.json`` until a run no longer refuses, and ``remedy`` is the command that</span>
+<span class="sd">    applies them. A publish failure raises :class:`PublishError` after the local rebuild</span>
+<span class="sd">    is in place.</span>
+
+<span class="sd">    &gt;&gt;&gt; import tempfile</span>
+<span class="sd">    &gt;&gt;&gt; item = {'id': 'a/b#1', 'url': 'https://github.com/a/b/issues/1',</span>
+<span class="sd">    ...         'repo': 'a/b', 'title': 'Add a key', 'src': 'label:manual-task'}</span>
+<span class="sd">    &gt;&gt;&gt; sweep = lambda **kw: {'listed': True, 'candidates': [item], 'error': None}</span>
+<span class="sd">    &gt;&gt;&gt; with tempfile.TemporaryDirectory() as tmp:</span>
+<span class="sd">    ...     first = refresh_board(tmp, gather=sweep, settings={'title': 'Mine'})</span>
+<span class="sd">    ...     again = refresh_board(tmp, gather=sweep)</span>
+<span class="sd">    &gt;&gt;&gt; first['rebuilt'], first['added'], again['status']</span>
+<span class="sd">    (True, 1, 'unchanged')</span>
+<span class="sd">    """</span>
+    <span class="n">work</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">work_dir</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+    <span class="n">board_dir</span> <span class="o">=</span> <span class="n">work</span> <span class="o">/</span> <span class="s2">"board"</span>
+    <span class="n">tasks_path</span> <span class="o">=</span> <span class="n">board_dir</span> <span class="o">/</span> <span class="s2">"tasks.json"</span>
+    <span class="n">scope</span> <span class="o">=</span> <span class="n">remember_scope</span><span class="p">(</span>
+        <span class="n">work</span><span class="p">,</span>
+        <span class="n">owners</span><span class="o">=</span><span class="n">owners</span><span class="p">,</span>
+        <span class="n">exclude_owners</span><span class="o">=</span><span class="n">exclude_owners</span><span class="p">,</span>
+        <span class="n">exclude_repos</span><span class="o">=</span><span class="n">exclude_repos</span><span class="p">,</span>
+        <span class="n">searches</span><span class="o">=</span><span class="n">searches</span><span class="p">,</span>
+        <span class="n">review_prs</span><span class="o">=</span><span class="n">review_prs</span><span class="p">,</span>
+        <span class="n">run_specs</span><span class="o">=</span><span class="n">run_specs</span><span class="p">,</span>
+        <span class="n">run_extras</span><span class="o">=</span><span class="n">run_extras</span><span class="p">,</span>
+        <span class="n">publish_to</span><span class="o">=</span><span class="n">publish_to</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">pinned</span> <span class="o">=</span> <span class="n">pin_env_scope</span><span class="p">(</span><span class="n">work</span><span class="p">)</span>
+    <span class="n">scope</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">scope</span><span class="p">,</span> <span class="o">**</span><span class="n">pinned</span><span class="p">}</span>
+    <span class="n">live</span> <span class="o">=</span> <span class="n">_live_tasks</span><span class="p">(</span><span class="n">tasks_path</span><span class="p">)</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">_board_settings</span><span class="p">(</span><span class="n">board_dir</span> <span class="o">/</span> <span class="s2">"board.json"</span><span class="p">,</span> <span class="n">settings</span><span class="p">)</span>
+    <span class="n">store</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"store"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">publish</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">scope</span><span class="p">[</span><span class="s2">"publish_to"</span><span class="p">]:</span>
+        <span class="n">publish</span> <span class="o">=</span> <span class="n">dir_publisher</span><span class="p">(</span><span class="n">scope</span><span class="p">[</span><span class="s2">"publish_to"</span><span class="p">])</span>
+    <span class="n">destination</span> <span class="o">=</span> <span class="n">scope</span><span class="p">[</span><span class="s2">"publish_to"</span><span class="p">]</span> <span class="k">if</span> <span class="n">publish</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="n">report</span> <span class="o">=</span> <span class="n">gather</span><span class="p">(</span>
+        <span class="n">owners</span><span class="o">=</span><span class="n">scope</span><span class="p">[</span><span class="s2">"owners"</span><span class="p">],</span>
+        <span class="n">exclude_owners</span><span class="o">=</span><span class="n">scope</span><span class="p">[</span><span class="s2">"exclude_owners"</span><span class="p">]</span> <span class="ow">or</span> <span class="p">(),</span>
+        <span class="n">exclude_repos</span><span class="o">=</span><span class="n">scope</span><span class="p">[</span><span class="s2">"exclude_repos"</span><span class="p">],</span>
+        <span class="n">searches</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">scope</span><span class="p">[</span><span class="s2">"searches"</span><span class="p">]),</span>
+        <span class="n">review_prs</span><span class="o">=</span><span class="n">scope</span><span class="p">[</span><span class="s2">"review_prs"</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">saturated</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"saturated"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span>
+    <span class="n">outcome</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"rebuilt"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"needs_republish"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"saturated"</span><span class="p">:</span> <span class="n">saturated</span><span class="p">,</span>
+        <span class="s2">"refused_closes"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">"refused_close_ids"</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">report</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"listed"</span><span class="p">):</span>
+        <span class="n">outcome</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="n">status</span><span class="o">=</span><span class="s2">"incomplete"</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="sa">f</span><span class="s2">"the sweep was incomplete, board left as it was: </span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'error'</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">scope</span><span class="p">[</span><span class="s2">"owners"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">report</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"owners"</span><span class="p">):</span>
+            <span class="c1"># The default owners (gh alias or login), resolved by the sweep: pinned so</span>
+            <span class="c1"># the timer, which lacks the shell's environment, sweeps the same owners.</span>
+            <span class="n">_save_state</span><span class="p">(</span><span class="n">work</span><span class="p">,</span> <span class="p">{</span><span class="o">**</span><span class="n">load_state</span><span class="p">(</span><span class="n">work</span><span class="p">),</span> <span class="s2">"owners"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">report</span><span class="p">[</span><span class="s2">"owners"</span><span class="p">])})</span>
+        <span class="n">candidates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">report</span><span class="p">[</span><span class="s2">"candidates"</span><span class="p">])</span>
+        <span class="n">records</span><span class="p">,</span> <span class="n">fresh</span><span class="p">,</span> <span class="n">plan</span> <span class="o">=</span> <span class="n">merge_refresh</span><span class="p">(</span><span class="n">live</span><span class="p">,</span> <span class="n">candidates</span><span class="p">,</span> <span class="n">saturated</span><span class="o">=</span><span class="n">saturated</span><span class="p">)</span>
+        <span class="n">remedy</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"ol board-refresh </span><span class="si">{</span><span class="n">work</span><span class="si">}</span><span class="s2"> --force"</span>
+        <span class="n">refusal</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">force</span>
+            <span class="k">else</span> <span class="n">_refusal</span><span class="p">(</span><span class="n">plan</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">live</span><span class="p">),</span> <span class="n">max_close_fraction</span><span class="p">,</span> <span class="n">remedy</span><span class="o">=</span><span class="n">remedy</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">refused</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="k">if</span> <span class="n">refusal</span><span class="p">:</span>
+            <span class="n">refused</span> <span class="o">=</span> <span class="n">plan</span><span class="o">.</span><span class="n">closed</span>
+            <span class="n">records</span><span class="p">,</span> <span class="n">fresh</span><span class="p">,</span> <span class="n">plan</span> <span class="o">=</span> <span class="n">merge_refresh</span><span class="p">(</span>
+                <span class="n">live</span><span class="p">,</span> <span class="n">candidates</span><span class="p">,</span> <span class="n">saturated</span><span class="o">=</span><span class="n">saturated</span><span class="p">,</span> <span class="n">withhold_closes</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+        <span class="n">outcome</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="n">added</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">plan</span><span class="o">.</span><span class="n">added</span><span class="p">),</span>
+            <span class="n">closed</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">plan</span><span class="o">.</span><span class="n">closed</span><span class="p">),</span>
+            <span class="n">kept</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">plan</span><span class="o">.</span><span class="n">kept</span><span class="p">),</span>
+            <span class="n">withheld</span><span class="o">=</span><span class="mi">0</span> <span class="k">if</span> <span class="n">refused</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">plan</span><span class="o">.</span><span class="n">withheld</span><span class="p">),</span>
+            <span class="n">updated</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">plan</span><span class="o">.</span><span class="n">updated</span><span class="p">),</span>
+            <span class="n">refused_closes</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">refused</span><span class="p">),</span>
+            <span class="n">refused_close_ids</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">refused</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">refused</span><span class="p">:</span>
+            <span class="n">outcome</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">remedy</span><span class="o">=</span><span class="n">remedy</span><span class="p">)</span>
+        <span class="n">_record_refusal</span><span class="p">(</span><span class="n">work</span><span class="p">,</span> <span class="n">refused</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">plan</span><span class="o">.</span><span class="n">changed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span> <span class="ow">and</span> <span class="n">tasks_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">outcome</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="n">status</span><span class="o">=</span><span class="s2">"refused"</span> <span class="k">if</span> <span class="n">refused</span> <span class="k">else</span> <span class="s2">"unchanged"</span><span class="p">,</span>
+                <span class="n">reason</span><span class="o">=</span><span class="n">refusal</span> <span class="ow">or</span> <span class="s2">"no item opened, closed or retitled"</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">open_ids</span> <span class="o">=</span> <span class="p">{</span><span class="n">r</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">records</span><span class="p">}</span>
+            <span class="n">new_items</span> <span class="o">=</span> <span class="n">_accumulated_new_items</span><span class="p">(</span>
+                <span class="n">_read_json</span><span class="p">(</span><span class="n">work</span> <span class="o">/</span> <span class="n">NEW_ITEMS_FILE</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">[],</span> <span class="n">kind</span><span class="o">=</span><span class="nb">list</span><span class="p">),</span>
+                <span class="n">fresh</span><span class="p">,</span>
+                <span class="n">open_ids</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">work</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">work</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">".board-"</span><span class="p">)</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+                <span class="n">built</span> <span class="o">=</span> <span class="n">_board</span><span class="o">.</span><span class="n">build_board</span><span class="p">(</span>
+                    <span class="n">records</span><span class="p">,</span>
+                    <span class="n">tmp</span><span class="p">,</span>
+                    <span class="n">candidates</span><span class="o">=</span><span class="n">candidates</span><span class="p">,</span>
+                    <span class="n">specs</span><span class="o">=</span><span class="n">_board</span><span class="o">.</span><span class="n">run_specs</span><span class="p">(</span><span class="n">scope</span><span class="p">[</span><span class="s2">"run_specs"</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">scope</span><span class="p">[</span><span class="s2">"run_specs"</span><span class="p">]</span>
+                    <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">extras</span><span class="o">=</span><span class="n">_board</span><span class="o">.</span><span class="n">run_extras</span><span class="p">(</span><span class="n">scope</span><span class="p">[</span><span class="s2">"run_extras"</span><span class="p">]),</span>
+                    <span class="n">title</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_board</span><span class="o">.</span><span class="n">DFLT_TITLE</span><span class="p">,</span>
+                    <span class="n">session</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"session"</span><span class="p">),</span>
+                    <span class="n">read_only_orgs</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"read_only_orgs"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(),</span>
+                    <span class="n">machine</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"machine"</span><span class="p">),</span>
+                    <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kind"</span><span class="p">,</span> <span class="s2">"artifact"</span><span class="p">),</span>
+                    <span class="n">api</span><span class="o">=</span><span class="n">store</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"api"</span><span class="p">),</span>
+                    <span class="n">moved_to</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"moved_to"</span><span class="p">),</span>
+                <span class="p">)</span>
+                <span class="n">_install_board</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">),</span> <span class="n">board_dir</span><span class="p">)</span>
+            <span class="n">_write_json</span><span class="p">(</span><span class="n">work</span> <span class="o">/</span> <span class="n">CANDIDATES_FILE</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">report</span><span class="p">))</span>
+            <span class="n">_write_json</span><span class="p">(</span><span class="n">work</span> <span class="o">/</span> <span class="n">NEW_ITEMS_FILE</span><span class="p">,</span> <span class="n">new_items</span><span class="p">)</span>
+            <span class="n">outcome</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="n">status</span><span class="o">=</span><span class="s2">"partial"</span> <span class="k">if</span> <span class="n">refused</span> <span class="k">else</span> <span class="s2">"rebuilt"</span><span class="p">,</span>
+                <span class="n">rebuilt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">tasks</span><span class="o">=</span><span class="n">built</span><span class="p">[</span><span class="s2">"tasks"</span><span class="p">],</span>
+                <span class="n">needs_enrichment</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">new_items</span><span class="p">),</span>
+                <span class="n">new_items</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">work</span> <span class="o">/</span> <span class="n">NEW_ITEMS_FILE</span><span class="p">),</span>
+                <span class="n">needs_republish</span><span class="o">=</span><span class="n">store</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kind"</span><span class="p">,</span> <span class="s2">"artifact"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"artifact"</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">refusal</span><span class="p">:</span>
+                <span class="n">outcome</span><span class="p">[</span><span class="s2">"reason"</span><span class="p">]</span> <span class="o">=</span> <span class="n">refusal</span>
+
+    <span class="n">outcome</span><span class="p">[</span><span class="s2">"published"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">digest</span> <span class="o">=</span> <span class="n">_board_digest</span><span class="p">(</span><span class="n">board_dir</span><span class="p">)</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">load_state</span><span class="p">(</span><span class="n">work</span><span class="p">)</span>
+    <span class="n">unpublished</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"last_published"</span><span class="p">)</span> <span class="o">!=</span> <span class="n">digest</span>
+        <span class="ow">or</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"last_published_to"</span><span class="p">)</span> <span class="o">!=</span> <span class="n">destination</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">publish</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">digest</span> <span class="ow">and</span> <span class="n">unpublished</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">publish</span><span class="p">(</span><span class="n">board_dir</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># any publisher's failure, named as one</span>
+            <span class="k">raise</span> <span class="n">PublishError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"publishing </span><span class="si">{</span><span class="n">board_dir</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">destination</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'the publisher'</span><span class="si">}</span><span class="s2"> failed "</span>
+                <span class="sa">f</span><span class="s2">"(the local board is up to date; the next run retries): </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+        <span class="n">_save_state</span><span class="p">(</span>
+            <span class="n">work</span><span class="p">,</span>
+            <span class="p">{</span><span class="o">**</span><span class="n">state</span><span class="p">,</span> <span class="s2">"last_published"</span><span class="p">:</span> <span class="n">digest</span><span class="p">,</span> <span class="s2">"last_published_to"</span><span class="p">:</span> <span class="n">destination</span><span class="p">},</span>
+        <span class="p">)</span>
+        <span class="n">outcome</span><span class="p">[</span><span class="s2">"published"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">outcome</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

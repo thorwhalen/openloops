@@ -13,6 +13,7 @@ openloops.board
       build_board
       group_runs
       join_created
+      run_extras
       run_specs
       sort_tasks
    

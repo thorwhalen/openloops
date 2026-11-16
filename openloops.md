@@ -1,4 +1,4 @@
-> built 2026-11-16 06:22 UTC from 0ee5f24 (main) · openloops 0.1.35. Details: build_info.json
+> built 2026-11-16 06:50 UTC from d05d9cf (main) · openloops 0.1.36. Details: build_info.json
 
 # index.html.md
 
@@ -1422,14 +1422,15 @@ data anywhere near the repository: where the board lives is the caller’s choic
 
 ### Functions
 
-| [`as_document`](_autosummary/openloops.board.html.md#openloops.board.as_document)(fragment)                    | The page as a full HTML document, for hosting outside a claude.ai Artifact.    |
-|-------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| [`board_dir`](_autosummary/openloops.board.html.md#openloops.board.board_dir)()                              | Where the page template and the default run specs ship, inside the package.    |
-| [`build_board`](_autosummary/openloops.board.html.md#openloops.board.build_board)(records, out_dir, \*[, ...]) | Write the board's five files into `out_dir` and say what went in.              |
-| [`group_runs`](_autosummary/openloops.board.html.md#openloops.board.group_runs)(tasks, \*[, specs, extras])   | Repeated chores grouped into runs, ordered as the specs are.                   |
-| [`join_created`](_autosummary/openloops.board.html.md#openloops.board.join_created)(tasks, candidates)          | Fill each record's missing `created` from the gathered candidate with its URL. |
-| [`run_specs`](_autosummary/openloops.board.html.md#openloops.board.run_specs)([path])                        | The run specs: one per pattern, in display order.                              |
-| [`sort_tasks`](_autosummary/openloops.board.html.md#openloops.board.sort_tasks)(tasks)                        | Cheapest first: by tier, then by minutes per thing the item unblocks.          |
+| [`as_document`](_autosummary/openloops.board.html.md#openloops.board.as_document)(fragment)                    | The page as a full HTML document, for hosting outside a claude.ai Artifact.         |
+|-------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| [`board_dir`](_autosummary/openloops.board.html.md#openloops.board.board_dir)()                              | Where the page template and the default run specs ship, inside the package.         |
+| [`build_board`](_autosummary/openloops.board.html.md#openloops.board.build_board)(records, out_dir, \*[, ...]) | Write the board's five files into `out_dir` and say what went in.                   |
+| [`group_runs`](_autosummary/openloops.board.html.md#openloops.board.group_runs)(tasks, \*[, specs, extras])   | Repeated chores grouped into runs, ordered as the specs are.                        |
+| [`join_created`](_autosummary/openloops.board.html.md#openloops.board.join_created)(tasks, candidates)          | Fill each record's missing `created` from the gathered candidate with its URL.      |
+| [`run_extras`](_autosummary/openloops.board.html.md#openloops.board.run_extras)([path])                       | The deployment's run extras (a JSON object keyed by run), or `None` without a path. |
+| [`run_specs`](_autosummary/openloops.board.html.md#openloops.board.run_specs)([path])                        | The run specs: one per pattern, in display order.                                   |
+| [`sort_tasks`](_autosummary/openloops.board.html.md#openloops.board.sort_tasks)(tasks)                        | Cheapest first: by tier, then by minutes per thing the item unblocks.               |
 
 ### openloops.board.as_document(fragment)
 
@@ -1502,6 +1503,18 @@ Fill each record’s missing `created` from the gathered candidate with its URL.
 * **Return type:**
   [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
 
+### openloops.board.run_extras(path=None)
+
+The deployment’s run extras (a JSON object keyed by run), or `None` without a path.
+
+```pycon
+>>> run_extras() is None
+True
+```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)] | [`None`](https://docs.python.org/3/builtins/constants.html#None)
+
 ### openloops.board.run_specs(path=None)
 
 The run specs: one per pattern, in display order. Packaged ones by default.
@@ -1528,6 +1541,287 @@ Cheapest first: by tier, then by minutes per thing the item unblocks.
 
 * **Return type:**
   [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
+
+
+# _autosummary/openloops.board_refresh.html.md
+
+# openloops.board_refresh
+
+Keep the phone board within a day of GitHub, without a session remembering to.
+
+The board ([`openloops.board`](_autosummary/openloops.board.html.md#module-openloops.board)) is built by hand once: gather, classify, build. Left
+alone it goes stale (a board built 2026-10-27 was still that build on 2026-11-09, with
+210 of its 420 cards closed and 222 new items missing). [`refresh_board()`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.refresh_board) is the
+rebuild as one deterministic, model-free step meant to run from a timer (`ol
+install-refresh-job`) or by hand (`ol board-refresh WORK`):
+
+1. gather the open items ([`openloops.tasks.gather()`](_autosummary/openloops.tasks.html.md#openloops.tasks.gather)) over the scope saved in
+   `WORK/refresh.json` (flags given on the command line are saved there first, and
+   what `OPENLOOPS_OWNERS`/`OPENLOOPS_EXCLUDE_REPOS` or the default owners resolve
+   to is saved as explicit lists, so a timer without that environment sweeps the same
+   scope: [`pin_env_scope()`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.pin_env_scope));
+2. merge them with the live `WORK/board/tasks.json` ([`merge_refresh()`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.merge_refresh), pure):
+   the earlier record of every id still open is kept, with its title and url
+   refreshed from GitHub and nothing re-classified; each new id gets the free
+   heuristic record;
+3. if nothing opened, closed or was retitled, stop (`rebuilt: False`);
+4. otherwise rebuild into a temporary directory and move each file into place
+   (`os.replace`: the receiver job reads `tasks.json` at any moment); the new ids
+   accumulate in `WORK/new-items.json` for a session’s classifier brief;
+5. publish (a directory, or `host:dir` through `scp`) whenever the local board’s
+   files differ from the last ones published, and only then record it.
+
+Guards, because a wrong rebuild is worse than a stale one:
+
+* an incomplete sweep (`listed: false`) never rebuilds;
+* a saturated sweep (some search hit its cap) adds but never closes;
+* closing more than `max_close_fraction` of a board of at least
+  [`GUARD_MIN_LIVE`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.GUARD_MIN_LIVE) cards is refused unless `force`: those closes are withheld
+  > (and named in `refresh.json`), while additions and retitles still go through, so
+  > a refusal never freezes the board;
+* a `tasks.json`, `board.json` or `refresh.json` that exists but does not parse
+  (or, for `refresh.json`, holds a value of the wrong shape) raises rather than being
+  read as empty, and a first run with no `board.json` raises rather than publishing
+  default settings;
+* an owner-edited `kit.html` (one that differs from the packaged template) is kept.
+
+A board whose page keeps its state in a claude.ai Artifact cannot be republished from
+here: the result says `needs_republish: True` and a session republishes it.
+
+What it touches: GitHub through `gather` (read-only); files under `WORK`; and, when
+publishing, the destination directory or the remote host (`scp` with the user’s own
+keys). It never calls a model.
+
+### Module Attributes
+
+| [`NEW_ITEMS_FILE`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.NEW_ITEMS_FILE)          | Where the items that got only the heuristic record are listed, for a classifier brief.                 |
+|--------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| [`STATE_FILE`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.STATE_FILE)              | the gather scope, run specs/extras, where to publish, and the hash of the `tasks.json` last published. |
+| [`DFLT_MAX_CLOSE_FRACTION`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.DFLT_MAX_CLOSE_FRACTION) | A rebuild may close at most this fraction of the live cards without `force`...                         |
+| [`GUARD_MIN_LIVE`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.GUARD_MIN_LIVE)          | ...once the board has at least this many cards (a small board may empty legitimately).                 |
+
+### Functions
+
+| [`dir_publisher`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.dir_publisher)(destination, \*[, timeout])   | A publisher that copies the board's files to `destination`.                                                                  |
+|----------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| [`is_remote_destination`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.is_remote_destination)(destination)          | Whether `destination` names `host:dir` (for `scp`) rather than a local path.                                                 |
+| [`load_state`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.load_state)(work_dir)                        | `WORK/refresh.json`: `{}` when missing, an error when it exists but is unreadable or holds a scope value of the wrong shape. |
+| [`merge_refresh`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.merge_refresh)(live, candidates, \*[, ...])  | The rebuild's records, the new candidates, and the plan.                                                                     |
+| [`pin_env_scope`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.pin_env_scope)(work_dir, \*[, environ, ...]) | Save what the environment makes the sweep's scope into `WORK/refresh.json`.                                                  |
+| [`plan_refresh`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.plan_refresh)(current, previous)             | Diff the ids now open against the ids on the live board.                                                                     |
+| [`refresh_board`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.refresh_board)(work_dir, \*[, owners, ...])  | Rebuild `WORK/board` when the set of open items changed.                                                                     |
+| [`remember_scope`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.remember_scope)(work_dir, \*\*given)         | Save the `given` scope values (`None` = not given) into `WORK/refresh.json`.                                                 |
+
+### Classes
+
+| [`RefreshPlan`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.RefreshPlan)(kept, added, closed[, withheld, ...])   | What a fresh sweep changes relative to the live board.   |
+|------------------------------------------------------------------------------------------------------|----------------------------------------------------------|
+
+### Exceptions
+
+| [`PublishError`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.PublishError)   | Publishing the rebuilt board failed.   |
+|-----------------------------------------------------------------|----------------------------------------|
+
+### openloops.board_refresh.DFLT_MAX_CLOSE_FRACTION *= 0.5*
+
+A rebuild may close at most this fraction of the live cards without `force`…
+
+### openloops.board_refresh.GUARD_MIN_LIVE *= 10*
+
+…once the board has at least this many cards (a small board may empty legitimately).
+
+### openloops.board_refresh.NEW_ITEMS_FILE *= 'new-items.json'*
+
+Where the items that got only the heuristic record are listed, for a classifier brief.
+
+### *exception* openloops.board_refresh.PublishError
+
+Bases: [`RuntimeError`](https://docs.python.org/3/builtins/exceptions.html#RuntimeError)
+
+Publishing the rebuilt board failed. The local board is in place; the next run
+retries, because the published marker is recorded only after a success.
+
+### *class* openloops.board_refresh.RefreshPlan(kept, added, closed, withheld=(), updated=())
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+What a fresh sweep changes relative to the live board.
+
+`withheld` are ids missing from a saturated sweep, kept rather than closed;
+`updated` are kept ids whose title or url changed on GitHub.
+
+### openloops.board_refresh.STATE_FILE *= 'refresh.json'*
+
+the gather scope, run specs/extras, where to publish, and
+the hash of the `tasks.json` last published.
+
+* **Type:**
+  The refresh’s own state
+
+### openloops.board_refresh.dir_publisher(destination, , timeout=300)
+
+A publisher that copies the board’s files to `destination`.
+
+`destination` is a directory, or `host:dir` (see
+[`is_remote_destination()`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.is_remote_destination)), which goes through `scp -o BatchMode=yes` (never a
+password prompt that would hang a timer) with `timeout` seconds. A local copy
+replaces each file atomically; the remote copy does not (`scp` writes in place),
+so a reader on the host can, for a moment, see a partly written file. A failure
+raises, so a timer’s log says the board did not move.
+
+* **Return type:**
+  [`Callable`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[[`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)], [`None`](https://docs.python.org/3/builtins/constants.html#None)]
+
+### openloops.board_refresh.is_remote_destination(destination)
+
+Whether `destination` names `host:dir` (for `scp`) rather than a local path.
+
+Remote only when the text before the first colon is a plausible host (non-empty, no
+`/` or `\`, not a one-letter Windows drive such as `C:`) and the whole thing
+is not an existing local path.
+
+```pycon
+>>> [is_remote_destination(d) for d in ('tw:/srv/board', 'me@host:board')]
+[True, True]
+>>> [is_remote_destination(d) for d in (r'C:\Users\x\dest', '/tmp/a:b', 'board')]
+[False, False, False]
+```
+
+* **Return type:**
+  [`bool`](https://docs.python.org/3/builtins/functions.html#bool)
+
+### openloops.board_refresh.load_state(work_dir)
+
+`WORK/refresh.json`: `{}` when missing, an error when it exists but is
+unreadable or holds a scope value of the wrong shape.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.board_refresh.merge_refresh(live, candidates, , saturated=(), withhold_closes=False)
+
+The rebuild’s records, the new candidates, and the plan. No I/O.
+
+Every id still open keeps its earlier record (never re-classified), with
+`REFRESHED_FIELDS` taken from the sweep; new ids get the heuristic record. A
+`saturated` sweep did not list everything, so an id it did not see is kept
+(`withheld`), never closed; `withhold_closes` does the same for a sweep whose
+closes were refused.
+
+```pycon
+>>> live = [{'id': 'a/b#1', 'title': 'Old', 'ask': 'ENRICHED'}, {'id': 'a/b#2'}]
+>>> seen = [{'id': 'a/b#1', 'title': 'New', 'url': 'https://github.com/a/b/issues/1'}]
+>>> records, fresh, plan = merge_refresh(live, seen)
+>>> [(r['id'], r['title'], r['ask']) for r in records], plan.closed, plan.updated
+([('a/b#1', 'New', 'ENRICHED')], ('a/b#2',), ('a/b#1',))
+>>> records, _, plan = merge_refresh(live, seen, saturated=['label:manual-task'])
+>>> [r['id'] for r in records], plan.closed, plan.withheld
+(['a/b#1', 'a/b#2'], (), ('a/b#2',))
+```
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]], [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]], [`RefreshPlan`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.RefreshPlan)]
+
+### openloops.board_refresh.pin_env_scope(work_dir, , environ=None, resolve_owners=None)
+
+Save what the environment makes the sweep’s scope into `WORK/refresh.json`.
+
+A launchd timer does not get the shell’s `OPENLOOPS_OWNERS` or
+`OPENLOOPS_EXCLUDE_REPOS`, so a scope that lives only there would make the timer
+sweep a different set of repositories than a run by hand (and could put an excluded
+client repo on the board). Each is written as an explicit list, but only where
+`refresh.json` has no value yet (a flag given earlier, or an earlier pin, wins).
+With no `OPENLOOPS_OWNERS`, `resolve_owners` (e.g.
+[`openloops.obligations.configured_owners()`](_autosummary/openloops.obligations.html.md#openloops.obligations.configured_owners)) supplies the default owners; when
+it is not given they stay unset here and the first sweep’s resolved owners are
+pinned instead. Returns what was saved.
+
+```pycon
+>>> import tempfile
+>>> with tempfile.TemporaryDirectory() as tmp:
+...     env = {'OPENLOOPS_OWNERS': 'me, org', 'OPENLOOPS_EXCLUDE_REPOS': 'org/x-*'}
+...     first = pin_env_scope(tmp, environ=env)
+...     second = pin_env_scope(tmp, environ={'OPENLOOPS_OWNERS': 'other'})
+>>> first, second
+({'owners': ['me', 'org'], 'exclude_repos': ['org/x-*']}, {})
+```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]]
+
+### openloops.board_refresh.plan_refresh(current, previous)
+
+Diff the ids now open against the ids on the live board.
+
+```pycon
+>>> plan = plan_refresh(['a#1', 'a#2', 'a#4'], ['a#1', 'a#3'])
+>>> plan.kept, plan.added, plan.closed, plan.changed
+(('a#1',), ('a#2', 'a#4'), ('a#3',), True)
+>>> plan_refresh(['a#1'], ['a#1']).changed
+False
+```
+
+* **Return type:**
+  [`RefreshPlan`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.RefreshPlan)
+
+### openloops.board_refresh.refresh_board(work_dir, \*, owners=None, exclude_owners=None, exclude_repos=None, searches=None, review_prs=None, run_specs=None, run_extras=None, publish_to=None, force=False, max_close_fraction=0.5, publish=None, gather=<function gather>, settings=None)
+
+Rebuild `WORK/board` when the set of open items changed. Returns what happened.
+
+The scope keywords (`owners` to `publish_to`) are saved into
+`WORK/refresh.json` when given and read from it when not ([`remember_scope()`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.remember_scope));
+their defaults are every kind of item and PRs awaiting review, like
+`board-gather --all-kinds`. `run_specs`/`run_extras` are passed to every
+rebuild, as `board-build` takes them. `force` rebuilds even when nothing
+changed and overrides the close guard (never the incomplete-sweep one). What the
+environment sets (`OPENLOOPS_OWNERS`, `OPENLOOPS_EXCLUDE_REPOS`) and, failing
+that, the owners the sweep resolved, are pinned into `refresh.json` where it has no
+value yet ([`pin_env_scope()`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.pin_env_scope)).
+`publish` replaces the publisher built from `publish_to` (see
+[`dir_publisher()`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.dir_publisher)); `gather` replaces the sweep; `settings` override the
+existing `board.json` (and are required when there is none).
+
+`status` is `rebuilt`, `unchanged`, `incomplete`, `partial` (rebuilt with
+additions/retitles while a mass close was refused) or `refused` (a mass close was
+refused and nothing else changed). Refused closes are withheld, never dropped:
+`refused_closes` (a count) and `refused_close_ids` are returned and kept in
+`refresh.json` until a run no longer refuses, and `remedy` is the command that
+applies them. A publish failure raises [`PublishError`](_autosummary/openloops.board_refresh.html.md#openloops.board_refresh.PublishError) after the local rebuild
+is in place.
+
+```pycon
+>>> import tempfile
+>>> item = {'id': 'a/b#1', 'url': 'https://github.com/a/b/issues/1',
+...         'repo': 'a/b', 'title': 'Add a key', 'src': 'label:manual-task'}
+>>> sweep = lambda **kw: {'listed': True, 'candidates': [item], 'error': None}
+>>> with tempfile.TemporaryDirectory() as tmp:
+...     first = refresh_board(tmp, gather=sweep, settings={'title': 'Mine'})
+...     again = refresh_board(tmp, gather=sweep)
+>>> first['rebuilt'], first['added'], again['status']
+(True, 1, 'unchanged')
+```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.board_refresh.remember_scope(work_dir, \*\*given)
+
+Save the `given` scope values (`None` = not given) into `WORK/refresh.json`.
+
+Returns the full scope: what was saved, then defaults. Both `ol board-refresh`
+and `ol install-refresh-job` go through here, so the timer needs only `WORK`.
+
+```pycon
+>>> import tempfile
+>>> with tempfile.TemporaryDirectory() as tmp:
+...     _ = remember_scope(tmp, owners=['me'])
+...     scope = remember_scope(tmp, exclude_repos=None)
+>>> scope['owners'], scope['review_prs']
+(['me'], True)
+```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 
 # _autosummary/openloops.board_server.html.md
@@ -3460,6 +3754,7 @@ which is what makes it safe to suggest when someone suspects a stale digest.
 |-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
 | [`blockers`](_autosummary/openloops.blockers.html.md#module-openloops.blockers)                 | The other kind of open loop: the one that points at a repository, not at a person.      |
 | [`board`](_autosummary/openloops.board.html.md#module-openloops.board)                       | The phone task board: task records in, a static page and its data files out.            |
+| [`board_refresh`](_autosummary/openloops.board_refresh.html.md#module-openloops.board_refresh)       | Keep the phone board within a day of GitHub, without a session remembering to.          |
 | [`board_server`](_autosummary/openloops.board_server.html.md#module-openloops.board_server)         | An optional web app for a self-hosted phone board: the page, its files, its store API.  |
 | [`board_store`](_autosummary/openloops.board_store.html.md#module-openloops.board_store)           | The board store's rules, for a self-hosted phone board: who may write what, and how.    |
 | [`dashboard`](_autosummary/openloops.dashboard.html.md#module-openloops.dashboard)               | One page you can look at instead of reading three command outputs.                      |
@@ -3499,11 +3794,12 @@ the same command, and [`install()`](_autosummary/openloops.job.html.md#openloops
 
 ### Module Attributes
 
-| [`DFLT_LABEL`](_autosummary/openloops.job.html.md#openloops.job.DFLT_LABEL)        | launchd job label.                                 |
-|--------------------------------------------------------------------|----------------------------------------------------|
-| [`DFLT_INTERVAL`](_autosummary/openloops.job.html.md#openloops.job.DFLT_INTERVAL)     | Seconds between ticks.                             |
-| [`RECEIVER_LABEL`](_autosummary/openloops.job.html.md#openloops.job.RECEIVER_LABEL)    | launchd label of the board-receiver job (ADR-011). |
-| [`RECEIVER_INTERVAL`](_autosummary/openloops.job.html.md#openloops.job.RECEIVER_INTERVAL) | Seconds between receiver ticks.                    |
+| [`DFLT_LABEL`](_autosummary/openloops.job.html.md#openloops.job.DFLT_LABEL)        | launchd job label.                                                                           |
+|--------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
+| [`DFLT_INTERVAL`](_autosummary/openloops.job.html.md#openloops.job.DFLT_INTERVAL)     | Seconds between ticks.                                                                       |
+| [`RECEIVER_LABEL`](_autosummary/openloops.job.html.md#openloops.job.RECEIVER_LABEL)    | launchd label of the board-receiver job (ADR-011).                                           |
+| [`RECEIVER_INTERVAL`](_autosummary/openloops.job.html.md#openloops.job.RECEIVER_INTERVAL) | Seconds between receiver ticks.                                                              |
+| [`REFRESH_LABEL`](_autosummary/openloops.job.html.md#openloops.job.REFRESH_LABEL)     | no model, so it can run often; six hours keeps the board within a day of GitHub with margin. |
 
 ### Functions
 
@@ -3533,6 +3829,14 @@ calls and no model, so this can be as short as the phone board’s latency wants
 ### openloops.job.RECEIVER_LABEL *= 'openloops.board-receiver'*
 
 launchd label of the board-receiver job (ADR-011).
+
+### openloops.job.REFRESH_LABEL *= 'openloops.board-refresh'*
+
+no model, so it can
+run often; six hours keeps the board within a day of GitHub with margin.
+
+* **Type:**
+  The board-rebuild job (`ol board-refresh` on a timer; issue #39)
 
 ### openloops.job.install(, label='openloops.sync', interval=900, dry_run=False)
 
@@ -5461,16 +5765,18 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-11-16 06:22 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/0ee5f245a9e97c2130388e0402e8fc2aa368e3c1"><code>0ee5f24</code></a> on branch <code>main</code>, for **openloops 0.1.35** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-16 06:50 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/d05d9cf39251272979271f2f5e6f672dcb27d44e"><code>d05d9cf</code></a> on branch <code>main</code>, for **openloops 0.1.36** (from <code>pyproject.toml</code>).
 
-#### NOTE
-Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
+#### WARNING
+The documentation and the package may be misaligned:
+
+- The documented version (0.1.36) is behind the latest release on PyPI (0.1.37): `pip install openloops` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/0ee5f245a9e97c2130388e0402e8fc2aa368e3c1"><code>0ee5f245a9e97c2130388e0402e8fc2aa368e3c1</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/d05d9cf39251272979271f2f5e6f672dcb27d44e"><code>d05d9cf39251272979271f2f5e6f672dcb27d44e</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -5481,9 +5787,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/43816115620">43816115620</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/43819348350">43819348350</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>0ee5f245a9e97c2130388e0402e8fc2aa368e3c1</code> (in the history of the built commit) |
+| Event commit | <code>d05d9cf39251272979271f2f5e6f672dcb27d44e</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -5508,13 +5814,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.35/">0.1.35</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.37/">0.1.37</a>, newer than the documented version (0.1.36).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 0ee5f245a9e97c2130388e0402e8fc2aa368e3c1
+git checkout d05d9cf39251272979271f2f5e6f672dcb27d44e
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

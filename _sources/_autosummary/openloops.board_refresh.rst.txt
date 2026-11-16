@@ -1,0 +1,40 @@
+openloops.board\_refresh
+========================
+
+.. automodule:: openloops.board_refresh
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      NEW_ITEMS_FILE
+      STATE_FILE
+      DFLT_MAX_CLOSE_FRACTION
+      GUARD_MIN_LIVE
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      dir_publisher
+      is_remote_destination
+      load_state
+      merge_refresh
+      pin_env_scope
+      plan_refresh
+      refresh_board
+      remember_scope
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      RefreshPlan
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+   
+      PublishError
+   

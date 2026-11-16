@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../../_static/documentation_options.js?v=2b6ce006"></script>
+    <script src="../../_static/documentation_options.js?v=1c946a6c"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.35" />
+  <meta name="docsearch:version" content="0.1.36" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -735,6 +735,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">openloops.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">state_dir</span><span class="p">,</span> <span class="n">sync_state_path</span>
@@ -742,6 +743,8 @@ window.runMermaid = runMermaid;</script>
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">"DFLT_LABEL"</span><span class="p">,</span>
     <span class="s2">"DFLT_INTERVAL"</span><span class="p">,</span>
+    <span class="s2">"REFRESH_INTERVAL"</span><span class="p">,</span>
+    <span class="s2">"REFRESH_LABEL"</span><span class="p">,</span>
     <span class="s2">"RECEIVER_LABEL"</span><span class="p">,</span>
     <span class="s2">"RECEIVER_INTERVAL"</span><span class="p">,</span>
     <span class="s2">"install"</span><span class="p">,</span>
@@ -778,6 +781,10 @@ window.runMermaid = runMermaid;</script>
 <span class="c1">#: Seconds between receiver ticks. A tick that finds nothing pending costs a few HTTP</span>
 <span class="c1">#: calls and no model, so this can be as short as the phone board's latency wants.</span>
 <span class="n">RECEIVER_INTERVAL</span> <span class="o">=</span> <span class="mi">300</span>
+<span class="c1">#: The board-rebuild job (`ol board-refresh` on a timer; issue #39): no model, so it can</span>
+<span class="c1">#: run often; six hours keeps the board within a day of GitHub with margin.</span>
+<span class="n">REFRESH_LABEL</span> <span class="o">=</span> <span class="s2">"openloops.board-refresh"</span>
+<span class="n">REFRESH_INTERVAL</span> <span class="o">=</span> <span class="mi">21600</span>
 
 <span class="c1">#: Tools the unattended receiver session may use without asking. Bash is limited to the</span>
 <span class="c1">#: commands the receiver procedure runs (`gh`, `curl`, `python3`, the worker dispatch,</span>
@@ -1157,6 +1164,74 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"interval"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"interval"</span><span class="p">]),</span>
     <span class="p">}</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">refresh_job_spec</span><span class="p">(</span>
+    <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">refresh_args</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+    <span class="n">interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">REFRESH_INTERVAL</span><span class="p">,</span>
+    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">REFRESH_LABEL</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The board-rebuild job as data: ``python -m openloops board-refresh WORK ...``.</span>
+
+<span class="sd">    Pure, so it tests anywhere. The scope (owners, exclusions, run specs, where to</span>
+<span class="sd">    publish) lives in ``WORK/refresh.json`` (``ol install-refresh-job`` saves it there),</span>
+<span class="sd">    so the plist needs only ``WORK``; ``refresh_args`` are extra ``board-refresh``</span>
+<span class="sd">    flags appended as they are, for a caller that wants them. The job runs with the</span>
+<span class="sd">    sync job's minimal environment (``gh`` must be on its ``PATH`` and logged in for</span>
+<span class="sd">    the same user) and carries no credential.</span>
+<span class="sd">    """</span>
+    <span class="n">work</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">work_dir</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span>
+        <span class="s2">"-m"</span><span class="p">,</span>
+        <span class="s2">"openloops"</span><span class="p">,</span>
+        <span class="s2">"board-refresh"</span><span class="p">,</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">work</span><span class="p">),</span>
+        <span class="o">*</span><span class="n">refresh_args</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">job_environment</span><span class="p">()</span>
+    <span class="n">log_path</span> <span class="o">=</span> <span class="n">_log_path</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"label"</span><span class="p">:</span> <span class="n">label</span><span class="p">,</span>
+        <span class="s2">"program_args"</span><span class="p">:</span> <span class="n">args</span><span class="p">,</span>
+        <span class="s2">"env"</span><span class="p">:</span> <span class="n">env</span><span class="p">,</span>
+        <span class="s2">"interval"</span><span class="p">:</span> <span class="n">interval</span><span class="p">,</span>
+        <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">log_path</span><span class="p">),</span>
+        <span class="s2">"plist"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">_plist_path</span><span class="p">(</span><span class="n">label</span><span class="p">)),</span>
+        <span class="s2">"xml"</span><span class="p">:</span> <span class="n">plist_xml</span><span class="p">(</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="n">program_args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+            <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
+            <span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span>
+            <span class="n">log_path</span><span class="o">=</span><span class="n">log_path</span><span class="p">,</span>
+            <span class="n">working_dir</span><span class="o">=</span><span class="n">work</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">install_refresh</span><span class="p">(</span>
+    <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Install (or replace) the board-rebuild job. ``kwargs`` are :func:`refresh_job_spec`'s."""</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">refresh_job_spec</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"plist"</span><span class="p">,</span> <span class="s2">"log"</span><span class="p">,</span> <span class="s2">"xml"</span><span class="p">)}</span>
+    <span class="n">_require_macos</span><span class="p">()</span>
+    <span class="n">_bootstrap</span><span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"label"</span><span class="p">]),</span>
+        <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"plist"</span><span class="p">])),</span>
+        <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"log"</span><span class="p">])),</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"xml"</span><span class="p">]),</span>
+        <span class="n">smoke</span><span class="o">=</span><span class="p">[[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-m"</span><span class="p">,</span> <span class="s2">"openloops"</span><span class="p">,</span> <span class="s2">"board-refresh"</span><span class="p">,</span> <span class="s2">"--help"</span><span class="p">]],</span>
+        <span class="n">env</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"env"</span><span class="p">]),</span>  <span class="c1"># type: ignore[arg-type]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"plist"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"plist"</span><span class="p">]),</span>
+        <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"log"</span><span class="p">]),</span>
+        <span class="s2">"interval"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"interval"</span><span class="p">]),</span>
+    <span class="p">}</span>
 
 
 <div class="viewcode-block" id="uninstall">

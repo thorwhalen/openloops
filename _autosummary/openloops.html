@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=2b6ce006"></script>
+    <script src="../_static/documentation_options.js?v=1c946a6c"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.35" />
+  <meta name="docsearch:version" content="0.1.36" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -323,6 +323,7 @@
 <li class="toctree-l2"><a class="reference internal" href="openloops.base.html">openloops.base</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.blockers.html">openloops.blockers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.board.html">openloops.board</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.board_refresh.html">openloops.board_refresh</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.board_server.html">openloops.board_server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.board_store.html">openloops.board_store</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.dashboard.html">openloops.dashboard</a></li>
@@ -1722,49 +1723,52 @@ which is what makes it safe to suggest when someone suspects a stale digest.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="openloops.board.html#module-openloops.board" title="openloops.board"><code class="xref py py-obj docutils literal notranslate"><span class="pre">board</span></code></a></p></td>
 <td><p>The phone task board: task records in, a static page and its data files out.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="openloops.board_server.html#module-openloops.board_server" title="openloops.board_server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">board_server</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="openloops.board_refresh.html#module-openloops.board_refresh" title="openloops.board_refresh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">board_refresh</span></code></a></p></td>
+<td><p>Keep the phone board within a day of GitHub, without a session remembering to.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="openloops.board_server.html#module-openloops.board_server" title="openloops.board_server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">board_server</span></code></a></p></td>
 <td><p>An optional web app for a self-hosted phone board: the page, its files, its store API.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="openloops.board_store.html#module-openloops.board_store" title="openloops.board_store"><code class="xref py py-obj docutils literal notranslate"><span class="pre">board_store</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="openloops.board_store.html#module-openloops.board_store" title="openloops.board_store"><code class="xref py py-obj docutils literal notranslate"><span class="pre">board_store</span></code></a></p></td>
 <td><p>The board store's rules, for a self-hosted phone board: who may write what, and how.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="openloops.dashboard.html#module-openloops.dashboard" title="openloops.dashboard"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dashboard</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="openloops.dashboard.html#module-openloops.dashboard" title="openloops.dashboard"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dashboard</span></code></a></p></td>
 <td><p>One page you can look at instead of reading three command outputs.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="openloops.digest.html#module-openloops.digest" title="openloops.digest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">digest</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="openloops.digest.html#module-openloops.digest" title="openloops.digest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">digest</span></code></a></p></td>
 <td><p>Rendering one session into one dated markdown digest.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="openloops.egress.html#module-openloops.egress" title="openloops.egress"><code class="xref py py-obj docutils literal notranslate"><span class="pre">egress</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="openloops.egress.html#module-openloops.egress" title="openloops.egress"><code class="xref py py-obj docutils literal notranslate"><span class="pre">egress</span></code></a></p></td>
 <td><p>The egress choke point: nothing leaves openloops carrying a home path or a secret.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="openloops.job.html#module-openloops.job" title="openloops.job"><code class="xref py py-obj docutils literal notranslate"><span class="pre">job</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="openloops.job.html#module-openloops.job" title="openloops.job"><code class="xref py py-obj docutils literal notranslate"><span class="pre">job</span></code></a></p></td>
 <td><p>The periodic job: launchd runs <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">sync</span></code>, writes, and exits.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="openloops.obligations.html#module-openloops.obligations" title="openloops.obligations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">obligations</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="openloops.obligations.html#module-openloops.obligations" title="openloops.obligations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">obligations</span></code></a></p></td>
 <td><p>What you still owe your agents — re-checked against the world before it is shown.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="openloops.predicate_safety.html#module-openloops.predicate_safety" title="openloops.predicate_safety"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predicate_safety</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="openloops.predicate_safety.html#module-openloops.predicate_safety" title="openloops.predicate_safety"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predicate_safety</span></code></a></p></td>
 <td><p>Is a <code class="docutils literal notranslate"><span class="pre">manual-task</span></code> verify predicate a pure read?</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="openloops.publications.html#module-openloops.publications" title="openloops.publications"><code class="xref py py-obj docutils literal notranslate"><span class="pre">publications</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="openloops.publications.html#module-openloops.publications" title="openloops.publications"><code class="xref py py-obj docutils literal notranslate"><span class="pre">publications</span></code></a></p></td>
 <td><p>What your agents handed you lately: recently published annals documents, per session.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="openloops.receiver_tick.html#module-openloops.receiver_tick" title="openloops.receiver_tick"><code class="xref py py-obj docutils literal notranslate"><span class="pre">receiver_tick</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="openloops.receiver_tick.html#module-openloops.receiver_tick" title="openloops.receiver_tick"><code class="xref py py-obj docutils literal notranslate"><span class="pre">receiver_tick</span></code></a></p></td>
 <td><p>One tick of the board-receiver job: check for work without a model, then hand over.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="openloops.skills.html#module-openloops.skills" title="openloops.skills"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skills</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="openloops.skills.html#module-openloops.skills" title="openloops.skills"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skills</span></code></a></p></td>
 <td><p>The agent-facing surface: two skills, one subagent, and the command that installs them.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="openloops.store.html#module-openloops.store" title="openloops.store"><code class="xref py py-obj docutils literal notranslate"><span class="pre">store</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="openloops.store.html#module-openloops.store" title="openloops.store"><code class="xref py py-obj docutils literal notranslate"><span class="pre">store</span></code></a></p></td>
 <td><p>Where digests live, and where the change-detection cache lives — two different things.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="openloops.tasks.html#module-openloops.tasks" title="openloops.tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tasks</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="openloops.tasks.html#module-openloops.tasks" title="openloops.tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tasks</span></code></a></p></td>
 <td><p>Everything you could act on, as one list of task records: gather, classify, merge.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="openloops.tools.html#module-openloops.tools" title="openloops.tools"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tools</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="openloops.tools.html#module-openloops.tools" title="openloops.tools"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tools</span></code></a></p></td>
 <td><p>The package's single list of operations: plain functions, JSON-ready dicts.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="openloops.transcripts.html#module-openloops.transcripts" title="openloops.transcripts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transcripts</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="openloops.transcripts.html#module-openloops.transcripts" title="openloops.transcripts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transcripts</span></code></a></p></td>
 <td><p>The default <code class="docutils literal notranslate"><span class="pre">transcript_source</span></code>: a direct reader of Claude Code's on-disk state.</p></td>
 </tr>
 </tbody>
