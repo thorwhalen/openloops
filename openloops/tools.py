@@ -603,11 +603,6 @@ def board_build(
     ``store='http'`` with ``api`` wires the page to a self-hosted board store API
     instead of the claude.ai Artifact store; ``moved_to`` builds a forwarding page.
     """
-    extras = (
-        json.loads(Path(run_extras).expanduser().read_text(encoding="utf-8"))
-        if run_extras
-        else None
-    )
     return _board.build_board(
         _tasks.apply_reviews(
             _tasks.merge_records(_tasks.load_records(records)),
@@ -616,7 +611,7 @@ def board_build(
         Path(out_dir).expanduser(),
         candidates=_tasks.load_records(candidates or []),
         specs=_board.run_specs(run_specs) if run_specs else None,
-        extras=extras,
+        extras=_board.run_extras(run_extras),
         title=title,
         session=session,
         read_only_orgs=read_only_orgs or (),
@@ -633,25 +628,32 @@ def board_refresh(
     owners: list[str] | None = None,
     exclude_owners: list[str] | None = None,
     exclude_repos: list[str] | None = None,
-    force: bool = False,
+    run_specs: str | None = None,
+    run_extras: str | None = None,
     publish_to: str | None = None,
+    force: bool = False,
 ) -> dict[str, Any]:
     """Rebuild the phone board in ``work_dir/board`` if any item opened or closed.
 
     Gathers every kind of open item, diffs the ids against the live ``tasks.json`` and,
     only when they changed (or ``force``), rebuilds, keeping the earlier record of every
-    item still open and giving new ones the free heuristic record (listed in
-    ``new-items.json`` for the classifier brief). An incomplete sweep rebuilds nothing.
-    ``publish_to`` (a directory or ``host:dir``) receives the files after a rebuild.
-    Reads GitHub; writes only into ``work_dir`` and ``publish_to``.
+    item still open and giving new ones the free heuristic record (accumulated in
+    ``new-items.json`` for the classifier brief). An incomplete sweep rebuilds nothing,
+    a saturated one closes nothing, and closing over half a large board needs ``force``.
+    The scope arguments, when given, are saved in ``work_dir/refresh.json`` and read
+    from it when not. ``publish_to`` (a directory or ``host:dir``) receives the files
+    whenever they differ from what was last published there. Reads GitHub; writes into
+    ``work_dir`` and ``publish_to``.
     """
     return _refresh.refresh_board(
         work_dir,
         owners=owners,
-        exclude_owners=exclude_owners or (),
+        exclude_owners=exclude_owners,
         exclude_repos=exclude_repos,
+        run_specs=run_specs,
+        run_extras=run_extras,
+        publish_to=publish_to,
         force=force,
-        publish=_refresh.dir_publisher(publish_to) if publish_to else None,
     )
 
 

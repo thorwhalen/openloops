@@ -449,8 +449,10 @@ def refresh_job_spec(
 ) -> dict[str, object]:
     """The board-rebuild job as data: ``python -m openloops board-refresh WORK ...``.
 
-    Pure, so it tests anywhere. ``refresh_args`` are ``board-refresh`` flags
-    (``--owners``, ``--exclude-repos``, ``--publish-to``). The job runs with the
+    Pure, so it tests anywhere. The scope (owners, exclusions, run specs, where to
+    publish) lives in ``WORK/refresh.json`` (``ol install-refresh-job`` saves it there),
+    so the plist needs only ``WORK``; ``refresh_args`` are extra ``board-refresh``
+    flags appended as they are, for a caller that wants them. The job runs with the
     sync job's minimal environment (``gh`` must be on its ``PATH`` and logged in for
     the same user) and carries no credential.
     """

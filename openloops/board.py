@@ -53,6 +53,7 @@ __all__ = [
     "build_board",
     "group_runs",
     "join_created",
+    "run_extras",
     "run_specs",
     "sort_tasks",
 ]
@@ -90,6 +91,20 @@ def run_specs(path: str | Path | None = None) -> list[dict[str, Any]]:
     """
     source = Path(path) if path else board_dir() / "runs.json"
     return json.loads(source.read_text(encoding="utf-8"))
+
+
+def run_extras(path: str | Path | None = None) -> dict[str, Any] | None:
+    """The deployment's run extras (a JSON object keyed by run), or ``None`` without a path.
+
+    >>> run_extras() is None
+    True
+    """
+    if not path:
+        return None
+    extras = json.loads(Path(path).expanduser().read_text(encoding="utf-8"))
+    if not isinstance(extras, dict):
+        raise ValueError(f"{path}: run extras should be a JSON object keyed by run")
+    return extras
 
 
 def sort_tasks(tasks: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:

@@ -494,32 +494,41 @@ def install_refresh_job(
     *,
     interval: int = _job.REFRESH_INTERVAL,
     owners: str = None,
+    exclude_owners: str = None,
     exclude_repos: str = None,
+    run_specs: str = None,
+    run_extras: str = None,
     publish_to: str = None,
     dry_run: bool = False,
 ):
     """Install the phone-board rebuild job (macOS launchd): `ol board-refresh` on a timer.
 
-    Every `interval` seconds (default six hours) it runs `ol board-refresh WORK_DIR`
-    with the given `--owners`, `--exclude-repos` and `--publish-to`, so the board stays
-    within a day of GitHub without a session remembering to. No model is called. The
-    job needs `gh` logged in for the same user. `--dry-run` prints the plist.
+    Every `interval` seconds (default six hours) it runs `ol board-refresh WORK_DIR`, so
+    the board stays within a day of GitHub without a session remembering to. The flags
+    given here are saved in WORK_DIR/refresh.json, exactly as `ol board-refresh` saves
+    them, and the job reads them from there: the plist names only WORK_DIR. No model is
+    called. The job needs `gh` logged in for the same user. `--dry-run` prints the plist
+    and saves nothing.
     """
-    result = _job.install_refresh(
-        work_dir,
-        interval=interval,
-        refresh_args=[
-            *(["--owners", owners] if owners else []),
-            *(["--exclude-repos", exclude_repos] if exclude_repos else []),
-            *(["--publish-to", publish_to] if publish_to else []),
-        ],
-        dry_run=dry_run,
-    )
+    if not dry_run:
+        from openloops.board_refresh import remember_scope
+
+        remember_scope(
+            work_dir,
+            owners=_words(owners),
+            exclude_owners=_words(exclude_owners),
+            exclude_repos=_words(exclude_repos),
+            run_specs=run_specs,
+            run_extras=run_extras,
+            publish_to=publish_to,
+        )
+    result = _job.install_refresh(work_dir, interval=interval, dry_run=dry_run)
     if dry_run:
         return result["xml"]
     return (
         f"installed {_job.REFRESH_LABEL} every {result['interval']}s\n"
-        f"  plist: {result['plist']}\n  log:   {result['log']}"
+        f"  plist: {result['plist']}\n  log:   {result['log']}\n"
+        f"  scope: {work_dir}/refresh.json"
     )
 
 
@@ -625,36 +634,59 @@ def board_refresh(
     owners: str = None,
     exclude_owners: str = None,
     exclude_repos: str = None,
-    force: bool = False,
+    run_specs: str = None,
+    run_extras: str = None,
     publish_to: str = None,
+    force: bool = False,
 ):
-    """Rebuild WORK_DIR/board if any item opened or closed since the last build.
+    """Rebuild WORK_DIR/board if any item opened, closed or was retitled since the last build.
 
     The model-free rebuild for a timer (`ol install-refresh-job WORK_DIR`): gathers every
     kind of open item, compares ids with the live `tasks.json`, and rebuilds only on a
     change, keeping the records of items still open. New items get the heuristic record
-    and are listed in WORK_DIR/new-items.json for a classifier-brief pass. An incomplete
-    sweep leaves the board alone. The board's settings come from its `board.json`.
-    `--publish-to DIR|host:DIR` copies the files after a rebuild; `--force` rebuilds
-    anyway.
+    and accumulate in WORK_DIR/new-items.json for a classifier-brief pass. The board's
+    settings come from its `board.json` (build it once by hand first). Flags given are
+    saved in WORK_DIR/refresh.json and reused when absent. `--publish-to DIR|host:DIR`
+    copies the files whenever they differ from what was last published. Exits 1 when the
+    sweep was incomplete, the rebuild was refused (it would close over half the board;
+    `--force` overrides) or publishing failed.
     """
-    result = tools.board_refresh(
-        work_dir=work_dir,
-        owners=_words(owners),
-        exclude_owners=_words(exclude_owners),
-        exclude_repos=_words(exclude_repos),
-        force=force,
-        publish_to=publish_to,
-    )
-    if not result["rebuilt"]:
-        return f"board left as it was: {result['reason']}"
-    head = (
-        f"rebuilt the board: {result['tasks']} tasks "
-        f"(+{result['added']} opened, -{result['closed']} closed, {result['kept']} kept)"
-    )
+    from openloops.board_refresh import PublishError
+
+    try:
+        result = tools.board_refresh(
+            work_dir=work_dir,
+            owners=_words(owners),
+            exclude_owners=_words(exclude_owners),
+            exclude_repos=_words(exclude_repos),
+            run_specs=run_specs,
+            run_extras=run_extras,
+            publish_to=publish_to,
+            force=force,
+        )
+    except PublishError as exc:
+        print(f"ol: {exc}", file=sys.stderr)
+        sys.exit(1)
+    if result["status"] in ("incomplete", "refused"):
+        print(f"board left as it was: {result['reason']}", file=sys.stderr)
+        sys.exit(1)
+    if result["rebuilt"]:
+        head = (
+            f"rebuilt the board: {result['tasks']} tasks (+{result['added']} opened, "
+            f"-{result['closed']} closed, {result['kept']} kept, "
+            f"{result['updated']} retitled)"
+        )
+    else:
+        head = f"board left as it was: {result['reason']}"
+    if result["withheld"]:
+        head += f"\n  {result['withheld']} unseen items kept: the sweep was saturated"
     if result["published"]:
-        head += f"\n  published to {publish_to}"
-    if result["needs_enrichment"]:
+        head += "\n  published"
+    if result["needs_republish"]:
+        head += (
+            "\n  needs_republish: True (an Artifact board: republish it from a session)"
+        )
+    if result.get("needs_enrichment"):
         head += f"\n  {result['needs_enrichment']} new items have only the heuristic record: {result['new_items']}"
     if result["saturated"]:
         head += f"\n  saturated: {', '.join(result['saturated'])}"
