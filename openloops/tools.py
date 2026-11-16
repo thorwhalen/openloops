@@ -639,9 +639,10 @@ def board_refresh(
     only when they changed (or ``force``), rebuilds, keeping the earlier record of every
     item still open and giving new ones the free heuristic record (accumulated in
     ``new-items.json`` for the classifier brief). An incomplete sweep rebuilds nothing,
-    a saturated one closes nothing, and closing over half a large board needs ``force``.
+    a saturated one closes nothing, and closing over half a large board needs ``force``
+    (without it those closes are withheld and named, and the rest still applies).
     The scope arguments, when given, are saved in ``work_dir/refresh.json`` and read
-    from it when not. ``publish_to`` (a directory or ``host:dir``) receives the files
+    from it when not, as is the scope the environment sets. ``publish_to`` (a directory or ``host:dir``) receives the files
     whenever they differ from what was last published there. Reads GitHub; writes into
     ``work_dir`` and ``publish_to``.
     """

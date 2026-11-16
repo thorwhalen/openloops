@@ -506,12 +506,21 @@ def install_refresh_job(
     Every `interval` seconds (default six hours) it runs `ol board-refresh WORK_DIR`, so
     the board stays within a day of GitHub without a session remembering to. The flags
     given here are saved in WORK_DIR/refresh.json, exactly as `ol board-refresh` saves
-    them, and the job reads them from there: the plist names only WORK_DIR. No model is
-    called. The job needs `gh` logged in for the same user. `--dry-run` prints the plist
-    and saves nothing.
+    them, and the job reads them from there: the plist names only WORK_DIR. Owners and
+    excluded repos not given as flags are resolved now (OPENLOOPS_OWNERS or the default
+    owners, OPENLOOPS_EXCLUDE_REPOS) and saved as explicit lists, because the job does
+    not get the shell's environment. No model is called. The job needs `gh` logged in
+    for the same user. `--dry-run` prints the plist and saves nothing.
     """
     if not dry_run:
-        from openloops.board_refresh import remember_scope
+        from openloops.board_refresh import pin_env_scope, remember_scope
+        from openloops.obligations import GhUnavailable, configured_owners
+
+        def default_owners():
+            try:
+                return configured_owners()
+            except GhUnavailable:  # the first run's sweep pins them instead
+                return ()
 
         remember_scope(
             work_dir,
@@ -522,6 +531,7 @@ def install_refresh_job(
             run_extras=run_extras,
             publish_to=publish_to,
         )
+        pin_env_scope(work_dir, resolve_owners=default_owners)
     result = _job.install_refresh(work_dir, interval=interval, dry_run=dry_run)
     if dry_run:
         return result["xml"]
@@ -647,9 +657,11 @@ def board_refresh(
     and accumulate in WORK_DIR/new-items.json for a classifier-brief pass. The board's
     settings come from its `board.json` (build it once by hand first). Flags given are
     saved in WORK_DIR/refresh.json and reused when absent. `--publish-to DIR|host:DIR`
-    copies the files whenever they differ from what was last published. Exits 1 when the
-    sweep was incomplete, the rebuild was refused (it would close over half the board;
-    `--force` overrides) or publishing failed.
+    copies the files whenever they differ from what was last published. Closing over
+    half the board is refused (`--force` overrides): those closes are withheld and named,
+    while additions and retitles still apply (a partial rebuild, exit 0). Exits 1 when
+    the sweep was incomplete, a refused close left nothing else to apply, or publishing
+    failed.
     """
     from openloops.board_refresh import PublishError
 
@@ -678,6 +690,11 @@ def board_refresh(
         )
     else:
         head = f"board left as it was: {result['reason']}"
+    if result.get("refused_closes"):
+        head += (
+            f"\n  partial: {result['refused_closes']} closes refused and withheld (a "
+            f"mass close); if they are really closed, run `{result['remedy']}`"
+        )
     if result["withheld"]:
         head += f"\n  {result['withheld']} unseen items kept: the sweep was saturated"
     if result["published"]:

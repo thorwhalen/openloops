@@ -704,3 +704,174 @@ def test_the_cli_exits_nonzero_on_an_incomplete_sweep(tmp_path, monkeypatch, cap
         main(["board-refresh", str(tmp_path)])
     assert exit_.value.code == 1
     assert "incomplete" in capsys.readouterr().err
+
+
+# I (second review of #57): remote detection, env scope, partial rebuilds, the
+# publish marker over every file, refresh.json shapes.
+
+
+@pytest.mark.parametrize(
+    "destination, remote",
+    [
+        ("C:\\Users\\x\\dest", False),  # a Windows drive, not a host called C
+        ("c:/data/dest", False),
+        ("/srv/a:b", False),  # a separator before the colon: a local path
+        ("board", False),
+        ("tw:/srv/board", True),
+        ("user@host:dir", True),
+    ],
+)
+def test_a_destination_is_remote_only_when_it_names_a_host(destination, remote):
+    assert refresh.is_remote_destination(destination) is remote
+
+
+@pytest.mark.skipif(
+    __import__("os").name == "nt", reason="a colon cannot be in a Windows file name"
+)
+def test_an_existing_local_dir_with_a_colon_is_local(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "a:b").mkdir()
+    assert refresh.is_remote_destination("a:b") is False
+
+
+@pytest.mark.skipif(
+    __import__("os").name == "nt", reason="would write under the real C: drive"
+)
+def test_a_windows_style_destination_is_copied_locally_not_scped(tmp_path, monkeypatch):
+    _seeded(tmp_path, store="http", api="/x")
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1)))
+    ran = []
+    monkeypatch.setattr(refresh.subprocess, "run", lambda args, **kw: ran.append(args))
+    monkeypatch.chdir(tmp_path)  # on POSIX, "C:\\served" is a relative file name
+    refresh.dir_publisher("C:\\served")(tmp_path / "board")
+    assert ran == [] and (tmp_path / "C:\\served" / "tasks.json").is_file()
+
+
+def test_the_environments_scope_is_pinned_for_the_timer(tmp_path, monkeypatch):
+    _seeded(tmp_path)
+    monkeypatch.setenv("OPENLOOPS_OWNERS", "me, org")
+    monkeypatch.setenv("OPENLOOPS_EXCLUDE_REPOS", "client/*")
+    calls = []
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1), calls=calls))
+    state = json.loads((tmp_path / refresh.STATE_FILE).read_text())
+    assert state["owners"] == ["me", "org"] and state["exclude_repos"] == ["client/*"]
+    # The timer has no such environment, and sweeps the same scope.
+    monkeypatch.delenv("OPENLOOPS_OWNERS")
+    monkeypatch.delenv("OPENLOOPS_EXCLUDE_REPOS")
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1), calls=calls))
+    assert [(c["owners"], c["exclude_repos"]) for c in calls] == [
+        (["me", "org"], ["client/*"])
+    ] * 2
+
+
+def test_a_flag_or_saved_value_wins_over_the_environment(tmp_path, monkeypatch):
+    _seeded(tmp_path)
+    monkeypatch.setenv("OPENLOOPS_OWNERS", "env-owner")
+    calls = []
+    refresh.refresh_board(tmp_path, owners=["flag"], gather=_sweep(calls=calls))
+    refresh.refresh_board(tmp_path, gather=_sweep(calls=calls))
+    assert [c["owners"] for c in calls] == [["flag"], ["flag"]]
+
+
+def test_the_owners_a_sweep_resolved_are_pinned(tmp_path, monkeypatch):
+    _seeded(tmp_path)
+    monkeypatch.delenv("OPENLOOPS_OWNERS", raising=False)
+
+    def gather(**kw):
+        return {**_sweep(_item(1))(**kw), "owners": ["login"]}
+
+    refresh.refresh_board(tmp_path, gather=gather)
+    assert json.loads((tmp_path / refresh.STATE_FILE).read_text())["owners"] == [
+        "login"
+    ]
+
+
+def test_install_refresh_job_pins_the_default_owners_and_exclusions(
+    tmp_path, monkeypatch
+):
+    from openloops import __main__ as cli
+    from openloops import obligations
+
+    monkeypatch.setattr(
+        job,
+        "install_refresh",
+        lambda *a, **kw: {"interval": "60", "plist": "p", "log": "l"},
+    )
+    monkeypatch.delenv("OPENLOOPS_OWNERS", raising=False)
+    monkeypatch.setenv("OPENLOOPS_EXCLUDE_REPOS", "client/*")
+    monkeypatch.setattr(obligations, "configured_owners", lambda **kw: ("alias-owner",))
+    cli.install_refresh_job(str(tmp_path))
+    state = json.loads((tmp_path / refresh.STATE_FILE).read_text())
+    assert state["owners"] == ["alias-owner"] and state["exclude_repos"] == ["client/*"]
+
+
+def test_a_refused_mass_close_still_applies_additions_and_retitles(
+    tmp_path, monkeypatch, capsys
+):
+    _seeded(tmp_path, store="http", api="/x")
+    refresh.refresh_board(tmp_path, gather=_sweep(*[_item(i) for i in range(1, 21)]))
+    sweep = _sweep(*[_item(i) for i in range(1, 8)], _item(8, "Retitled"), _item(99))
+    published = []
+    result = refresh.refresh_board(tmp_path, gather=sweep, publish=published.append)
+    assert result["status"] == "partial" and result["rebuilt"] and published
+    assert result["refused_closes"] == 12 and result["closed"] == 0
+    assert result["refused_close_ids"][0] == "a/b#9" and "--force" in result["remedy"]
+    ids = _ids(tmp_path)
+    assert "a/b#99" in ids and len(ids) == 21  # added, and nothing closed
+    titles = {
+        t["id"]: t["title"]
+        for t in json.loads((tmp_path / "board" / "tasks.json").read_text())
+    }
+    assert titles["a/b#8"] == "Retitled"
+    state = json.loads((tmp_path / refresh.STATE_FILE).read_text())
+    assert state["refused_closes"] == 12 and len(state["refused_close_ids"]) == 12
+
+    # The CLI names it, with the remedy, and exits 0.
+    monkeypatch.setattr(tools, "board_refresh", lambda **kw: result)
+    out = main(["board-refresh", str(tmp_path)])
+    printed = (out or "") + capsys.readouterr().out
+    assert "12 closes refused" in printed and "--force" in printed
+
+    # Nothing else changed: refused, board as it was; --force applies the closes.
+    again = refresh.refresh_board(tmp_path, gather=sweep)
+    assert again["status"] == "refused" and again["refused_closes"] == 12
+    forced = refresh.refresh_board(tmp_path, gather=sweep, force=True)
+    assert forced["closed"] == 12 and len(_ids(tmp_path)) == 9
+    assert "refused_closes" not in json.loads(
+        (tmp_path / refresh.STATE_FILE).read_text()
+    )
+
+
+def test_any_board_file_change_is_republished(tmp_path):
+    _seeded(tmp_path, store="http", api="/x")
+    dest = tmp_path / "served"
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1)), publish_to=str(dest))
+    cfg_path = tmp_path / "board" / "board.json"
+    cfg = json.loads(cfg_path.read_text())
+    cfg["title"] = "Renamed"
+    cfg_path.write_text(json.dumps(cfg))
+    forced = refresh.refresh_board(tmp_path, gather=_sweep(_item(1)), force=True)
+    assert forced["published"]
+    assert json.loads((dest / "board.json").read_text())["title"] == "Renamed"
+    runs = tmp_path / "board" / "runs.json"
+    runs.write_text("[]\n ")
+    edited = refresh.refresh_board(tmp_path, gather=_sweep(_item(1)))
+    assert edited["status"] == "unchanged" and edited["published"]
+    assert (dest / "runs.json").read_text() == "[]\n "
+
+
+@pytest.mark.parametrize(
+    "state, match",
+    [
+        ({"owners": "thorwhalen"}, "'owners' should be a list of strings"),
+        ({"exclude_repos": [1]}, "'exclude_repos' should be a list of strings"),
+        ({"searches": None}, "'searches' should be a list of strings"),
+        ({"publish_to": 5}, "'publish_to' should be a string"),
+        ({"review_prs": "yes"}, "'review_prs' should be true or false"),
+    ],
+)
+def test_a_refresh_json_value_of_the_wrong_shape_raises(tmp_path, state, match):
+    _seeded(tmp_path)
+    (tmp_path / refresh.STATE_FILE).write_text(json.dumps(state))
+    with pytest.raises(ValueError, match=match):
+        refresh.refresh_board(tmp_path, gather=_sweep(_item(1)))

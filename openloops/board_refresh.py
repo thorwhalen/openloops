@@ -7,7 +7,10 @@ rebuild as one deterministic, model-free step meant to run from a timer (``ol
 install-refresh-job``) or by hand (``ol board-refresh WORK``):
 
 1. gather the open items (:func:`openloops.tasks.gather`) over the scope saved in
-   ``WORK/refresh.json`` (flags given on the command line are saved there first);
+   ``WORK/refresh.json`` (flags given on the command line are saved there first, and
+   what ``OPENLOOPS_OWNERS``/``OPENLOOPS_EXCLUDE_REPOS`` or the default owners resolve
+   to is saved as explicit lists, so a timer without that environment sweeps the same
+   scope: :func:`pin_env_scope`);
 2. merge them with the live ``WORK/board/tasks.json`` (:func:`merge_refresh`, pure):
    the earlier record of every id still open is kept, with its title and url
    refreshed from GitHub and nothing re-classified; each new id gets the free
@@ -16,18 +19,21 @@ install-refresh-job``) or by hand (``ol board-refresh WORK``):
 4. otherwise rebuild into a temporary directory and move each file into place
    (``os.replace``: the receiver job reads ``tasks.json`` at any moment); the new ids
    accumulate in ``WORK/new-items.json`` for a session's classifier brief;
-5. publish (a directory, or ``host:dir`` through ``scp``) whenever the local
-   ``tasks.json`` differs from the last one published, and only then record it.
+5. publish (a directory, or ``host:dir`` through ``scp``) whenever the local board's
+   files differ from the last ones published, and only then record it.
 
 Guards, because a wrong rebuild is worse than a stale one:
 
 * an incomplete sweep (``listed: false``) never rebuilds;
 * a saturated sweep (some search hit its cap) adds but never closes;
-* a rebuild that would close more than ``max_close_fraction`` of a board of at least
-  :data:`GUARD_MIN_LIVE` cards is refused unless ``force``;
+* closing more than ``max_close_fraction`` of a board of at least
+  :data:`GUARD_MIN_LIVE` cards is refused unless ``force``: those closes are withheld
+  (and named in ``refresh.json``), while additions and retitles still go through, so
+  a refusal never freezes the board;
 * a ``tasks.json``, ``board.json`` or ``refresh.json`` that exists but does not parse
-  raises rather than being read as empty, and a first run with no ``board.json``
-  raises rather than publishing default settings;
+  (or, for ``refresh.json``, holds a value of the wrong shape) raises rather than being
+  read as empty, and a first run with no ``board.json`` raises rather than publishing
+  default settings;
 * an owner-edited ``kit.html`` (one that differs from the packaged template) is kept.
 
 A board whose page keeps its state in a claude.ai Artifact cannot be republished from
@@ -43,6 +49,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -52,6 +59,7 @@ from pathlib import Path
 from typing import Any
 
 from openloops import board as _board
+from openloops import obligations as _obligations
 from openloops import tasks as _tasks
 
 __all__ = [
@@ -62,8 +70,10 @@ __all__ = [
     "STATE_FILE",
     "RefreshPlan",
     "dir_publisher",
+    "is_remote_destination",
     "load_state",
     "merge_refresh",
+    "pin_env_scope",
     "plan_refresh",
     "refresh_board",
     "remember_scope",
@@ -95,6 +105,9 @@ DFLT_SCOPE: dict[str, Any] = {
 }
 #: Scope values that are local paths, saved absolute so the timer (another cwd) finds them.
 _PATH_KEYS = ("run_specs", "run_extras")
+#: The JSON shape each scope value in ``refresh.json`` must have (``None`` = may be null).
+_STR_LIST_KEYS = ("owners", "exclude_owners", "exclude_repos")
+_STR_KEYS = ("publish_to", "run_specs", "run_extras")
 
 
 class PublishError(RuntimeError):
@@ -144,13 +157,15 @@ def merge_refresh(
     candidates: Sequence[Mapping[str, Any]],
     *,
     saturated: Sequence[str] = (),
+    withhold_closes: bool = False,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], RefreshPlan]:
     """The rebuild's records, the new candidates, and the plan. No I/O.
 
     Every id still open keeps its earlier record (never re-classified), with
     :data:`REFRESHED_FIELDS` taken from the sweep; new ids get the heuristic record. A
     ``saturated`` sweep did not list everything, so an id it did not see is kept
-    (``withheld``), never closed.
+    (``withheld``), never closed; ``withhold_closes`` does the same for a sweep whose
+    closes were refused.
 
     >>> live = [{'id': 'a/b#1', 'title': 'Old', 'ask': 'ENRICHED'}, {'id': 'a/b#2'}]
     >>> seen = [{'id': 'a/b#1', 'title': 'New', 'url': 'https://github.com/a/b/issues/1'}]
@@ -172,26 +187,29 @@ def merge_refresh(
         if record != earlier[i]:
             updated.append(i)
         kept.append(record)
-    withheld = raw.closed if saturated else ()
+    withhold = bool(saturated) or withhold_closes
+    withheld = raw.closed if withhold else ()
     fresh = [dict(by_id[i]) for i in raw.added]
     records = kept + [dict(earlier[i]) for i in withheld] + _tasks.classify(fresh)
     plan = RefreshPlan(
         kept=raw.kept,
         added=raw.added,
-        closed=() if saturated else raw.closed,
+        closed=() if withhold else raw.closed,
         withheld=tuple(withheld),
         updated=tuple(updated),
     )
     return records, fresh, plan
 
 
-def _refusal(plan: RefreshPlan, n_live: int, max_close_fraction: float) -> str | None:
-    """Why a rebuild that closes this much of the board should not go ahead, if it should not."""
+def _refusal(
+    plan: RefreshPlan, n_live: int, max_close_fraction: float, *, remedy: str
+) -> str | None:
+    """Why closing this much of the board should not go ahead, if it should not."""
     if n_live >= GUARD_MIN_LIVE and len(plan.closed) > max_close_fraction * n_live:
         return (
             f"the sweep would close {len(plan.closed)} of {n_live} cards (more than "
-            f"{max_close_fraction:.0%}); board left as it was. If that is real, rerun "
-            "with --force"
+            f"{max_close_fraction:.0%}); those closes were withheld (additions and "
+            f"retitles still apply). If they are real, run `{remedy}`"
         )
     return None
 
@@ -272,9 +290,52 @@ def _sha256(path: Path) -> str | None:
     return hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else None
 
 
+def _board_digest(board_dir: Path) -> str | None:
+    """One hash over every published board file (``None`` before the first build).
+
+    Every file counts, not only ``tasks.json``: a ``board.json`` or ``runs.json`` edit,
+    an edited ``kit.html`` or a forced rebuild must reach the destination too.
+    """
+    if not (board_dir / "tasks.json").exists():
+        return None
+    h = hashlib.sha256()
+    for name in sorted(_board.BOARD_FILES):
+        h.update(f"{name}\0{_sha256(board_dir / name) or ''}\n".encode())
+    return h.hexdigest()
+
+
+def _is_str_list(value: Any) -> bool:
+    return isinstance(value, list) and all(isinstance(v, str) for v in value)
+
+
+def _check_state(path: Path, state: Mapping[str, Any]) -> None:
+    """Raise a ``ValueError`` naming the first scope value of the wrong shape."""
+
+    def wrong(key: str, expected: str) -> ValueError:
+        return ValueError(
+            f"{path}: {key!r} should be {expected}, found {state[key]!r}; fix it or "
+            "remove the key (a flag given on the next run sets it again)"
+        )
+
+    for key in _STR_LIST_KEYS:
+        if state.get(key) is not None and not _is_str_list(state[key]):
+            raise wrong(key, "a list of strings (or null)")
+    if "searches" in state and not _is_str_list(state["searches"]):
+        raise wrong("searches", "a list of strings (or absent, for every search)")
+    for key in _STR_KEYS:
+        if state.get(key) is not None and not isinstance(state[key], str):
+            raise wrong(key, "a string (or null)")
+    if "review_prs" in state and not isinstance(state["review_prs"], bool):
+        raise wrong("review_prs", "true or false")
+
+
 def load_state(work_dir: str | Path) -> dict[str, Any]:
-    """``WORK/refresh.json``: ``{}`` when missing, an error when it exists but is unreadable."""
-    return _read_json(Path(work_dir).expanduser() / STATE_FILE, default={}, kind=dict)
+    """``WORK/refresh.json``: ``{}`` when missing, an error when it exists but is
+    unreadable or holds a scope value of the wrong shape."""
+    path = Path(work_dir).expanduser() / STATE_FILE
+    state = _read_json(path, default={}, kind=dict)
+    _check_state(path, state)
+    return state
 
 
 def _save_state(work: Path, state: Mapping[str, Any]) -> None:
@@ -284,7 +345,7 @@ def _save_state(work: Path, state: Mapping[str, Any]) -> None:
 def _normalise(key: str, value: Any) -> Any:
     if key in _PATH_KEYS:
         return str(Path(value).expanduser().resolve())
-    if key == "publish_to" and not _is_remote(value):
+    if key == "publish_to" and not is_remote_destination(value):
         return str(Path(value).expanduser().resolve())
     if isinstance(value, (tuple, list)):
         return list(value)
@@ -316,19 +377,84 @@ def remember_scope(work_dir: str | Path, **given: Any) -> dict[str, Any]:
     return {k: state.get(k, default) for k, default in DFLT_SCOPE.items()}
 
 
+def _words(raw: str | None) -> list[str]:
+    return [p for p in re.split(r"[,\s]+", raw or "") if p]
+
+
+def pin_env_scope(
+    work_dir: str | Path,
+    *,
+    environ: Mapping[str, str] | None = None,
+    resolve_owners: Callable[[], Sequence[str]] | None = None,
+) -> dict[str, list[str]]:
+    """Save what the environment makes the sweep's scope into ``WORK/refresh.json``.
+
+    A launchd timer does not get the shell's ``OPENLOOPS_OWNERS`` or
+    ``OPENLOOPS_EXCLUDE_REPOS``, so a scope that lives only there would make the timer
+    sweep a different set of repositories than a run by hand (and could put an excluded
+    client repo on the board). Each is written as an explicit list, but only where
+    ``refresh.json`` has no value yet (a flag given earlier, or an earlier pin, wins).
+    With no ``OPENLOOPS_OWNERS``, ``resolve_owners`` (e.g.
+    :func:`openloops.obligations.configured_owners`) supplies the default owners; when
+    it is not given they stay unset here and the first sweep's resolved owners are
+    pinned instead. Returns what was saved.
+
+    >>> import tempfile
+    >>> with tempfile.TemporaryDirectory() as tmp:
+    ...     env = {'OPENLOOPS_OWNERS': 'me, org', 'OPENLOOPS_EXCLUDE_REPOS': 'org/x-*'}
+    ...     first = pin_env_scope(tmp, environ=env)
+    ...     second = pin_env_scope(tmp, environ={'OPENLOOPS_OWNERS': 'other'})
+    >>> first, second
+    ({'owners': ['me', 'org'], 'exclude_repos': ['org/x-*']}, {})
+    """
+    environ = os.environ if environ is None else environ
+    work = Path(work_dir).expanduser()
+    state = load_state(work)
+    pins: dict[str, list[str]] = {}
+    if state.get("owners") is None:
+        owners = _words(environ.get(_obligations.OWNERS_ENV_VAR))
+        if not owners and resolve_owners is not None:
+            owners = list(resolve_owners())
+        if owners:
+            pins["owners"] = owners
+    if state.get("exclude_repos") is None:
+        globs = _words(environ.get(_tasks.EXCLUDE_ENV_VAR))
+        if globs:
+            pins["exclude_repos"] = globs
+    if pins:
+        _save_state(work, {**state, **pins})
+    return pins
+
+
 # --------------------------------------------------------------------------------
 # Publishing.
 
 
-def _is_remote(destination: str) -> bool:
-    return ":" in destination and not Path(destination).expanduser().exists()
+def is_remote_destination(destination: str) -> bool:
+    """Whether ``destination`` names ``host:dir`` (for ``scp``) rather than a local path.
+
+    Remote only when the text before the first colon is a plausible host (non-empty, no
+    ``/`` or ``\\``, not a one-letter Windows drive such as ``C:``) and the whole thing
+    is not an existing local path.
+
+    >>> [is_remote_destination(d) for d in ('tw:/srv/board', 'me@host:board')]
+    [True, True]
+    >>> [is_remote_destination(d) for d in (r'C:\\Users\\x\\dest', '/tmp/a:b', 'board')]
+    [False, False, False]
+    """
+    head, colon, _ = destination.partition(":")
+    if not colon or not head or "/" in head or "\\" in head:
+        return False
+    if len(head) == 1 and head.isalpha():
+        return False
+    return not Path(destination).expanduser().exists()
 
 
 def dir_publisher(destination: str, *, timeout: float = 300) -> Callable[[Path], None]:
     """A publisher that copies the board's files to ``destination``.
 
-    ``destination`` is a directory, or ``host:dir`` (anything with a colon that is not
-    an existing local path), which goes through ``scp -o BatchMode=yes`` (never a
+    ``destination`` is a directory, or ``host:dir`` (see
+    :func:`is_remote_destination`), which goes through ``scp -o BatchMode=yes`` (never a
     password prompt that would hang a timer) with ``timeout`` seconds. A local copy
     replaces each file atomically; the remote copy does not (``scp`` writes in place),
     so a reader on the host can, for a moment, see a partly written file. A failure
@@ -337,7 +463,7 @@ def dir_publisher(destination: str, *, timeout: float = 300) -> Callable[[Path],
 
     def publish(board_dir: Path) -> None:
         files = [board_dir / name for name in _board.BOARD_FILES]
-        if _is_remote(destination):
+        if is_remote_destination(destination):
             subprocess.run(
                 [
                     "scp",
@@ -382,6 +508,24 @@ def _install_board(built: Path, board_dir: Path) -> None:
         os.replace(built / name, board_dir / name)
 
 
+def _record_refusal(work: Path, refused: Sequence[str]) -> None:
+    """Name the withheld closes in ``refresh.json``, or clear them once none are refused."""
+    state = load_state(work)
+    if refused:
+        update = {"refused_closes": len(refused), "refused_close_ids": list(refused)}
+        if any(state.get(k) != v for k, v in update.items()):
+            _save_state(work, {**state, **update})
+    elif "refused_closes" in state or "refused_close_ids" in state:
+        _save_state(
+            work,
+            {
+                k: v
+                for k, v in state.items()
+                if k not in ("refused_closes", "refused_close_ids")
+            },
+        )
+
+
 def _accumulated_new_items(
     previous: list[Any], fresh: list[dict[str, Any]], open_ids: set[str]
 ) -> list[dict[str, Any]]:
@@ -417,13 +561,21 @@ def refresh_board(
     their defaults are every kind of item and PRs awaiting review, like
     ``board-gather --all-kinds``. ``run_specs``/``run_extras`` are passed to every
     rebuild, as ``board-build`` takes them. ``force`` rebuilds even when nothing
-    changed and overrides the close guard (never the incomplete-sweep one).
+    changed and overrides the close guard (never the incomplete-sweep one). What the
+    environment sets (``OPENLOOPS_OWNERS``, ``OPENLOOPS_EXCLUDE_REPOS``) and, failing
+    that, the owners the sweep resolved, are pinned into ``refresh.json`` where it has no
+    value yet (:func:`pin_env_scope`).
     ``publish`` replaces the publisher built from ``publish_to`` (see
     :func:`dir_publisher`); ``gather`` replaces the sweep; ``settings`` override the
     existing ``board.json`` (and are required when there is none).
 
-    ``status`` is ``rebuilt``, ``unchanged``, ``incomplete`` or ``refused``. A publish
-    failure raises :class:`PublishError` after the local rebuild is in place.
+    ``status`` is ``rebuilt``, ``unchanged``, ``incomplete``, ``partial`` (rebuilt with
+    additions/retitles while a mass close was refused) or ``refused`` (a mass close was
+    refused and nothing else changed). Refused closes are withheld, never dropped:
+    ``refused_closes`` (a count) and ``refused_close_ids`` are returned and kept in
+    ``refresh.json`` until a run no longer refuses, and ``remedy`` is the command that
+    applies them. A publish failure raises :class:`PublishError` after the local rebuild
+    is in place.
 
     >>> import tempfile
     >>> item = {'id': 'a/b#1', 'url': 'https://github.com/a/b/issues/1',
@@ -449,6 +601,8 @@ def refresh_board(
         run_extras=run_extras,
         publish_to=publish_to,
     )
+    pinned = pin_env_scope(work)
+    scope = {**scope, **pinned}
     live = _live_tasks(tasks_path)
     config = _board_settings(board_dir / "board.json", settings)
     store = config.get("store") or {}
@@ -468,6 +622,8 @@ def refresh_board(
         "rebuilt": False,
         "needs_republish": False,
         "saturated": saturated,
+        "refused_closes": 0,
+        "refused_close_ids": [],
     }
     if not report.get("listed"):
         outcome.update(
@@ -475,21 +631,40 @@ def refresh_board(
             reason=f"the sweep was incomplete, board left as it was: {report.get('error')}",
         )
     else:
+        if scope["owners"] is None and report.get("owners"):
+            # The default owners (gh alias or login), resolved by the sweep: pinned so
+            # the timer, which lacks the shell's environment, sweeps the same owners.
+            _save_state(work, {**load_state(work), "owners": list(report["owners"])})
         candidates = list(report["candidates"])
         records, fresh, plan = merge_refresh(live, candidates, saturated=saturated)
+        remedy = f"ol board-refresh {work} --force"
+        refusal = (
+            None
+            if force
+            else _refusal(plan, len(live), max_close_fraction, remedy=remedy)
+        )
+        refused: tuple[str, ...] = ()
+        if refusal:
+            refused = plan.closed
+            records, fresh, plan = merge_refresh(
+                live, candidates, saturated=saturated, withhold_closes=True
+            )
         outcome.update(
             added=len(plan.added),
             closed=len(plan.closed),
             kept=len(plan.kept),
-            withheld=len(plan.withheld),
+            withheld=0 if refused else len(plan.withheld),
             updated=len(plan.updated),
+            refused_closes=len(refused),
+            refused_close_ids=list(refused),
         )
-        refusal = None if force else _refusal(plan, len(live), max_close_fraction)
-        if refusal:
-            outcome.update(status="refused", reason=refusal)
-        elif not plan.changed and not force and tasks_path.exists():
+        if refused:
+            outcome.update(remedy=remedy)
+        _record_refusal(work, refused)
+        if not plan.changed and not force and tasks_path.exists():
             outcome.update(
-                status="unchanged", reason="no item opened, closed or retitled"
+                status="refused" if refused else "unchanged",
+                reason=refusal or "no item opened, closed or retitled",
             )
         else:
             open_ids = {r["id"] for r in records}
@@ -520,16 +695,18 @@ def refresh_board(
             _write_json(work / CANDIDATES_FILE, dict(report))
             _write_json(work / NEW_ITEMS_FILE, new_items)
             outcome.update(
-                status="rebuilt",
+                status="partial" if refused else "rebuilt",
                 rebuilt=True,
                 tasks=built["tasks"],
                 needs_enrichment=len(new_items),
                 new_items=str(work / NEW_ITEMS_FILE),
                 needs_republish=store.get("kind", "artifact") == "artifact",
             )
+            if refusal:
+                outcome["reason"] = refusal
 
     outcome["published"] = False
-    digest = _sha256(tasks_path)
+    digest = _board_digest(board_dir)
     state = load_state(work)
     unpublished = (
         state.get("last_published") != digest
