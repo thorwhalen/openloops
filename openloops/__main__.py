@@ -449,8 +449,20 @@ def job_status():
             f"loaded     {info['loaded']}",
             f"last write {_age(info['last_write'])}",
             f"log        {info['log']}",
+            *_pinned_warning(info),
         ]
     )
+
+
+def _pinned_warning(info: dict) -> list[str]:
+    """A line naming pinned paths that no longer exist: the job cannot start."""
+    if not info.get("pinned_missing"):
+        return []
+    return [
+        "WARNING    the job pins a path that no longer exists, so it fails every tick: "
+        + ", ".join(info["pinned_missing"])
+        + " (reinstall the job)"
+    ]
 
 
 def install_receiver_job(
@@ -574,6 +586,7 @@ def receiver_job_status():
             f"last check {_age(info['last_check'])}",
             f"last work  {_age(info['last_write'])}",
             f"log        {info['log']}",
+            *_pinned_warning(info),
         ]
     )
 

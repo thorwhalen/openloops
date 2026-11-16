@@ -18,6 +18,7 @@ the same command, and :func:`install` says so rather than pretending.
 from __future__ import annotations
 
 import os
+import plistlib
 import shutil
 import subprocess
 import sys
@@ -521,6 +522,27 @@ def uninstall(*, label: str = DFLT_LABEL) -> dict[str, str]:
     return {"plist": str(plist_path), "removed": str(existed).lower()}
 
 
+def pinned_missing(plist: Path) -> list[str]:
+    """Absolute paths a job's plist pins that no longer exist (empty: fine, or unreadable).
+
+    The job pins ``sys.executable`` (often under ``~/.pyenv/versions/X.Y.Z``) and, for the
+    receiver, the ``claude`` link. ``pyenv uninstall`` or an upgrade deletes them and the
+    job then fails silently every tick; this is the check that says so.
+
+    >>> pinned_missing(Path('/no/such/plist'))
+    []
+    """
+    try:
+        args = plistlib.loads(Path(plist).read_bytes()).get("ProgramArguments") or []
+    except Exception:  # noqa: BLE001 - a diagnostic must not crash on a damaged plist
+        return []
+    args = [a for a in args if isinstance(a, str)]
+    pinned = args[:1]
+    if "--" in args:
+        pinned += args[args.index("--") + 1 :][:1]  # the receiver's claude
+    return [p for p in pinned if os.path.isabs(p) and not Path(p).exists()]
+
+
 def job_status(
     *, label: str = DFLT_LABEL, env_file: str | Path = RECEIVER_ENV_FILE
 ) -> dict[str, object]:
@@ -556,6 +578,7 @@ def job_status(
         "platform_supported": sys.platform == "darwin",
         "plist": str(plist_path),
         "installed": plist_path.exists(),
+        "pinned_missing": pinned_missing(plist_path),
         "loaded": loaded,
         "log": str(log),
         "last_write": evidence,
