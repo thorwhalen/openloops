@@ -324,6 +324,14 @@ def _install_report(plan: dict) -> str:
             "conflict means nothing was written there. Look at the file, then re-run "
             "with --force to replace it."
         )
+    for row in plan.get("shadowed", ()):
+        lines.append("")
+        lines.append(
+            f"note: skill '{row['name']}' resolves to {row['resolves_to']}, not the "
+            f"shipped {row['shadows']}; sessions that load '{row['name']}' read that one "
+            f"({'same text' if row['same_text'] else 'the text has drifted'}). "
+            f"`--alias --force` links it to the shipped copy."
+        )
     return "\n".join(lines)
 
 
@@ -378,6 +386,7 @@ def install_skills(
     copy: bool = False,
     force: bool = False,
     dry_run: bool = False,
+    alias: bool = False,
 ):
     """Make the bundled skills and the sweep subagent visible to your coding agent.
 
@@ -393,6 +402,11 @@ def install_skills(
     `--only openloops,openloops-sweep` installs a subset. Use it when you already have
     your own capture skill: two skills competing for the same triggers and answering
     differently is worse than either one alone.
+
+    `--alias` also links the bare name `needs-human` (what standing instructions point
+    at) to the shipped copy; an existing one is a `conflict` until `--force`. Without it,
+    a bare `needs-human` that resolves elsewhere is reported, with whether its text
+    matches the shipped one.
     """
     return _install_report(
         _skills.install_skills(
@@ -401,6 +415,7 @@ def install_skills(
             copy=copy,
             force=force,
             dry_run=dry_run,
+            alias=alias,
         )
     )
 

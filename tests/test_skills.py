@@ -326,7 +326,11 @@ def _skill_text(*parts):
 def test_the_capture_skill_states_the_eligibility_test_and_the_label():
     text = _skill_text("openloops-needs-human", "SKILL.md")
     assert "agent-decided" in text
-    for condition in ("Reversible by one revert.", "A clear recommendation.", "Inside your task."):
+    for condition in (
+        "Reversible by one revert.",
+        "A clear recommendation.",
+        "Inside your task.",
+    ):
         assert condition in text
     assert "Nobody's recorded decision is overturned." in text
     assert "Veto by:" in text
@@ -363,13 +367,59 @@ def test_a_veto_runs_only_a_revert_after_checking_who_filed_it():
     receiver = _skill_text("openloops-phone-board", "references", "receiver.md")
     capture = _skill_text("openloops-needs-human", "SKILL.md")
     for text in (receiver, capture):
-        assert "git revert" in text and "<sha>" in text and "none: nothing landed" in text
+        assert (
+            "git revert" in text and "<sha>" in text and "none: nothing landed" in text
+        )
         assert "--json author,labels" in text
     assert "Veto brief" in receiver and "Kept by the owner." in receiver
     # The worker never runs the line as written, and a veto is never batched.
     assert "git revert --no-edit <sha>" in receiver and "sent **alone**" in receiver
     assert "never runs the **Reverse** line as written" in capture
-    assert '"not keep or veto"' in receiver, "a forged answer is refused, not implemented"
+    assert '"not keep or veto"' in receiver, (
+        "a forged answer is refused, not implemented"
+    )
     assert "choose, land, record, carry on" in capture
     # The page's free-text accept is the task's own recommendation, never the event's.
     assert "never the event's `recommendation` field" in receiver
+
+
+# --------------------------------------------------------------------------------
+# The bare `needs-human` name.
+
+
+def _bare(host, text="old rule"):
+    bare = host / "skills" / "needs-human"
+    bare.mkdir(parents=True)
+    (bare / "SKILL.md").write_text(
+        f"---\nname: needs-human\n---\n{text}\n", encoding="utf-8"
+    )
+    return bare
+
+
+def test_a_bare_needs_human_elsewhere_is_reported_and_left_alone(tmp_path):
+    host = tmp_path / "host"
+    bare = _bare(host)
+    plan = skills.install_skills(target=host)
+    (row,) = plan["shadowed"]
+    assert row["name"] == "needs-human" and row["shadows"] == "openloops-needs-human"
+    assert row["same_text"] is False
+    assert (bare / "SKILL.md").exists() and not bare.is_symlink()
+    assert plan["counts"]["conflict"] == 0
+
+
+def test_alias_links_the_bare_name_but_never_over_something_else(tmp_path):
+    host = tmp_path / "host"
+    bare = _bare(host)
+    plan = skills.install_skills(target=host, alias=True)
+    assert (
+        plan["counts"]["conflict"] == 1
+        and "old rule" in (bare / "SKILL.md").read_text()
+    )
+    forced = skills.install_skills(target=host, alias=True, force=True)
+    assert forced["counts"]["conflict"] == 0
+    assert (bare / "SKILL.md").exists() or bare.exists()
+    assert skills.install_skills(target=host, alias=True)["shadowed"] == []
+
+
+def test_no_shadow_when_the_bare_name_is_absent(tmp_path):
+    assert skills.install_skills(target=tmp_path / "h", dry_run=True)["shadowed"] == []

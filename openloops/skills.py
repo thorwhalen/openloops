@@ -54,9 +54,11 @@ import shutil
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+from collections.abc import Sequence
 from typing import Any
 
 __all__ = [
+    "ALIASES",
     "HOST_ENV_VAR",
     "Asset",
     "agents_dir",
@@ -71,6 +73,12 @@ __all__ = [
 #: for a reason, and an installer that ignores it writes to a directory nobody reads.
 HOST_ENV_VAR = "CLAUDE_CONFIG_DIR"
 DFLT_HOST = "~/.claude"
+
+#: Bare names that standing instructions point at, mapped from the shipped skill that
+#: should answer to them. Nothing else installs these, so an older copy of the same rule
+#: (a research checkout predating this package) silently wins when a session loads
+#: ``needs-human`` -- :func:`install_skills` reports that, and ``alias=True`` links it.
+ALIASES = {"openloops-needs-human": "needs-human"}
 
 #: Where each kind of asset lands under the host directory. A skill is a *directory*
 #: (it may carry ``references/``); a subagent is a single markdown file.
@@ -225,6 +233,47 @@ def _verdict(asset: Asset, destination: Path, *, force: bool) -> tuple[str, str]
     return "conflict", "something else with this name is already there"
 
 
+def _body(skill_dir: Path) -> str:
+    """A skill's text without its front matter (whose ``name:`` legitimately differs)."""
+    try:
+        text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+    except OSError:
+        return ""
+    return text.split("\n---\n", 1)[-1] if text.startswith("---") else text
+
+
+def _shadows(assets: Sequence[Asset], host: Path) -> list[dict[str, Any]]:
+    """Report each bare alias name that exists in the host and is not our shipped copy.
+
+    Read-only. ``same_text`` compares bodies, so a reader can tell "a stale duplicate"
+    from "a different edition of the same rule" before choosing which one to keep.
+    """
+    rows = []
+    for asset in assets:
+        alias = ALIASES.get(asset.name)
+        if asset.kind != "skill" or not alias:
+            continue
+        found = host / _HOST_SUBDIR["skill"] / alias
+        if not (found.exists() or found.is_symlink()):
+            continue
+        try:
+            resolved = found.resolve()
+        except OSError:
+            resolved = found
+        if resolved == asset.source.resolve():
+            continue
+        rows.append(
+            {
+                "name": alias,
+                "shadows": asset.name,
+                "path": str(found),
+                "resolves_to": str(resolved),
+                "same_text": _body(resolved) == _body(asset.source),
+            }
+        )
+    return rows
+
+
 def _remove(path: Path) -> None:
     if path.is_symlink() or path.is_file():
         path.unlink()
@@ -239,6 +288,7 @@ def install_skills(
     copy: bool = False,
     force: bool = False,
     dry_run: bool = False,
+    alias: bool = False,
 ) -> dict[str, Any]:
     """Make the bundled skills and subagent visible to an agent host. Idempotent.
 
@@ -257,6 +307,11 @@ def install_skills(
     own capture skill, adapted to your own fleet, and a second one competing for the same
     triggers is worse than either alone -- so take the reader and the subagent and leave
     the capture skill out.
+
+    ``alias=True`` also links the bare names in :data:`ALIASES` (``needs-human``) to the
+    shipped copy, under the same never-overwrite rule. Without it, the plan's
+    ``shadowed`` list says when a bare-named skill resolves somewhere else, and whether
+    its text matches ours.
 
     >>> plan = install_skills(target='/nonexistent/host', only=['openloops'], dry_run=True)
     >>> [row['name'] for row in plan['actions']]
@@ -282,6 +337,13 @@ def install_skills(
                 f"available: {', '.join(sorted(known))}"
             )
         assets = [asset for asset in assets if asset.name in wanted]
+    shadowed = _shadows(assets, host)
+    if alias:
+        assets += [
+            Asset("skill", ALIASES[a.name], a.source)
+            for a in assets
+            if a.kind == "skill" and a.name in ALIASES
+        ]
     for asset in assets:
         destination = asset.destination(host)
         action, reason = _verdict(asset, destination, force=force)
@@ -327,6 +389,7 @@ def install_skills(
         "dry_run": dry_run,
         "actions": rows,
         "counts": counts,
+        "shadowed": shadowed,
     }
 
 
