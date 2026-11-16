@@ -1,4 +1,4 @@
-> built 2026-11-16 05:43 UTC from c506655 (main) · openloops 0.1.33. Details: build_info.json
+> built 2026-11-16 06:04 UTC from 953ca28 (main) · openloops 0.1.34. Details: build_info.json
 
 # index.html.md
 
@@ -3133,7 +3133,7 @@ than writing a secret into a store that may be synced.
 * **Return type:**
   [`Digest`](_autosummary/openloops.base.html.md#openloops.base.Digest)
 
-### openloops.owed(, verify=True, owners=None, trusted_owners=None, label='manual-task', limit=50, timeout=30.0, predicate_timeout=20.0, now=None, issues_source=None, run_predicate=None)
+### openloops.owed(\*, verify=True, owners=None, trusted_owners=None, label='manual-task', limit=50, timeout=30.0, predicate_timeout=20.0, now=None, issues_source=None, run_predicate=None, write_guard=<function write_effect>)
 
 The open `manual-task` obligations, each re-checked against the world.
 
@@ -3144,6 +3144,13 @@ predicate then reads `unknown`, because that is what is true about it.
 `trusted_owners=` scopes what may *execute* and defaults to `owners`, so
 widening the search never quietly widens what runs — pass it explicitly to search
 wider than you trust.
+
+A predicate that *looks like a write* (`gh workflow run`, a `curl` write, `git
+push`… see [`openloops.predicate_safety`](_autosummary/openloops.predicate_safety.html.md#module-openloops.predicate_safety)) is not run: the row reads
+`unknown` with `unverified: predicate not read-only`, because asking what is owed
+must not start a deploy (openloops#43). `write_guard=` is the seam: any callable
+from command to a non-empty reason (refuse) or `""` (run); `lambda c: ""`
+restores the old behaviour.
 
 Two seams, each one keyword argument, each defaulting to a real implementation:
 `issues_source=` (defaults to [`gh_issues()`](_autosummary/openloops.html.md#openloops.gh_issues); a list of dicts substitutes) and
@@ -3449,24 +3456,25 @@ which is what makes it safe to suggest when someone suspects a stale digest.
 
 ### Modules
 
-| [`base`](_autosummary/openloops.base.html.md#module-openloops.base)                   | Data structures shared across openloops: what a session is, and what a digest is.       |
-|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| [`blockers`](_autosummary/openloops.blockers.html.md#module-openloops.blockers)           | The other kind of open loop: the one that points at a repository, not at a person.      |
-| [`board`](_autosummary/openloops.board.html.md#module-openloops.board)                 | The phone task board: task records in, a static page and its data files out.            |
-| [`board_server`](_autosummary/openloops.board_server.html.md#module-openloops.board_server)   | An optional web app for a self-hosted phone board: the page, its files, its store API.  |
-| [`board_store`](_autosummary/openloops.board_store.html.md#module-openloops.board_store)     | The board store's rules, for a self-hosted phone board: who may write what, and how.    |
-| [`dashboard`](_autosummary/openloops.dashboard.html.md#module-openloops.dashboard)         | One page you can look at instead of reading three command outputs.                      |
-| [`digest`](_autosummary/openloops.digest.html.md#module-openloops.digest)               | Rendering one session into one dated markdown digest.                                   |
-| [`egress`](_autosummary/openloops.egress.html.md#module-openloops.egress)               | The egress choke point: nothing leaves openloops carrying a home path or a secret.      |
-| [`job`](_autosummary/openloops.job.html.md#module-openloops.job)                     | The periodic job: launchd runs `ol sync`, writes, and exits.                            |
-| [`obligations`](_autosummary/openloops.obligations.html.md#module-openloops.obligations)     | What you still owe your agents — re-checked against the world before it is shown.       |
-| [`publications`](_autosummary/openloops.publications.html.md#module-openloops.publications)   | What your agents handed you lately: recently published annals documents, per session.   |
-| [`receiver_tick`](_autosummary/openloops.receiver_tick.html.md#module-openloops.receiver_tick) | One tick of the board-receiver job: check for work without a model, then hand over.     |
-| [`skills`](_autosummary/openloops.skills.html.md#module-openloops.skills)               | The agent-facing surface: two skills, one subagent, and the command that installs them. |
-| [`store`](_autosummary/openloops.store.html.md#module-openloops.store)                 | Where digests live, and where the change-detection cache lives — two different things.  |
-| [`tasks`](_autosummary/openloops.tasks.html.md#module-openloops.tasks)                 | Everything you could act on, as one list of task records: gather, classify, merge.      |
-| [`tools`](_autosummary/openloops.tools.html.md#module-openloops.tools)                 | The package's single list of operations: plain functions, JSON-ready dicts.             |
-| [`transcripts`](_autosummary/openloops.transcripts.html.md#module-openloops.transcripts)     | The default `transcript_source`: a direct reader of Claude Code's on-disk state.        |
+| [`base`](_autosummary/openloops.base.html.md#module-openloops.base)                         | Data structures shared across openloops: what a session is, and what a digest is.       |
+|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| [`blockers`](_autosummary/openloops.blockers.html.md#module-openloops.blockers)                 | The other kind of open loop: the one that points at a repository, not at a person.      |
+| [`board`](_autosummary/openloops.board.html.md#module-openloops.board)                       | The phone task board: task records in, a static page and its data files out.            |
+| [`board_server`](_autosummary/openloops.board_server.html.md#module-openloops.board_server)         | An optional web app for a self-hosted phone board: the page, its files, its store API.  |
+| [`board_store`](_autosummary/openloops.board_store.html.md#module-openloops.board_store)           | The board store's rules, for a self-hosted phone board: who may write what, and how.    |
+| [`dashboard`](_autosummary/openloops.dashboard.html.md#module-openloops.dashboard)               | One page you can look at instead of reading three command outputs.                      |
+| [`digest`](_autosummary/openloops.digest.html.md#module-openloops.digest)                     | Rendering one session into one dated markdown digest.                                   |
+| [`egress`](_autosummary/openloops.egress.html.md#module-openloops.egress)                     | The egress choke point: nothing leaves openloops carrying a home path or a secret.      |
+| [`job`](_autosummary/openloops.job.html.md#module-openloops.job)                           | The periodic job: launchd runs `ol sync`, writes, and exits.                            |
+| [`obligations`](_autosummary/openloops.obligations.html.md#module-openloops.obligations)           | What you still owe your agents — re-checked against the world before it is shown.       |
+| [`predicate_safety`](_autosummary/openloops.predicate_safety.html.md#module-openloops.predicate_safety) | Is a `manual-task` verify predicate a pure read?                                        |
+| [`publications`](_autosummary/openloops.publications.html.md#module-openloops.publications)         | What your agents handed you lately: recently published annals documents, per session.   |
+| [`receiver_tick`](_autosummary/openloops.receiver_tick.html.md#module-openloops.receiver_tick)       | One tick of the board-receiver job: check for work without a model, then hand over.     |
+| [`skills`](_autosummary/openloops.skills.html.md#module-openloops.skills)                     | The agent-facing surface: two skills, one subagent, and the command that installs them. |
+| [`store`](_autosummary/openloops.store.html.md#module-openloops.store)                       | Where digests live, and where the change-detection cache lives — two different things.  |
+| [`tasks`](_autosummary/openloops.tasks.html.md#module-openloops.tasks)                       | Everything you could act on, as one list of task records: gather, classify, merge.      |
+| [`tools`](_autosummary/openloops.tools.html.md#module-openloops.tools)                       | The package's single list of operations: plain functions, JSON-ready dicts.             |
+| [`transcripts`](_autosummary/openloops.transcripts.html.md#module-openloops.transcripts)           | The default `transcript_source`: a direct reader of Claude Code's on-disk state.        |
 
 
 # _autosummary/openloops.job.html.md
@@ -3640,7 +3648,7 @@ command, its exit status and what it printed, and you decide.
 ## Trust boundary — stated here because it should be read, not discovered
 
 Evaluating a predicate means **executing text that came from a GitHub issue body**.
-That is a real capability and it is bounded here in five ways, each of them visible:
+That is a real capability and it is bounded here in six ways, each of them visible:
 
 1. **Only owners you named.** A predicate is run only when the issue’s repository owner
    is in `trusted_owners=`, which defaults to the same `owners=` the search was
@@ -3657,7 +3665,11 @@ That is a real capability and it is bounded here in five ways, each of them visi
    the shell itself is killed — a predicate that backgrounds work can outlive its
    timeout there, which is a platform limit worth knowing rather than a promise broken
    quietly.
-5. **The whole thing is one keyword argument away from being someone else’s code.**
+5. **A predicate that looks like a write is not run.** `gh workflow run`, a `curl`
+   with a write method, `git push` and the like read `?` with `unverified: predicate not
+   read-only` ([`openloops.predicate_safety`](_autosummary/openloops.predicate_safety.html.md#module-openloops.predicate_safety); `write_guard=` is the seam). Asking
+   what is owed must not start a deploy.
+6. **The whole thing is one keyword argument away from being someone else’s code.**
    `run_predicate=` replaces the evaluator; `issues_source=` replaces the reader.
 
 One honest limit: predicates are POSIX shell. On a shell that cannot parse one, the
@@ -3855,7 +3867,7 @@ Returns whatever `gh` returned, unparsed and unjudged: a list of dicts with
 * **Return type:**
   [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
 
-### openloops.obligations.owed(, verify=True, owners=None, trusted_owners=None, label='manual-task', limit=50, timeout=30.0, predicate_timeout=20.0, now=None, issues_source=None, run_predicate=None)
+### openloops.obligations.owed(\*, verify=True, owners=None, trusted_owners=None, label='manual-task', limit=50, timeout=30.0, predicate_timeout=20.0, now=None, issues_source=None, run_predicate=None, write_guard=<function write_effect>)
 
 The open `manual-task` obligations, each re-checked against the world.
 
@@ -3866,6 +3878,13 @@ predicate then reads `unknown`, because that is what is true about it.
 `trusted_owners=` scopes what may *execute* and defaults to `owners`, so
 widening the search never quietly widens what runs — pass it explicitly to search
 wider than you trust.
+
+A predicate that *looks like a write* (`gh workflow run`, a `curl` write, `git
+push`… see [`openloops.predicate_safety`](_autosummary/openloops.predicate_safety.html.md#module-openloops.predicate_safety)) is not run: the row reads
+`unknown` with `unverified: predicate not read-only`, because asking what is owed
+must not start a deploy (openloops#43). `write_guard=` is the seam: any callable
+from command to a non-empty reason (refuse) or `""` (run); `lambda c: ""`
+restores the old behaviour.
 
 Two seams, each one keyword argument, each defaulting to a real implementation:
 `issues_source=` (defaults to [`gh_issues()`](_autosummary/openloops.obligations.html.md#openloops.obligations.gh_issues); a list of dicts substitutes) and
@@ -3973,6 +3992,73 @@ True
 
 * **Return type:**
   [`PredicateOutcome`](_autosummary/openloops.obligations.html.md#openloops.obligations.PredicateOutcome)
+
+
+# _autosummary/openloops.predicate_safety.html.md
+
+# openloops.predicate_safety
+
+Is a `manual-task` verify predicate a pure read?
+
+`ol owed` *executes* the shell command an issue carries, to see whether the ask has
+been done since. A question (“what do I owe?”) must not have a write effect, but a
+predicate is free text from an issue body: one ran `gh workflow run` and every
+`ol owed` started a deploy (openloops#43).
+
+[`write_effect()`](_autosummary/openloops.predicate_safety.html.md#openloops.predicate_safety.write_effect) is the guard. It returns the reason a command is refused, or
+`""` for one that reads. It is a **guard against honest mistakes, not a sandbox**: a
+predicate that hides a write behind a script it calls still runs. What it does see, it
+sees as the shell would: the command is split into shell words ([`shlex`](https://docs.python.org/3/library/shlex.html#module-shlex)), then
+into simple commands at unquoted `|`, `;`, `&&`, `||`, `&` and newlines, and
+`bash -c`, `ssh host '...'`, `eval` and `$(...)` are read by recursing into the
+command they carry. So `--jq 'length > 0'` is an argument, not a redirect, and
+`ssh tw 'rm -rf x'` is an `rm`.
+
+`gh` and `git` are **allowlisted** (`GH_READS`, `GIT_READS`): a verb
+not known to read is refused. Everything else is denylisted by name
+(`MUTATORS`, `SUBCOMMAND_WRITES`, `DEPLOY_MARKERS`). Ambiguity is
+refused, never run: the cost of a wrong refusal is one `?` row in `ol owed`; the
+cost of a wrong run is a write nobody asked for.
+
+```pycon
+>>> write_effect('gh workflow run deploy.yml --repo o/r')
+'gh workflow run'
+>>> write_effect('gh pr view 3 --json state -q .state | grep -q MERGED')
+''
+>>> write_effect('curl -s -d a=b https://example.com/x')
+'curl with a request body (-d)'
+>>> write_effect('test -f ~/.config/x && echo ok > /dev/null')
+''
+>>> write_effect("gh run list --created '>2026-09-10' -q length")
+''
+>>> write_effect("ssh tw 'rm -rf /srv/x'")
+'rm'
+```
+
+### Functions
+
+| [`write_effect`](_autosummary/openloops.predicate_safety.html.md#openloops.predicate_safety.write_effect)(command)   | Why *command* is refused as a predicate, or `""` if it only reads.   |
+|--------------------------------------------------------------------------|----------------------------------------------------------------------|
+
+### openloops.predicate_safety.write_effect(command)
+
+Why *command* is refused as a predicate, or `""` if it only reads.
+
+```pycon
+>>> write_effect('gh pr -R o/r merge 3')
+'gh pr merge'
+>>> write_effect('gh api repos/o/r/pulls/3 --jq "length > 0"')
+''
+>>> write_effect('echo x 2>err.log')
+'redirect into err.log'
+>>> write_effect('git -C ~/x log -1')
+''
+>>> write_effect("echo 'unbalanced")
+'unparseable'
+```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 
 # _autosummary/openloops.publications.html.md
@@ -5361,7 +5447,7 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-11-16 05:43 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/c506655d095b33e154b114c459efad6a9ff569f5"><code>c506655</code></a> on branch <code>main</code>, for **openloops 0.1.33** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-16 06:04 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/953ca281051e1305869070eb474de4bdc56a6891"><code>953ca28</code></a> on branch <code>main</code>, for **openloops 0.1.34** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -5370,7 +5456,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/c506655d095b33e154b114c459efad6a9ff569f5"><code>c506655d095b33e154b114c459efad6a9ff569f5</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/953ca281051e1305869070eb474de4bdc56a6891"><code>953ca281051e1305869070eb474de4bdc56a6891</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -5381,9 +5467,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/43811857534">43811857534</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/43814106346">43814106346</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>c506655d095b33e154b114c459efad6a9ff569f5</code> (in the history of the built commit) |
+| Event commit | <code>953ca281051e1305869070eb474de4bdc56a6891</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -5408,13 +5494,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.33/">0.1.33</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.34/">0.1.34</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout c506655d095b33e154b114c459efad6a9ff569f5
+git checkout 953ca281051e1305869070eb474de4bdc56a6891
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

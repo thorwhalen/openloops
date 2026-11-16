@@ -800,7 +800,7 @@ than writing a secret into a store that may be synced.
 * **Return type:**
   [`Digest`](openloops.base.html.md#openloops.base.Digest)
 
-### openloops.owed(, verify=True, owners=None, trusted_owners=None, label='manual-task', limit=50, timeout=30.0, predicate_timeout=20.0, now=None, issues_source=None, run_predicate=None)
+### openloops.owed(\*, verify=True, owners=None, trusted_owners=None, label='manual-task', limit=50, timeout=30.0, predicate_timeout=20.0, now=None, issues_source=None, run_predicate=None, write_guard=<function write_effect>)
 
 The open `manual-task` obligations, each re-checked against the world.
 
@@ -811,6 +811,13 @@ predicate then reads `unknown`, because that is what is true about it.
 `trusted_owners=` scopes what may *execute* and defaults to `owners`, so
 widening the search never quietly widens what runs — pass it explicitly to search
 wider than you trust.
+
+A predicate that *looks like a write* (`gh workflow run`, a `curl` write, `git
+push`… see [`openloops.predicate_safety`](openloops.predicate_safety.html.md#module-openloops.predicate_safety)) is not run: the row reads
+`unknown` with `unverified: predicate not read-only`, because asking what is owed
+must not start a deploy (openloops#43). `write_guard=` is the seam: any callable
+from command to a non-empty reason (refuse) or `""` (run); `lambda c: ""`
+restores the old behaviour.
 
 Two seams, each one keyword argument, each defaulting to a real implementation:
 `issues_source=` (defaults to [`gh_issues()`](#openloops.gh_issues); a list of dicts substitutes) and
@@ -1116,21 +1123,22 @@ which is what makes it safe to suggest when someone suspects a stale digest.
 
 ### Modules
 
-| [`base`](openloops.base.html.md#module-openloops.base)                   | Data structures shared across openloops: what a session is, and what a digest is.       |
-|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| [`blockers`](openloops.blockers.html.md#module-openloops.blockers)           | The other kind of open loop: the one that points at a repository, not at a person.      |
-| [`board`](openloops.board.html.md#module-openloops.board)                 | The phone task board: task records in, a static page and its data files out.            |
-| [`board_server`](openloops.board_server.html.md#module-openloops.board_server)   | An optional web app for a self-hosted phone board: the page, its files, its store API.  |
-| [`board_store`](openloops.board_store.html.md#module-openloops.board_store)     | The board store's rules, for a self-hosted phone board: who may write what, and how.    |
-| [`dashboard`](openloops.dashboard.html.md#module-openloops.dashboard)         | One page you can look at instead of reading three command outputs.                      |
-| [`digest`](openloops.digest.html.md#module-openloops.digest)               | Rendering one session into one dated markdown digest.                                   |
-| [`egress`](openloops.egress.html.md#module-openloops.egress)               | The egress choke point: nothing leaves openloops carrying a home path or a secret.      |
-| [`job`](openloops.job.html.md#module-openloops.job)                     | The periodic job: launchd runs `ol sync`, writes, and exits.                            |
-| [`obligations`](openloops.obligations.html.md#module-openloops.obligations)     | What you still owe your agents — re-checked against the world before it is shown.       |
-| [`publications`](openloops.publications.html.md#module-openloops.publications)   | What your agents handed you lately: recently published annals documents, per session.   |
-| [`receiver_tick`](openloops.receiver_tick.html.md#module-openloops.receiver_tick) | One tick of the board-receiver job: check for work without a model, then hand over.     |
-| [`skills`](openloops.skills.html.md#module-openloops.skills)               | The agent-facing surface: two skills, one subagent, and the command that installs them. |
-| [`store`](openloops.store.html.md#module-openloops.store)                 | Where digests live, and where the change-detection cache lives — two different things.  |
-| [`tasks`](openloops.tasks.html.md#module-openloops.tasks)                 | Everything you could act on, as one list of task records: gather, classify, merge.      |
-| [`tools`](openloops.tools.html.md#module-openloops.tools)                 | The package's single list of operations: plain functions, JSON-ready dicts.             |
-| [`transcripts`](openloops.transcripts.html.md#module-openloops.transcripts)     | The default `transcript_source`: a direct reader of Claude Code's on-disk state.        |
+| [`base`](openloops.base.html.md#module-openloops.base)                         | Data structures shared across openloops: what a session is, and what a digest is.       |
+|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| [`blockers`](openloops.blockers.html.md#module-openloops.blockers)                 | The other kind of open loop: the one that points at a repository, not at a person.      |
+| [`board`](openloops.board.html.md#module-openloops.board)                       | The phone task board: task records in, a static page and its data files out.            |
+| [`board_server`](openloops.board_server.html.md#module-openloops.board_server)         | An optional web app for a self-hosted phone board: the page, its files, its store API.  |
+| [`board_store`](openloops.board_store.html.md#module-openloops.board_store)           | The board store's rules, for a self-hosted phone board: who may write what, and how.    |
+| [`dashboard`](openloops.dashboard.html.md#module-openloops.dashboard)               | One page you can look at instead of reading three command outputs.                      |
+| [`digest`](openloops.digest.html.md#module-openloops.digest)                     | Rendering one session into one dated markdown digest.                                   |
+| [`egress`](openloops.egress.html.md#module-openloops.egress)                     | The egress choke point: nothing leaves openloops carrying a home path or a secret.      |
+| [`job`](openloops.job.html.md#module-openloops.job)                           | The periodic job: launchd runs `ol sync`, writes, and exits.                            |
+| [`obligations`](openloops.obligations.html.md#module-openloops.obligations)           | What you still owe your agents — re-checked against the world before it is shown.       |
+| [`predicate_safety`](openloops.predicate_safety.html.md#module-openloops.predicate_safety) | Is a `manual-task` verify predicate a pure read?                                        |
+| [`publications`](openloops.publications.html.md#module-openloops.publications)         | What your agents handed you lately: recently published annals documents, per session.   |
+| [`receiver_tick`](openloops.receiver_tick.html.md#module-openloops.receiver_tick)       | One tick of the board-receiver job: check for work without a model, then hand over.     |
+| [`skills`](openloops.skills.html.md#module-openloops.skills)                     | The agent-facing surface: two skills, one subagent, and the command that installs them. |
+| [`store`](openloops.store.html.md#module-openloops.store)                       | Where digests live, and where the change-detection cache lives — two different things.  |
+| [`tasks`](openloops.tasks.html.md#module-openloops.tasks)                       | Everything you could act on, as one list of task records: gather, classify, merge.      |
+| [`tools`](openloops.tools.html.md#module-openloops.tools)                       | The package's single list of operations: plain functions, JSON-ready dicts.             |
+| [`transcripts`](openloops.transcripts.html.md#module-openloops.transcripts)           | The default `transcript_source`: a direct reader of Claude Code's on-disk state.        |

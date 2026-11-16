@@ -1,0 +1,12 @@
+openloops.predicate\_safety
+===========================
+
+.. automodule:: openloops.predicate_safety
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      write_effect
+   

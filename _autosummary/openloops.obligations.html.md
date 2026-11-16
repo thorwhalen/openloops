@@ -40,7 +40,7 @@ command, its exit status and what it printed, and you decide.
 ## Trust boundary — stated here because it should be read, not discovered
 
 Evaluating a predicate means **executing text that came from a GitHub issue body**.
-That is a real capability and it is bounded here in five ways, each of them visible:
+That is a real capability and it is bounded here in six ways, each of them visible:
 
 1. **Only owners you named.** A predicate is run only when the issue’s repository owner
    is in `trusted_owners=`, which defaults to the same `owners=` the search was
@@ -57,7 +57,11 @@ That is a real capability and it is bounded here in five ways, each of them visi
    the shell itself is killed — a predicate that backgrounds work can outlive its
    timeout there, which is a platform limit worth knowing rather than a promise broken
    quietly.
-5. **The whole thing is one keyword argument away from being someone else’s code.**
+5. **A predicate that looks like a write is not run.** `gh workflow run`, a `curl`
+   with a write method, `git push` and the like read `?` with `unverified: predicate not
+   read-only` ([`openloops.predicate_safety`](openloops.predicate_safety.html.md#module-openloops.predicate_safety); `write_guard=` is the seam). Asking
+   what is owed must not start a deploy.
+6. **The whole thing is one keyword argument away from being someone else’s code.**
    `run_predicate=` replaces the evaluator; `issues_source=` replaces the reader.
 
 One honest limit: predicates are POSIX shell. On a shell that cannot parse one, the
@@ -255,7 +259,7 @@ Returns whatever `gh` returned, unparsed and unjudged: a list of dicts with
 * **Return type:**
   [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
 
-### openloops.obligations.owed(, verify=True, owners=None, trusted_owners=None, label='manual-task', limit=50, timeout=30.0, predicate_timeout=20.0, now=None, issues_source=None, run_predicate=None)
+### openloops.obligations.owed(\*, verify=True, owners=None, trusted_owners=None, label='manual-task', limit=50, timeout=30.0, predicate_timeout=20.0, now=None, issues_source=None, run_predicate=None, write_guard=<function write_effect>)
 
 The open `manual-task` obligations, each re-checked against the world.
 
@@ -266,6 +270,13 @@ predicate then reads `unknown`, because that is what is true about it.
 `trusted_owners=` scopes what may *execute* and defaults to `owners`, so
 widening the search never quietly widens what runs — pass it explicitly to search
 wider than you trust.
+
+A predicate that *looks like a write* (`gh workflow run`, a `curl` write, `git
+push`… see [`openloops.predicate_safety`](openloops.predicate_safety.html.md#module-openloops.predicate_safety)) is not run: the row reads
+`unknown` with `unverified: predicate not read-only`, because asking what is owed
+must not start a deploy (openloops#43). `write_guard=` is the seam: any callable
+from command to a non-empty reason (refuse) or `""` (run); `lambda c: ""`
+restores the old behaviour.
 
 Two seams, each one keyword argument, each defaulting to a real implementation:
 `issues_source=` (defaults to [`gh_issues()`](#openloops.obligations.gh_issues); a list of dicts substitutes) and
