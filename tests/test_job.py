@@ -67,3 +67,21 @@ def test_installing_off_macos_explains_the_alternative(monkeypatch):
     with pytest.raises(NotImplementedError):
         job.uninstall()
     assert job.job_status()["platform_supported"] is False
+
+
+def test_a_plist_pinning_a_deleted_interpreter_is_reported(tmp_path):
+    import plistlib
+
+    gone = tmp_path / "versions" / "3.12.1" / "bin" / "python"
+    here = tmp_path / "claude"
+    here.write_text("")
+    plist = tmp_path / "x.plist"
+    plist.write_bytes(
+        plistlib.dumps({"ProgramArguments": [str(gone), "-m", "x", "--", str(here)]})
+    )
+    assert job.pinned_missing(plist) == [str(gone)]
+    here2 = tmp_path / "py"
+    here2.write_text("")
+    plist.write_bytes(plistlib.dumps({"ProgramArguments": [str(here2), "-m", "x"]}))
+    assert job.pinned_missing(plist) == []
+    assert job.pinned_missing(tmp_path / "absent.plist") == []
