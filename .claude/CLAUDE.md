@@ -39,6 +39,7 @@ the records.
 - `tools.py` — **the single surface all dispatch goes through** (CLI today, MCP/HTTP
   later): plain functions taking/returning flat JSON-ready dicts — `sync`, `ls`,
   `show`, `status`, `owed`, `blocked`, `dashboard`, `published`, `board_*`.
+- `board_refresh.py` — `refresh_board()`: the model-free board rebuild on a timer (ADR-012; `ol board-refresh`, `ol install-refresh-job`).
 - `job.py` — the periodic-job (launchd `StartInterval`) design: no daemon, ADR-006; also the board-receiver job (ADR-011).
 - `receiver_tick.py` — run by that job, nothing imports it: a no-model check of the
   board store (HTTP), then `exec` of `claude -p` only if work is pending. The one module

@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import json
 
-from openloops import board, tools
+from openloops import board, job, tools
+from openloops import board_refresh as refresh
 from openloops.__main__ import main
 
 
@@ -313,8 +314,99 @@ def test_the_page_can_show_only_what_was_opened_this_week():
     filt = page[page.index("function viewTasks") :][:1800]
     assert "new Date(t.created)" not in filt and "onOrAfter(t)" in filt
     # The link selects To do as well, and switching the filter off rewrites the address.
-    assert 'ui.show = SHOWS.some(x => x.k === q.get("show")) ? q.get("show") : "todo"' in page
+    assert (
+        'ui.show = SHOWS.some(x => x.k === q.get("show")) ? q.get("show") : "todo"'
+        in page
+    )
     assert 'u.searchParams.delete("opened")' in page and "history.replaceState" in page
     # The page says what the filter did: the day it counts from, and why a list is empty.
     assert "newest first" in page and "Nothing opened since" in page
     assert "(ui.opened ? 1 : 0)" in page
+
+
+# --------------------------------------------------------------------------------
+# The rebuild on a timer (openloops#39).
+
+
+def _item(n, title="Add a key"):
+    return {
+        "id": f"a/b#{n}",
+        "url": f"https://github.com/a/b/issues/{n}",
+        "repo": "a/b",
+        "title": title,
+        "src": "label:manual-task",
+        "created": "2026-11-01",
+    }
+
+
+def _sweep(*items, listed=True):
+    return lambda **kw: {
+        "listed": listed,
+        "candidates": list(items),
+        "error": None if listed else "HTTP 500",
+        "saturated": [],
+    }
+
+
+def test_refresh_builds_then_leaves_an_unchanged_board_alone(tmp_path):
+    first = refresh.refresh_board(tmp_path, gather=_sweep(_item(1), _item(2)))
+    assert first["rebuilt"] and first["added"] == 2 and first["needs_enrichment"] == 2
+    stamp = (tmp_path / "board" / "tasks.json").stat().st_mtime_ns
+    again = refresh.refresh_board(tmp_path, gather=_sweep(_item(1), _item(2)))
+    assert again["rebuilt"] is False
+    assert (tmp_path / "board" / "tasks.json").stat().st_mtime_ns == stamp
+
+
+def test_refresh_reuses_enriched_records_and_classifies_only_the_new(tmp_path):
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1), _item(2)))
+    path = tmp_path / "board" / "tasks.json"
+    tasks = json.loads(path.read_text())
+    for t in tasks:
+        if t["id"] == "a/b#1":
+            t["ask"] = "ENRICHED BY A BRIEF"
+    path.write_text(json.dumps(tasks))
+    result = refresh.refresh_board(tmp_path, gather=_sweep(_item(1), _item(3)))
+    assert (result["added"], result["closed"], result["kept"]) == (1, 1, 1)
+    after = {t["id"]: t for t in json.loads(path.read_text())}
+    assert set(after) == {"a/b#1", "a/b#3"}
+    assert after["a/b#1"]["ask"] == "ENRICHED BY A BRIEF"
+    new = json.loads((tmp_path / refresh.NEW_ITEMS_FILE).read_text())
+    assert [c["id"] for c in new] == ["a/b#3"]
+
+
+def test_an_incomplete_sweep_never_rebuilds(tmp_path):
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1), _item(2)))
+    before = (tmp_path / "board" / "tasks.json").read_text()
+    result = refresh.refresh_board(tmp_path, gather=_sweep(_item(1), listed=False))
+    assert result["rebuilt"] is False and "incomplete" in result["reason"]
+    assert (tmp_path / "board" / "tasks.json").read_text() == before
+
+
+def test_refresh_keeps_the_boards_own_settings_and_can_publish(tmp_path):
+    board.build_board(
+        [],
+        tmp_path / "board",
+        title="Mine",
+        session="s1",
+        read_only_orgs=["acme"],
+        store="http",
+        api="/x/board-store",
+    )
+    dest = tmp_path / "served"
+    result = refresh.refresh_board(
+        tmp_path, gather=_sweep(_item(1)), publish=refresh.dir_publisher(str(dest))
+    )
+    cfg = json.loads((tmp_path / "board" / "board.json").read_text())
+    assert cfg["title"] == "Mine" and cfg["read_only_orgs"] == ["acme"]
+    assert cfg["store"] == {"kind": "http", "api": "/x/board-store"}
+    assert result["published"] and (dest / "tasks.json").is_file()
+    assert (dest / "index.html").read_text().startswith("<!doctype html>")
+
+
+def test_the_refresh_job_runs_board_refresh_on_a_start_interval(tmp_path):
+    spec = job.refresh_job_spec(tmp_path, refresh_args=["--owners", "me"])
+    xml = spec["xml"]
+    assert "<key>StartInterval</key>" in xml and "KeepAlive" not in xml
+    assert spec["program_args"][1:4] == ["-m", "openloops", "board-refresh"]
+    assert spec["program_args"][-2:] == ["--owners", "me"]
+    assert spec["interval"] == job.REFRESH_INTERVAL

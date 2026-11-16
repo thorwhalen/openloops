@@ -21,6 +21,7 @@ import os
 import shutil
 import subprocess
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 
 from openloops.store import state_dir, sync_state_path
@@ -28,6 +29,8 @@ from openloops.store import state_dir, sync_state_path
 __all__ = [
     "DFLT_LABEL",
     "DFLT_INTERVAL",
+    "REFRESH_INTERVAL",
+    "REFRESH_LABEL",
     "RECEIVER_LABEL",
     "RECEIVER_INTERVAL",
     "install",
@@ -64,6 +67,10 @@ RECEIVER_LABEL = "openloops.board-receiver"
 #: Seconds between receiver ticks. A tick that finds nothing pending costs a few HTTP
 #: calls and no model, so this can be as short as the phone board's latency wants.
 RECEIVER_INTERVAL = 300
+#: The board-rebuild job (`ol board-refresh` on a timer; issue #39): no model, so it can
+#: run often; six hours keeps the board within a day of GitHub with margin.
+REFRESH_LABEL = "openloops.board-refresh"
+REFRESH_INTERVAL = 21600
 
 #: Tools the unattended receiver session may use without asking. Bash is limited to the
 #: commands the receiver procedure runs (`gh`, `curl`, `python3`, the worker dispatch,
@@ -424,6 +431,72 @@ def install_receiver(
             [sys.executable, "-m", "openloops.receiver_tick", "--help"],
             [str(spec["claude"]), "--version"],
         ],
+        env=dict(spec["env"]),  # type: ignore[arg-type]
+    )
+    return {
+        "plist": str(spec["plist"]),
+        "log": str(spec["log"]),
+        "interval": str(spec["interval"]),
+    }
+
+
+def refresh_job_spec(
+    work_dir: str | Path,
+    *,
+    refresh_args: Sequence[str] = (),
+    interval: int = REFRESH_INTERVAL,
+    label: str = REFRESH_LABEL,
+) -> dict[str, object]:
+    """The board-rebuild job as data: ``python -m openloops board-refresh WORK ...``.
+
+    Pure, so it tests anywhere. ``refresh_args`` are ``board-refresh`` flags
+    (``--owners``, ``--exclude-repos``, ``--publish-to``). The job runs with the
+    sync job's minimal environment (``gh`` must be on its ``PATH`` and logged in for
+    the same user) and carries no credential.
+    """
+    work = Path(work_dir).expanduser().resolve()
+    args = [
+        sys.executable,
+        "-m",
+        "openloops",
+        "board-refresh",
+        str(work),
+        *refresh_args,
+    ]
+    env = job_environment()
+    log_path = _log_path(label)
+    return {
+        "label": label,
+        "program_args": args,
+        "env": env,
+        "interval": interval,
+        "log": str(log_path),
+        "plist": str(_plist_path(label)),
+        "xml": plist_xml(
+            label=label,
+            program_args=args,
+            env=env,
+            interval=interval,
+            log_path=log_path,
+            working_dir=work,
+        ),
+    }
+
+
+def install_refresh(
+    work_dir: str | Path, *, dry_run: bool = False, **kwargs: object
+) -> dict[str, str]:
+    """Install (or replace) the board-rebuild job. ``kwargs`` are :func:`refresh_job_spec`'s."""
+    spec = refresh_job_spec(work_dir, **kwargs)  # type: ignore[arg-type]
+    if dry_run:
+        return {k: str(v) for k, v in spec.items() if k in ("plist", "log", "xml")}
+    _require_macos()
+    _bootstrap(
+        str(spec["label"]),
+        Path(str(spec["plist"])),
+        Path(str(spec["log"])),
+        str(spec["xml"]),
+        smoke=[[sys.executable, "-m", "openloops", "board-refresh", "--help"]],
         env=dict(spec["env"]),  # type: ignore[arg-type]
     )
     return {

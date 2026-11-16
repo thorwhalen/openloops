@@ -489,6 +489,47 @@ def install_receiver_job(
     )
 
 
+def install_refresh_job(
+    work_dir: str,
+    *,
+    interval: int = _job.REFRESH_INTERVAL,
+    owners: str = None,
+    exclude_repos: str = None,
+    publish_to: str = None,
+    dry_run: bool = False,
+):
+    """Install the phone-board rebuild job (macOS launchd): `ol board-refresh` on a timer.
+
+    Every `interval` seconds (default six hours) it runs `ol board-refresh WORK_DIR`
+    with the given `--owners`, `--exclude-repos` and `--publish-to`, so the board stays
+    within a day of GitHub without a session remembering to. No model is called. The
+    job needs `gh` logged in for the same user. `--dry-run` prints the plist.
+    """
+    result = _job.install_refresh(
+        work_dir,
+        interval=interval,
+        refresh_args=[
+            *(["--owners", owners] if owners else []),
+            *(["--exclude-repos", exclude_repos] if exclude_repos else []),
+            *(["--publish-to", publish_to] if publish_to else []),
+        ],
+        dry_run=dry_run,
+    )
+    if dry_run:
+        return result["xml"]
+    return (
+        f"installed {_job.REFRESH_LABEL} every {result['interval']}s\n"
+        f"  plist: {result['plist']}\n  log:   {result['log']}"
+    )
+
+
+def uninstall_refresh_job():
+    """Unload and remove the phone-board rebuild job."""
+    result = _job.uninstall(label=_job.REFRESH_LABEL)
+    removed = result["removed"] == "true"
+    return f"{'removed' if removed else 'nothing to remove at'} {result['plist']}"
+
+
 def uninstall_receiver_job():
     """Unload and remove the phone-board receiver job."""
     result = _job.uninstall(label=_job.RECEIVER_LABEL)
@@ -578,6 +619,48 @@ def board_gather(
     return head
 
 
+def board_refresh(
+    work_dir: str,
+    *,
+    owners: str = None,
+    exclude_owners: str = None,
+    exclude_repos: str = None,
+    force: bool = False,
+    publish_to: str = None,
+):
+    """Rebuild WORK_DIR/board if any item opened or closed since the last build.
+
+    The model-free rebuild for a timer (`ol install-refresh-job WORK_DIR`): gathers every
+    kind of open item, compares ids with the live `tasks.json`, and rebuilds only on a
+    change, keeping the records of items still open. New items get the heuristic record
+    and are listed in WORK_DIR/new-items.json for a classifier-brief pass. An incomplete
+    sweep leaves the board alone. The board's settings come from its `board.json`.
+    `--publish-to DIR|host:DIR` copies the files after a rebuild; `--force` rebuilds
+    anyway.
+    """
+    result = tools.board_refresh(
+        work_dir=work_dir,
+        owners=_words(owners),
+        exclude_owners=_words(exclude_owners),
+        exclude_repos=_words(exclude_repos),
+        force=force,
+        publish_to=publish_to,
+    )
+    if not result["rebuilt"]:
+        return f"board left as it was: {result['reason']}"
+    head = (
+        f"rebuilt the board: {result['tasks']} tasks "
+        f"(+{result['added']} opened, -{result['closed']} closed, {result['kept']} kept)"
+    )
+    if result["published"]:
+        head += f"\n  published to {publish_to}"
+    if result["needs_enrichment"]:
+        head += f"\n  {result['needs_enrichment']} new items have only the heuristic record: {result['new_items']}"
+    if result["saturated"]:
+        head += f"\n  saturated: {', '.join(result['saturated'])}"
+    return head
+
+
 def board_classify(*candidates: str, out: str = None, enriched: str = None):
     """Classify gathered items into task records (deterministic heuristic, no model).
 
@@ -645,6 +728,7 @@ _commands = [
     board_gather,
     board_classify,
     board_build,
+    board_refresh,
     sync,
     ls,
     show,
@@ -655,6 +739,8 @@ _commands = [
     job_status,
     install_receiver_job,
     uninstall_receiver_job,
+    install_refresh_job,
+    uninstall_refresh_job,
     receiver_job_status,
 ]
 

@@ -39,6 +39,7 @@ from openloops.obligations import (
     owed as _owed,
 )
 from openloops import board as _board
+from openloops import board_refresh as _refresh
 from openloops import tasks as _tasks
 from openloops.publications import DFLT_LIMIT as DFLT_PUBLISHED_LIMIT
 from openloops.publications import published as _published
@@ -626,6 +627,34 @@ def board_build(
     )
 
 
+def board_refresh(
+    *,
+    work_dir: str,
+    owners: list[str] | None = None,
+    exclude_owners: list[str] | None = None,
+    exclude_repos: list[str] | None = None,
+    force: bool = False,
+    publish_to: str | None = None,
+) -> dict[str, Any]:
+    """Rebuild the phone board in ``work_dir/board`` if any item opened or closed.
+
+    Gathers every kind of open item, diffs the ids against the live ``tasks.json`` and,
+    only when they changed (or ``force``), rebuilds, keeping the earlier record of every
+    item still open and giving new ones the free heuristic record (listed in
+    ``new-items.json`` for the classifier brief). An incomplete sweep rebuilds nothing.
+    ``publish_to`` (a directory or ``host:dir``) receives the files after a rebuild.
+    Reads GitHub; writes only into ``work_dir`` and ``publish_to``.
+    """
+    return _refresh.refresh_board(
+        work_dir,
+        owners=owners,
+        exclude_owners=exclude_owners or (),
+        exclude_repos=exclude_repos,
+        force=force,
+        publish=_refresh.dir_publisher(publish_to) if publish_to else None,
+    )
+
+
 #: Single source of truth for what every surface exposes. The CLI dispatches this list;
 #: an MCP or HTTP adapter would reference the same names as strings.
 _dispatch_funcs = [
@@ -640,6 +669,7 @@ _dispatch_funcs = [
     board_gather,
     board_classify,
     board_build,
+    board_refresh,
 ]
 
 

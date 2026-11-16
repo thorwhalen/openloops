@@ -18,6 +18,7 @@ session identifiers that motivated it are not, and never will be — see
 | [ADR-009](009-a-self-hosted-board-store.md) | A self-hosted board: the store seam, the rules, the host's login | accepted |
 | [ADR-010](010-agents-decide-what-is-reversible-and-clear.md) | Agents decide what is reversible and clearly recommended; the owner can veto | accepted |
 | [ADR-011](011-the-board-receiver-is-a-periodic-job-with-a-free-check.md) | The board receiver is a periodic job whose idle ticks cost nothing | accepted |
+| [ADR-012](012-the-board-rebuild-is-a-free-timer-job.md) | The board rebuild is a model-free timer job that reuses what it already knows | accepted |
 
 ## Where these came from
 
