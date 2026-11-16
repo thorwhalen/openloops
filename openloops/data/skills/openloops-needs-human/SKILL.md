@@ -377,6 +377,13 @@ given in conversation. Write it out.
 **Verify:** none possible — a judgement call with no observable artifact. Close by hand once decided.
 ```
 
+**A predicate must be a pure read.** `ol owed` runs it every time anyone asks what is
+owed, so a predicate that deploys, merges, posts or pushes (`gh workflow run`,
+`gh pr merge`, `curl -X POST`, `git push`...) turns a question into an action: five
+`ol owed` calls once started five deploys. `ol owed` refuses to run commands that look
+like that and shows `unverified: predicate not read-only`; write the check as a
+read (`gh run list ...`, `gh pr view --json state`) or say none is possible.
+
 **Never invent one.** A predicate that passes trivially is worse than an absent one: it
 closes a live obligation silently, and the count is the whole product.
 

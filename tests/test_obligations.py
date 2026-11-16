@@ -823,3 +823,59 @@ def test_annals_links_in_the_body_are_carried_once_each():
 
 def test_a_body_without_a_document_link_carries_none():
     assert only([issue()])["documents"] == ()
+
+
+# --------------------------------------------------------------------------------
+# A question must not have a write effect (openloops#43).
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "gh workflow run deploy.yml -R o/r",
+        "gh pr merge 4 --squash",
+        "curl -X POST https://x.test/y",
+        "curl -s -d a=b https://x.test",
+        "gh api repos/o/r/issues -f title=x",
+        "gh api -X DELETE repos/o/r",
+        "git push origin main",
+        "rm -rf build",
+        "echo hi > out.txt",
+        "gh run list && gh workflow run a.yml",
+    ],
+)
+def test_a_predicate_that_looks_like_a_write_is_not_run(command):
+    ran = []
+    rows = report(
+        [issue(1, predicate=command)], run_predicate=lambda c: ran.append(c) or 0
+    )["rows"]
+    assert ran == []
+    assert rows[0]["state"] == "unknown"
+    assert "unverified: predicate not read-only" in rows[0]["evidence"]
+    assert rows[0]["predicate"] == command
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "gh pr view 3 --json state -q .state | grep -q MERGED",
+        "gh api repos/o/r/pulls/3 --jq .merged",
+        "gh api -X GET repos/o/r -f per_page=1",
+        "gh run list -R o/r --workflow deploy.yml --json conclusion",
+        "test -f ~/.config/x 2>/dev/null",
+        "curl -sf https://x.test/health",
+    ],
+)
+def test_reads_still_run(command):
+    ran = []
+    rows = report(
+        [issue(1, predicate=command)], run_predicate=lambda c: ran.append(c) or 0
+    )["rows"]
+    assert ran == [command] and rows[0]["state"] == "discharged"
+
+
+def test_the_write_guard_is_a_seam():
+    rows = report(
+        [issue(1, predicate="gh workflow run a.yml")], write_guard=lambda c: ""
+    )["rows"]
+    assert rows[0]["state"] == "discharged"

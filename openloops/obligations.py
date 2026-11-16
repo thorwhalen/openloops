@@ -40,7 +40,7 @@ Trust boundary — stated here because it should be read, not discovered
 ---------------------------------------------------------------------
 
 Evaluating a predicate means **executing text that came from a GitHub issue body**.
-That is a real capability and it is bounded here in five ways, each of them visible:
+That is a real capability and it is bounded here in six ways, each of them visible:
 
 1. **Only owners you named.** A predicate is run only when the issue's repository owner
    is in ``trusted_owners=``, which defaults to the same ``owners=`` the search was
@@ -57,7 +57,11 @@ That is a real capability and it is bounded here in five ways, each of them visi
    the shell itself is killed — a predicate that backgrounds work can outlive its
    timeout there, which is a platform limit worth knowing rather than a promise broken
    quietly.
-5. **The whole thing is one keyword argument away from being someone else's code.**
+5. **A predicate that looks like a write is not run.** ``gh workflow run``, a ``curl``
+   with a write method, ``git push`` and the like read ``?`` with ``unverified: predicate not
+   read-only`` (:mod:`openloops.predicate_safety`; ``write_guard=`` is the seam). Asking
+   what is owed must not start a deploy.
+6. **The whole thing is one keyword argument away from being someone else's code.**
    ``run_predicate=`` replaces the evaluator; ``issues_source=`` replaces the reader.
 
 One honest limit: predicates are POSIX shell. On a shell that cannot parse one, the
@@ -136,6 +140,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from openloops.base import OPEN
+from openloops.predicate_safety import write_effect
 
 __all__ = [
     "DISCHARGED",
@@ -783,6 +788,7 @@ def _verdict(
     trusted_owners: frozenset[str],
     verify: bool,
     run_predicate: Callable[[str], Any],
+    write_guard: Callable[[str], str] = write_effect,
 ) -> tuple[str, str]:
     """``(state, evidence)`` for one obligation. The whole three-state rule lives here.
 
@@ -816,6 +822,8 @@ def _verdict(
         return UNKNOWN, "not evaluated (verify=False)"
     if owner not in trusted_owners:
         return UNKNOWN, f"not evaluated: owner {owner!r} is not in trusted_owners"
+    if effect := write_guard(command):
+        return UNKNOWN, f"unverified: predicate not read-only ({effect}); not run"
     try:
         outcome = _as_outcome(run_predicate(command))
     except Exception as exc:  # noqa: BLE001 - an evaluator that blew up is not an answer
@@ -894,6 +902,7 @@ def owed(
     now: datetime | None = None,
     issues_source: Any = None,
     run_predicate: Callable[[str], Any] | None = None,
+    write_guard: Callable[[str], str] = write_effect,
 ) -> dict[str, Any]:
     """The open `manual-task` obligations, each re-checked against the world.
 
@@ -904,6 +913,13 @@ def owed(
     ``trusted_owners=`` scopes what may *execute* and defaults to ``owners``, so
     widening the search never quietly widens what runs — pass it explicitly to search
     wider than you trust.
+
+    A predicate that *looks like a write* (``gh workflow run``, a ``curl`` write, ``git
+    push``... see :mod:`openloops.predicate_safety`) is not run: the row reads
+    ``unknown`` with ``unverified: predicate not read-only``, because asking what is owed
+    must not start a deploy (openloops#43). ``write_guard=`` is the seam: any callable
+    from command to a non-empty reason (refuse) or ``""`` (run); ``lambda c: ""``
+    restores the old behaviour.
 
     Two seams, each one keyword argument, each defaulting to a real implementation:
     ``issues_source=`` (defaults to :func:`gh_issues`; a list of dicts substitutes) and
@@ -993,6 +1009,7 @@ def owed(
             trusted_owners=trusted,
             verify=verify,
             run_predicate=run_predicate,
+            write_guard=write_guard,
         )
         rows.append(
             Obligation(

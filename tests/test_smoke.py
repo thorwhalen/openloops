@@ -118,6 +118,8 @@ def test_no_surface_exposes_a_mutating_operation():
     package = Path(__file__).resolve().parent.parent / "openloops"
     offenders = []
     for path in sorted(package.rglob("*.py")):
+        if path.name == "predicate_safety.py":
+            continue  # the denylist of write verbs: they appear as data, never as calls
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
             if isinstance(node, ast.Constant) and isinstance(node.value, str):
