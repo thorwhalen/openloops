@@ -19,7 +19,7 @@ Guards, because a wrong rebuild is worse than a stale one:
 
 - an incomplete sweep (`listed: false`) never rebuilds, and the CLI exits 1 so a failing timer shows;
 - a saturated sweep (a search hit its cap) adds but never closes;
-- a rebuild that would close more than half (`max_close_fraction`) of a board of ten or more cards is refused (exit 1) unless `--force`;
+- a rebuild that would close more than half (`max_close_fraction`) of a board of ten or more cards holds the closes back (additions and retitles still apply, `status: partial`, exit 0 with the remedy `--force` printed; exit 1 if nothing else changed) unless `--force`, so a long gap cannot freeze the board;
 - a `tasks.json`, `board.json` or `refresh.json` that exists but does not parse, or has the wrong shape, raises; only a missing one is empty;
 - the board's files are built in a temporary directory and moved into place one by one with `os.replace` (`tasks.json` last), since the receiver job reads them at any moment; a `kit.html` that differs from the packaged template is the owner's edit and is kept.
 
