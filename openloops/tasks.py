@@ -48,6 +48,8 @@ import glob
 import json
 import os
 import re
+import sys
+import time
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field, fields
 from pathlib import Path
@@ -58,6 +60,7 @@ from typing import Any, NamedTuple
 from openloops.obligations import (
     DFLT_LABEL,
     DFLT_LIST_TIMEOUT,
+    GhRateLimited,
     GhUnavailable,
     _gh,
     configured_owners,
@@ -272,6 +275,11 @@ def _id_of(url: str) -> str:
 
 #: The search API's own per-query ceiling. A query that returns this many is saturated.
 DFLT_GATHER_LIMIT = 1000
+#: GitHub's search API allows 30 requests a minute; a sweep over several owners and kinds
+#: issues more than that back to back. A query refused for it waits this long (a full
+#: window plus a margin) and is tried again, up to ``DFLT_RATE_LIMIT_RETRIES`` times.
+DFLT_RATE_LIMIT_BACKOFF = 65.0
+DFLT_RATE_LIMIT_RETRIES = 2
 #: The label an agent files a decision it made itself under (ADR-010).
 AGENT_DECIDED_LABEL = "agent-decided"
 #: Extra searches beyond the label, by name: (search terms, the field they match).
@@ -304,6 +312,42 @@ def _split(raw: str | None) -> tuple[str, ...]:
     return tuple(p for p in re.split(r"[,\s]+", raw or "") if p)
 
 
+def _retrying(
+    run: Callable[..., str],
+    *,
+    retries: int,
+    backoff: float,
+    sleep: Callable[[float], Any],
+) -> Callable[..., str]:
+    """``run`` that waits out the search rate limit and tries again, then gives up.
+
+    Only :class:`GhRateLimited` is retried; any other failure is raised as it was. Once
+    one query has spent its retries the limit is not clearing, so later queries fail
+    at once instead of each waiting it out again: the envelope says ``listed: false``
+    after one wait, not after an hour.
+    """
+    exhausted = False
+
+    def run_with_retry(args: Sequence[str], *, timeout: float) -> str:
+        nonlocal exhausted
+        attempt = 0
+        while True:
+            try:
+                return run(args, timeout=timeout)
+            except GhRateLimited:
+                if exhausted or attempt >= retries:
+                    exhausted = True
+                    raise
+                attempt += 1
+                print(
+                    f"search rate limit: waiting {backoff:g}s ({attempt}/{retries})",
+                    file=sys.stderr,
+                )
+                sleep(backoff)
+
+    return run_with_retry
+
+
 def gather(
     *,
     owners: Sequence[str] | None = None,
@@ -315,6 +359,9 @@ def gather(
     limit: int = DFLT_GATHER_LIMIT,
     timeout: float = DFLT_LIST_TIMEOUT,
     run_gh: Callable[..., str] | None = None,
+    rate_limit_retries: int = DFLT_RATE_LIMIT_RETRIES,
+    rate_limit_backoff: float = DFLT_RATE_LIMIT_BACKOFF,
+    sleep: Callable[[float], Any] = time.sleep,
 ) -> dict[str, Any]:
     """Every open item that asks something of the human, across ``owners``, deduplicated.
 
@@ -329,6 +376,10 @@ def gather(
     failed, because a partial sweep presented as a whole one is the failure that
     matters. ``saturated`` names the queries that hit ``limit``.
 
+    A query GitHub refuses for the search rate limit (30 a minute) waits
+    ``rate_limit_backoff`` seconds and is retried up to ``rate_limit_retries`` times
+    before it counts as failed, so a many-owner sweep completes in one call.
+
     >>> def fake(args, *, timeout):
     ...     return json.dumps([{'number': 1, 'title': 'Add a key',
     ...         'url': 'https://github.com/acme/w/issues/1',
@@ -337,7 +388,14 @@ def gather(
     >>> report['listed'], [c['id'] for c in report['candidates']]
     (True, ['acme/w#1'])
     """
-    run = run_gh or _gh
+    if rate_limit_retries < 0:
+        raise ValueError("rate_limit_retries must be >= 0")
+    run = _retrying(
+        run_gh or _gh,
+        retries=rate_limit_retries,
+        backoff=rate_limit_backoff,
+        sleep=sleep,
+    )
     unknown = [name for name in searches if name not in DFLT_SEARCHES]
     if unknown:
         raise ValueError(f"unknown search {unknown}; known: {sorted(DFLT_SEARCHES)}")

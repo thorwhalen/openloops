@@ -147,6 +147,7 @@ __all__ = [
     "OBLIGATION_FIELDS",
     "OBLIGATION_STATES",
     "UNKNOWN",
+    "GhRateLimited",
     "GhUnavailable",
     "Obligation",
     "PredicateOutcome",
@@ -195,6 +196,18 @@ class GhUnavailable(RuntimeError):
     it becomes ``listed: False`` plus an ``error``, which every surface must render as
     ``?``. Turning it into an empty list would be the one unrecoverable bug here.
     """
+
+
+class GhRateLimited(GhUnavailable):
+    """``gh`` was refused for GitHub's rate limit: an answer to try again later.
+
+    A subclass, so every ``except GhUnavailable`` keeps treating it as ``?``; a caller
+    that can wait (:func:`openloops.tasks.gather`) catches it first.
+    """
+
+
+#: What GitHub's stderr says when it is rate limiting (primary, secondary, abuse).
+_RATE_LIMIT_TEXT = re.compile(r"rate limit|HTTP 429|abuse detection", re.IGNORECASE)
 
 
 @dataclass(frozen=True)
@@ -281,7 +294,8 @@ def _gh(args: Sequence[str], *, timeout: float) -> str:
         raise GhUnavailable(f"could not run `gh`: {exc}") from None
     if done.returncode != 0:
         detail = _first_line(done.stderr) or f"`gh` exited {done.returncode}"
-        raise GhUnavailable(detail)
+        limited = _RATE_LIMIT_TEXT.search(done.stderr or "")
+        raise (GhRateLimited if limited else GhUnavailable)(detail)
     return done.stdout
 
 

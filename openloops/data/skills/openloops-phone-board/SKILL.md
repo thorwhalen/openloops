@@ -17,6 +17,7 @@ Keep every file of the board **outside any repository**, in a working directory 
 ol board-gather --out WORK/candidates.json --all-kinds --exclude-repos 'some-org/*,acme/private-thing'
 ```
 
+- The sweep waits out GitHub's search limit (30 a minute, 65 s per wait, printed on stderr), so with many owners it takes minutes: run it in the background or with a Bash timeout of 300000, not the 120 s default.
 - Owners default to `OPENLOOPS_OWNERS` (or the `gh owe` alias, or your `gh` login). `--owners a,b` overrides; `--exclude-owners` drops some.
 - `--all-kinds` = the `manual-task` label + the `decide` and `needs-user` searches + the `agent-decided` label (decisions an agent made, for the owner to keep or veto) + PRs requesting the owner's review. Without it only the label is swept.
 - Read the printed line. `saturated` means more exist than were listed (the search API stops at 1000 per query): narrow the owners. `? incomplete` means a query failed: the board would be partial, so fix that first or tell the owner.
