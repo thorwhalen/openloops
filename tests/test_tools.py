@@ -122,6 +122,7 @@ def test_the_dispatch_list_is_the_public_surface():
         "board_gather",
         "board_classify",
         "board_build",
+        "board_refresh",
     }
     for func in tools._dispatch_funcs:
         assert func.__doc__, f"{func.__name__} needs a docstring — it is the CLI help"

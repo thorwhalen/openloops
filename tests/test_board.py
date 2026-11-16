@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
-from openloops import board, tools
+import pytest
+
+from openloops import board, job, tools
+from openloops import board_refresh as refresh
 from openloops.__main__ import main
 
 
@@ -313,8 +317,561 @@ def test_the_page_can_show_only_what_was_opened_this_week():
     filt = page[page.index("function viewTasks") :][:1800]
     assert "new Date(t.created)" not in filt and "onOrAfter(t)" in filt
     # The link selects To do as well, and switching the filter off rewrites the address.
-    assert 'ui.show = SHOWS.some(x => x.k === q.get("show")) ? q.get("show") : "todo"' in page
+    assert (
+        'ui.show = SHOWS.some(x => x.k === q.get("show")) ? q.get("show") : "todo"'
+        in page
+    )
     assert 'u.searchParams.delete("opened")' in page and "history.replaceState" in page
     # The page says what the filter did: the day it counts from, and why a list is empty.
     assert "newest first" in page and "Nothing opened since" in page
     assert "(ui.opened ? 1 : 0)" in page
+
+
+# --------------------------------------------------------------------------------
+# The rebuild on a timer (openloops#39).
+
+
+def _item(n, title="Add a key"):
+    return {
+        "id": f"a/b#{n}",
+        "url": f"https://github.com/a/b/issues/{n}",
+        "repo": "a/b",
+        "title": title,
+        "src": "label:manual-task",
+        "created": "2026-11-01",
+    }
+
+
+def _sweep(*items, listed=True, saturated=(), calls=None):
+    def gather(**kw):
+        if calls is not None:
+            calls.append(kw)
+        return {
+            "listed": listed,
+            "candidates": list(items),
+            "error": None if listed else "HTTP 500",
+            "saturated": list(saturated),
+        }
+
+    return gather
+
+
+def _seeded(tmp_path, **settings):
+    """A WORK dir whose board was built once by hand (empty), as the refresh requires."""
+    board.build_board([], tmp_path / "board", **settings)
+    return tmp_path
+
+
+def _ids(tmp_path):
+    return [
+        t["id"] for t in json.loads((tmp_path / "board" / "tasks.json").read_text())
+    ]
+
+
+def test_refresh_builds_then_leaves_an_unchanged_board_alone(tmp_path):
+    _seeded(tmp_path)
+    first = refresh.refresh_board(tmp_path, gather=_sweep(_item(1), _item(2)))
+    assert first["rebuilt"] and first["added"] == 2 and first["needs_enrichment"] == 2
+    stamp = (tmp_path / "board" / "tasks.json").stat().st_mtime_ns
+    again = refresh.refresh_board(tmp_path, gather=_sweep(_item(1), _item(2)))
+    assert again["rebuilt"] is False and again["status"] == "unchanged"
+    assert (tmp_path / "board" / "tasks.json").stat().st_mtime_ns == stamp
+
+
+def test_refresh_reuses_enriched_records_and_classifies_only_the_new(tmp_path):
+    _seeded(tmp_path)
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1), _item(2)))
+    path = tmp_path / "board" / "tasks.json"
+    tasks = json.loads(path.read_text())
+    for t in tasks:
+        if t["id"] == "a/b#1":
+            t["ask"] = "ENRICHED BY A BRIEF"
+    path.write_text(json.dumps(tasks))
+    result = refresh.refresh_board(tmp_path, gather=_sweep(_item(1), _item(3)))
+    assert (result["added"], result["closed"], result["kept"]) == (1, 1, 1)
+    after = {t["id"]: t for t in json.loads(path.read_text())}
+    assert set(after) == {"a/b#1", "a/b#3"}
+    assert after["a/b#1"]["ask"] == "ENRICHED BY A BRIEF"
+    new = json.loads((tmp_path / refresh.NEW_ITEMS_FILE).read_text())
+    # a/b#1 is still waiting for the brief from the first build; a/b#2 closed.
+    assert [c["id"] for c in new] == ["a/b#1", "a/b#3"]
+
+
+def test_an_incomplete_sweep_never_rebuilds(tmp_path):
+    _seeded(tmp_path)
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1), _item(2)))
+    before = (tmp_path / "board" / "tasks.json").read_text()
+    result = refresh.refresh_board(tmp_path, gather=_sweep(_item(1), listed=False))
+    assert result["rebuilt"] is False and result["status"] == "incomplete"
+    assert "incomplete" in result["reason"]
+    assert (tmp_path / "board" / "tasks.json").read_text() == before
+
+
+def test_refresh_keeps_the_boards_own_settings_and_can_publish(tmp_path):
+    _seeded(
+        tmp_path,
+        title="Mine",
+        session="s1",
+        read_only_orgs=["acme"],
+        store="http",
+        api="/x/board-store",
+    )
+    dest = tmp_path / "served"
+    result = refresh.refresh_board(
+        tmp_path, gather=_sweep(_item(1)), publish=refresh.dir_publisher(str(dest))
+    )
+    cfg = json.loads((tmp_path / "board" / "board.json").read_text())
+    assert cfg["title"] == "Mine" and cfg["read_only_orgs"] == ["acme"]
+    assert cfg["store"] == {"kind": "http", "api": "/x/board-store"}
+    assert result["published"] and (dest / "tasks.json").is_file()
+    assert result["needs_republish"] is False
+    assert (dest / "index.html").read_text().startswith("<!doctype html>")
+
+
+def test_the_refresh_job_runs_board_refresh_on_a_start_interval(tmp_path):
+    spec = job.refresh_job_spec(tmp_path, refresh_args=["--owners", "me"])
+    xml = spec["xml"]
+    assert "<key>StartInterval</key>" in xml and "KeepAlive" not in xml
+    assert spec["program_args"][1:4] == ["-m", "openloops", "board-refresh"]
+    assert spec["program_args"][-2:] == ["--owners", "me"]
+    assert spec["interval"] == job.REFRESH_INTERVAL
+
+
+# A: the merge is pure.
+
+
+def test_merge_refresh_is_pure_and_keeps_earlier_records():
+    live = [{"id": "a/b#1", "title": "Add a key", "ask": "ENRICHED"}, {"id": "a/b#2"}]
+    before = json.dumps(live)
+    records, fresh, plan = refresh.merge_refresh(live, [_item(1), _item(3)])
+    assert json.dumps(live) == before  # inputs untouched
+    assert [r["id"] for r in records] == ["a/b#1", "a/b#3"]
+    assert records[0]["ask"] == "ENRICHED" and [f["id"] for f in fresh] == ["a/b#3"]
+    assert (plan.kept, plan.added, plan.closed) == (("a/b#1",), ("a/b#3",), ("a/b#2",))
+
+
+# B: the scope persists in refresh.json; run specs/extras reach every rebuild.
+
+
+def test_flags_are_saved_in_refresh_json_and_reused_when_absent(tmp_path):
+    _seeded(tmp_path)
+    calls = []
+    refresh.refresh_board(
+        tmp_path,
+        owners=["me"],
+        exclude_repos=["me/secret-*"],
+        gather=_sweep(_item(1), calls=calls),
+    )
+    state = json.loads((tmp_path / refresh.STATE_FILE).read_text())
+    assert state["owners"] == ["me"] and state["exclude_repos"] == ["me/secret-*"]
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1), calls=calls))
+    assert calls[1]["owners"] == ["me"] and calls[1]["exclude_repos"] == ["me/secret-*"]
+    assert calls[1]["review_prs"] is True and calls[1]["searches"]
+
+
+def test_install_refresh_job_saves_its_flags_and_the_plist_names_only_work(
+    tmp_path, monkeypatch
+):
+    seen = {}
+
+    def fake_install(work_dir, **kw):
+        seen.update(work_dir=work_dir, **kw)
+        return {"plist": "p", "log": "l", "interval": "60"}
+
+    monkeypatch.setattr(job, "install_refresh", fake_install)
+    from openloops import __main__ as cli
+
+    cli.install_refresh_job(str(tmp_path), owners="me,you", publish_to="host:/srv/b")
+    assert "refresh_args" not in seen
+    state = json.loads((tmp_path / refresh.STATE_FILE).read_text())
+    assert state["owners"] == ["me", "you"] and state["publish_to"] == "host:/srv/b"
+    spec = job.refresh_job_spec(tmp_path)
+    assert spec["program_args"][-1] == str(tmp_path.resolve())
+
+
+def test_run_extras_reach_every_rebuild_and_an_edited_kit_is_kept(tmp_path):
+    _seeded(tmp_path)
+    extras = tmp_path / "extras.json"
+    extras.write_text(json.dumps({"api-key": {"prompt": "DEPLOYMENT PROMPT"}}))
+    kit = tmp_path / "board" / "kit.html"
+    kit.write_text("EDITED KIT")
+    items = [
+        dict(_item(n), title="Add the API key", pattern="api-key", tier="browser")
+        for n in (1, 2)
+    ]
+    refresh.refresh_board(tmp_path, run_extras=str(extras), gather=_sweep(*items))
+    refresh.refresh_board(tmp_path, gather=_sweep(*items, _item(3)))
+    runs = json.loads((tmp_path / "board" / "runs.json").read_text())
+    assert any(r.get("prompt") == "DEPLOYMENT PROMPT" for r in runs), runs
+    assert kit.read_text() == "EDITED KIT"
+
+
+def test_an_untouched_kit_follows_the_packaged_template(tmp_path):
+    _seeded(tmp_path)
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1)))
+    packaged = (board.board_dir() / "kit.html").read_text()
+    assert (tmp_path / "board" / "kit.html").read_text() == packaged
+
+
+# C: missing is empty, corrupt is an error.
+
+
+def test_a_corrupt_tasks_json_raises_instead_of_resetting(tmp_path):
+    _seeded(tmp_path)
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1)))
+    path = tmp_path / "board" / "tasks.json"
+    path.write_text(path.read_text()[:-5])
+    with pytest.raises(ValueError, match="not valid JSON"):
+        refresh.refresh_board(tmp_path, gather=_sweep(_item(1)))
+
+
+@pytest.mark.parametrize(
+    "name, content, match",
+    [
+        ("tasks.json", '{"a": 1}', "should hold a JSON list"),
+        ("tasks.json", "[1, 2]", "not task records"),
+        ("board.json", "{oops", "not valid JSON"),
+        ("board.json", "[]", "should hold a JSON object"),
+    ],
+)
+def test_a_board_file_of_the_wrong_shape_raises(tmp_path, name, content, match):
+    _seeded(tmp_path)
+    (tmp_path / "board" / name).write_text(content)
+    with pytest.raises(ValueError, match=match):
+        refresh.refresh_board(tmp_path, gather=_sweep(_item(1)))
+
+
+def test_a_corrupt_refresh_json_raises(tmp_path):
+    _seeded(tmp_path)
+    (tmp_path / refresh.STATE_FILE).write_text("{nope")
+    with pytest.raises(ValueError, match="refresh.json"):
+        refresh.refresh_board(tmp_path, gather=_sweep(_item(1)))
+
+
+def test_a_first_run_without_a_board_asks_for_a_build_by_hand(tmp_path):
+    published = []
+    with pytest.raises(ValueError, match="ol board-build"):
+        refresh.refresh_board(
+            tmp_path, gather=_sweep(_item(1)), publish=published.append
+        )
+    assert not published and not (tmp_path / "board").exists()
+    # Explicit settings are an explicit choice.
+    result = refresh.refresh_board(
+        tmp_path, gather=_sweep(_item(1)), settings={"title": "Mine"}
+    )
+    assert result["rebuilt"]
+
+
+# D: a saturated sweep never closes; a mass close needs force.
+
+
+def test_a_saturated_sweep_adds_but_never_closes(tmp_path):
+    _seeded(tmp_path)
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1), _item(2), _item(3)))
+    result = refresh.refresh_board(
+        tmp_path, gather=_sweep(_item(1), _item(4), saturated=["me label"])
+    )
+    assert result["rebuilt"] and result["closed"] == 0 and result["withheld"] == 2
+    assert sorted(_ids(tmp_path)) == ["a/b#1", "a/b#2", "a/b#3", "a/b#4"]
+
+
+def test_closing_most_of_a_large_board_is_refused_without_force(tmp_path):
+    _seeded(tmp_path)
+    many = [_item(i) for i in range(1, 50)]
+    refresh.refresh_board(tmp_path, gather=_sweep(*many))
+    published = []
+    result = refresh.refresh_board(tmp_path, gather=_sweep(), publish=published.append)
+    assert result["status"] == "refused" and not result["rebuilt"]
+    assert "49 of 49" in result["reason"] and len(_ids(tmp_path)) == 49
+    forced = refresh.refresh_board(tmp_path, gather=_sweep(), force=True)
+    assert forced["rebuilt"] and _ids(tmp_path) == []
+    # An empty board that stays empty is not rebuilt on every tick.
+    again = refresh.refresh_board(tmp_path, gather=_sweep())
+    assert again["status"] == "unchanged"
+
+
+def test_a_small_board_may_close_everything(tmp_path):
+    _seeded(tmp_path)
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1), _item(2)))
+    assert refresh.refresh_board(tmp_path, gather=_sweep())["rebuilt"]
+
+
+# E: new-items.json accumulates.
+
+
+def test_new_items_accumulate_until_closed(tmp_path):
+    _seeded(tmp_path)
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1)))
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1), _item(2)))
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1), _item(2), _item(3)))
+    new = tmp_path / refresh.NEW_ITEMS_FILE
+    assert [c["id"] for c in json.loads(new.read_text())] == ["a/b#1", "a/b#2", "a/b#3"]
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1), _item(3)), force=True)
+    assert [c["id"] for c in json.loads(new.read_text())] == ["a/b#1", "a/b#3"]
+
+
+# F: publish on a hash mismatch, record only after success; artifact boards say so.
+
+
+def test_a_failed_publish_is_retried_on_the_next_tick(tmp_path):
+    _seeded(tmp_path, store="http", api="/x")
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1)))
+
+    def boom(board_dir):
+        raise RuntimeError("scp failed")
+
+    with pytest.raises(refresh.PublishError, match="scp failed"):
+        refresh.refresh_board(tmp_path, gather=_sweep(_item(1), _item(2)), publish=boom)
+    assert _ids(tmp_path) == ["a/b#1", "a/b#2"]  # the local rebuild stays
+    published = []
+    result = refresh.refresh_board(
+        tmp_path, gather=_sweep(_item(1), _item(2)), publish=published.append
+    )
+    assert result["status"] == "unchanged" and result["published"] and published
+    # Published once: the next tick has nothing to send.
+    again = refresh.refresh_board(
+        tmp_path, gather=_sweep(_item(1), _item(2)), publish=published.append
+    )
+    assert again["published"] is False and len(published) == 1
+
+
+def test_an_artifact_board_needs_a_republish_after_a_rebuild(tmp_path):
+    _seeded(tmp_path)  # store defaults to the claude.ai Artifact
+    result = refresh.refresh_board(tmp_path, gather=_sweep(_item(1)))
+    assert result["rebuilt"] and result["needs_republish"] is True
+    assert (
+        refresh.refresh_board(tmp_path, gather=_sweep(_item(1)))["needs_republish"]
+        is False
+    )
+
+
+def test_board_files_are_replaced_atomically(tmp_path, monkeypatch):
+    _seeded(tmp_path)
+    replaced = []
+    real = refresh.os.replace
+    monkeypatch.setattr(
+        refresh.os, "replace", lambda a, b: (replaced.append(Path(b).name), real(a, b))
+    )
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1)))
+    assert "tasks.json" in replaced and replaced.index("tasks.json") > replaced.index(
+        "runs.json"
+    )
+    leftovers = [p.name for p in tmp_path.iterdir() if p.name.startswith(".")]
+    assert leftovers == []
+
+
+def test_scp_publishing_never_prompts(monkeypatch, tmp_path):
+    ran = []
+    monkeypatch.setattr(refresh.subprocess, "run", lambda args, **kw: ran.append(args))
+    refresh.dir_publisher("host:/srv/board")(tmp_path)
+    assert ran[0][:4] == ["scp", "-q", "-o", "BatchMode=yes"]
+
+
+# G: kept records follow GitHub's title, and are never re-classified.
+
+
+def test_a_kept_record_takes_the_new_title_but_keeps_its_enrichment(tmp_path):
+    _seeded(tmp_path)
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1, "Add a key")))
+    path = tmp_path / "board" / "tasks.json"
+    tasks = json.loads(path.read_text())
+    tasks[0].update(ask="ENRICHED", tier="session")
+    path.write_text(json.dumps(tasks))
+    result = refresh.refresh_board(
+        tmp_path, gather=_sweep(_item(1, "Decide: rename the package"))
+    )
+    assert result["rebuilt"] and result["updated"] == 1
+    task = json.loads(path.read_text())[0]
+    assert task["title"] == "Decide: rename the package"
+    assert (task["ask"], task["tier"]) == ("ENRICHED", "session")
+
+
+# H: the CLI exits non-zero on an incomplete sweep, zero on an unchanged board.
+
+
+def test_the_cli_exits_nonzero_on_an_incomplete_sweep(tmp_path, monkeypatch, capsys):
+    _seeded(tmp_path)
+    sweeps = iter([_sweep(_item(1)), _sweep(_item(1)), _sweep(listed=False)])
+
+    def fake(**kw):
+        return refresh.refresh_board(kw.pop("work_dir"), gather=next(sweeps), **kw)
+
+    monkeypatch.setattr(tools, "board_refresh", fake)
+    main(["board-refresh", str(tmp_path)])
+    main(["board-refresh", str(tmp_path)])
+    assert "board left as it was" in capsys.readouterr().out
+    with pytest.raises(SystemExit) as exit_:
+        main(["board-refresh", str(tmp_path)])
+    assert exit_.value.code == 1
+    assert "incomplete" in capsys.readouterr().err
+
+
+# I (second review of #57): remote detection, env scope, partial rebuilds, the
+# publish marker over every file, refresh.json shapes.
+
+
+@pytest.mark.parametrize(
+    "destination, remote",
+    [
+        ("C:\\Users\\x\\dest", False),  # a Windows drive, not a host called C
+        ("c:/data/dest", False),
+        ("/srv/a:b", False),  # a separator before the colon: a local path
+        ("board", False),
+        ("tw:/srv/board", True),
+        ("user@host:dir", True),
+    ],
+)
+def test_a_destination_is_remote_only_when_it_names_a_host(destination, remote):
+    assert refresh.is_remote_destination(destination) is remote
+
+
+@pytest.mark.skipif(
+    __import__("os").name == "nt", reason="a colon cannot be in a Windows file name"
+)
+def test_an_existing_local_dir_with_a_colon_is_local(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "a:b").mkdir()
+    assert refresh.is_remote_destination("a:b") is False
+
+
+@pytest.mark.skipif(
+    __import__("os").name == "nt", reason="would write under the real C: drive"
+)
+def test_a_windows_style_destination_is_copied_locally_not_scped(tmp_path, monkeypatch):
+    _seeded(tmp_path, store="http", api="/x")
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1)))
+    ran = []
+    monkeypatch.setattr(refresh.subprocess, "run", lambda args, **kw: ran.append(args))
+    monkeypatch.chdir(tmp_path)  # on POSIX, "C:\\served" is a relative file name
+    refresh.dir_publisher("C:\\served")(tmp_path / "board")
+    assert ran == [] and (tmp_path / "C:\\served" / "tasks.json").is_file()
+
+
+def test_the_environments_scope_is_pinned_for_the_timer(tmp_path, monkeypatch):
+    _seeded(tmp_path)
+    monkeypatch.setenv("OPENLOOPS_OWNERS", "me, org")
+    monkeypatch.setenv("OPENLOOPS_EXCLUDE_REPOS", "client/*")
+    calls = []
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1), calls=calls))
+    state = json.loads((tmp_path / refresh.STATE_FILE).read_text())
+    assert state["owners"] == ["me", "org"] and state["exclude_repos"] == ["client/*"]
+    # The timer has no such environment, and sweeps the same scope.
+    monkeypatch.delenv("OPENLOOPS_OWNERS")
+    monkeypatch.delenv("OPENLOOPS_EXCLUDE_REPOS")
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1), calls=calls))
+    assert [(c["owners"], c["exclude_repos"]) for c in calls] == [
+        (["me", "org"], ["client/*"])
+    ] * 2
+
+
+def test_a_flag_or_saved_value_wins_over_the_environment(tmp_path, monkeypatch):
+    _seeded(tmp_path)
+    monkeypatch.setenv("OPENLOOPS_OWNERS", "env-owner")
+    calls = []
+    refresh.refresh_board(tmp_path, owners=["flag"], gather=_sweep(calls=calls))
+    refresh.refresh_board(tmp_path, gather=_sweep(calls=calls))
+    assert [c["owners"] for c in calls] == [["flag"], ["flag"]]
+
+
+def test_the_owners_a_sweep_resolved_are_pinned(tmp_path, monkeypatch):
+    _seeded(tmp_path)
+    monkeypatch.delenv("OPENLOOPS_OWNERS", raising=False)
+
+    def gather(**kw):
+        return {**_sweep(_item(1))(**kw), "owners": ["login"]}
+
+    refresh.refresh_board(tmp_path, gather=gather)
+    assert json.loads((tmp_path / refresh.STATE_FILE).read_text())["owners"] == [
+        "login"
+    ]
+
+
+def test_install_refresh_job_pins_the_default_owners_and_exclusions(
+    tmp_path, monkeypatch
+):
+    from openloops import __main__ as cli
+    from openloops import obligations
+
+    monkeypatch.setattr(
+        job,
+        "install_refresh",
+        lambda *a, **kw: {"interval": "60", "plist": "p", "log": "l"},
+    )
+    monkeypatch.delenv("OPENLOOPS_OWNERS", raising=False)
+    monkeypatch.setenv("OPENLOOPS_EXCLUDE_REPOS", "client/*")
+    monkeypatch.setattr(obligations, "configured_owners", lambda **kw: ("alias-owner",))
+    cli.install_refresh_job(str(tmp_path))
+    state = json.loads((tmp_path / refresh.STATE_FILE).read_text())
+    assert state["owners"] == ["alias-owner"] and state["exclude_repos"] == ["client/*"]
+
+
+def test_a_refused_mass_close_still_applies_additions_and_retitles(
+    tmp_path, monkeypatch, capsys
+):
+    _seeded(tmp_path, store="http", api="/x")
+    refresh.refresh_board(tmp_path, gather=_sweep(*[_item(i) for i in range(1, 21)]))
+    sweep = _sweep(*[_item(i) for i in range(1, 8)], _item(8, "Retitled"), _item(99))
+    published = []
+    result = refresh.refresh_board(tmp_path, gather=sweep, publish=published.append)
+    assert result["status"] == "partial" and result["rebuilt"] and published
+    assert result["refused_closes"] == 12 and result["closed"] == 0
+    assert result["refused_close_ids"][0] == "a/b#9" and "--force" in result["remedy"]
+    ids = _ids(tmp_path)
+    assert "a/b#99" in ids and len(ids) == 21  # added, and nothing closed
+    titles = {
+        t["id"]: t["title"]
+        for t in json.loads((tmp_path / "board" / "tasks.json").read_text())
+    }
+    assert titles["a/b#8"] == "Retitled"
+    state = json.loads((tmp_path / refresh.STATE_FILE).read_text())
+    assert state["refused_closes"] == 12 and len(state["refused_close_ids"]) == 12
+
+    # The CLI names it, with the remedy, and exits 0.
+    monkeypatch.setattr(tools, "board_refresh", lambda **kw: result)
+    out = main(["board-refresh", str(tmp_path)])
+    printed = (out or "") + capsys.readouterr().out
+    assert "12 closes refused" in printed and "--force" in printed
+
+    # Nothing else changed: refused, board as it was; --force applies the closes.
+    again = refresh.refresh_board(tmp_path, gather=sweep)
+    assert again["status"] == "refused" and again["refused_closes"] == 12
+    forced = refresh.refresh_board(tmp_path, gather=sweep, force=True)
+    assert forced["closed"] == 12 and len(_ids(tmp_path)) == 9
+    assert "refused_closes" not in json.loads(
+        (tmp_path / refresh.STATE_FILE).read_text()
+    )
+
+
+def test_any_board_file_change_is_republished(tmp_path):
+    _seeded(tmp_path, store="http", api="/x")
+    dest = tmp_path / "served"
+    refresh.refresh_board(tmp_path, gather=_sweep(_item(1)), publish_to=str(dest))
+    cfg_path = tmp_path / "board" / "board.json"
+    cfg = json.loads(cfg_path.read_text())
+    cfg["title"] = "Renamed"
+    cfg_path.write_text(json.dumps(cfg))
+    forced = refresh.refresh_board(tmp_path, gather=_sweep(_item(1)), force=True)
+    assert forced["published"]
+    assert json.loads((dest / "board.json").read_text())["title"] == "Renamed"
+    runs = tmp_path / "board" / "runs.json"
+    runs.write_text("[]\n ")
+    edited = refresh.refresh_board(tmp_path, gather=_sweep(_item(1)))
+    assert edited["status"] == "unchanged" and edited["published"]
+    assert (dest / "runs.json").read_text() == "[]\n "
+
+
+@pytest.mark.parametrize(
+    "state, match",
+    [
+        ({"owners": "thorwhalen"}, "'owners' should be a list of strings"),
+        ({"exclude_repos": [1]}, "'exclude_repos' should be a list of strings"),
+        ({"searches": None}, "'searches' should be a list of strings"),
+        ({"publish_to": 5}, "'publish_to' should be a string"),
+        ({"review_prs": "yes"}, "'review_prs' should be true or false"),
+    ],
+)
+def test_a_refresh_json_value_of_the_wrong_shape_raises(tmp_path, state, match):
+    _seeded(tmp_path)
+    (tmp_path / refresh.STATE_FILE).write_text(json.dumps(state))
+    with pytest.raises(ValueError, match=match):
+        refresh.refresh_board(tmp_path, gather=_sweep(_item(1)))
