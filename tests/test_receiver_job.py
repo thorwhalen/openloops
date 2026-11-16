@@ -53,7 +53,7 @@ def test_the_receiver_plist_is_a_start_interval_job_that_pins_its_inputs(
     # The link, never the versioned file it points to today: an update deletes that.
     assert args[args.index("--") + 1] == str(fake_claude)
     assert spec["claude"] == str(fake_claude)
-    assert "versions" not in " ".join(args)
+    assert str(fake_claude.resolve()) not in args, "the versioned file must not be pinned"
     assert "-p" in args and "--max-budget-usd" in args and "--allowedTools" in args
     assert "phone-board receiver" in args[args.index("-p") + 1]
     assert str(fake_claude.parent) in spec["env"]["PATH"]
