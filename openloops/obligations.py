@@ -788,7 +788,7 @@ def _verdict(
     trusted_owners: frozenset[str],
     verify: bool,
     run_predicate: Callable[[str], Any],
-    write_guard: Callable[[str], str] = write_effect,
+    write_guard: Callable[[str], str],
 ) -> tuple[str, str]:
     """``(state, evidence)`` for one obligation. The whole three-state rule lives here.
 
