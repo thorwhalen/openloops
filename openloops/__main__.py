@@ -327,10 +327,16 @@ def _install_report(plan: dict) -> str:
     for row in plan.get("shadowed", ()):
         lines.append("")
         lines.append(
-            f"note: skill '{row['name']}' resolves to {row['resolves_to']}, not the "
-            f"shipped {row['shadows']}; sessions that load '{row['name']}' read that one "
-            f"({'same text' if row['same_text'] else 'the text has drifted'}). "
-            f"`--alias --force` links it to the shipped copy."
+            f"note: skill '{row['name']}' "
+            + (
+                "is a broken link"
+                if row["dangling"]
+                else f"resolves to {row['resolves_to']}"
+            )
+            + f", not the shipped {row['shadows']}; sessions that load '{row['name']}' "
+            + ("read that one" if not row["dangling"] else "find nothing")
+            + (" (same text)." if row["same_text"] else " (the text has drifted).")
+            + f" Point instructions at '{row['shadows']}' or relink it."
         )
     return "\n".join(lines)
 
@@ -386,7 +392,6 @@ def install_skills(
     copy: bool = False,
     force: bool = False,
     dry_run: bool = False,
-    alias: bool = False,
 ):
     """Make the bundled skills and the sweep subagent visible to your coding agent.
 
@@ -403,10 +408,9 @@ def install_skills(
     your own capture skill: two skills competing for the same triggers and answering
     differently is worse than either one alone.
 
-    `--alias` also links the bare name `needs-human` (what standing instructions point
-    at) to the shipped copy; an existing one is a `conflict` until `--force`. Without it,
-    a bare `needs-human` that resolves elsewhere is reported, with whether its text
-    matches the shipped one.
+    A bare `needs-human` skill that resolves somewhere other than the shipped
+    `openloops-needs-human` is reported with whether its text matches; it is never
+    changed. Point your instructions at the shipped name, or replace that link yourself.
     """
     return _install_report(
         _skills.install_skills(
@@ -415,7 +419,6 @@ def install_skills(
             copy=copy,
             force=force,
             dry_run=dry_run,
-            alias=alias,
         )
     )
 

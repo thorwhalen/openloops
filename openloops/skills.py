@@ -52,9 +52,9 @@ from __future__ import annotations
 import os
 import shutil
 import tempfile
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from collections.abc import Sequence
 from typing import Any
 
 __all__ = [
@@ -77,7 +77,8 @@ DFLT_HOST = "~/.claude"
 #: Bare names that standing instructions point at, mapped from the shipped skill that
 #: should answer to them. Nothing else installs these, so an older copy of the same rule
 #: (a research checkout predating this package) silently wins when a session loads
-#: ``needs-human`` -- :func:`install_skills` reports that, and ``alias=True`` links it.
+#: ``needs-human`` -- :func:`install_skills` reports that. It does not install the alias:
+#: a second folder over one SKILL.md would give two skills the same triggers.
 ALIASES = {"openloops-needs-human": "needs-human"}
 
 #: Where each kind of asset lands under the host directory. A skill is a *directory*
@@ -234,12 +235,12 @@ def _verdict(asset: Asset, destination: Path, *, force: bool) -> tuple[str, str]
 
 
 def _body(skill_dir: Path) -> str:
-    """A skill's text without its front matter (whose ``name:`` legitimately differs)."""
+    """A skill's text minus its ``name:`` line, which legitimately differs under an alias."""
     try:
         text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
     except OSError:
         return ""
-    return text.split("\n---\n", 1)[-1] if text.startswith("---") else text
+    return "\n".join(l for l in text.splitlines() if not l.startswith("name:"))
 
 
 def _shadows(assets: Sequence[Asset], host: Path) -> list[dict[str, Any]]:
@@ -260,7 +261,7 @@ def _shadows(assets: Sequence[Asset], host: Path) -> list[dict[str, Any]]:
             resolved = found.resolve()
         except OSError:
             resolved = found
-        if resolved == asset.source.resolve():
+        if resolved == asset.source.resolve() or _identical(asset.source, found):
             continue
         rows.append(
             {
@@ -268,6 +269,7 @@ def _shadows(assets: Sequence[Asset], host: Path) -> list[dict[str, Any]]:
                 "shadows": asset.name,
                 "path": str(found),
                 "resolves_to": str(resolved),
+                "dangling": not resolved.exists(),
                 "same_text": _body(resolved) == _body(asset.source),
             }
         )
@@ -288,7 +290,6 @@ def install_skills(
     copy: bool = False,
     force: bool = False,
     dry_run: bool = False,
-    alias: bool = False,
 ) -> dict[str, Any]:
     """Make the bundled skills and subagent visible to an agent host. Idempotent.
 
@@ -308,10 +309,9 @@ def install_skills(
     triggers is worse than either alone -- so take the reader and the subagent and leave
     the capture skill out.
 
-    ``alias=True`` also links the bare names in :data:`ALIASES` (``needs-human``) to the
-    shipped copy, under the same never-overwrite rule. Without it, the plan's
-    ``shadowed`` list says when a bare-named skill resolves somewhere else, and whether
-    its text matches ours.
+    The plan's ``shadowed`` list names any bare-named skill (``needs-human``) that
+    resolves somewhere other than the shipped copy, and whether its text matches ours;
+    nothing is changed on its account.
 
     >>> plan = install_skills(target='/nonexistent/host', only=['openloops'], dry_run=True)
     >>> [row['name'] for row in plan['actions']]
@@ -338,12 +338,6 @@ def install_skills(
             )
         assets = [asset for asset in assets if asset.name in wanted]
     shadowed = _shadows(assets, host)
-    if alias:
-        assets += [
-            Asset("skill", ALIASES[a.name], a.source)
-            for a in assets
-            if a.kind == "skill" and a.name in ALIASES
-        ]
     for asset in assets:
         destination = asset.destination(host)
         action, reason = _verdict(asset, destination, force=force)
