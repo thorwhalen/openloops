@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../../_static/documentation_options.js?v=8f14641f"></script>
+    <script src="../../_static/documentation_options.js?v=2b6ce006"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.34" />
+  <meta name="docsearch:version" content="0.1.35" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -861,6 +861,7 @@ window.runMermaid = runMermaid;</script>
     <span class="s2">"OBLIGATION_FIELDS"</span><span class="p">,</span>
     <span class="s2">"OBLIGATION_STATES"</span><span class="p">,</span>
     <span class="s2">"UNKNOWN"</span><span class="p">,</span>
+    <span class="s2">"GhRateLimited"</span><span class="p">,</span>
     <span class="s2">"GhUnavailable"</span><span class="p">,</span>
     <span class="s2">"Obligation"</span><span class="p">,</span>
     <span class="s2">"PredicateOutcome"</span><span class="p">,</span>
@@ -912,6 +913,21 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ``?``. Turning it into an empty list would be the one unrecoverable bug here.</span>
 <span class="sd">    """</span></div>
 
+
+
+<div class="viewcode-block" id="GhRateLimited">
+<a class="viewcode-back" href="../../_autosummary/openloops.obligations.html#openloops.GhRateLimited">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GhRateLimited</span><span class="p">(</span><span class="n">GhUnavailable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``gh`` was refused for GitHub's rate limit: an answer to try again later.</span>
+
+<span class="sd">    A subclass, so every ``except GhUnavailable`` keeps treating it as ``?``; a caller</span>
+<span class="sd">    that can wait (:func:`openloops.tasks.gather`) catches it first.</span>
+<span class="sd">    """</span></div>
+
+
+
+<span class="c1">#: What GitHub's stderr says when it is rate limiting (primary, secondary, abuse).</span>
+<span class="n">_RATE_LIMIT_TEXT</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"rate limit|HTTP 429|abuse detection"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="PredicateOutcome">
@@ -1007,7 +1023,8 @@ window.runMermaid = runMermaid;</script>
         <span class="k">raise</span> <span class="n">GhUnavailable</span><span class="p">(</span><span class="sa">f</span><span class="s2">"could not run `gh`: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
     <span class="k">if</span> <span class="n">done</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">detail</span> <span class="o">=</span> <span class="n">_first_line</span><span class="p">(</span><span class="n">done</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">"`gh` exited </span><span class="si">{</span><span class="n">done</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2">"</span>
-        <span class="k">raise</span> <span class="n">GhUnavailable</span><span class="p">(</span><span class="n">detail</span><span class="p">)</span>
+        <span class="n">limited</span> <span class="o">=</span> <span class="n">_RATE_LIMIT_TEXT</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">done</span><span class="o">.</span><span class="n">stderr</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="p">(</span><span class="n">GhRateLimited</span> <span class="k">if</span> <span class="n">limited</span> <span class="k">else</span> <span class="n">GhUnavailable</span><span class="p">)(</span><span class="n">detail</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">done</span><span class="o">.</span><span class="n">stdout</span>
 
 

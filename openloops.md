@@ -1,4 +1,4 @@
-> built 2026-11-16 06:04 UTC from 953ca28 (main) · openloops 0.1.34. Details: build_info.json
+> built 2026-11-16 06:22 UTC from 0ee5f24 (main) · openloops 0.1.35. Details: build_info.json
 
 # index.html.md
 
@@ -3763,12 +3763,22 @@ An owner you did not name is never executed, and never silently believed:
 
 ### Exceptions
 
-| [`GhUnavailable`](_autosummary/openloops.obligations.html.md#openloops.obligations.GhUnavailable)   | The world could not be read: no `gh`, no credentials, no network, a timeout.   |
-|------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| [`GhRateLimited`](_autosummary/openloops.obligations.html.md#openloops.obligations.GhRateLimited)   | `gh` was refused for GitHub's rate limit: an answer to try again later.      |
+|------------------------------------------------------------------|------------------------------------------------------------------------------|
+| [`GhUnavailable`](_autosummary/openloops.obligations.html.md#openloops.obligations.GhUnavailable)   | The world could not be read: no `gh`, no credentials, no network, a timeout. |
 
 ### openloops.obligations.DISCHARGED *= 'discharged'*
 
 The predicate ran and returned 0. The ask is done; the issue is just still open.
+
+### *exception* openloops.obligations.GhRateLimited
+
+Bases: [`GhUnavailable`](_autosummary/openloops.obligations.html.md#openloops.obligations.GhUnavailable)
+
+`gh` was refused for GitHub’s rate limit: an answer to try again later.
+
+A subclass, so every `except GhUnavailable` keeps treating it as `?`; a caller
+that can wait ([`openloops.tasks.gather()`](_autosummary/openloops.tasks.html.md#openloops.tasks.gather)) catches it first.
 
 ### *exception* openloops.obligations.GhUnavailable
 
@@ -4869,7 +4879,7 @@ One normalised record per candidate, through `classifier`.
 * **Return type:**
   [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
 
-### openloops.tasks.gather(, owners=None, exclude_owners=(), exclude_repos=None, label='manual-task', searches=(), review_prs=False, limit=1000, timeout=30.0, run_gh=None)
+### openloops.tasks.gather(\*, owners=None, exclude_owners=(), exclude_repos=None, label='manual-task', searches=(), review_prs=False, limit=1000, timeout=30.0, run_gh=None, rate_limit_retries=2, rate_limit_backoff=65.0, sleep=<built-in function sleep>)
 
 Every open item that asks something of the human, across `owners`, deduplicated.
 
@@ -4883,6 +4893,10 @@ runner (`run_gh(args, timeout=...) -> stdout`).
 The result is an envelope: `listed` is `False` with an `error` when any query
 failed, because a partial sweep presented as a whole one is the failure that
 matters. `saturated` names the queries that hit `limit`.
+
+A query GitHub refuses for the search rate limit (30 a minute) waits
+`rate_limit_backoff` seconds and is retried up to `rate_limit_retries` times
+before it counts as failed, so a many-owner sweep completes in one call.
 
 ```pycon
 >>> def fake(args, *, timeout):
@@ -5447,7 +5461,7 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-11-16 06:04 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/953ca281051e1305869070eb474de4bdc56a6891"><code>953ca28</code></a> on branch <code>main</code>, for **openloops 0.1.34** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-16 06:22 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/0ee5f245a9e97c2130388e0402e8fc2aa368e3c1"><code>0ee5f24</code></a> on branch <code>main</code>, for **openloops 0.1.35** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -5456,7 +5470,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/953ca281051e1305869070eb474de4bdc56a6891"><code>953ca281051e1305869070eb474de4bdc56a6891</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/0ee5f245a9e97c2130388e0402e8fc2aa368e3c1"><code>0ee5f245a9e97c2130388e0402e8fc2aa368e3c1</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -5467,9 +5481,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/43814106346">43814106346</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/43816115620">43816115620</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>953ca281051e1305869070eb474de4bdc56a6891</code> (in the history of the built commit) |
+| Event commit | <code>0ee5f245a9e97c2130388e0402e8fc2aa368e3c1</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -5494,13 +5508,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.34/">0.1.34</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.35/">0.1.35</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 953ca281051e1305869070eb474de4bdc56a6891
+git checkout 0ee5f245a9e97c2130388e0402e8fc2aa368e3c1
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

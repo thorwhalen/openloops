@@ -192,7 +192,7 @@ One normalised record per candidate, through `classifier`.
 * **Return type:**
   [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
 
-### openloops.tasks.gather(, owners=None, exclude_owners=(), exclude_repos=None, label='manual-task', searches=(), review_prs=False, limit=1000, timeout=30.0, run_gh=None)
+### openloops.tasks.gather(\*, owners=None, exclude_owners=(), exclude_repos=None, label='manual-task', searches=(), review_prs=False, limit=1000, timeout=30.0, run_gh=None, rate_limit_retries=2, rate_limit_backoff=65.0, sleep=<built-in function sleep>)
 
 Every open item that asks something of the human, across `owners`, deduplicated.
 
@@ -206,6 +206,10 @@ runner (`run_gh(args, timeout=...) -> stdout`).
 The result is an envelope: `listed` is `False` with an `error` when any query
 failed, because a partial sweep presented as a whole one is the failure that
 matters. `saturated` names the queries that hit `limit`.
+
+A query GitHub refuses for the search rate limit (30 a minute) waits
+`rate_limit_backoff` seconds and is retried up to `rate_limit_retries` times
+before it counts as failed, so a many-owner sweep completes in one call.
 
 ```pycon
 >>> def fake(args, *, timeout):

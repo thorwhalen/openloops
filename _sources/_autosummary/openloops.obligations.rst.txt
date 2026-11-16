@@ -34,5 +34,6 @@ openloops.obligations
 
    .. autosummary::
    
+      GhRateLimited
       GhUnavailable
    

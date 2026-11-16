@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=8f14641f"></script>
+    <script src="../_static/documentation_options.js?v=2b6ce006"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.34" />
+  <meta name="docsearch:version" content="0.1.35" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -584,7 +584,10 @@ fields that a plain <code class="docutils literal notranslate"><span class="pre"
 <p class="rubric">Exceptions</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.obligations.GhUnavailable" title="openloops.obligations.GhUnavailable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GhUnavailable</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.obligations.GhRateLimited" title="openloops.obligations.GhRateLimited"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GhRateLimited</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gh</span></code> was refused for GitHub's rate limit: an answer to try again later.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.obligations.GhUnavailable" title="openloops.obligations.GhUnavailable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GhUnavailable</span></code></a></p></td>
 <td><p>The world could not be read: no <code class="docutils literal notranslate"><span class="pre">gh</span></code>, no credentials, no network, a timeout.</p></td>
 </tr>
 </tbody>
@@ -595,6 +598,15 @@ fields that a plain <code class="docutils literal notranslate"><span class="pre"
 <dt class="sig sig-object py" id="openloops.obligations.DISCHARGED">
 <span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">DISCHARGED</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'discharged'</span></span><a class="headerlink" href="#openloops.obligations.DISCHARGED" title="Link to this definition">#</a></dt>
 <dd><p>The predicate ran and returned 0. The ask is done; the issue is just still open.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="openloops.obligations.GhRateLimited">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">GhRateLimited</span></span><a class="reference internal" href="../_modules/openloops/obligations.html#GhRateLimited"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.obligations.GhRateLimited" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#openloops.obligations.GhUnavailable" title="openloops.obligations.GhUnavailable"><code class="xref py py-class docutils literal notranslate"><span class="pre">GhUnavailable</span></code></a></p>
+<p><code class="docutils literal notranslate"><span class="pre">gh</span></code> was refused for GitHub’s rate limit: an answer to try again later.</p>
+<p>A subclass, so every <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">GhUnavailable</span></code> keeps treating it as <code class="docutils literal notranslate"><span class="pre">?</span></code>; a caller
+that can wait (<a class="reference internal" href="openloops.tasks.html#openloops.tasks.gather" title="openloops.tasks.gather"><code class="xref py py-func docutils literal notranslate"><span class="pre">openloops.tasks.gather()</span></code></a>) catches it first.</p>
 </dd></dl>
 
 <dl class="py exception">
@@ -878,6 +890,7 @@ an exit status — a timeout, a shell that would not start — comes back as
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trust-boundary-stated-here-because-it-should-be-read-not-discovered">Trust boundary — stated here because it should be read, not discovered</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.DISCHARGED"><code class="docutils literal notranslate"><span class="pre">DISCHARGED</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.GhRateLimited"><code class="docutils literal notranslate"><span class="pre">GhRateLimited</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.GhUnavailable"><code class="docutils literal notranslate"><span class="pre">GhUnavailable</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.OBLIGATION_FIELDS"><code class="docutils literal notranslate"><span class="pre">OBLIGATION_FIELDS</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.OBLIGATION_STATES"><code class="docutils literal notranslate"><span class="pre">OBLIGATION_STATES</span></code></a></li>

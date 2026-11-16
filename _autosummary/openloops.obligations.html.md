@@ -155,12 +155,22 @@ An owner you did not name is never executed, and never silently believed:
 
 ### Exceptions
 
-| [`GhUnavailable`](#openloops.obligations.GhUnavailable)   | The world could not be read: no `gh`, no credentials, no network, a timeout.   |
-|------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| [`GhRateLimited`](#openloops.obligations.GhRateLimited)   | `gh` was refused for GitHub's rate limit: an answer to try again later.      |
+|------------------------------------------------------------------|------------------------------------------------------------------------------|
+| [`GhUnavailable`](#openloops.obligations.GhUnavailable)   | The world could not be read: no `gh`, no credentials, no network, a timeout. |
 
 ### openloops.obligations.DISCHARGED *= 'discharged'*
 
 The predicate ran and returned 0. The ask is done; the issue is just still open.
+
+### *exception* openloops.obligations.GhRateLimited
+
+Bases: [`GhUnavailable`](#openloops.obligations.GhUnavailable)
+
+`gh` was refused for GitHub’s rate limit: an answer to try again later.
+
+A subclass, so every `except GhUnavailable` keeps treating it as `?`; a caller
+that can wait ([`openloops.tasks.gather()`](openloops.tasks.html.md#openloops.tasks.gather)) catches it first.
 
 ### *exception* openloops.obligations.GhUnavailable
 
