@@ -110,6 +110,38 @@ CURL_UPLOADS = frozenset(
 MUTATORS = frozenset(
     {"rm", "mv", "rmdir", "kill", "pkill", "killall", "tee", "chmod", "chown"}
     | {"truncate", "cp", "touch", "mkdir", "ln", "unlink", "shred", "dd"}
+    | {"rsync", "scp", "make", "just", "wget"}
+)
+#: Package managers and runners: installing, syncing or running anything changes the
+#: machine or runs code (``uv run gh workflow run`` is a workflow run).
+_PACKAGE_WRITES = frozenset(
+    {
+        "install",
+        "uninstall",
+        "sync",
+        "add",
+        "remove",
+        "run",
+        "exec",
+        "publish",
+        "upload",
+        "push",
+    }
+)
+_DOCKER_WRITES = frozenset(
+    {
+        "up",
+        "down",
+        "rm",
+        "run",
+        "stop",
+        "start",
+        "restart",
+        "exec",
+        "push",
+        "build",
+        "kill",
+    }
 )
 #: Commands that write when any of these words is among their arguments.
 SUBCOMMAND_WRITES: dict[str, frozenset[str]] = {
@@ -120,9 +152,11 @@ SUBCOMMAND_WRITES: dict[str, frozenset[str]] = {
         {"kickstart", "load", "unload", "bootstrap", "bootout", "start", "stop"}
     ),
     **dict.fromkeys(
-        ("npm", "uv", "cargo", "twine", "docker"),
-        frozenset({"publish", "upload", "push"}),
+        ("npm", "pnpm", "yarn", "uv", "pip", "pip3", "brew", "cargo", "twine"),
+        _PACKAGE_WRITES,
     ),
+    "docker": _DOCKER_WRITES,
+    "crontab": frozenset({"-r", "-e", "-"}),
     "find": frozenset({"-delete", "-exec", "-execdir", "-ok", "-okdir", "-fprint"}),
 }
 #: A word containing one of these is a deploy or a secret edit, whatever runs it.
@@ -285,6 +319,8 @@ def _command_effect(words: Sequence[str], *, depth: int) -> str:
             return f"{name} {word}"
     if name == "sed" and _sed_in_place(args):
         return "sed -i"
+    if name == "perl" and any(a.startswith("-") and "i" in a.lstrip("-") for a in args):
+        return "perl -i"
     if name == "gh":
         return _gh_effect(args)
     if name == "git":
