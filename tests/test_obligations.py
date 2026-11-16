@@ -942,3 +942,23 @@ def test_the_write_guard_is_a_seam():
         [issue(1, predicate="gh workflow run a.yml")], write_guard=lambda c: ""
     )["rows"]
     assert rows[0]["state"] == "discharged"
+
+
+def test_gh_names_a_rate_limit_refusal_as_its_own_kind(monkeypatch):
+    import subprocess
+    from types import SimpleNamespace
+
+    from openloops.obligations import GhRateLimited, _gh
+
+    monkeypatch.setattr("shutil.which", lambda name: "/bin/gh")
+
+    def refused(stderr):
+        return lambda *a, **k: SimpleNamespace(returncode=1, stderr=stderr, stdout="")
+
+    monkeypatch.setattr(subprocess, "run", refused("gh: HTTP 403\nAPI rate limit exceeded"))
+    with pytest.raises(GhRateLimited):
+        _gh(["search", "issues"], timeout=1)
+    monkeypatch.setattr(subprocess, "run", refused("HTTP 404: Not Found"))
+    with pytest.raises(GhUnavailable) as caught:
+        _gh(["search", "issues"], timeout=1)
+    assert not isinstance(caught.value, GhRateLimited)

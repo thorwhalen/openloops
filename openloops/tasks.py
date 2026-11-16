@@ -48,6 +48,7 @@ import glob
 import json
 import os
 import re
+import sys
 import time
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field, fields
@@ -59,6 +60,7 @@ from typing import Any, NamedTuple
 from openloops.obligations import (
     DFLT_LABEL,
     DFLT_LIST_TIMEOUT,
+    GhRateLimited,
     GhUnavailable,
     _gh,
     configured_owners,
@@ -278,7 +280,6 @@ DFLT_GATHER_LIMIT = 1000
 #: window plus a margin) and is tried again, up to ``DFLT_RATE_LIMIT_RETRIES`` times.
 DFLT_RATE_LIMIT_BACKOFF = 65.0
 DFLT_RATE_LIMIT_RETRIES = 2
-_RATE_LIMITED = re.compile(r"rate limit|HTTP 429|secondary rate", re.IGNORECASE)
 #: The label an agent files a decision it made itself under (ADR-010).
 AGENT_DECIDED_LABEL = "agent-decided"
 #: Extra searches beyond the label, by name: (search terms, the field they match).
@@ -311,17 +312,6 @@ def _split(raw: str | None) -> tuple[str, ...]:
     return tuple(p for p in re.split(r"[,\s]+", raw or "") if p)
 
 
-def is_rate_limited(error: BaseException) -> bool:
-    """Whether a ``gh`` failure is GitHub saying "slow down" rather than an answer.
-
-    >>> is_rate_limited(GhUnavailable('GraphQL: API rate limit exceeded (HTTP 403)'))
-    True
-    >>> is_rate_limited(GhUnavailable('HTTP 404: Not Found'))
-    False
-    """
-    return bool(_RATE_LIMITED.search(str(error)))
-
-
 def _retrying(
     run: Callable[..., str],
     *,
@@ -331,19 +321,29 @@ def _retrying(
 ) -> Callable[..., str]:
     """``run`` that waits out the search rate limit and tries again, then gives up.
 
-    Only a rate-limit refusal is retried; any other failure, and a limit that outlasts
-    ``retries``, is raised as it was, so the envelope still says ``listed: false``.
+    Only :class:`GhRateLimited` is retried; any other failure is raised as it was. Once
+    one query has spent its retries the limit is not clearing, so later queries fail
+    at once instead of each waiting it out again: the envelope says ``listed: false``
+    after one wait, not after an hour.
     """
+    exhausted = False
 
     def run_with_retry(args: Sequence[str], *, timeout: float) -> str:
-        for attempt in range(retries + 1):
+        nonlocal exhausted
+        attempt = 0
+        while True:
             try:
                 return run(args, timeout=timeout)
-            except GhUnavailable as exc:
-                if attempt == retries or not is_rate_limited(exc):
+            except GhRateLimited:
+                if exhausted or attempt >= retries:
+                    exhausted = True
                     raise
+                attempt += 1
+                print(
+                    f"search rate limit: waiting {backoff:g}s ({attempt}/{retries})",
+                    file=sys.stderr,
+                )
                 sleep(backoff)
-        raise AssertionError("unreachable")  # pragma: no cover
 
     return run_with_retry
 
@@ -388,6 +388,8 @@ def gather(
     >>> report['listed'], [c['id'] for c in report['candidates']]
     (True, ['acme/w#1'])
     """
+    if rate_limit_retries < 0:
+        raise ValueError("rate_limit_retries must be >= 0")
     run = _retrying(
         run_gh or _gh,
         retries=rate_limit_retries,

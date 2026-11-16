@@ -10,7 +10,7 @@ import json
 import pytest
 
 from openloops import tasks
-from openloops.obligations import GhUnavailable
+from openloops.obligations import GhRateLimited, GhUnavailable
 
 
 def _row(
@@ -497,7 +497,7 @@ def _limited_then_ok(failures):
     def run(args, *, timeout):
         calls["n"] += 1
         if calls["n"] <= failures:
-            raise GhUnavailable("HTTP 403: API rate limit exceeded for user")
+            raise GhRateLimited("HTTP 403: API rate limit exceeded for user")
         return "[]"
 
     return run, calls
@@ -527,3 +527,24 @@ def test_another_failure_is_not_retried():
     slept = []
     report = tasks.gather(owners=["acme"], run_gh=run, sleep=slept.append)
     assert report["listed"] is False and len(calls) == 1 and slept == []
+
+
+def test_once_a_limit_is_exhausted_later_queries_do_not_wait_again():
+    run, calls = _limited_then_ok(99)
+    slept = []
+    report = tasks.gather(
+        owners=["a", "b", "c"], run_gh=run, sleep=slept.append, rate_limit_retries=1
+    )
+    assert report["listed"] is False
+    assert slept == [tasks.DFLT_RATE_LIMIT_BACKOFF], "only the first query waited"
+
+
+def test_zero_retries_and_a_negative_count():
+    run, calls = _limited_then_ok(1)
+    slept = []
+    report = tasks.gather(
+        owners=["acme"], run_gh=run, sleep=slept.append, rate_limit_retries=0
+    )
+    assert report["listed"] is False and slept == []
+    with pytest.raises(ValueError):
+        tasks.gather(owners=["acme"], run_gh=run, rate_limit_retries=-1)
