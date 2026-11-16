@@ -143,7 +143,7 @@ def test_one_failed_query_makes_the_whole_sweep_unlisted_not_quietly_partial():
     gh = FakeGh(
         {
             ("acme", "label"): [_row("acme/w", 1)],
-            ("beta", "label"): GhUnavailable("rate limited"),
+            ("beta", "label"): GhUnavailable("HTTP 500: server error"),
         }
     )
     report = tasks.gather(owners=["acme", "beta"], run_gh=gh)
@@ -485,3 +485,45 @@ def test_review_verdict_validated_and_blank_concern_dropped():
     assert r["verdict"] is None and r["concerns"] == []
     ok = tasks.Task.from_mapping({"id": "a/b#1", "review": {"verdict": "shown"}}).review
     assert ok["verdict"] == "shown"
+
+
+# --------------------------------------------------------------------------------
+# The search rate limit (openloops#40).
+
+
+def _limited_then_ok(failures):
+    calls = {"n": 0}
+
+    def run(args, *, timeout):
+        calls["n"] += 1
+        if calls["n"] <= failures:
+            raise GhUnavailable("HTTP 403: API rate limit exceeded for user")
+        return "[]"
+
+    return run, calls
+
+
+def test_a_rate_limited_query_waits_and_is_retried_so_the_sweep_is_complete():
+    run, calls = _limited_then_ok(2)
+    slept = []
+    report = tasks.gather(owners=["acme"], run_gh=run, sleep=slept.append)
+    assert report["listed"] is True and report["error"] is None
+    assert calls["n"] == 3 and slept == [tasks.DFLT_RATE_LIMIT_BACKOFF] * 2
+
+
+def test_a_limit_that_outlasts_the_retries_still_reports_the_sweep_incomplete():
+    run, _ = _limited_then_ok(99)
+    report = tasks.gather(owners=["acme"], run_gh=run, sleep=lambda s: None)
+    assert report["listed"] is False and "rate limit" in report["error"]
+
+
+def test_another_failure_is_not_retried():
+    calls = []
+
+    def run(args, *, timeout):
+        calls.append(args)
+        raise GhUnavailable("HTTP 404: Not Found")
+
+    slept = []
+    report = tasks.gather(owners=["acme"], run_gh=run, sleep=slept.append)
+    assert report["listed"] is False and len(calls) == 1 and slept == []
