@@ -1,32 +1,32 @@
 {
   "schema_version": 1,
-  "built_at": "2026-11-16T06:50:40Z",
+  "built_at": "2026-11-16T06:55:34Z",
   "package": {
     "name": "openloops",
-    "version": "0.1.36",
+    "version": "0.1.37",
     "display_name": "openloops",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "d05d9cf39251272979271f2f5e6f672dcb27d44e",
-    "short_commit": "d05d9cf",
+    "commit": "b35f2c0e054d125e3e3fff9bef6509b6204ab928",
+    "short_commit": "b35f2c0",
     "branch": "main",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/thorwhalen/openloops",
-    "commit_url": "https://github.com/thorwhalen/openloops/commit/d05d9cf39251272979271f2f5e6f672dcb27d44e",
+    "commit_url": "https://github.com/thorwhalen/openloops/commit/b35f2c0e054d125e3e3fff9bef6509b6204ab928",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "thorwhalen/openloops",
-    "sha": "d05d9cf39251272979271f2f5e6f672dcb27d44e",
+    "sha": "b35f2c0e054d125e3e3fff9bef6509b6204ab928",
     "sha_in_history": true,
     "ref": "refs/heads/main",
     "ref_name": "main",
-    "run_id": "43819348350",
-    "run_url": "https://github.com/thorwhalen/openloops/actions/runs/43819348350",
+    "run_id": "43819933214",
+    "run_url": "https://github.com/thorwhalen/openloops/actions/runs/43819933214",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -61,15 +61,13 @@
   "pypi": {
     "checked": true,
     "latest": "0.1.37",
-    "relation": "behind",
+    "relation": "same",
     "error": null
   },
-  "reproduce": "git clone https://github.com/thorwhalen/openloops && cd openloops\ngit checkout d05d9cf39251272979271f2f5e6f672dcb27d44e\npip install \"epythet==0.2.22\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/thorwhalen/openloops && cd openloops\ngit checkout b35f2c0e054d125e3e3fff9bef6509b6204ab928\npip install \"epythet==0.2.22\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
-    "aligned": false,
-    "notes": [
-      "The documented version (0.1.36) is behind the latest release on PyPI (0.1.37): `pip install openloops` gives newer code than these docs describe."
-    ]
+    "aligned": true,
+    "notes": []
   }
 }

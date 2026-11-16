@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../../_static/documentation_options.js?v=1c946a6c"></script>
+    <script src="../../_static/documentation_options.js?v=b8ecee75"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.36" />
+  <meta name="docsearch:version" content="0.1.37" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -732,6 +732,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plistlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
@@ -1250,6 +1251,27 @@ window.runMermaid = runMermaid;</script>
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">pinned_missing</span><span class="p">(</span><span class="n">plist</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Absolute paths a job's plist pins that no longer exist (empty: fine, or unreadable).</span>
+
+<span class="sd">    The job pins ``sys.executable`` (often under ``~/.pyenv/versions/X.Y.Z``) and, for the</span>
+<span class="sd">    receiver, the ``claude`` link. ``pyenv uninstall`` or an upgrade deletes them and the</span>
+<span class="sd">    job then fails silently every tick; this is the check that says so.</span>
+
+<span class="sd">    &gt;&gt;&gt; pinned_missing(Path('/no/such/plist'))</span>
+<span class="sd">    []</span>
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">plistlib</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">plist</span><span class="p">)</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">())</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ProgramArguments"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - a diagnostic must not crash on a damaged plist</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">args</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="nb">str</span><span class="p">)]</span>
+    <span class="n">pinned</span> <span class="o">=</span> <span class="n">args</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s2">"--"</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+        <span class="n">pinned</span> <span class="o">+=</span> <span class="n">args</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">"--"</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:][:</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># the receiver's claude</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pinned</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()]</span>
+
+
 <div class="viewcode-block" id="job_status">
 <a class="viewcode-back" href="../../_autosummary/openloops.job.html#openloops.job.job_status">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">job_status</span><span class="p">(</span>
@@ -1287,6 +1309,7 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"platform_supported"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">"darwin"</span><span class="p">,</span>
         <span class="s2">"plist"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">plist_path</span><span class="p">),</span>
         <span class="s2">"installed"</span><span class="p">:</span> <span class="n">plist_path</span><span class="o">.</span><span class="n">exists</span><span class="p">(),</span>
+        <span class="s2">"pinned_missing"</span><span class="p">:</span> <span class="n">pinned_missing</span><span class="p">(</span><span class="n">plist_path</span><span class="p">),</span>
         <span class="s2">"loaded"</span><span class="p">:</span> <span class="n">loaded</span><span class="p">,</span>
         <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">log</span><span class="p">),</span>
         <span class="s2">"last_write"</span><span class="p">:</span> <span class="n">evidence</span><span class="p">,</span>
