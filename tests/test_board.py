@@ -313,10 +313,7 @@ def test_the_page_can_show_only_what_was_opened_this_week():
     filt = page[page.index("function viewTasks") :][:1800]
     assert "new Date(t.created)" not in filt and "onOrAfter(t)" in filt
     # The link selects To do as well, and switching the filter off rewrites the address.
-    assert (
-        'ui.show = SHOWS.some(x => x.k === q.get("show")) ? q.get("show") : "todo"'
-        in page
-    )
+    assert 'ui.show = SHOWS.some(x => x.k === q.get("show")) ? q.get("show") : "todo"' in page
     assert 'u.searchParams.delete("opened")' in page and "history.replaceState" in page
     # The page says what the filter did: the day it counts from, and why a list is empty.
     assert "newest first" in page and "Nothing opened since" in page

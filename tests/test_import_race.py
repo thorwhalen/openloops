@@ -38,12 +38,6 @@ RACE = textwrap.dedent(
 
 
 def test_concurrent_imports_in_a_fresh_interpreter_all_succeed():
-    for _ in range(
-        3
-    ):  # the race was deterministic, but a fresh process each time is cheap
-        out = subprocess.run(
-            [sys.executable, "-c", RACE], capture_output=True, text=True, timeout=60
-        )
-        assert out.returncode == 0 and out.stdout.strip() == "ok", (
-            out.stdout + out.stderr
-        )
+    for _ in range(3):  # the race was deterministic, but a fresh process each time is cheap
+        out = subprocess.run([sys.executable, "-c", RACE], capture_output=True, text=True, timeout=60)
+        assert out.returncode == 0 and out.stdout.strip() == "ok", out.stdout + out.stderr

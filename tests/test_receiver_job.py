@@ -501,7 +501,9 @@ def test_work_pending_while_another_receiver_is_live_starts_nothing(
     assert "x is the live receiver" in capsys.readouterr().err
 
 
-def test_the_same_work_twice_in_a_row_backs_off_new_work_does_not(board, monkeypatch):
+def test_the_same_work_twice_in_a_row_backs_off_new_work_does_not(
+    board, monkeypatch
+):
     """A session that changed nothing (budget hit, a refused command) is not
     restarted every tick for the same events."""
     started = []
