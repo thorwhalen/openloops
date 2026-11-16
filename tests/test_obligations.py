@@ -31,6 +31,7 @@ from openloops.obligations import (
     shell_predicate,
 )
 from openloops.obligations import _as_outcome, _verdict, not_an_answer
+from openloops.predicate_safety import write_effect
 
 NOW = datetime(2026, 8, 20, tzinfo=timezone.utc)
 TRUSTED = ("acme",)
@@ -420,6 +421,7 @@ def test_a_non_zero_exit_for_the_wrong_reason_is_unknown(command, why):
         trusted_owners=frozenset({"acme"}),
         verify=True,
         run_predicate=shell_predicate,
+        write_guard=write_effect,
     )
     assert state == UNKNOWN, why
     assert "could not be run" in evidence or "check itself failed" in evidence
@@ -650,6 +652,7 @@ def test_no_predicate_prose_with_a_code_span_reads_open_not_unknown(field):
         trusted_owners=frozenset(TRUSTED),
         verify=True,
         run_predicate=shell_predicate,
+        write_guard=write_effect,
     )
     assert state == OPEN
     assert evidence == text
@@ -685,6 +688,7 @@ def test_a_bare_ambiguous_prefix_with_a_code_span_still_reads_unknown(field):
         trusted_owners=frozenset(TRUSTED),
         verify=True,
         run_predicate=shell_predicate,
+        write_guard=write_effect,
     )
     assert state == UNKNOWN
     assert "malformed" in evidence
@@ -781,6 +785,7 @@ def test_an_unterminated_code_span_reads_unknown_not_open():
         trusted_owners=frozenset(TRUSTED),
         verify=True,
         run_predicate=shell_predicate,
+        write_guard=write_effect,
     )
     assert state == UNKNOWN
     assert "malformed" in evidence
@@ -823,3 +828,117 @@ def test_annals_links_in_the_body_are_carried_once_each():
 
 def test_a_body_without_a_document_link_carries_none():
     assert only([issue()])["documents"] == ()
+
+
+# --------------------------------------------------------------------------------
+# A question must not have a write effect (openloops#43).
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "gh workflow run deploy.yml -R o/r",
+        "gh pr merge 4 --squash",
+        "curl -X POST https://x.test/y",
+        "curl -s -d a=b https://x.test",
+        "gh api repos/o/r/issues -f title=x",
+        "gh api -X DELETE repos/o/r",
+        "git push origin main",
+        "rm -rf build",
+        "echo hi > out.txt",
+        "gh run list && gh workflow run a.yml",
+        "git -C ~/x push",
+        "git --git-dir=x push",
+        "curl -sXPOST u",
+        "curl -sd a=b u",
+        "gh pr -R o/r merge 3",
+        "gh issue -R o/r close 3",
+        "gh api x -fbody=x",
+        "ssh tw 'rm -rf x'",
+        "ssh tw 'systemctl restart caddy'",
+        "python deploy.py cmd-deploy --force",
+        "GH_TOKEN=x gh pr merge 3",
+        "xargs gh pr merge",
+        'bash -c "gh workflow run a.yml"',
+        "gh cache delete 1",
+        "echo x 2>err.log",
+        "echo x &>out",
+        "gh workflow run a.yml",
+        "make deploy",
+        "npm run deploy",
+        "uv run gh workflow run x",
+        "uv pip install foo",
+        "brew install x",
+        "docker compose up -d",
+        "rsync -a a b",
+        "crontab -r",
+        "perl -pi -e s/a/b/ f",
+        "wget --post-data=a u",
+        "gh  workflow  run a.yml",
+        'test -n "$(gh pr merge 3)"',
+        "sed -i s/a/b/ f",
+        "echo 'unbalanced",
+    ],
+)
+def test_a_predicate_that_looks_like_a_write_is_not_run(command):
+    ran = []
+    rows = report(
+        [issue(1, predicate=command)], run_predicate=lambda c: ran.append(c) or 0
+    )["rows"]
+    assert ran == []
+    assert rows[0]["state"] == "unknown"
+    assert "unverified: predicate not read-only" in rows[0]["evidence"]
+    assert rows[0]["predicate"] == command
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "gh pr view 3 --json state -q .state | grep -q MERGED",
+        "gh api repos/o/r/pulls/3 --jq .merged",
+        "gh api -X GET repos/o/r -f per_page=1",
+        "gh run list -R o/r --workflow deploy.yml --json conclusion",
+        "test -f ~/.config/x 2>/dev/null",
+        "curl -sf https://x.test/health",
+        "gh run list -R o/r --created '>2026-09-10' -q length",
+        "gh api repos/o/r/pulls/3 --jq 'length > 0'",
+        "gh api graphql -f query='{viewer{login}}'",
+        "python3 -c 'import sys; sys.exit(0 if 1<>2 else 1)'",
+        "gh issue view 3 -R o/r --json state -q .state | grep -q CLOSED",
+        "gh pr view 3",
+        "curl -sf https://x.test/h?a=1&b=2",
+        "ssh tw 'test -f /x'",
+        "git -C ~/x log -1",
+        "gh api -X GET repos/o/r",
+        "gh pr -R o/r view 3 --json state 2>&1 >/dev/null",
+        "git remote get-url origin",
+    ],
+)
+def test_reads_still_run(command):
+    ran = []
+    rows = report(
+        [issue(1, predicate=command)], run_predicate=lambda c: ran.append(c) or 0
+    )["rows"]
+    assert ran == [command] and rows[0]["state"] == "discharged"
+
+
+@pytest.mark.parametrize(
+    "command, reason",
+    [
+        ("gh run list\ngh workflow run a.yml", "gh workflow run"),
+        ("gh pr -R o/r merge 3", "gh pr merge"),
+        ("ssh tw 'sh -c \"git push\"'", "git push"),
+        ("echo x >| out", "redirect into out"),
+        ("curl -sXPOST u", "curl -X POST"),
+        ("gh api graphql -f query='mutation{x}'", "gh api graphql mutation"),
+    ],
+)
+def test_the_refusal_names_what_it_saw(command, reason):
+    assert write_effect(command) == reason
+
+
+def test_the_write_guard_is_a_seam():
+    rows = report(
+        [issue(1, predicate="gh workflow run a.yml")], write_guard=lambda c: ""
+    )["rows"]
+    assert rows[0]["state"] == "discharged"
