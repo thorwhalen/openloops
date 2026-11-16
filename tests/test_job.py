@@ -85,3 +85,20 @@ def test_a_plist_pinning_a_deleted_interpreter_is_reported(tmp_path):
     plist.write_bytes(plistlib.dumps({"ProgramArguments": [str(here2), "-m", "x"]}))
     assert job.pinned_missing(plist) == []
     assert job.pinned_missing(tmp_path / "absent.plist") == []
+
+
+def test_the_receivers_claude_link_and_a_damaged_plist(tmp_path):
+    import plistlib
+
+    py = tmp_path / "py"
+    py.write_text("")
+    gone = tmp_path / "claude"
+    plist = tmp_path / "r.plist"
+    plist.write_bytes(plistlib.dumps({"ProgramArguments": [str(py), "--", str(gone)]}))
+    assert job.pinned_missing(plist) == [str(gone)]
+    plist.write_text("<plist><dict>")  # truncated
+    assert job.pinned_missing(plist) == []
+    plist.write_bytes(plistlib.dumps(["not", "a", "dict"]))
+    assert job.pinned_missing(plist) == []
+    info = job.job_status(label="openloops.no-such-job")
+    assert info["pinned_missing"] == []

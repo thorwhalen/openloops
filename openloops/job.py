@@ -534,11 +534,12 @@ def pinned_missing(plist: Path) -> list[str]:
     """
     try:
         args = plistlib.loads(Path(plist).read_bytes()).get("ProgramArguments") or []
-    except (OSError, ValueError, plistlib.InvalidFileException):
+    except Exception:  # noqa: BLE001 - a diagnostic must not crash on a damaged plist
         return []
-    pinned = [args[0]] if args else []
-    if "--" in args and args.index("--") + 1 < len(args):
-        pinned.append(args[args.index("--") + 1])  # the receiver's claude
+    args = [a for a in args if isinstance(a, str)]
+    pinned = args[:1]
+    if "--" in args:
+        pinned += args[args.index("--") + 1 :][:1]  # the receiver's claude
     return [p for p in pinned if os.path.isabs(p) and not Path(p).exists()]
 
 
