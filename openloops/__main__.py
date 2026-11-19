@@ -781,7 +781,13 @@ def board_build(
 
 
 def _loop_line(row: dict) -> str:
-    when = (row.get("remind_at") or "")[:16].replace("T", " ") or "-"
+    from openloops import remind as _remind
+    from openloops.loops import to_utc
+
+    when = "-"
+    if row.get("remind_at"):
+        zone = _remind.RemindSettings.from_env().zone
+        when = f"{_remind.local(to_utc(row['remind_at']), zone):%Y-%m-%d %H:%M}"
     flags = ("armed " if row.get("armed") else "") + (
         "" if row.get("reveal") else "hidden"
     )

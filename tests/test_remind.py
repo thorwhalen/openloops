@@ -275,3 +275,18 @@ def test_a_failing_channel_is_counted_not_logged_every_hour():
     log = kit["store"][made["id"]].log
     assert [e["event"] for e in log] == ["created", "delivery-failed"]
     assert log[-1]["count"] == 4
+
+
+def test_the_cli_lists_times_in_the_owners_zone(monkeypatch):
+    from openloops.__main__ import _loop_line
+
+    monkeypatch.setenv("OPENLOOPS_TZ", "UTC")
+    row = {
+        "id": "a",
+        "state": "submitted",
+        "remind_at": "2026-11-20T08:00:00Z",
+        "title": "t",
+        "armed": True,
+        "reveal": True,
+    }
+    assert "2026-11-20 08:00" in _loop_line(row)
