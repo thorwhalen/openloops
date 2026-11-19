@@ -774,7 +774,7 @@ nothing is changed on its account.
 ```pycon
 >>> plan = install_skills(target='/nonexistent/host', dry_run=True)
 >>> plan['counts']['install'], plan['dry_run']
-(4, True)
+(5, True)
 >>> sorted({row['action'] for row in plan['actions']})
 ['install']
 ```
@@ -1134,10 +1134,12 @@ which is what makes it safe to suggest when someone suspects a stale digest.
 | [`digest`](openloops.digest.html.md#module-openloops.digest)                     | Rendering one session into one dated markdown digest.                                   |
 | [`egress`](openloops.egress.html.md#module-openloops.egress)                     | The egress choke point: nothing leaves openloops carrying a home path or a secret.      |
 | [`job`](openloops.job.html.md#module-openloops.job)                           | The periodic job: launchd runs `ol sync`, writes, and exits.                            |
+| [`loops`](openloops.loops.html.md#module-openloops.loops)                       | Loops: the one record of a commitment, and the pure function that says what is due.     |
 | [`obligations`](openloops.obligations.html.md#module-openloops.obligations)           | What you still owe your agents — re-checked against the world before it is shown.       |
 | [`predicate_safety`](openloops.predicate_safety.html.md#module-openloops.predicate_safety) | Is a `manual-task` verify predicate a pure read?                                        |
 | [`publications`](openloops.publications.html.md#module-openloops.publications)         | What your agents handed you lately: recently published annals documents, per session.   |
 | [`receiver_tick`](openloops.receiver_tick.html.md#module-openloops.receiver_tick)       | One tick of the board-receiver job: check for work without a model, then hand over.     |
+| [`remind`](openloops.remind.html.md#module-openloops.remind)                     | Reminders: loops kept in a store and delivered through a channel that holds the time.   |
 | [`skills`](openloops.skills.html.md#module-openloops.skills)                     | The agent-facing surface: two skills, one subagent, and the command that installs them. |
 | [`store`](openloops.store.html.md#module-openloops.store)                       | Where digests live, and where the change-detection cache lives — two different things.  |
 | [`tasks`](openloops.tasks.html.md#module-openloops.tasks)                       | Everything you could act on, as one list of task records: gather, classify, merge.      |

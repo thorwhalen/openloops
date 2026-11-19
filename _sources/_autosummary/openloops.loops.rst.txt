@@ -1,0 +1,35 @@
+openloops.loops
+===============
+
+.. automodule:: openloops.loops
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      STATES
+      TERMINAL
+      LISTS
+      MAX_HORIZON
+      MIN_SCHEDULE_LEAD
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      new_loop
+      evaluate
+      complete
+      snooze
+      cancel
+      mark
+      to_utc
+      iso
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Loop
+   

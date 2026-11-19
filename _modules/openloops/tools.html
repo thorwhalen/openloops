@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../../_static/documentation_options.js?v=b8ecee75"></script>
+    <script src="../../_static/documentation_options.js?v=50f64db7"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.37" />
+  <meta name="docsearch:version" content="0.1.38" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -782,6 +782,11 @@ window.runMermaid = runMermaid;</script>
     <span class="s2">"board_gather"</span><span class="p">,</span>
     <span class="s2">"board_classify"</span><span class="p">,</span>
     <span class="s2">"board_build"</span><span class="p">,</span>
+    <span class="s2">"remind"</span><span class="p">,</span>
+    <span class="s2">"loops"</span><span class="p">,</span>
+    <span class="s2">"done"</span><span class="p">,</span>
+    <span class="s2">"snooze"</span><span class="p">,</span>
+    <span class="s2">"remind_tick"</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="c1">#: The keys every :func:`ls` row carries, whatever the digest happens to record.</span>
@@ -1405,6 +1410,88 @@ window.runMermaid = runMermaid;</script>
     <span class="p">)</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_remind_module</span><span class="p">():</span>
+    <span class="c1"># Imported on use: the reminder runner is not part of `import openloops` (ADR-013).</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openloops</span><span class="w"> </span><span class="kn">import</span> <span class="n">remind</span> <span class="k">as</span> <span class="n">_remind</span>
+
+    <span class="k">return</span> <span class="n">_remind</span>
+
+
+<div class="viewcode-block" id="remind">
+<a class="viewcode-back" href="../../_autosummary/openloops.tools.html#openloops.tools.remind">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">remind</span><span class="p">(</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">when</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">due</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">reveal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Make a loop that comes back at ``when`` and push it to the phone then.</span>
+
+<span class="sd">    ``when`` is a duration (``20m``, ``3h``, ``2d``) or a time (``15:30``, an ISO date or</span>
+<span class="sd">    date-time; naive means the owner's zone). Within three days it is scheduled on ntfy at</span>
+<span class="sd">    once, so it fires even if this machine sleeps. Without ``when`` the loop is only</span>
+<span class="sd">    listed. ``reveal`` lets the title travel in the push (ntfy.sh is a public relay: short</span>
+<span class="sd">    labels only). ``source`` is where the ask came from (a URL or a session name). The</span>
+<span class="sd">    result's ``echo`` is the line to repeat to the owner.</span>
+<span class="sd">    """</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">_remind_module</span><span class="p">()</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">RemindSettings</span><span class="o">.</span><span class="n">from_env</span><span class="p">()</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+    <span class="n">at</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">parse_when</span><span class="p">(</span><span class="n">when</span><span class="p">,</span> <span class="n">now</span><span class="o">=</span><span class="n">now</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">zone</span><span class="p">)</span> <span class="k">if</span> <span class="n">when</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">remind</span><span class="p">(</span>
+        <span class="n">title</span><span class="p">,</span>
+        <span class="n">at</span><span class="o">=</span><span class="n">at</span><span class="p">,</span>
+        <span class="n">due</span><span class="o">=</span><span class="n">due</span><span class="p">,</span>
+        <span class="n">reveal</span><span class="o">=</span><span class="n">reveal</span><span class="p">,</span>
+        <span class="n">source</span><span class="o">=</span><span class="p">{</span><span class="s2">"kind"</span><span class="p">:</span> <span class="s2">"ref"</span><span class="p">,</span> <span class="s2">"ref"</span><span class="p">:</span> <span class="n">source</span><span class="p">}</span> <span class="k">if</span> <span class="n">source</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
+        <span class="n">now</span><span class="o">=</span><span class="n">now</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="loops">
+<a class="viewcode-back" href="../../_autosummary/openloops.tools.html#openloops.tools.loops">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">loops</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"open"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The loops, soonest first. ``state``: ``open`` (default), ``closed``, ``all``, or an A2A state."""</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"loops"</span><span class="p">:</span> <span class="n">_remind_module</span><span class="p">()</span><span class="o">.</span><span class="n">list_loops</span><span class="p">(</span><span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">)}</span></div>
+
+
+
+<div class="viewcode-block" id="done">
+<a class="viewcode-back" href="../../_autosummary/openloops.tools.html#openloops.tools.done">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">done</span><span class="p">(</span><span class="n">ref</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">note</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Close a loop (by id or a unique prefix) as done, cancelling its scheduled push."""</span>
+    <span class="k">return</span> <span class="n">_remind_module</span><span class="p">()</span><span class="o">.</span><span class="n">done</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">note</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="snooze">
+<a class="viewcode-back" href="../../_autosummary/openloops.tools.html#openloops.tools.snooze">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">snooze</span><span class="p">(</span><span class="n">ref</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">when</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Bring a loop back at ``when`` (a duration or a time, as for :func:`remind`); re-arms its push."""</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">_remind_module</span><span class="p">()</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">RemindSettings</span><span class="o">.</span><span class="n">from_env</span><span class="p">()</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">snooze</span><span class="p">(</span>
+        <span class="n">ref</span><span class="p">,</span>
+        <span class="n">until</span><span class="o">=</span><span class="n">r</span><span class="o">.</span><span class="n">parse_when</span><span class="p">(</span><span class="n">when</span><span class="p">,</span> <span class="n">now</span><span class="o">=</span><span class="n">now</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">zone</span><span class="p">),</span>
+        <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
+        <span class="n">now</span><span class="o">=</span><span class="n">now</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="remind_tick">
+<a class="viewcode-back" href="../../_autosummary/openloops.tools.html#openloops.tools.remind_tick">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">remind_tick</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Arm loops that came within three days, record those that fired, deliver late any missed one."""</span>
+    <span class="k">return</span> <span class="n">_remind_module</span><span class="p">()</span><span class="o">.</span><span class="n">tick</span><span class="p">()</span></div>
+
+
+
 <span class="c1">#: Single source of truth for what every surface exposes. The CLI dispatches this list;</span>
 <span class="c1">#: an MCP or HTTP adapter would reference the same names as strings.</span>
 <span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">[</span>
@@ -1420,6 +1507,11 @@ window.runMermaid = runMermaid;</script>
     <span class="n">board_classify</span><span class="p">,</span>
     <span class="n">board_build</span><span class="p">,</span>
     <span class="n">board_refresh</span><span class="p">,</span>
+    <span class="n">remind</span><span class="p">,</span>
+    <span class="n">loops</span><span class="p">,</span>
+    <span class="n">done</span><span class="p">,</span>
+    <span class="n">snooze</span><span class="p">,</span>
+    <span class="n">remind_tick</span><span class="p">,</span>
 <span class="p">]</span>
 
 

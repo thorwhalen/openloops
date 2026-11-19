@@ -1,4 +1,4 @@
-> built 2026-11-16 06:55 UTC from b35f2c0 (main) · openloops 0.1.37. Details: build_info.json
+> built 2026-11-19 19:18 UTC from 900b82a (main) · openloops 0.1.38. Details: build_info.json
 
 # index.html.md
 
@@ -12,10 +12,11 @@ scrolled away. An agent got blocked on you and filed an issue you never re-read.
 agent found the real fix belonged in another repository, filed it there, wrote a
 workaround here, and nobody ever told this repository the blocker was closed.
 
-`openloops` finds those and re-checks them. It answers three questions and nothing
-else. It never writes: it does not close, reopen, relabel or comment on anything,
-anywhere, and there is no local database — the transcript, the label and the
-dependency edge *are* the records.
+`openloops` finds those and re-checks them. It answers three questions. It never writes
+to GitHub: it does not close, reopen, relabel or comment on anything, anywhere — the
+transcript, the label and the dependency edge *are* the records.
+
+The one loop it keeps itself is the one you ask for: `ol remind "Review the draft" --when 3h` makes a reminder that pushes to your phone at that time even if your laptop is asleep (see [`ol remind`]()).
 
 **The surface most people want is not a command.** If you delegate development to
 agents, what you want is an agent that runs the commands and tells you what matters.
@@ -628,6 +629,26 @@ The taps on the page become GitHub comments, closed issues and dispatched worker
 **On your own website.** `ol board-build --store http --api /your/prefix/board-store` wires the page to a small document-store API instead of the Artifact store. `pip install openloops[server]` adds `openloops.board_server.mk_app`, a FastAPI app serving the board files and that API under the store rules of `openloops.board_store` (events immutable, drafts newest-wins, receipts written only by the receiver, which never writes events outside a migration import). It authenticates nobody: put it behind your own login and map each identity to `viewer` (you) or `receiver` (the receiving session’s account) in its `role_of` ([ADR-009]()).
 
 **A receiver on a timer (macOS).** `ol install-receiver-job WORK_DIR` installs a launchd job that, every five minutes, asks a self-hosted board store over HTTPS, with no model, whether any tap is waiting, and when none is, writes the board’s heartbeat. Only when something is waiting does it start `claude -p` with the receiver procedure, capped at `--max-budget-usd` (that tick’s session only, not the workers it dispatches). Credentials stay in `~/.config/openloops/board-receiver.env` (mode 600), never in the job. Check with `python3 -m openloops.receiver_tick --check-only` and `ol receiver-job-status`; remove with `ol uninstall-receiver-job`. This is the one part of openloops that reaches the network or starts a model, and only once you install it ([ADR-011]()).
+
+## `ol remind` — a reminder that fires while your laptop sleeps
+
+```bash
+pip install 'openloops[remind]'            # adds correspond, which delivers through ntfy (Python 3.11+)
+ol remind "Stretch" --when 20m --reveal    # a duration: 20m, 3h, 2d, 1h30m
+ol remind "Call back" --when 15:30         # a time today (tomorrow if passed), an ISO date (09:00) or date-time
+ol loops                                   # open reminders, soonest first
+ol snooze <id> 1h                          # or: ol snooze <id> 18:00
+ol done <id>                               # close it (see the note below on early cancels)
+ol install-remind-job                      # macOS: the hourly tick (needed for reminders more than 3 days out)
+```
+
+A reminder is a **loop**: one record per commitment, kept as a JSON file under `~/.local/share/openloops/loops/`. Its lifecycle uses the same seven A2A state names as the equerry desk’s items (scheduled is `submitted`, fired is `input-required`, done is `completed`), and it already has the fields of a Getting Things Done list item (list, contexts, project, energy, waiting-for), most of them unused for now. The design is [ADR-013]().
+
+How it survives a sleeping machine: a reminder due within three days is handed to ntfy at once as a *scheduled* message, whose sequence id is the loop’s id. ntfy delivers it at the time whatever your laptop is doing. `ol done` and `ol snooze` cancel or replace it under the same id, but ntfy.sh does not honour that today (measured 2026-11-19): the original push may still arrive, and both commands say so when it can. The hourly tick arms reminders as they come within three days (ntfy’s limit), records the ones that fired, and delivers late, saying how late, anything that was never armed.
+
+**What the push says.** The topic is correspond’s default ntfy topic (`NTFY_TOPIC`, else the Keychain). ntfy.sh is a public relay, so a push says only “A reminder you set is due” unless the reminder was made with `--reveal`; then the title travels too. Reveal short labels only.
+
+Settings come from the environment: `OPENLOOPS_TZ` (an IANA zone for reading and echoing times; default this machine’s), `OPENLOOPS_REMIND_CHANNEL` (a correspond reference, default `ntfy:`), `OPENLOOPS_REMIND_HORIZON_HOURS` (default 72). The seams (`store=`, `deliver=`, `settings=`) are keyword arguments of `openloops.remind`’s functions.
 
 ## Turning it off
 
@@ -3401,7 +3422,7 @@ nothing is changed on its account.
 ```pycon
 >>> plan = install_skills(target='/nonexistent/host', dry_run=True)
 >>> plan['counts']['install'], plan['dry_run']
-(4, True)
+(5, True)
 >>> sorted({row['action'] for row in plan['actions']})
 ['install']
 ```
@@ -3761,10 +3782,12 @@ which is what makes it safe to suggest when someone suspects a stale digest.
 | [`digest`](_autosummary/openloops.digest.html.md#module-openloops.digest)                     | Rendering one session into one dated markdown digest.                                   |
 | [`egress`](_autosummary/openloops.egress.html.md#module-openloops.egress)                     | The egress choke point: nothing leaves openloops carrying a home path or a secret.      |
 | [`job`](_autosummary/openloops.job.html.md#module-openloops.job)                           | The periodic job: launchd runs `ol sync`, writes, and exits.                            |
+| [`loops`](_autosummary/openloops.loops.html.md#module-openloops.loops)                       | Loops: the one record of a commitment, and the pure function that says what is due.     |
 | [`obligations`](_autosummary/openloops.obligations.html.md#module-openloops.obligations)           | What you still owe your agents — re-checked against the world before it is shown.       |
 | [`predicate_safety`](_autosummary/openloops.predicate_safety.html.md#module-openloops.predicate_safety) | Is a `manual-task` verify predicate a pure read?                                        |
 | [`publications`](_autosummary/openloops.publications.html.md#module-openloops.publications)         | What your agents handed you lately: recently published annals documents, per session.   |
 | [`receiver_tick`](_autosummary/openloops.receiver_tick.html.md#module-openloops.receiver_tick)       | One tick of the board-receiver job: check for work without a model, then hand over.     |
+| [`remind`](_autosummary/openloops.remind.html.md#module-openloops.remind)                     | Reminders: loops kept in a store and delivered through a channel that holds the time.   |
 | [`skills`](_autosummary/openloops.skills.html.md#module-openloops.skills)                     | The agent-facing surface: two skills, one subagent, and the command that installs them. |
 | [`store`](_autosummary/openloops.store.html.md#module-openloops.store)                       | Where digests live, and where the change-detection cache lives — two different things.  |
 | [`tasks`](_autosummary/openloops.tasks.html.md#module-openloops.tasks)                       | Everything you could act on, as one list of task records: gather, classify, merge.      |
@@ -3794,22 +3817,25 @@ the same command, and [`install()`](_autosummary/openloops.job.html.md#openloops
 
 ### Module Attributes
 
-| [`DFLT_LABEL`](_autosummary/openloops.job.html.md#openloops.job.DFLT_LABEL)        | launchd job label.                                                                           |
-|--------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
-| [`DFLT_INTERVAL`](_autosummary/openloops.job.html.md#openloops.job.DFLT_INTERVAL)     | Seconds between ticks.                                                                       |
-| [`RECEIVER_LABEL`](_autosummary/openloops.job.html.md#openloops.job.RECEIVER_LABEL)    | launchd label of the board-receiver job (ADR-011).                                           |
-| [`RECEIVER_INTERVAL`](_autosummary/openloops.job.html.md#openloops.job.RECEIVER_INTERVAL) | Seconds between receiver ticks.                                                              |
-| [`REFRESH_LABEL`](_autosummary/openloops.job.html.md#openloops.job.REFRESH_LABEL)     | no model, so it can run often; six hours keeps the board within a day of GitHub with margin. |
+| [`DFLT_LABEL`](_autosummary/openloops.job.html.md#openloops.job.DFLT_LABEL)        | launchd job label.                                                                                                                                     |
+|--------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`DFLT_INTERVAL`](_autosummary/openloops.job.html.md#openloops.job.DFLT_INTERVAL)     | Seconds between ticks.                                                                                                                                 |
+| [`RECEIVER_LABEL`](_autosummary/openloops.job.html.md#openloops.job.RECEIVER_LABEL)    | launchd label of the board-receiver job (ADR-011).                                                                                                     |
+| [`RECEIVER_INTERVAL`](_autosummary/openloops.job.html.md#openloops.job.RECEIVER_INTERVAL) | Seconds between receiver ticks.                                                                                                                        |
+| [`REMIND_LABEL`](_autosummary/openloops.job.html.md#openloops.job.REMIND_LABEL)      | no model, so it can run often; six hours keeps the board within a day of GitHub with margin.                                                           |
+| [`REMIND_INTERVAL`](_autosummary/openloops.job.html.md#openloops.job.REMIND_INTERVAL)   | a reminder is armed on the channel up to three days ahead, so the tick only needs to catch loops entering that horizon and record the ones that fired. |
 
 ### Functions
 
-| [`install`](_autosummary/openloops.job.html.md#openloops.job.install)(\*[, label, interval, dry_run])        | Install (or replace) the periodic sync job.                                  |
-|-------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
-| [`install_receiver`](_autosummary/openloops.job.html.md#openloops.job.install_receiver)(work_dir, \*[, dry_run])      | Install (or replace) the board-receiver job.                                 |
-| [`receiver_job_spec`](_autosummary/openloops.job.html.md#openloops.job.receiver_job_spec)(work_dir, \*[, claude, ...]) | The receiver job as data: program arguments, environment, plist.             |
-| [`uninstall`](_autosummary/openloops.job.html.md#openloops.job.uninstall)(\*[, label])                         | Unload the job and remove its plist.                                         |
-| [`job_status`](_autosummary/openloops.job.html.md#openloops.job.job_status)(\*[, label, env_file])              | Installed? loaded? and — the question that matters — when did it last write? |
-| [`plist_xml`](_autosummary/openloops.job.html.md#openloops.job.plist_xml)(\*, label, program_args, env, ...)   | The launchd property list, as text.                                          |
+| [`install`](_autosummary/openloops.job.html.md#openloops.job.install)(\*[, label, interval, dry_run])        | Install (or replace) the periodic sync job.                                      |
+|-------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+| [`install_remind`](_autosummary/openloops.job.html.md#openloops.job.install_remind)(\*[, dry_run])                  | Install (or replace) the reminder tick job.                                      |
+| [`remind_job_spec`](_autosummary/openloops.job.html.md#openloops.job.remind_job_spec)(\*[, interval, label])         | The reminder tick as data: `python -m openloops remind-tick` every `interval` s. |
+| [`install_receiver`](_autosummary/openloops.job.html.md#openloops.job.install_receiver)(work_dir, \*[, dry_run])      | Install (or replace) the board-receiver job.                                     |
+| [`receiver_job_spec`](_autosummary/openloops.job.html.md#openloops.job.receiver_job_spec)(work_dir, \*[, claude, ...]) | The receiver job as data: program arguments, environment, plist.                 |
+| [`uninstall`](_autosummary/openloops.job.html.md#openloops.job.uninstall)(\*[, label])                         | Unload the job and remove its plist.                                             |
+| [`job_status`](_autosummary/openloops.job.html.md#openloops.job.job_status)(\*[, label, env_file])              | Installed? loaded? and — the question that matters — when did it last write?     |
+| [`plist_xml`](_autosummary/openloops.job.html.md#openloops.job.plist_xml)(\*, label, program_args, env, ...)   | The launchd property list, as text.                                              |
 
 ### openloops.job.DFLT_INTERVAL *= 900*
 
@@ -3830,7 +3856,15 @@ calls and no model, so this can be as short as the phone board’s latency wants
 
 launchd label of the board-receiver job (ADR-011).
 
-### openloops.job.REFRESH_LABEL *= 'openloops.board-refresh'*
+### openloops.job.REMIND_INTERVAL *= 3600*
+
+a reminder is armed on the channel up to three days ahead, so the tick only
+needs to catch loops entering that horizon and record the ones that fired.
+
+* **Type:**
+  Hourly
+
+### openloops.job.REMIND_LABEL *= 'openloops.remind-tick'*
 
 no model, so it can
 run often; six hours keeps the board within a day of GitHub with margin.
@@ -3854,6 +3888,13 @@ Install (or replace) the board-receiver job. Returns the paths it wrote.
 
 `kwargs` are those of [`receiver_job_spec()`](_autosummary/openloops.job.html.md#openloops.job.receiver_job_spec). A dry run builds and returns the
 plist without touching launchd and without requiring the credentials file.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+### openloops.job.install_remind(, dry_run=False, \*\*kwargs)
+
+Install (or replace) the reminder tick job. `kwargs` are [`remind_job_spec()`](_autosummary/openloops.job.html.md#openloops.job.remind_job_spec)’s.
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
@@ -3900,12 +3941,225 @@ name instead of refused.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`object`](https://docs.python.org/3/builtins/functions.html#object)]
 
+### openloops.job.remind_job_spec(, interval=3600, label='openloops.remind-tick')
+
+The reminder tick as data: `python -m openloops remind-tick` every `interval` s.
+
+Pure, so it tests anywhere. The job carries no credential: the ntfy topic is resolved
+by correspond (`NTFY_TOPIC`, else the Keychain), and the owner’s zone by
+`OPENLOOPS_TZ` when set in the job’s environment.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`object`](https://docs.python.org/3/builtins/functions.html#object)]
+
 ### openloops.job.uninstall(, label='openloops.sync')
 
 Unload the job and remove its plist. Idempotent.
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+
+# _autosummary/openloops.loops.html.md
+
+# openloops.loops
+
+Loops: the one record of a commitment, and the pure function that says what is due.
+
+A **loop** is an open loop in David Allen’s sense: a commitment held somewhere other
+than your head. It is one record whatever GTD list it sits on, so every list (In, Next,
+Waiting For, Someday, the tickler) is a view over loops rather than a separate store.
+
+Two vocabularies, kept apart on purpose (ADR-013):
+
+- `state` is the **lifecycle**, in A2A’s seven names, the same ones equerry’s desk
+  `Item` uses, so a loop is a desk item without translation. A reminder that is
+  scheduled is `submitted` with a `remind_at`; once it fires it is
+  `input-required`; done is `completed`; dismissed is `rejected`; withdrawn is
+  `canceled`.
+- `list` is the **GTD list**: `in`, `next`, `waiting`, `someday`,
+  `reference`. “Scheduled” (the tickler) is not a list; it is a loop with a future
+  `remind_at`.
+
+Three times, never conflated: `remind_at` (when it comes back to you: the tickler,
+GTD’s defer date), `due` (a deadline, a promise to someone) and `created`. All are
+stored as UTC ISO strings.
+
+Nothing here reads a clock, a file or the network: [`evaluate()`](_autosummary/openloops.loops.html.md#openloops.loops.evaluate) takes `now` and
+returns the actions a runner should take ([`openloops.remind`](_autosummary/openloops.remind.html.md#module-openloops.remind) is that runner).
+
+```pycon
+>>> now = datetime(2026, 11, 19, 12, 0, tzinfo=timezone.utc)
+>>> loop = new_loop("Send the signed draft", remind_at=now + timedelta(hours=3), now=now, id="loop-a")
+>>> loop.state, loop.list
+('submitted', 'next')
+>>> [a["action"] for a in evaluate([loop], now)]
+['arm']
+```
+
+### Module Attributes
+
+| [`STATES`](_autosummary/openloops.loops.html.md#openloops.loops.STATES)            | The lifecycle, in A2A's names (the same as equerry's desk Item).                   |
+|--------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| [`TERMINAL`](_autosummary/openloops.loops.html.md#openloops.loops.TERMINAL)          | Nothing leaves these.                                                              |
+| [`LISTS`](_autosummary/openloops.loops.html.md#openloops.loops.LISTS)             | The GTD lists a loop can sit on.                                                   |
+| [`MAX_HORIZON`](_autosummary/openloops.loops.html.md#openloops.loops.MAX_HORIZON)       | How far ahead a reminder is handed to the delivery channel's own scheduler.        |
+| [`MIN_SCHEDULE_LEAD`](_autosummary/openloops.loops.html.md#openloops.loops.MIN_SCHEDULE_LEAD) | Below this lead a scheduled delivery is refused by ntfy (10 s), so it is sent now. |
+
+### Functions
+
+| [`new_loop`](_autosummary/openloops.loops.html.md#openloops.loops.new_loop)(title, \*[, remind_at, due, reveal, ...])   | A new loop, logged as created.                                                  |
+|-------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| [`evaluate`](_autosummary/openloops.loops.html.md#openloops.loops.evaluate)(loops, now, \*[, horizon])                  | What a runner should do now, as data.                                           |
+| [`complete`](_autosummary/openloops.loops.html.md#openloops.loops.complete)(loop, now, \*[, by, note])                  | Done.                                                                           |
+| [`snooze`](_autosummary/openloops.loops.html.md#openloops.loops.snooze)(loop, until, now, \*[, by])                   | Bring it back at `until`: scheduled again, one more snooze counted.             |
+| [`cancel`](_autosummary/openloops.loops.html.md#openloops.loops.cancel)(loop, now, \*[, by, note])                    | Withdrawn: it will not fire.                                                    |
+| [`mark`](_autosummary/openloops.loops.html.md#openloops.loops.mark)(loop, now, event, \*[, by])                     | A copy with `changes` applied and one log entry appended.                       |
+| [`to_utc`](_autosummary/openloops.loops.html.md#openloops.loops.to_utc)(when)                                         | A timezone-aware UTC datetime; a naive one is read as the machine's local time. |
+| [`iso`](_autosummary/openloops.loops.html.md#openloops.loops.iso)(when)                                            | UTC ISO with a `Z`, to the second.                                              |
+
+### Classes
+
+| [`Loop`](_autosummary/openloops.loops.html.md#openloops.loops.Loop)(id, title, created[, state, list, ...])   | One commitment.   |
+|-------------------------------------------------------------------------------------------------|-------------------|
+
+### openloops.loops.LISTS *= ('in', 'next', 'waiting', 'someday', 'reference')*
+
+The GTD lists a loop can sit on.
+
+### *class* openloops.loops.Loop(id, title, created, state='submitted', list='next', remind_at=None, due=None, reveal=False, source=None, proposed_by=None, project=None, area=None, contexts=(), energy=None, minutes=None, waiting=None, available_when=None, done_when=None, snoozes=0, carried=0, armed=None, log=tuple(), extra=dict())
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+One commitment. Most fields are optional; GTD-complete, v1 uses a few.
+
+`source` is where it came from (`{kind, ref, quote, said_by}`): every loop an
+agent makes is traceable. `proposed_by` is set when an agent proposed it and the
+person has not accepted it; a proposal never pushes. `reveal` says whether a push
+may carry the title (pushes cross a public relay by default). `armed` records the
+delivery the channel holds (`{sequence_id, at}`), so it can be replaced or
+cancelled. `log` is append-only.
+
+#### extra *: [Mapping](https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), [Any](https://docs.python.org/3/library/typing.html#typing.Any)]*
+
+kept and written back.
+
+* **Type:**
+  Keys a newer writer added that this version does not know
+
+#### *classmethod* from_dict(data)
+
+Read a stored loop; keys this version does not know are kept in `extra`.
+
+* **Return type:**
+  [`Loop`](_autosummary/openloops.loops.html.md#openloops.loops.Loop)
+
+### openloops.loops.MAX_HORIZON *= datetime.timedelta(days=2, seconds=82800)*
+
+How far ahead a reminder is handed to the delivery channel’s own scheduler. ntfy
+holds a scheduled message for at most three days; an hour’s margin absorbs a clock
+that runs ahead of the server’s.
+
+### openloops.loops.MIN_SCHEDULE_LEAD *= datetime.timedelta(seconds=15)*
+
+Below this lead a scheduled delivery is refused by ntfy (10 s), so it is sent now.
+
+### openloops.loops.STATES *= ('submitted', 'working', 'input-required', 'completed', 'failed', 'canceled', 'rejected')*
+
+The lifecycle, in A2A’s names (the same as equerry’s desk Item).
+
+### openloops.loops.TERMINAL *= frozenset({'canceled', 'completed', 'failed', 'rejected'})*
+
+Nothing leaves these.
+
+### openloops.loops.cancel(loop, now, , by='owner', note=None)
+
+Withdrawn: it will not fire. A reason belongs in `note`.
+
+* **Return type:**
+  [`Loop`](_autosummary/openloops.loops.html.md#openloops.loops.Loop)
+
+### openloops.loops.complete(loop, now, , by='owner', note=None)
+
+Done. Refused on a loop already closed, so a second `done` is visible, not silent.
+
+* **Return type:**
+  [`Loop`](_autosummary/openloops.loops.html.md#openloops.loops.Loop)
+
+### openloops.loops.evaluate(loops, now, , horizon=datetime.timedelta(days=2, seconds=82800))
+
+What a runner should do now, as data. Pure: same loops and `now`, same actions.
+
+For each open, accepted loop with a `remind_at`:
+
+- `arm`: due within `horizon` and not yet handed to the channel at that time.
+  The channel delivers it at `remind_at` even if this machine is asleep then.
+- `deliver`: due and never armed (created late, or arming failed, or the machine
+  slept past the horizon). Sent now, saying how late.
+- `woke`: due and armed, so the channel has delivered it; the loop now needs its
+  owner (`input-required`).
+- `disarm`: closed but still armed, or moved (snoozed) outside the horizon while
+  armed at its old time: cancel the channel’s copy.
+
+Proposals (`proposed_by` set) never produce a delivery.
+
+```pycon
+>>> now = datetime(2026, 11, 19, 12, 0, tzinfo=timezone.utc)
+>>> far = new_loop("x", remind_at=now + timedelta(days=5), now=now, id="far")
+>>> late = new_loop("y", remind_at=now - timedelta(minutes=5), now=now, id="late")
+>>> [(a["action"], a["id"]) for a in evaluate([far, late], now)]
+[('deliver', 'late')]
+```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
+
+### openloops.loops.iso(when)
+
+UTC ISO with a `Z`, to the second.
+
+```pycon
+>>> iso(datetime(2026, 11, 19, 12, 0, 30, 999, tzinfo=timezone.utc))
+'2026-11-19T12:00:30Z'
+```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str) | [`None`](https://docs.python.org/3/builtins/constants.html#None)
+
+### openloops.loops.mark(loop, now, event, , by='tick', \*\*changes)
+
+A copy with `changes` applied and one log entry appended.
+
+* **Return type:**
+  [`Loop`](_autosummary/openloops.loops.html.md#openloops.loops.Loop)
+
+### openloops.loops.new_loop(title, , remind_at=None, due=None, reveal=False, source=None, by='owner', now=None, id=None, \*\*extra)
+
+A new loop, logged as created. `extra` takes any other [`Loop`](_autosummary/openloops.loops.html.md#openloops.loops.Loop) field.
+
+A loop the owner asked for goes on `next`; `list` in `extra` overrides it.
+
+* **Return type:**
+  [`Loop`](_autosummary/openloops.loops.html.md#openloops.loops.Loop)
+
+### openloops.loops.snooze(loop, until, now, , by='owner')
+
+Bring it back at `until`: scheduled again, one more snooze counted.
+
+* **Return type:**
+  [`Loop`](_autosummary/openloops.loops.html.md#openloops.loops.Loop)
+
+### openloops.loops.to_utc(when)
+
+A timezone-aware UTC datetime; a naive one is read as the machine’s local time.
+
+```pycon
+>>> to_utc("2026-11-19T12:00:00Z").isoformat()
+'2026-11-19T12:00:00+00:00'
+```
+
+* **Return type:**
+  [`datetime`](https://docs.python.org/3/library/datetime.html#datetime.datetime)
 
 
 # _autosummary/openloops.obligations.html.md
@@ -4587,6 +4841,247 @@ lacking one, `claimedAt`) is older than *retry_after*; one with neither counts.
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 
+# _autosummary/openloops.remind.html.md
+
+# openloops.remind
+
+Reminders: loops kept in a store and delivered through a channel that holds the time.
+
+The runner over [`openloops.loops`](_autosummary/openloops.loops.html.md#module-openloops.loops) (ADR-013). The core modules never import this
+one: it is where a store, a clock and a delivery channel are composed, and it is the
+only openloops code that sends anything for a reminder.
+
+How a reminder survives a sleeping machine: when a loop comes within the horizon (three
+days, ntfy’s limit), it is **armed**, handed to ntfy as a scheduled message whose
+sequence id is the loop’s id. ntfy delivers it at `remind_at` whether or not this
+machine is awake. Done or snoozed first, the scheduled copy is cancelled or replaced
+by the same id, but ntfy.sh does not honour that today ([`UNCANCELLABLE_NOTE`](_autosummary/openloops.remind.html.md#openloops.remind.UNCANCELLABLE_NOTE)), so
+the result carries a `warning` that the original push may still arrive. A tick (`ol remind-tick`, hourly from a launchd job) arms loops that
+came within the horizon, records the ones that fired, and delivers late, saying so,
+anything that was never armed.
+
+Three seams, each one keyword argument with a default that works:
+
+- `store`: a `MutableMapping[str, Loop]`; default JSON files under
+  `~/.local/share/openloops/loops/` ([`loops_store()`](_autosummary/openloops.remind.html.md#openloops.remind.loops_store)).
+- `deliver`: an object with `schedule`, `now` and `cancel`; default
+  [`NtfyDelivery`](_autosummary/openloops.remind.html.md#openloops.remind.NtfyDelivery), through correspond’s ntfy channel (
+
+  ```
+  ``
+  ```
+
+  pip install
+  > openloops[remind]\`\`).
+- `settings`: [`RemindSettings`](_autosummary/openloops.remind.html.md#openloops.remind.RemindSettings); default from the environment.
+
+**Privacy.** ntfy.sh is a public relay: anyone holding the topic reads the push. A
+push says only that a reminder is due unless the loop was made with `reveal=True`;
+the title then travels too. Reveal short labels only, never names, clients or secrets.
+
+### Module Attributes
+
+| [`UNCANCELLABLE_NOTE`](_autosummary/openloops.remind.html.md#openloops.remind.UNCANCELLABLE_NOTE)   | a DELETE (or a replacement under the same sequence id) of a *scheduled* message is acknowledged with a `message_delete` event, yet the original is still delivered at its time.   |
+|-----------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+
+### Functions
+
+| [`loops_store`](_autosummary/openloops.remind.html.md#openloops.remind.loops_store)([rootdir])                         | The default store: `~/.local/share/openloops/loops/<id>.json`.                                                                                |
+|-------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| [`parse_in`](_autosummary/openloops.remind.html.md#openloops.remind.parse_in)(text)                                 | A duration such as `20m`, `3h`, `2d` or `1h30m`.                                                                                              |
+| [`parse_at`](_autosummary/openloops.remind.html.md#openloops.remind.parse_at)(text, \*, now, zone)                  | An ISO date-time (naive means `zone`), an ISO date (09:00 that day) or `HH:MM` (the next one).                                                |
+| [`parse_when`](_autosummary/openloops.remind.html.md#openloops.remind.parse_when)(text, \*, now, zone)                | A duration from `now` (`3h`, `1h30m`) or a time ([`parse_at()`](_autosummary/openloops.remind.html.md#openloops.remind.parse_at)): the one form a CLI flag takes. |
+| [`attach`](_autosummary/openloops.remind.html.md#openloops.remind.attach)(naive, zone)                            | `naive` read in `zone`; `None` means this machine's zone, DST rules included.                                                                 |
+| [`local`](_autosummary/openloops.remind.html.md#openloops.remind.local)(when, zone)                              | `when` shown in `zone`, or in this machine's zone (DST-aware) when `None`.                                                                    |
+| [`remind`](_autosummary/openloops.remind.html.md#openloops.remind.remind)(title, \*[, at, in_, due, reveal, ...]) | Make a loop that comes back at `at` (or after `in_`), arm it, and say when.                                                                   |
+| [`list_loops`](_autosummary/openloops.remind.html.md#openloops.remind.list_loops)(\*[, state, store])                 | Loops as summaries, soonest first.                                                                                                            |
+| [`done`](_autosummary/openloops.remind.html.md#openloops.remind.done)(ref, \*[, note, by, store, deliver, ...]) | Close a loop as done and cancel its scheduled push, if any.                                                                                   |
+| [`snooze`](_autosummary/openloops.remind.html.md#openloops.remind.snooze)(ref, \*[, until, for_, by, store, ...]) | Bring a loop back later (`until` a time, or `for_` a duration); re-arms its push.                                                             |
+| [`tick`](_autosummary/openloops.remind.html.md#openloops.remind.tick)(\*[, store, deliver, settings, now])      | Arm what came within the horizon, record what fired, deliver late what was missed.                                                            |
+| [`find`](_autosummary/openloops.remind.html.md#openloops.remind.find)(store, ref)                               | A loop by id, by a unique prefix (with or without `loop-`), or by its hex suffix.                                                             |
+
+### Classes
+
+| [`RemindSettings`](_autosummary/openloops.remind.html.md#openloops.remind.RemindSettings)([channel, horizon_hours, ...])   | What the owner sets once.                                                   |
+|--------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
+| [`NtfyDelivery`](_autosummary/openloops.remind.html.md#openloops.remind.NtfyDelivery)([ref, send, get_channel])          | The default `deliver`: correspond's ntfy channel, one sequence id per loop. |
+| [`LoopsStore`](_autosummary/openloops.remind.html.md#openloops.remind.LoopsStore)(files)                               | `Loop` records as `<id>.json` files, each write atomic.                     |
+
+### Exceptions
+
+| [`DeliveryError`](_autosummary/openloops.remind.html.md#openloops.remind.DeliveryError)   | The channel refused or could not be reached; the loop is left to the next tick.   |
+|------------------------------------------------------------------|-----------------------------------------------------------------------------------|
+
+### *exception* openloops.remind.DeliveryError
+
+Bases: [`RuntimeError`](https://docs.python.org/3/builtins/exceptions.html#RuntimeError)
+
+The channel refused or could not be reached; the loop is left to the next tick.
+
+### *class* openloops.remind.LoopsStore(files)
+
+Bases: [`MutableMapping`](https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping)
+
+`Loop` records as `<id>.json` files, each write atomic.
+
+### *class* openloops.remind.NtfyDelivery(ref='ntfy:', , send=None, get_channel=None)
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+The default `deliver`: correspond’s ntfy channel, one sequence id per loop.
+
+`send` and `get_channel` default to correspond’s, imported when first used, so
+`import openloops.remind` costs nothing and tests inject fakes.
+
+### *class* openloops.remind.RemindSettings(channel='ntfy:', horizon_hours=71.0, generic_title='Reminder', generic_text='A reminder you set is due.', tz=None)
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+What the owner sets once. `from_env` reads `OPENLOOPS_REMIND_*` and `OPENLOOPS_TZ`.
+
+`channel` is a correspond reference (`ntfy:` is the default topic). `tz` is an
+IANA zone for reading and echoing times; `None` uses the machine’s own, with its
+daylight-saving rules applied per instant. `horizon_hours` is capped at 71 (ntfy
+schedules three days ahead at most).
+
+#### *property* channel_label *: [str](https://docs.python.org/3/builtins/stdtypes.html#str)*
+
+a topic in the reference is a bearer secret.
+
+* **Type:**
+  The channel’s name only
+
+#### *property* zone
+
+A `ZoneInfo`, or `None` for the machine’s own zone (see [`attach()`](_autosummary/openloops.remind.html.md#openloops.remind.attach)).
+
+### openloops.remind.UNCANCELLABLE_NOTE *= 'ntfy.sh still delivers a scheduled push that was cancelled or replaced, so the original push may arrive at {at} anyway'*
+
+a DELETE (or a replacement under the same sequence
+id) of a *scheduled* message is acknowledged with a `message_delete` event, yet the
+original is still delivered at its time. ntfy’s documentation says otherwise; until
+the server honours it, an early `done` or `snooze` is said, not hidden.
+
+* **Type:**
+  Measured on ntfy.sh, 2026-11-19
+
+### openloops.remind.attach(naive, zone)
+
+`naive` read in `zone`; `None` means this machine’s zone, DST rules included.
+
+```pycon
+>>> attach(datetime(2026, 7, 1, 9, 0), timezone.utc).isoformat()
+'2026-07-01T09:00:00+00:00'
+```
+
+* **Return type:**
+  [`datetime`](https://docs.python.org/3/library/datetime.html#datetime.datetime)
+
+### openloops.remind.done(ref, , note=None, by='owner', store=None, deliver=None, settings=None, now=None)
+
+Close a loop as done and cancel its scheduled push, if any.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.remind.find(store, ref)
+
+A loop by id, by a unique prefix (with or without `loop-`), or by its hex suffix.
+
+* **Return type:**
+  [`Loop`](_autosummary/openloops.loops.html.md#openloops.loops.Loop)
+
+### openloops.remind.list_loops(, state='open', store=None)
+
+Loops as summaries, soonest first. `state`: `open`, `closed`, `all` or one A2A state.
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]
+
+### openloops.remind.local(when, zone)
+
+`when` shown in `zone`, or in this machine’s zone (DST-aware) when `None`.
+
+* **Return type:**
+  [`datetime`](https://docs.python.org/3/library/datetime.html#datetime.datetime)
+
+### openloops.remind.loops_store(rootdir=None)
+
+The default store: `~/.local/share/openloops/loops/<id>.json`.
+
+* **Return type:**
+  [`LoopsStore`](_autosummary/openloops.remind.html.md#openloops.remind.LoopsStore)
+
+### openloops.remind.parse_at(text, , now, zone)
+
+An ISO date-time (naive means `zone`), an ISO date (09:00 that day) or `HH:MM`
+(the next one). Natural language is the calling agent’s job, not this function’s.
+
+```pycon
+>>> z = timezone.utc
+>>> now = datetime(2026, 11, 19, 12, 0, tzinfo=z)
+>>> parse_at("09:30", now=now, zone=z).isoformat()
+'2026-11-20T09:30:00+00:00'
+>>> parse_at("2026-11-21", now=now, zone=z).isoformat()
+'2026-11-21T09:00:00+00:00'
+```
+
+* **Return type:**
+  [`datetime`](https://docs.python.org/3/library/datetime.html#datetime.datetime)
+
+### openloops.remind.parse_in(text)
+
+A duration such as `20m`, `3h`, `2d` or `1h30m`.
+
+```pycon
+>>> parse_in("1h30m")
+datetime.timedelta(seconds=5400)
+```
+
+* **Return type:**
+  [`timedelta`](https://docs.python.org/3/library/datetime.html#datetime.timedelta)
+
+### openloops.remind.parse_when(text, , now, zone)
+
+A duration from `now` (`3h`, `1h30m`) or a time ([`parse_at()`](_autosummary/openloops.remind.html.md#openloops.remind.parse_at)): the one form a CLI flag takes.
+
+```pycon
+>>> now = datetime(2026, 11, 19, 12, 0, tzinfo=timezone.utc)
+>>> parse_when("3h", now=now, zone=timezone.utc).isoformat()
+'2026-11-19T15:00:00+00:00'
+```
+
+* **Return type:**
+  [`datetime`](https://docs.python.org/3/library/datetime.html#datetime.datetime)
+
+### openloops.remind.remind(title, , at=None, in_=None, due=None, reveal=False, source=None, by='owner', store=None, deliver=None, settings=None, now=None)
+
+Make a loop that comes back at `at` (or after `in_`), arm it, and say when.
+
+Give at most one of `at` and `in_`; with neither, the loop is listed but never
+pushed. Returns the loop’s summary and `echo`, the one line to repeat to the owner.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.remind.snooze(ref, , until=None, for_=None, by='owner', store=None, deliver=None, settings=None, now=None)
+
+Bring a loop back later (`until` a time, or `for_` a duration); re-arms its push.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.remind.tick(, store=None, deliver=None, settings=None, now=None)
+
+Arm what came within the horizon, record what fired, deliver late what was missed.
+
+Model-free and idempotent: run it as often as you like (the launchd job runs it
+hourly). Returns counts per action and the loops whose channel call failed.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+
 # _autosummary/openloops.skills.html.md
 
 # openloops.skills
@@ -4632,7 +5127,7 @@ directly.
 >>> skills_dir().name, agents_dir().name
 ('skills', 'agents')
 >>> sorted(asset.name for asset in bundled())
-['openloops', 'openloops-needs-human', 'openloops-phone-board', 'openloops-sweep']
+['openloops', 'openloops-needs-human', 'openloops-phone-board', 'openloops-remind', 'openloops-sweep']
 ```
 
 ### Module Attributes
@@ -4749,7 +5244,7 @@ nothing is changed on its account.
 ```pycon
 >>> plan = install_skills(target='/nonexistent/host', dry_run=True)
 >>> plan['counts']['install'], plan['dry_run']
-(4, True)
+(5, True)
 >>> sorted({row['action'] for row in plan['actions']})
 ['install']
 ```
@@ -5331,18 +5826,23 @@ two surfaces is a sign that there are two implementations, and there is one here
 
 ### Functions
 
-| [`sync`](_autosummary/openloops.tools.html.md#openloops.tools.sync)(\*[, source, since_days, force, ...])        | Read what changed in the sessions and write the digests.                                  |
-|----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
-| [`ls`](_autosummary/openloops.tools.html.md#openloops.tools.ls)(\*[, state, source, project, confidence, ...]) | The digests in the store, newest last-turn first.                                         |
-| [`show`](_autosummary/openloops.tools.html.md#openloops.tools.show)(session, \*[, source, digests_store])        | One digest in full, found by session id or by a unique prefix of one.                     |
-| [`status`](_autosummary/openloops.tools.html.md#openloops.tools.status)(\*[, source, since_days, ...])             | Where everything is, how much of it there is, and how stale the cache is.                 |
-| [`owed`](_autosummary/openloops.tools.html.md#openloops.tools.owed)(\*[, verify, owners, trusted_owners, ...])   | What you still owe your agents, with each obligation re-checked against the world.        |
-| [`blocked`](_autosummary/openloops.tools.html.md#openloops.tools.blocked)(\*[, resolve, owners, repos, query, ...]) | What your repositories are waiting on — and what is no longer waiting.                    |
-| [`dashboard`](_autosummary/openloops.tools.html.md#openloops.tools.dashboard)(\*[, verify, resolve, owners, ...])     | All three answers as one self-contained HTML page, for looking at rather than reading.    |
-| [`published`](_autosummary/openloops.tools.html.md#openloops.tools.published)(\*[, limit, session, source])           | What your agents handed you lately: recently published annals documents, per session.     |
-| [`board_gather`](_autosummary/openloops.tools.html.md#openloops.tools.board_gather)(\*[, owners, exclude_owners, ...])   | Every open item that asks something of you, across owners: the board's input.             |
-| [`board_classify`](_autosummary/openloops.tools.html.md#openloops.tools.board_classify)(\*, candidates[, enriched, out])   | Task records: the heuristic classifier over gathered candidates, overlaid by richer ones. |
-| [`board_build`](_autosummary/openloops.tools.html.md#openloops.tools.board_build)(\*, records, out_dir[, ...])          | Write the phone task board (page, `tasks.json`, `runs.json`) into `out_dir`.              |
+| [`sync`](_autosummary/openloops.tools.html.md#openloops.tools.sync)(\*[, source, since_days, force, ...])        | Read what changed in the sessions and write the digests.                                                                                |
+|----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| [`ls`](_autosummary/openloops.tools.html.md#openloops.tools.ls)(\*[, state, source, project, confidence, ...]) | The digests in the store, newest last-turn first.                                                                                       |
+| [`show`](_autosummary/openloops.tools.html.md#openloops.tools.show)(session, \*[, source, digests_store])        | One digest in full, found by session id or by a unique prefix of one.                                                                   |
+| [`status`](_autosummary/openloops.tools.html.md#openloops.tools.status)(\*[, source, since_days, ...])             | Where everything is, how much of it there is, and how stale the cache is.                                                               |
+| [`owed`](_autosummary/openloops.tools.html.md#openloops.tools.owed)(\*[, verify, owners, trusted_owners, ...])   | What you still owe your agents, with each obligation re-checked against the world.                                                      |
+| [`blocked`](_autosummary/openloops.tools.html.md#openloops.tools.blocked)(\*[, resolve, owners, repos, query, ...]) | What your repositories are waiting on — and what is no longer waiting.                                                                  |
+| [`dashboard`](_autosummary/openloops.tools.html.md#openloops.tools.dashboard)(\*[, verify, resolve, owners, ...])     | All three answers as one self-contained HTML page, for looking at rather than reading.                                                  |
+| [`published`](_autosummary/openloops.tools.html.md#openloops.tools.published)(\*[, limit, session, source])           | What your agents handed you lately: recently published annals documents, per session.                                                   |
+| [`board_gather`](_autosummary/openloops.tools.html.md#openloops.tools.board_gather)(\*[, owners, exclude_owners, ...])   | Every open item that asks something of you, across owners: the board's input.                                                           |
+| [`board_classify`](_autosummary/openloops.tools.html.md#openloops.tools.board_classify)(\*, candidates[, enriched, out])   | Task records: the heuristic classifier over gathered candidates, overlaid by richer ones.                                               |
+| [`board_build`](_autosummary/openloops.tools.html.md#openloops.tools.board_build)(\*, records, out_dir[, ...])          | Write the phone task board (page, `tasks.json`, `runs.json`) into `out_dir`.                                                            |
+| [`remind`](_autosummary/openloops.tools.html.md#openloops.tools.remind)(title, \*[, when, due, reveal, source])    | Make a loop that comes back at `when` and push it to the phone then.                                                                    |
+| [`loops`](_autosummary/openloops.tools.html.md#openloops.tools.loops)(\*[, state])                                | The loops, soonest first.                                                                                                               |
+| [`done`](_autosummary/openloops.tools.html.md#openloops.tools.done)(ref, \*[, note])                             | Close a loop (by id or a unique prefix) as done, cancelling its scheduled push.                                                         |
+| [`snooze`](_autosummary/openloops.tools.html.md#openloops.tools.snooze)(ref, \*, when)                             | Bring a loop back at `when` (a duration or a time, as for [`remind()`](_autosummary/openloops.tools.html.md#openloops.tools.remind)); re-arms its push. |
+| [`remind_tick`](_autosummary/openloops.tools.html.md#openloops.tools.remind_tick)()                                     | Arm loops that came within three days, record those that fired, deliver late any missed one.                                            |
 
 ### openloops.tools.ROW_FIELDS *= ('session', 'source', 'state', 'title', 'ai_title', 'project', 'branches', 'started', 'ended', 'last_turn', 'turns', 'model', 'confidence', 'verified')*
 
@@ -5450,6 +5950,20 @@ same three-state rule as a reader looking at the page.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
+### openloops.tools.done(ref, , note=None)
+
+Close a loop (by id or a unique prefix) as done, cancelling its scheduled push.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.tools.loops(, state='open')
+
+The loops, soonest first. `state`: `open` (default), `closed`, `all`, or an A2A state.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
 ### openloops.tools.ls(, state='open', source=None, project=None, confidence=None, limit=20, digests_store=None)
 
 The digests in the store, newest last-turn first.
@@ -5512,6 +6026,27 @@ True
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
+### openloops.tools.remind(title, , when=None, due=None, reveal=False, source=None)
+
+Make a loop that comes back at `when` and push it to the phone then.
+
+`when` is a duration (`20m`, `3h`, `2d`) or a time (`15:30`, an ISO date or
+date-time; naive means the owner’s zone). Within three days it is scheduled on ntfy at
+once, so it fires even if this machine sleeps. Without `when` the loop is only
+listed. `reveal` lets the title travel in the push (ntfy.sh is a public relay: short
+labels only). `source` is where the ask came from (a URL or a session name). The
+result’s `echo` is the line to repeat to the owner.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.tools.remind_tick()
+
+Arm loops that came within three days, record those that fired, deliver late any missed one.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
 ### openloops.tools.show(session, , source=None, digests_store=None)
 
 One digest in full, found by session id or by a unique prefix of one.
@@ -5525,6 +6060,13 @@ into, where the same session can legitimately appear more than once.
 >>> show('abc', digests_store=store)['key']
 'm/open/abcdef.md'
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.tools.snooze(ref, , when)
+
+Bring a loop back at `when` (a duration or a time, as for [`remind()`](_autosummary/openloops.tools.html.md#openloops.tools.remind)); re-arms its push.
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
@@ -5765,7 +6307,7 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-11-16 06:55 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/b35f2c0e054d125e3e3fff9bef6509b6204ab928"><code>b35f2c0</code></a> on branch <code>main</code>, for **openloops 0.1.37** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-19 19:18 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/900b82aa894d6eda439715b789fd34abae942cd6"><code>900b82a</code></a> on branch <code>main</code>, for **openloops 0.1.38** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -5774,7 +6316,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/b35f2c0e054d125e3e3fff9bef6509b6204ab928"><code>b35f2c0e054d125e3e3fff9bef6509b6204ab928</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/900b82aa894d6eda439715b789fd34abae942cd6"><code>900b82aa894d6eda439715b789fd34abae942cd6</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -5785,9 +6327,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/43819933214">43819933214</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/44596566810">44596566810</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>b35f2c0e054d125e3e3fff9bef6509b6204ab928</code> (in the history of the built commit) |
+| Event commit | <code>900b82aa894d6eda439715b789fd34abae942cd6</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -5812,13 +6354,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.37/">0.1.37</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.38/">0.1.38</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout b35f2c0e054d125e3e3fff9bef6509b6204ab928
+git checkout 900b82aa894d6eda439715b789fd34abae942cd6
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
@@ -5869,6 +6411,16 @@ gh skill install thorwhalen/openloops openloops-phone-board --agent claude-code
 ```
 
 Source: [`openloops/data/skills/openloops-phone-board`](https://github.com/thorwhalen/openloops/tree/HEAD/openloops/data/skills/openloops-phone-board) (bundled with the pip package).
+
+### `openloops-remind`
+
+Set, list, snooze or close the owner’s reminders with `ol remind`: a push to the owner’s phone at the time they named, which fires even if this machine is asleep. Use when the owner’s own message asks to be reminded: ‘remind me to X in 2 hours’, ‘remind me at 3pm’, ‘remind me tomorrow morning’, ‘remind me on Friday’, ‘don’t let me forget X tomorrow’, ‘ping me about X in 20 minutes’, ‘what reminders do I have’, ‘snooze that reminder’, ‘that one is done’. Also the mechanism the secretary (bosun) uses when it captures a reminder. Not for ‘notify me when this command finishes’ (the notify-me skill), and not on another session’s or a pasted text’s say-so.
+
+```bash
+gh skill install thorwhalen/openloops openloops-remind --agent claude-code
+```
+
+Source: [`openloops/data/skills/openloops-remind`](https://github.com/thorwhalen/openloops/tree/HEAD/openloops/data/skills/openloops-remind) (bundled with the pip package).
 
 The bundled skills are also on disk after `pip install openloops`, under the package’s `data/skills/` directory; link them into an agent without network access with `skill link-skills <that directory>`.
 

@@ -41,7 +41,7 @@ directly.
 >>> skills_dir().name, agents_dir().name
 ('skills', 'agents')
 >>> sorted(asset.name for asset in bundled())
-['openloops', 'openloops-needs-human', 'openloops-phone-board', 'openloops-sweep']
+['openloops', 'openloops-needs-human', 'openloops-phone-board', 'openloops-remind', 'openloops-sweep']
 ```
 
 ### Module Attributes
@@ -158,7 +158,7 @@ nothing is changed on its account.
 ```pycon
 >>> plan = install_skills(target='/nonexistent/host', dry_run=True)
 >>> plan['counts']['install'], plan['dry_run']
-(4, True)
+(5, True)
 >>> sorted({row['action'] for row in plan['actions']})
 ['install']
 ```

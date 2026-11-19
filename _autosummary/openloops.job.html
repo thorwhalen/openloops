@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=b8ecee75"></script>
+    <script src="../_static/documentation_options.js?v=50f64db7"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -53,12 +53,12 @@
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="openloops.obligations" href="openloops.obligations.html" />
+    <link rel="next" title="openloops.loops" href="openloops.loops.html" />
     <link rel="prev" title="openloops.egress" href="openloops.egress.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.37" />
+  <meta name="docsearch:version" content="0.1.38" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -330,10 +330,12 @@
 <li class="toctree-l2"><a class="reference internal" href="openloops.digest.html">openloops.digest</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.egress.html">openloops.egress</a></li>
 <li class="toctree-l2 current active"><a aria-current="page" class="current reference internal" href="#">openloops.job</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.loops.html">openloops.loops</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.obligations.html">openloops.obligations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.predicate_safety.html">openloops.predicate_safety</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.publications.html">openloops.publications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.receiver_tick.html">openloops.receiver_tick</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.remind.html">openloops.remind</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.skills.html">openloops.skills</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.store.html">openloops.store</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.tasks.html">openloops.tasks</a></li>
@@ -433,8 +435,11 @@ the same command, and <a class="reference internal" href="#openloops.job.install
 <tr class="row-even"><td><p><a class="reference internal" href="#openloops.job.RECEIVER_INTERVAL" title="openloops.job.RECEIVER_INTERVAL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RECEIVER_INTERVAL</span></code></a></p></td>
 <td><p>Seconds between receiver ticks.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.job.REFRESH_LABEL" title="openloops.job.REFRESH_LABEL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">REFRESH_LABEL</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.job.REMIND_LABEL" title="openloops.job.REMIND_LABEL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">REMIND_LABEL</span></code></a></p></td>
 <td><p>no model, so it can run often; six hours keeps the board within a day of GitHub with margin.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.job.REMIND_INTERVAL" title="openloops.job.REMIND_INTERVAL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">REMIND_INTERVAL</span></code></a></p></td>
+<td><p>a reminder is armed on the channel up to three days ahead, so the tick only needs to catch loops entering that horizon and record the ones that fired.</p></td>
 </tr>
 </tbody>
 </table>
@@ -444,6 +449,12 @@ the same command, and <a class="reference internal" href="#openloops.job.install
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#openloops.job.install" title="openloops.job.install"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install</span></code></a>(*[, label, interval, dry_run])</p></td>
 <td><p>Install (or replace) the periodic sync job.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.job.install_remind" title="openloops.job.install_remind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install_remind</span></code></a>(*[, dry_run])</p></td>
+<td><p>Install (or replace) the reminder tick job.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.job.remind_job_spec" title="openloops.job.remind_job_spec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remind_job_spec</span></code></a>(*[, interval, label])</p></td>
+<td><p>The reminder tick as data: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">openloops</span> <span class="pre">remind-tick</span></code> every <code class="docutils literal notranslate"><span class="pre">interval</span></code> s.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#openloops.job.install_receiver" title="openloops.job.install_receiver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install_receiver</span></code></a>(work_dir, *[, dry_run])</p></td>
 <td><p>Install (or replace) the board-receiver job.</p></td>
@@ -491,8 +502,20 @@ calls and no model, so this can be as short as the phone board’s latency wants
 </dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="openloops.job.REFRESH_LABEL">
-<span class="sig-prename descclassname"><span class="pre">openloops.job.</span></span><span class="sig-name descname"><span class="pre">REFRESH_LABEL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'openloops.board-refresh'</span></span><a class="headerlink" href="#openloops.job.REFRESH_LABEL" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="openloops.job.REMIND_INTERVAL">
+<span class="sig-prename descclassname"><span class="pre">openloops.job.</span></span><span class="sig-name descname"><span class="pre">REMIND_INTERVAL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3600</span></span><a class="headerlink" href="#openloops.job.REMIND_INTERVAL" title="Link to this definition">#</a></dt>
+<dd><p>a reminder is armed on the channel up to three days ahead, so the tick only
+needs to catch loops entering that horizon and record the ones that fired.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Hourly</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="openloops.job.REMIND_LABEL">
+<span class="sig-prename descclassname"><span class="pre">openloops.job.</span></span><span class="sig-name descname"><span class="pre">REMIND_LABEL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'openloops.remind-tick'</span></span><a class="headerlink" href="#openloops.job.REMIND_LABEL" title="Link to this definition">#</a></dt>
 <dd><p>no model, so it can
 run often; six hours keeps the board within a day of GitHub with margin.</p>
 <dl class="field-list simple">
@@ -521,6 +544,17 @@ the same silence as a job with nothing to do.</p>
 <dd><p>Install (or replace) the board-receiver job. Returns the paths it wrote.</p>
 <p><code class="docutils literal notranslate"><span class="pre">kwargs</span></code> are those of <a class="reference internal" href="#openloops.job.receiver_job_spec" title="openloops.job.receiver_job_spec"><code class="xref py py-func docutils literal notranslate"><span class="pre">receiver_job_spec()</span></code></a>. A dry run builds and returns the
 plist without touching launchd and without requiring the credentials file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.job.install_remind">
+<span class="sig-prename descclassname"><span class="pre">openloops.job.</span></span><span class="sig-name descname"><span class="pre">install_remind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/job.html#install_remind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.job.install_remind" title="Link to this definition">#</a></dt>
+<dd><p>Install (or replace) the reminder tick job. <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> are <a class="reference internal" href="#openloops.job.remind_job_spec" title="openloops.job.remind_job_spec"><code class="xref py py-func docutils literal notranslate"><span class="pre">remind_job_spec()</span></code></a>’s.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
@@ -580,6 +614,20 @@ name instead of refused.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="openloops.job.remind_job_spec">
+<span class="sig-prename descclassname"><span class="pre">openloops.job.</span></span><span class="sig-name descname"><span class="pre">remind_job_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'openloops.remind-tick'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/job.html#remind_job_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.job.remind_job_spec" title="Link to this definition">#</a></dt>
+<dd><p>The reminder tick as data: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">openloops</span> <span class="pre">remind-tick</span></code> every <code class="docutils literal notranslate"><span class="pre">interval</span></code> s.</p>
+<p>Pure, so it tests anywhere. The job carries no credential: the ntfy topic is resolved
+by correspond (<code class="docutils literal notranslate"><span class="pre">NTFY_TOPIC</span></code>, else the Keychain), and the owner’s zone by
+<code class="docutils literal notranslate"><span class="pre">OPENLOOPS_TZ</span></code> when set in the job’s environment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="openloops.job.uninstall">
 <span class="sig-prename descclassname"><span class="pre">openloops.job.</span></span><span class="sig-name descname"><span class="pre">uninstall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'openloops.sync'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/job.html#uninstall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.job.uninstall" title="Link to this definition">#</a></dt>
 <dd><p>Unload the job and remove its plist. Idempotent.</p>
@@ -612,11 +660,11 @@ name instead of refused.</p>
       </div>
     </a>
     <a class="right-next"
-       href="openloops.obligations.html"
+       href="openloops.loops.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">openloops.obligations</p>
+        <p class="prev-next-title">openloops.loops</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -643,12 +691,15 @@ name instead of refused.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.DFLT_LABEL"><code class="docutils literal notranslate"><span class="pre">DFLT_LABEL</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.RECEIVER_INTERVAL"><code class="docutils literal notranslate"><span class="pre">RECEIVER_INTERVAL</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.RECEIVER_LABEL"><code class="docutils literal notranslate"><span class="pre">RECEIVER_LABEL</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.REFRESH_LABEL"><code class="docutils literal notranslate"><span class="pre">REFRESH_LABEL</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.REMIND_INTERVAL"><code class="docutils literal notranslate"><span class="pre">REMIND_INTERVAL</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.REMIND_LABEL"><code class="docutils literal notranslate"><span class="pre">REMIND_LABEL</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.install"><code class="docutils literal notranslate"><span class="pre">install()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.install_receiver"><code class="docutils literal notranslate"><span class="pre">install_receiver()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.install_remind"><code class="docutils literal notranslate"><span class="pre">install_remind()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.job_status"><code class="docutils literal notranslate"><span class="pre">job_status()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.plist_xml"><code class="docutils literal notranslate"><span class="pre">plist_xml()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.receiver_job_spec"><code class="docutils literal notranslate"><span class="pre">receiver_job_spec()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.remind_job_spec"><code class="docutils literal notranslate"><span class="pre">remind_job_spec()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.job.uninstall"><code class="docutils literal notranslate"><span class="pre">uninstall()</span></code></a></li>
 </ul>
   </nav></div>

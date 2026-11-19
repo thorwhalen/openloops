@@ -18,18 +18,23 @@ two surfaces is a sign that there are two implementations, and there is one here
 
 ### Functions
 
-| [`sync`](#openloops.tools.sync)(\*[, source, since_days, force, ...])        | Read what changed in the sessions and write the digests.                                  |
-|----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
-| [`ls`](#openloops.tools.ls)(\*[, state, source, project, confidence, ...]) | The digests in the store, newest last-turn first.                                         |
-| [`show`](#openloops.tools.show)(session, \*[, source, digests_store])        | One digest in full, found by session id or by a unique prefix of one.                     |
-| [`status`](#openloops.tools.status)(\*[, source, since_days, ...])             | Where everything is, how much of it there is, and how stale the cache is.                 |
-| [`owed`](#openloops.tools.owed)(\*[, verify, owners, trusted_owners, ...])   | What you still owe your agents, with each obligation re-checked against the world.        |
-| [`blocked`](#openloops.tools.blocked)(\*[, resolve, owners, repos, query, ...]) | What your repositories are waiting on — and what is no longer waiting.                    |
-| [`dashboard`](#openloops.tools.dashboard)(\*[, verify, resolve, owners, ...])     | All three answers as one self-contained HTML page, for looking at rather than reading.    |
-| [`published`](#openloops.tools.published)(\*[, limit, session, source])           | What your agents handed you lately: recently published annals documents, per session.     |
-| [`board_gather`](#openloops.tools.board_gather)(\*[, owners, exclude_owners, ...])   | Every open item that asks something of you, across owners: the board's input.             |
-| [`board_classify`](#openloops.tools.board_classify)(\*, candidates[, enriched, out])   | Task records: the heuristic classifier over gathered candidates, overlaid by richer ones. |
-| [`board_build`](#openloops.tools.board_build)(\*, records, out_dir[, ...])          | Write the phone task board (page, `tasks.json`, `runs.json`) into `out_dir`.              |
+| [`sync`](#openloops.tools.sync)(\*[, source, since_days, force, ...])        | Read what changed in the sessions and write the digests.                                                                                |
+|----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| [`ls`](#openloops.tools.ls)(\*[, state, source, project, confidence, ...]) | The digests in the store, newest last-turn first.                                                                                       |
+| [`show`](#openloops.tools.show)(session, \*[, source, digests_store])        | One digest in full, found by session id or by a unique prefix of one.                                                                   |
+| [`status`](#openloops.tools.status)(\*[, source, since_days, ...])             | Where everything is, how much of it there is, and how stale the cache is.                                                               |
+| [`owed`](#openloops.tools.owed)(\*[, verify, owners, trusted_owners, ...])   | What you still owe your agents, with each obligation re-checked against the world.                                                      |
+| [`blocked`](#openloops.tools.blocked)(\*[, resolve, owners, repos, query, ...]) | What your repositories are waiting on — and what is no longer waiting.                                                                  |
+| [`dashboard`](#openloops.tools.dashboard)(\*[, verify, resolve, owners, ...])     | All three answers as one self-contained HTML page, for looking at rather than reading.                                                  |
+| [`published`](#openloops.tools.published)(\*[, limit, session, source])           | What your agents handed you lately: recently published annals documents, per session.                                                   |
+| [`board_gather`](#openloops.tools.board_gather)(\*[, owners, exclude_owners, ...])   | Every open item that asks something of you, across owners: the board's input.                                                           |
+| [`board_classify`](#openloops.tools.board_classify)(\*, candidates[, enriched, out])   | Task records: the heuristic classifier over gathered candidates, overlaid by richer ones.                                               |
+| [`board_build`](#openloops.tools.board_build)(\*, records, out_dir[, ...])          | Write the phone task board (page, `tasks.json`, `runs.json`) into `out_dir`.                                                            |
+| [`remind`](#openloops.tools.remind)(title, \*[, when, due, reveal, source])    | Make a loop that comes back at `when` and push it to the phone then.                                                                    |
+| [`loops`](#openloops.tools.loops)(\*[, state])                                | The loops, soonest first.                                                                                                               |
+| [`done`](#openloops.tools.done)(ref, \*[, note])                             | Close a loop (by id or a unique prefix) as done, cancelling its scheduled push.                                                         |
+| [`snooze`](#openloops.tools.snooze)(ref, \*, when)                             | Bring a loop back at `when` (a duration or a time, as for [`remind()`](#openloops.tools.remind)); re-arms its push. |
+| [`remind_tick`](#openloops.tools.remind_tick)()                                     | Arm loops that came within three days, record those that fired, deliver late any missed one.                                            |
 
 ### openloops.tools.ROW_FIELDS *= ('session', 'source', 'state', 'title', 'ai_title', 'project', 'branches', 'started', 'ended', 'last_turn', 'turns', 'model', 'confidence', 'verified')*
 
@@ -137,6 +142,20 @@ same three-state rule as a reader looking at the page.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
+### openloops.tools.done(ref, , note=None)
+
+Close a loop (by id or a unique prefix) as done, cancelling its scheduled push.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.tools.loops(, state='open')
+
+The loops, soonest first. `state`: `open` (default), `closed`, `all`, or an A2A state.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
 ### openloops.tools.ls(, state='open', source=None, project=None, confidence=None, limit=20, digests_store=None)
 
 The digests in the store, newest last-turn first.
@@ -199,6 +218,27 @@ True
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
+### openloops.tools.remind(title, , when=None, due=None, reveal=False, source=None)
+
+Make a loop that comes back at `when` and push it to the phone then.
+
+`when` is a duration (`20m`, `3h`, `2d`) or a time (`15:30`, an ISO date or
+date-time; naive means the owner’s zone). Within three days it is scheduled on ntfy at
+once, so it fires even if this machine sleeps. Without `when` the loop is only
+listed. `reveal` lets the title travel in the push (ntfy.sh is a public relay: short
+labels only). `source` is where the ask came from (a URL or a session name). The
+result’s `echo` is the line to repeat to the owner.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.tools.remind_tick()
+
+Arm loops that came within three days, record those that fired, deliver late any missed one.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
 ### openloops.tools.show(session, , source=None, digests_store=None)
 
 One digest in full, found by session id or by a unique prefix of one.
@@ -212,6 +252,13 @@ into, where the same session can legitimately appear more than once.
 >>> show('abc', digests_store=store)['key']
 'm/open/abcdef.md'
 ```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.tools.snooze(ref, , when)
+
+Bring a loop back at `when` (a duration or a time, as for [`remind()`](#openloops.tools.remind)); re-arms its push.
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]

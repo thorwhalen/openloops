@@ -18,22 +18,25 @@ the same command, and [`install()`](#openloops.job.install) says so rather than 
 
 ### Module Attributes
 
-| [`DFLT_LABEL`](#openloops.job.DFLT_LABEL)        | launchd job label.                                                                           |
-|--------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
-| [`DFLT_INTERVAL`](#openloops.job.DFLT_INTERVAL)     | Seconds between ticks.                                                                       |
-| [`RECEIVER_LABEL`](#openloops.job.RECEIVER_LABEL)    | launchd label of the board-receiver job (ADR-011).                                           |
-| [`RECEIVER_INTERVAL`](#openloops.job.RECEIVER_INTERVAL) | Seconds between receiver ticks.                                                              |
-| [`REFRESH_LABEL`](#openloops.job.REFRESH_LABEL)     | no model, so it can run often; six hours keeps the board within a day of GitHub with margin. |
+| [`DFLT_LABEL`](#openloops.job.DFLT_LABEL)        | launchd job label.                                                                                                                                     |
+|--------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`DFLT_INTERVAL`](#openloops.job.DFLT_INTERVAL)     | Seconds between ticks.                                                                                                                                 |
+| [`RECEIVER_LABEL`](#openloops.job.RECEIVER_LABEL)    | launchd label of the board-receiver job (ADR-011).                                                                                                     |
+| [`RECEIVER_INTERVAL`](#openloops.job.RECEIVER_INTERVAL) | Seconds between receiver ticks.                                                                                                                        |
+| [`REMIND_LABEL`](#openloops.job.REMIND_LABEL)      | no model, so it can run often; six hours keeps the board within a day of GitHub with margin.                                                           |
+| [`REMIND_INTERVAL`](#openloops.job.REMIND_INTERVAL)   | a reminder is armed on the channel up to three days ahead, so the tick only needs to catch loops entering that horizon and record the ones that fired. |
 
 ### Functions
 
-| [`install`](#openloops.job.install)(\*[, label, interval, dry_run])        | Install (or replace) the periodic sync job.                                  |
-|-------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
-| [`install_receiver`](#openloops.job.install_receiver)(work_dir, \*[, dry_run])      | Install (or replace) the board-receiver job.                                 |
-| [`receiver_job_spec`](#openloops.job.receiver_job_spec)(work_dir, \*[, claude, ...]) | The receiver job as data: program arguments, environment, plist.             |
-| [`uninstall`](#openloops.job.uninstall)(\*[, label])                         | Unload the job and remove its plist.                                         |
-| [`job_status`](#openloops.job.job_status)(\*[, label, env_file])              | Installed? loaded? and — the question that matters — when did it last write? |
-| [`plist_xml`](#openloops.job.plist_xml)(\*, label, program_args, env, ...)   | The launchd property list, as text.                                          |
+| [`install`](#openloops.job.install)(\*[, label, interval, dry_run])        | Install (or replace) the periodic sync job.                                      |
+|-------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+| [`install_remind`](#openloops.job.install_remind)(\*[, dry_run])                  | Install (or replace) the reminder tick job.                                      |
+| [`remind_job_spec`](#openloops.job.remind_job_spec)(\*[, interval, label])         | The reminder tick as data: `python -m openloops remind-tick` every `interval` s. |
+| [`install_receiver`](#openloops.job.install_receiver)(work_dir, \*[, dry_run])      | Install (or replace) the board-receiver job.                                     |
+| [`receiver_job_spec`](#openloops.job.receiver_job_spec)(work_dir, \*[, claude, ...]) | The receiver job as data: program arguments, environment, plist.                 |
+| [`uninstall`](#openloops.job.uninstall)(\*[, label])                         | Unload the job and remove its plist.                                             |
+| [`job_status`](#openloops.job.job_status)(\*[, label, env_file])              | Installed? loaded? and — the question that matters — when did it last write?     |
+| [`plist_xml`](#openloops.job.plist_xml)(\*, label, program_args, env, ...)   | The launchd property list, as text.                                              |
 
 ### openloops.job.DFLT_INTERVAL *= 900*
 
@@ -54,7 +57,15 @@ calls and no model, so this can be as short as the phone board’s latency wants
 
 launchd label of the board-receiver job (ADR-011).
 
-### openloops.job.REFRESH_LABEL *= 'openloops.board-refresh'*
+### openloops.job.REMIND_INTERVAL *= 3600*
+
+a reminder is armed on the channel up to three days ahead, so the tick only
+needs to catch loops entering that horizon and record the ones that fired.
+
+* **Type:**
+  Hourly
+
+### openloops.job.REMIND_LABEL *= 'openloops.remind-tick'*
 
 no model, so it can
 run often; six hours keeps the board within a day of GitHub with margin.
@@ -78,6 +89,13 @@ Install (or replace) the board-receiver job. Returns the paths it wrote.
 
 `kwargs` are those of [`receiver_job_spec()`](#openloops.job.receiver_job_spec). A dry run builds and returns the
 plist without touching launchd and without requiring the credentials file.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+### openloops.job.install_remind(, dry_run=False, \*\*kwargs)
+
+Install (or replace) the reminder tick job. `kwargs` are [`remind_job_spec()`](#openloops.job.remind_job_spec)’s.
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
@@ -120,6 +138,17 @@ packaged receiver prompt. The credentials stay in *env_file*; nothing about them
 is in the plist, the arguments or the environment (`PASSED_THROUGH` names none).
 With `require_claude=False` (a dry run) a missing `claude` is shown as a bare
 name instead of refused.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`object`](https://docs.python.org/3/builtins/functions.html#object)]
+
+### openloops.job.remind_job_spec(, interval=3600, label='openloops.remind-tick')
+
+The reminder tick as data: `python -m openloops remind-tick` every `interval` s.
+
+Pure, so it tests anywhere. The job carries no credential: the ntfy topic is resolved
+by correspond (`NTFY_TOPIC`, else the Keychain), and the owner’s zone by
+`OPENLOOPS_TZ` when set in the job’s environment.
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`object`](https://docs.python.org/3/builtins/functions.html#object)]

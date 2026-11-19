@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="alternate" type="text/markdown" href="remind.html.md">
+<link rel="describedby" href="../../llms.txt" type="text/markdown">
+    <title>openloops.remind &#8212; openloops</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/epythet.css?v=93ea43a0" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../../_static/documentation_options.js?v=50f64db7"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=fd10adb8"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+let closeModal = () => {};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if (false) {
+                                        addZoomToSvgs(d3.selectAll("").select(function() {
+                                            return this.querySelector("svg");
+                                        }));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if (false) {
+        const mermaids_to_add_zoom = 0 === -1 ? mermaids_active.length : 0;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("").select(function() {
+                return this.querySelector("svg");
+            });
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if (!true) return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = "\u26f6";
+        fullscreenBtn.style.opacity = "50%";
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scrollX, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.display = 'block';
+
+                if (false) {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+
+
+const load = async () => {
+    initStyles();
+
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...{"startOnLoad": false},
+                ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...{"startOnLoad": false},
+    ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openloops/remind';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.38" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">openloops</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../ai-agents.html">
+    For AI agents
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/thorwhalen/openloops" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../ai-agents.html">
+    For AI agents
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/thorwhalen/openloops" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">openloops.remind</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for openloops.remind</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Reminders: loops kept in a store and delivered through a channel that holds the time.</span>
+
+<span class="sd">The runner over :mod:`openloops.loops` (ADR-013). The core modules never import this</span>
+<span class="sd">one: it is where a store, a clock and a delivery channel are composed, and it is the</span>
+<span class="sd">only openloops code that sends anything for a reminder.</span>
+
+<span class="sd">How a reminder survives a sleeping machine: when a loop comes within the horizon (three</span>
+<span class="sd">days, ntfy's limit), it is **armed**, handed to ntfy as a scheduled message whose</span>
+<span class="sd">sequence id is the loop's id. ntfy delivers it at ``remind_at`` whether or not this</span>
+<span class="sd">machine is awake. Done or snoozed first, the scheduled copy is cancelled or replaced</span>
+<span class="sd">by the same id, but ntfy.sh does not honour that today (:data:`UNCANCELLABLE_NOTE`), so</span>
+<span class="sd">the result carries a ``warning`` that the original push may still arrive. A tick (``ol remind-tick``, hourly from a launchd job) arms loops that</span>
+<span class="sd">came within the horizon, records the ones that fired, and delivers late, saying so,</span>
+<span class="sd">anything that was never armed.</span>
+
+<span class="sd">Three seams, each one keyword argument with a default that works:</span>
+
+<span class="sd">- ``store``: a ``MutableMapping[str, Loop]``; default JSON files under</span>
+<span class="sd">  ``~/.local/share/openloops/loops/`` (:func:`loops_store`).</span>
+<span class="sd">- ``deliver``: an object with ``schedule``, ``now`` and ``cancel``; default</span>
+<span class="sd">  :class:`NtfyDelivery`, through correspond's ntfy channel (``pip install</span>
+<span class="sd">  openloops[remind]``).</span>
+<span class="sd">- ``settings``: :class:`RemindSettings`; default from the environment.</span>
+
+<span class="sd">**Privacy.** ntfy.sh is a public relay: anyone holding the topic reads the push. A</span>
+<span class="sd">push says only that a reminder is due unless the loop was made with ``reveal=True``;</span>
+<span class="sd">the title then travels too. Reveal short labels only, never names, clients or secrets.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">MutableMapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">replace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">,</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">zoneinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZoneInfo</span><span class="p">,</span> <span class="n">ZoneInfoNotFoundError</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops</span><span class="w"> </span><span class="kn">import</span> <span class="n">loops</span> <span class="k">as</span> <span class="n">_loops</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.loops</span><span class="w"> </span><span class="kn">import</span> <span class="n">Loop</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openloops.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">AtomicTextFiles</span><span class="p">,</span> <span class="n">data_dir</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"RemindSettings"</span><span class="p">,</span>
+    <span class="s2">"NtfyDelivery"</span><span class="p">,</span>
+    <span class="s2">"DeliveryError"</span><span class="p">,</span>
+    <span class="s2">"LoopsStore"</span><span class="p">,</span>
+    <span class="s2">"loops_store"</span><span class="p">,</span>
+    <span class="s2">"parse_in"</span><span class="p">,</span>
+    <span class="s2">"parse_at"</span><span class="p">,</span>
+    <span class="s2">"parse_when"</span><span class="p">,</span>
+    <span class="s2">"attach"</span><span class="p">,</span>
+    <span class="s2">"local"</span><span class="p">,</span>
+    <span class="s2">"remind"</span><span class="p">,</span>
+    <span class="s2">"list_loops"</span><span class="p">,</span>
+    <span class="s2">"done"</span><span class="p">,</span>
+    <span class="s2">"snooze"</span><span class="p">,</span>
+    <span class="s2">"tick"</span><span class="p">,</span>
+    <span class="s2">"find"</span><span class="p">,</span>
+    <span class="s2">"UNCANCELLABLE_NOTE"</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="DeliveryError">
+<a class="viewcode-back" href="../../_autosummary/openloops.remind.html#openloops.remind.DeliveryError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DeliveryError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The channel refused or could not be reached; the loop is left to the next tick."""</span></div>
+
+
+
+<div class="viewcode-block" id="RemindSettings">
+<a class="viewcode-back" href="../../_autosummary/openloops.remind.html#openloops.remind.RemindSettings">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RemindSettings</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""What the owner sets once. ``from_env`` reads ``OPENLOOPS_REMIND_*`` and ``OPENLOOPS_TZ``.</span>
+
+<span class="sd">    ``channel`` is a correspond reference (``ntfy:`` is the default topic). ``tz`` is an</span>
+<span class="sd">    IANA zone for reading and echoing times; ``None`` uses the machine's own, with its</span>
+<span class="sd">    daylight-saving rules applied per instant. ``horizon_hours`` is capped at 71 (ntfy</span>
+<span class="sd">    schedules three days ahead at most).</span>
+<span class="sd">    """</span>
+
+    <span class="n">channel</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"ntfy:"</span>
+    <span class="n">horizon_hours</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">71.0</span>
+    <span class="n">generic_title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"Reminder"</span>
+    <span class="n">generic_text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"A reminder you set is due."</span>
+    <span class="n">tz</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_env</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">environ</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RemindSettings</span><span class="p">:</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="k">if</span> <span class="n">environ</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">environ</span>
+        <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">env</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"OPENLOOPS_REMIND_CHANNEL"</span><span class="p">):</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">"channel"</span><span class="p">]</span> <span class="o">=</span> <span class="n">env</span><span class="p">[</span><span class="s2">"OPENLOOPS_REMIND_CHANNEL"</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">env</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"OPENLOOPS_REMIND_HORIZON_HOURS"</span><span class="p">):</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">"horizon_hours"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">env</span><span class="p">[</span><span class="s2">"OPENLOOPS_REMIND_HORIZON_HOURS"</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">env</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"OPENLOOPS_TZ"</span><span class="p">):</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">"tz"</span><span class="p">]</span> <span class="o">=</span> <span class="n">env</span><span class="p">[</span><span class="s2">"OPENLOOPS_TZ"</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">horizon</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">timedelta</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">horizon_hours</span><span class="p">),</span> <span class="n">_loops</span><span class="o">.</span><span class="n">MAX_HORIZON</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""A ``ZoneInfo``, or ``None`` for the machine's own zone (see :func:`attach`)."""</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tz</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tz</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"UTC"</span><span class="p">,</span> <span class="s2">"Z"</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">timezone</span><span class="o">.</span><span class="n">utc</span>  <span class="c1"># needs no tz database (Windows ships none)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ZoneInfo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tz</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ZoneInfoNotFoundError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"unknown time zone </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tz</span><span class="si">!r}</span><span class="s2"> (an IANA name such as Europe/Paris; "</span>
+                <span class="s2">"on Windows, pip install tzdata)"</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">channel_label</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The channel's name only: a topic in the reference is a bearer secret."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">":"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">":"</span></div>
+
+
+
+<div class="viewcode-block" id="attach">
+<a class="viewcode-back" href="../../_autosummary/openloops.remind.html#openloops.remind.attach">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">attach</span><span class="p">(</span><span class="n">naive</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">zone</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``naive`` read in ``zone``; ``None`` means this machine's zone, DST rules included.</span>
+
+<span class="sd">    &gt;&gt;&gt; attach(datetime(2026, 7, 1, 9, 0), timezone.utc).isoformat()</span>
+<span class="sd">    '2026-07-01T09:00:00+00:00'</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">naive</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">zone</span><span class="p">)</span> <span class="k">if</span> <span class="n">zone</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">naive</span><span class="o">.</span><span class="n">astimezone</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="local">
+<a class="viewcode-back" href="../../_autosummary/openloops.remind.html#openloops.remind.local">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">local</span><span class="p">(</span><span class="n">when</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">zone</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``when`` shown in ``zone``, or in this machine's zone (DST-aware) when ``None``."""</span>
+    <span class="k">return</span> <span class="n">when</span><span class="o">.</span><span class="n">astimezone</span><span class="p">(</span><span class="n">zone</span><span class="p">)</span> <span class="k">if</span> <span class="n">zone</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">when</span><span class="o">.</span><span class="n">astimezone</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="NtfyDelivery">
+<a class="viewcode-back" href="../../_autosummary/openloops.remind.html#openloops.remind.NtfyDelivery">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NtfyDelivery</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The default ``deliver``: correspond's ntfy channel, one sequence id per loop.</span>
+
+<span class="sd">    ``send`` and ``get_channel`` default to correspond's, imported when first used, so</span>
+<span class="sd">    ``import openloops.remind`` costs nothing and tests inject fakes.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"ntfy:"</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">send</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">get_channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">ref</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send</span> <span class="o">=</span> <span class="n">send</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel</span> <span class="o">=</span> <span class="n">get_channel</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_correspond</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_send</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">correspond</span>
+            <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># pragma: no cover - depends on the extra</span>
+                <span class="k">raise</span> <span class="n">DeliveryError</span><span class="p">(</span>
+                    <span class="s2">"reminders deliver through correspond, which needs Python 3.11+: "</span>
+                    <span class="s2">"pip install 'openloops[remind]'"</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_send</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_send</span> <span class="ow">or</span> <span class="n">correspond</span><span class="o">.</span><span class="n">send</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel</span> <span class="ow">or</span> <span class="n">correspond</span><span class="o">.</span><span class="n">get_channel</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_send</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_publish</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loop</span><span class="p">:</span> <span class="n">Loop</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">at</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">send</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_correspond</span><span class="p">()</span>
+        <span class="n">native</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"sequence_id"</span><span class="p">:</span> <span class="n">loop</span><span class="o">.</span><span class="n">id</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">at</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">native</span><span class="p">[</span><span class="s2">"at"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">at</span><span class="o">.</span><span class="n">timestamp</span><span class="p">())</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="s2">"high"</span><span class="p">,</span> <span class="n">native</span><span class="o">=</span><span class="n">native</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># correspond raises its own error types</span>
+            <span class="k">raise</span> <span class="n">DeliveryError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DeliveryError</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">error</span> <span class="ow">or</span> <span class="s2">"the channel refused the message"</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loop</span><span class="p">:</span> <span class="n">Loop</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">at</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_publish</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">at</span><span class="o">=</span><span class="n">at</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">now</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loop</span><span class="p">:</span> <span class="n">Loop</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_publish</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">at</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loop</span><span class="p">:</span> <span class="n">Loop</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">send</span><span class="p">,</span> <span class="n">get_channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_correspond</span><span class="p">()</span>
+        <span class="n">channel_name</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">topic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">channel</span> <span class="o">=</span> <span class="n">get_channel</span><span class="p">(</span><span class="n">channel_name</span><span class="p">)</span>
+            <span class="n">channel</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="n">channel</span><span class="o">.</span><span class="n">parse_ref</span><span class="p">(</span><span class="n">topic</span><span class="p">),</span> <span class="n">loop</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># correspond raises its own error types</span>
+            <span class="k">raise</span> <span class="n">DeliveryError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span></div>
+
+
+
+<div class="viewcode-block" id="LoopsStore">
+<a class="viewcode-back" href="../../_autosummary/openloops.remind.html#openloops.remind.LoopsStore">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LoopsStore</span><span class="p">(</span><span class="n">MutableMapping</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``Loop`` records as ``&lt;id&gt;.json`` files, each write atomic."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files</span><span class="p">:</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">files</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Loop</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Loop</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.json"</span><span class="p">]))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">loop</span><span class="p">:</span> <span class="n">Loop</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="n">loop</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"key </span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s2"> is not the loop's id </span><span class="si">{</span><span class="n">loop</span><span class="o">.</span><span class="n">id</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.json"</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">loop</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.json"</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">".json"</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"/"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">name</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">".json"</span><span class="p">)]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="loops_store">
+<a class="viewcode-back" href="../../_autosummary/openloops.remind.html#openloops.remind.loops_store">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">loops_store</span><span class="p">(</span><span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LoopsStore</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The default store: ``~/.local/share/openloops/loops/&lt;id&gt;.json``."""</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">rootdir</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span> <span class="k">if</span> <span class="n">rootdir</span> <span class="k">else</span> <span class="n">data_dir</span><span class="p">()</span> <span class="o">/</span> <span class="s2">"loops"</span>
+    <span class="k">return</span> <span class="n">LoopsStore</span><span class="p">(</span><span class="n">AtomicTextFiles</span><span class="p">(</span><span class="n">root</span><span class="p">))</span></div>
+
+
+
+<span class="n">_ISO</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"\d</span><span class="si">{4}</span><span class="s2">-\d</span><span class="si">{2}</span><span class="s2">-\d</span><span class="si">{2}</span><span class="s2">([T ]\d</span><span class="si">{2}</span><span class="s2">:\d</span><span class="si">{2}</span><span class="s2">(:\d</span><span class="si">{2}</span><span class="s2">)?(Z|[+-]\d</span><span class="si">{2}</span><span class="s2">:\d</span><span class="si">{2}</span><span class="s2">)?)?"</span>
+<span class="n">_DURATION</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(\d+(?:\.\d+)?)\s*([smhdw])"</span><span class="p">)</span>
+<span class="n">_UNIT</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"s"</span><span class="p">:</span> <span class="s2">"seconds"</span><span class="p">,</span> <span class="s2">"m"</span><span class="p">:</span> <span class="s2">"minutes"</span><span class="p">,</span> <span class="s2">"h"</span><span class="p">:</span> <span class="s2">"hours"</span><span class="p">,</span> <span class="s2">"d"</span><span class="p">:</span> <span class="s2">"days"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">:</span> <span class="s2">"weeks"</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="parse_in">
+<a class="viewcode-back" href="../../_autosummary/openloops.remind.html#openloops.remind.parse_in">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_in</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">timedelta</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A duration such as ``20m``, ``3h``, ``2d`` or ``1h30m``.</span>
+
+<span class="sd">    &gt;&gt;&gt; parse_in("1h30m")</span>
+<span class="sd">    datetime.timedelta(seconds=5400)</span>
+<span class="sd">    """</span>
+    <span class="n">cleaned</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">_DURATION</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">cleaned</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">parts</span> <span class="ow">or</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="n">u</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">)</span> <span class="o">!=</span> <span class="n">cleaned</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"not a duration: </span><span class="si">{</span><span class="n">text</span><span class="si">!r}</span><span class="s2"> (use e.g. 20m, 3h, 2d, 1h30m)"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">((</span><span class="n">timedelta</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">_UNIT</span><span class="p">[</span><span class="n">u</span><span class="p">]:</span> <span class="nb">float</span><span class="p">(</span><span class="n">n</span><span class="p">)})</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">),</span> <span class="n">timedelta</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="parse_at">
+<a class="viewcode-back" href="../../_autosummary/openloops.remind.html#openloops.remind.parse_at">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_at</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">zone</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""An ISO date-time (naive means ``zone``), an ISO date (09:00 that day) or ``HH:MM``</span>
+<span class="sd">    (the next one). Natural language is the calling agent's job, not this function's.</span>
+
+<span class="sd">    &gt;&gt;&gt; z = timezone.utc</span>
+<span class="sd">    &gt;&gt;&gt; now = datetime(2026, 11, 19, 12, 0, tzinfo=z)</span>
+<span class="sd">    &gt;&gt;&gt; parse_at("09:30", now=now, zone=z).isoformat()</span>
+<span class="sd">    '2026-11-20T09:30:00+00:00'</span>
+<span class="sd">    &gt;&gt;&gt; parse_at("2026-11-21", now=now, zone=z).isoformat()</span>
+<span class="sd">    '2026-11-21T09:00:00+00:00'</span>
+<span class="sd">    """</span>
+    <span class="n">raw</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">hint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"not a time: </span><span class="si">{</span><span class="n">text</span><span class="si">!r}</span><span class="s2"> (use HH:MM, YYYY-MM-DD, or YYYY-MM-DDTHH:MM)"</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\d{1,2}:\d</span><span class="si">{2}</span><span class="s2">"</span><span class="p">,</span> <span class="n">raw</span><span class="p">):</span>
+        <span class="n">hour</span><span class="p">,</span> <span class="n">minute</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">raw</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">":"</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">hour</span> <span class="o">&gt;</span> <span class="mi">23</span> <span class="ow">or</span> <span class="n">minute</span> <span class="o">&gt;</span> <span class="mi">59</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">hint</span><span class="p">)</span>
+        <span class="n">today</span> <span class="o">=</span> <span class="n">local</span><span class="p">(</span><span class="n">now</span><span class="p">,</span> <span class="n">zone</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">naive</span> <span class="o">=</span> <span class="n">today</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="n">hour</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="n">minute</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">attach</span><span class="p">(</span><span class="n">naive</span><span class="p">,</span> <span class="n">zone</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">now</span><span class="p">:</span>
+            <span class="n">naive</span> <span class="o">+=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">attach</span><span class="p">(</span><span class="n">naive</span><span class="p">,</span> <span class="n">zone</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">_ISO</span><span class="p">,</span> <span class="n">raw</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">hint</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">when</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"Z"</span><span class="p">,</span> <span class="s2">"+00:00"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="s2">"T"</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">hint</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span>  <span class="c1"># a date alone: 09:00 that day</span>
+        <span class="n">when</span> <span class="o">=</span> <span class="n">when</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">when</span> <span class="k">if</span> <span class="n">when</span><span class="o">.</span><span class="n">tzinfo</span> <span class="k">else</span> <span class="n">attach</span><span class="p">(</span><span class="n">when</span><span class="p">,</span> <span class="n">zone</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="parse_when">
+<a class="viewcode-back" href="../../_autosummary/openloops.remind.html#openloops.remind.parse_when">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_when</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">zone</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A duration from ``now`` (``3h``, ``1h30m``) or a time (:func:`parse_at`): the one form a CLI flag takes.</span>
+
+<span class="sd">    &gt;&gt;&gt; now = datetime(2026, 11, 19, 12, 0, tzinfo=timezone.utc)</span>
+<span class="sd">    &gt;&gt;&gt; parse_when("3h", now=now, zone=timezone.utc).isoformat()</span>
+<span class="sd">    '2026-11-19T15:00:00+00:00'</span>
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">now</span> <span class="o">+</span> <span class="n">parse_in</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">parse_at</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">now</span><span class="o">=</span><span class="n">now</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="n">zone</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_as_time</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">datetime</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">zone</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A string through :func:`parse_when`; a naive datetime read in ``zone``."""</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">parse_when</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">now</span><span class="o">=</span><span class="n">now</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="n">zone</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span> <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">tzinfo</span> <span class="k">else</span> <span class="n">attach</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">zone</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_load</span><span class="p">(</span><span class="n">store</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Loop</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">Loop</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Every loop that reads; the keys of those that do not (one bad file must not stop the rest)."""</span>
+    <span class="n">loops</span><span class="p">,</span> <span class="n">skipped</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">store</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">loop</span> <span class="o">=</span> <span class="n">store</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">skipped</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">loop</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="n">key</span><span class="p">:</span>
+            <span class="n">skipped</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: holds </span><span class="si">{</span><span class="n">loop</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">loops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">loops</span><span class="p">,</span> <span class="n">skipped</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_resolve</span><span class="p">(</span><span class="n">store</span><span class="p">,</span> <span class="n">deliver</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">settings</span> <span class="ow">or</span> <span class="n">RemindSettings</span><span class="o">.</span><span class="n">from_env</span><span class="p">()</span>
+    <span class="n">store</span> <span class="o">=</span> <span class="n">loops_store</span><span class="p">()</span> <span class="k">if</span> <span class="n">store</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">store</span>
+    <span class="n">deliver</span> <span class="o">=</span> <span class="n">NtfyDelivery</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">channel</span><span class="p">)</span> <span class="k">if</span> <span class="n">deliver</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">deliver</span>
+    <span class="k">return</span> <span class="n">store</span><span class="p">,</span> <span class="n">deliver</span><span class="p">,</span> <span class="n">settings</span>
+
+
+<div class="viewcode-block" id="find">
+<a class="viewcode-back" href="../../_autosummary/openloops.remind.html#openloops.remind.find">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find</span><span class="p">(</span><span class="n">store</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Loop</span><span class="p">],</span> <span class="n">ref</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Loop</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A loop by id, by a unique prefix (with or without ``loop-``), or by its hex suffix."""</span>
+    <span class="n">ref</span> <span class="o">=</span> <span class="p">(</span><span class="n">ref</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ref</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">"name a loop: its id, a unique prefix, or its last part"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">store</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">store</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">k</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">store</span>
+        <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span> <span class="ow">or</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">"loop-</span><span class="si">{</span><span class="n">ref</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">k</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">"-</span><span class="si">{</span><span class="n">ref</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">store</span><span class="p">[</span><span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">matches</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no loop </span><span class="si">{</span><span class="n">ref</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ref</span><span class="si">!r}</span><span class="s2"> matches </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span><span class="si">}</span><span class="s2"> loops: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">matches</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_push_text</span><span class="p">(</span><span class="n">loop</span><span class="p">:</span> <span class="n">Loop</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">RemindSettings</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">late_minutes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">title</span> <span class="k">if</span> <span class="n">loop</span><span class="o">.</span><span class="n">reveal</span> <span class="k">else</span> <span class="n">settings</span><span class="o">.</span><span class="n">generic_title</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">title</span> <span class="k">if</span> <span class="n">loop</span><span class="o">.</span><span class="n">reveal</span> <span class="k">else</span> <span class="n">settings</span><span class="o">.</span><span class="n">generic_text</span>
+    <span class="k">if</span> <span class="n">late_minutes</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">" (late by </span><span class="si">{</span><span class="n">late_minutes</span><span class="si">}</span><span class="s2"> min)"</span>
+    <span class="k">return</span> <span class="n">title</span><span class="p">[:</span><span class="mi">120</span><span class="p">],</span> <span class="n">text</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_apply</span><span class="p">(</span>
+    <span class="n">loop</span><span class="p">:</span> <span class="n">Loop</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">deliver</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Loop</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Carry out one evaluator action; a channel failure is logged and left for the next tick."""</span>
+    <span class="n">kind</span> <span class="o">=</span> <span class="n">action</span><span class="p">[</span><span class="s2">"action"</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"arm"</span><span class="p">:</span>
+            <span class="n">at</span> <span class="o">=</span> <span class="n">_loops</span><span class="o">.</span><span class="n">to_utc</span><span class="p">(</span><span class="n">action</span><span class="p">[</span><span class="s2">"at"</span><span class="p">])</span>
+            <span class="n">title</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="n">_push_text</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">settings</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">at</span> <span class="o">-</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="n">_loops</span><span class="o">.</span><span class="n">MIN_SCHEDULE_LEAD</span><span class="p">:</span>
+                <span class="n">deliver</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">_loops</span><span class="o">.</span><span class="n">mark</span><span class="p">(</span>
+                    <span class="n">loop</span><span class="p">,</span> <span class="n">now</span><span class="p">,</span> <span class="s2">"woke"</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s2">"input-required"</span><span class="p">,</span> <span class="n">armed</span><span class="o">=</span><span class="kc">None</span>
+                <span class="p">)</span>
+            <span class="n">deliver</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">at</span><span class="o">=</span><span class="n">at</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">_loops</span><span class="o">.</span><span class="n">mark</span><span class="p">(</span>
+                <span class="n">loop</span><span class="p">,</span>
+                <span class="n">now</span><span class="p">,</span>
+                <span class="s2">"armed"</span><span class="p">,</span>
+                <span class="n">armed</span><span class="o">=</span><span class="p">{</span><span class="s2">"sequence_id"</span><span class="p">:</span> <span class="n">loop</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">"at"</span><span class="p">:</span> <span class="n">action</span><span class="p">[</span><span class="s2">"at"</span><span class="p">]},</span>
+                <span class="n">note</span><span class="o">=</span><span class="sa">f</span><span class="s2">"scheduled on </span><span class="si">{</span><span class="n">settings</span><span class="o">.</span><span class="n">channel_label</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">action</span><span class="p">[</span><span class="s1">'at'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"deliver"</span><span class="p">:</span>
+            <span class="n">title</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="n">_push_text</span><span class="p">(</span>
+                <span class="n">loop</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">late_minutes</span><span class="o">=</span><span class="n">action</span><span class="p">[</span><span class="s2">"late_minutes"</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">deliver</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">_loops</span><span class="o">.</span><span class="n">mark</span><span class="p">(</span>
+                <span class="n">loop</span><span class="p">,</span>
+                <span class="n">now</span><span class="p">,</span>
+                <span class="s2">"woke"</span><span class="p">,</span>
+                <span class="n">state</span><span class="o">=</span><span class="s2">"input-required"</span><span class="p">,</span>
+                <span class="n">armed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">note</span><span class="o">=</span><span class="sa">f</span><span class="s2">"delivered late by </span><span class="si">{</span><span class="n">action</span><span class="p">[</span><span class="s1">'late_minutes'</span><span class="p">]</span><span class="si">}</span><span class="s2"> min"</span>
+                <span class="k">if</span> <span class="n">action</span><span class="p">[</span><span class="s2">"late_minutes"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span>
+                <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"woke"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_loops</span><span class="o">.</span><span class="n">mark</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">now</span><span class="p">,</span> <span class="s2">"woke"</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s2">"input-required"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"disarm"</span><span class="p">:</span>
+            <span class="n">deliver</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="n">loop</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">_loops</span><span class="o">.</span><span class="n">mark</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">now</span><span class="p">,</span> <span class="s2">"disarmed"</span><span class="p">,</span> <span class="n">armed</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">DeliveryError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_failed</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">now</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown action </span><span class="si">{</span><span class="n">kind</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_failed</span><span class="p">(</span><span class="n">loop</span><span class="p">:</span> <span class="n">Loop</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">note</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Loop</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Log a channel failure; a repeat of the last one is counted, not appended again."""</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">loop</span><span class="o">.</span><span class="n">log</span> <span class="k">else</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">last</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"event"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"delivery-failed"</span> <span class="ow">and</span> <span class="n">last</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"note"</span><span class="p">)</span> <span class="o">==</span> <span class="n">note</span><span class="p">:</span>
+        <span class="n">again</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">last</span><span class="p">,</span> <span class="s2">"count"</span><span class="p">:</span> <span class="n">last</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"count"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"last_at"</span><span class="p">:</span> <span class="n">_loops</span><span class="o">.</span><span class="n">iso</span><span class="p">(</span><span class="n">now</span><span class="p">)}</span>
+        <span class="k">return</span> <span class="n">replace</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">loop</span><span class="o">.</span><span class="n">log</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">again</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">_loops</span><span class="o">.</span><span class="n">mark</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">now</span><span class="p">,</span> <span class="s2">"delivery-failed"</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="s2">"tick"</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">note</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_settle</span><span class="p">(</span><span class="n">loop</span><span class="p">:</span> <span class="n">Loop</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">store</span><span class="p">,</span> <span class="n">deliver</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Loop</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Evaluate one loop now, apply what it needs, save it."""</span>
+    <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">_loops</span><span class="o">.</span><span class="n">evaluate</span><span class="p">([</span><span class="n">loop</span><span class="p">],</span> <span class="n">now</span><span class="p">,</span> <span class="n">horizon</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">horizon</span><span class="p">):</span>
+        <span class="n">loop</span> <span class="o">=</span> <span class="n">_apply</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">deliver</span><span class="o">=</span><span class="n">deliver</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span> <span class="n">now</span><span class="o">=</span><span class="n">now</span><span class="p">)</span>
+    <span class="n">store</span><span class="p">[</span><span class="n">loop</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">loop</span>
+    <span class="k">return</span> <span class="n">loop</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_echo</span><span class="p">(</span><span class="n">loop</span><span class="p">:</span> <span class="n">Loop</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">RemindSettings</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">loop</span><span class="o">.</span><span class="n">remind_at</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"no time set: listed by `ol loops`, never pushed"</span>
+    <span class="n">when</span> <span class="o">=</span> <span class="n">_loops</span><span class="o">.</span><span class="n">to_utc</span><span class="p">(</span><span class="n">loop</span><span class="o">.</span><span class="n">remind_at</span><span class="p">)</span>
+    <span class="n">shown</span> <span class="o">=</span> <span class="n">local</span><span class="p">(</span><span class="n">when</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">zone</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">when</span> <span class="o">-</span> <span class="n">now</span>
+    <span class="n">hours</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="o">-</span><span class="nb">int</span><span class="p">(</span><span class="n">delta</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span> <span class="o">//</span> <span class="mi">60</span><span class="p">),</span> <span class="mi">60</span><span class="p">)</span>  <span class="c1"># round up</span>
+    <span class="n">days</span><span class="p">,</span> <span class="n">hours</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">hours</span><span class="p">,</span> <span class="mi">24</span><span class="p">)</span>
+    <span class="n">ahead</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">days</span><span class="si">}</span><span class="s2">d </span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s2">h"</span> <span class="k">if</span> <span class="n">days</span> <span class="k">else</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s2">h </span><span class="si">{</span><span class="n">rest</span><span class="si">}</span><span class="s2">m"</span> <span class="k">if</span> <span class="n">hours</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">rest</span><span class="si">}</span><span class="s2">m"</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">failed</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">log</span> <span class="ow">and</span> <span class="n">loop</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"event"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"delivery-failed"</span>
+    <span class="k">if</span> <span class="n">failed</span><span class="p">:</span>
+        <span class="n">how</span> <span class="o">=</span> <span class="s2">"NOT scheduled (the channel failed; the next tick retries)"</span>
+    <span class="k">elif</span> <span class="n">loop</span><span class="o">.</span><span class="n">armed</span><span class="p">:</span>
+        <span class="n">how</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"push via </span><span class="si">{</span><span class="n">settings</span><span class="o">.</span><span class="n">channel_label</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">elif</span> <span class="n">loop</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s2">"input-required"</span><span class="p">:</span>
+        <span class="n">how</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"pushed now via </span><span class="si">{</span><span class="n">settings</span><span class="o">.</span><span class="n">channel_label</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">how</span> <span class="o">=</span> <span class="s2">"pushed once it is within 3 days (the hourly tick arms it)"</span>
+    <span class="n">reveal</span> <span class="o">=</span> <span class="s2">""</span> <span class="k">if</span> <span class="n">loop</span><span class="o">.</span><span class="n">reveal</span> <span class="k">else</span> <span class="s2">" (title not sent)"</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">shown</span><span class="si">:</span><span class="s2">%a %d %b %H:%M %Z</span><span class="si">}</span><span class="s2"> (in </span><span class="si">{</span><span class="n">ahead</span><span class="si">}</span><span class="s2">), </span><span class="si">{</span><span class="n">how</span><span class="si">}{</span><span class="n">reveal</span><span class="si">}</span><span class="s2">"</span>
+
+
+<span class="c1">#: Measured on ntfy.sh, 2026-11-19: a DELETE (or a replacement under the same sequence</span>
+<span class="c1">#: id) of a *scheduled* message is acknowledged with a ``message_delete`` event, yet the</span>
+<span class="c1">#: original is still delivered at its time. ntfy's documentation says otherwise; until</span>
+<span class="c1">#: the server honours it, an early ``done`` or ``snooze`` is said, not hidden.</span>
+<span class="n">UNCANCELLABLE_NOTE</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"ntfy.sh still delivers a scheduled push that was cancelled or replaced, so the "</span>
+    <span class="s2">"original push may arrive at </span><span class="si">{at}</span><span class="s2"> anyway"</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_pending_push</span><span class="p">(</span><span class="n">loop</span><span class="p">:</span> <span class="n">Loop</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The time of a scheduled push still ahead of ``now``, if the loop had one armed."""</span>
+    <span class="n">armed_at</span> <span class="o">=</span> <span class="p">(</span><span class="n">loop</span><span class="o">.</span><span class="n">armed</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"at"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">armed_at</span> <span class="ow">and</span> <span class="n">_loops</span><span class="o">.</span><span class="n">to_utc</span><span class="p">(</span><span class="n">armed_at</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">now</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">armed_at</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_warning</span><span class="p">(</span><span class="n">pending</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">RemindSettings</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pending</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="n">shown</span> <span class="o">=</span> <span class="n">local</span><span class="p">(</span><span class="n">_loops</span><span class="o">.</span><span class="n">to_utc</span><span class="p">(</span><span class="n">pending</span><span class="p">),</span> <span class="n">settings</span><span class="o">.</span><span class="n">zone</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"warning"</span><span class="p">:</span> <span class="n">UNCANCELLABLE_NOTE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">at</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">shown</span><span class="si">:</span><span class="s2">%a %d %b %H:%M</span><span class="si">}</span><span class="s2">"</span><span class="p">)}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_summary</span><span class="p">(</span><span class="n">loop</span><span class="p">:</span> <span class="n">Loop</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">loop</span><span class="o">.</span><span class="n">log</span> <span class="k">else</span> <span class="p">{}</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"id"</span><span class="p">:</span> <span class="n">loop</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="s2">"title"</span><span class="p">:</span> <span class="n">loop</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+        <span class="s2">"state"</span><span class="p">:</span> <span class="n">loop</span><span class="o">.</span><span class="n">state</span><span class="p">,</span>
+        <span class="s2">"list"</span><span class="p">:</span> <span class="n">loop</span><span class="o">.</span><span class="n">list</span><span class="p">,</span>
+        <span class="s2">"remind_at"</span><span class="p">:</span> <span class="n">loop</span><span class="o">.</span><span class="n">remind_at</span><span class="p">,</span>
+        <span class="s2">"due"</span><span class="p">:</span> <span class="n">loop</span><span class="o">.</span><span class="n">due</span><span class="p">,</span>
+        <span class="s2">"armed"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">loop</span><span class="o">.</span><span class="n">armed</span><span class="p">),</span>
+        <span class="s2">"reveal"</span><span class="p">:</span> <span class="n">loop</span><span class="o">.</span><span class="n">reveal</span><span class="p">,</span>
+        <span class="s2">"snoozes"</span><span class="p">:</span> <span class="n">loop</span><span class="o">.</span><span class="n">snoozes</span><span class="p">,</span>
+        <span class="s2">"last_event"</span><span class="p">:</span> <span class="n">last</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"event"</span><span class="p">),</span>
+        <span class="s2">"last_note"</span><span class="p">:</span> <span class="n">last</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"note"</span><span class="p">),</span>
+    <span class="p">}</span>
+
+
+<div class="viewcode-block" id="remind">
+<a class="viewcode-back" href="../../_autosummary/openloops.remind.html#openloops.remind.remind">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">remind</span><span class="p">(</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">in_</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">timedelta</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">due</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">reveal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">source</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"owner"</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Loop</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">deliver</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">settings</span><span class="p">:</span> <span class="n">RemindSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Make a loop that comes back at ``at`` (or after ``in_``), arm it, and say when.</span>
+
+<span class="sd">    Give at most one of ``at`` and ``in_``; with neither, the loop is listed but never</span>
+<span class="sd">    pushed. Returns the loop's summary and ``echo``, the one line to repeat to the owner.</span>
+<span class="sd">    """</span>
+    <span class="n">store</span><span class="p">,</span> <span class="n">deliver</span><span class="p">,</span> <span class="n">settings</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">store</span><span class="p">,</span> <span class="n">deliver</span><span class="p">,</span> <span class="n">settings</span><span class="p">)</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">_loops</span><span class="o">.</span><span class="n">to_utc</span><span class="p">(</span><span class="n">now</span> <span class="ow">or</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">at</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">in_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"give a time (at) or a delay (in), not both"</span><span class="p">)</span>
+    <span class="n">when</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">in_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">when</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="p">(</span><span class="n">parse_in</span><span class="p">(</span><span class="n">in_</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">in_</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">in_</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">at</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">when</span> <span class="o">=</span> <span class="n">_as_time</span><span class="p">(</span><span class="n">at</span><span class="p">,</span> <span class="n">now</span><span class="o">=</span><span class="n">now</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">zone</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">when</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_loops</span><span class="o">.</span><span class="n">to_utc</span><span class="p">(</span><span class="n">when</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">now</span><span class="p">:</span>
+        <span class="n">shown</span> <span class="o">=</span> <span class="n">local</span><span class="p">(</span><span class="n">_loops</span><span class="o">.</span><span class="n">to_utc</span><span class="p">(</span><span class="n">when</span><span class="p">),</span> <span class="n">settings</span><span class="o">.</span><span class="n">zone</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">shown</span><span class="si">:</span><span class="s2">%a %d %b %H:%M</span><span class="si">}</span><span class="s2"> is not in the future"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">due</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">due</span> <span class="o">=</span> <span class="n">_as_time</span><span class="p">(</span><span class="n">due</span><span class="p">,</span> <span class="n">now</span><span class="o">=</span><span class="n">now</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">zone</span><span class="p">)</span>
+    <span class="n">loop</span> <span class="o">=</span> <span class="n">_loops</span><span class="o">.</span><span class="n">new_loop</span><span class="p">(</span>
+        <span class="n">title</span><span class="p">,</span> <span class="n">remind_at</span><span class="o">=</span><span class="n">when</span><span class="p">,</span> <span class="n">due</span><span class="o">=</span><span class="n">due</span><span class="p">,</span> <span class="n">reveal</span><span class="o">=</span><span class="n">reveal</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="n">by</span><span class="p">,</span> <span class="n">now</span><span class="o">=</span><span class="n">now</span>
+    <span class="p">)</span>
+    <span class="n">loop</span> <span class="o">=</span> <span class="n">_settle</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span> <span class="n">deliver</span><span class="o">=</span><span class="n">deliver</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span> <span class="n">now</span><span class="o">=</span><span class="n">now</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="n">_summary</span><span class="p">(</span><span class="n">loop</span><span class="p">),</span> <span class="s2">"echo"</span><span class="p">:</span> <span class="n">_echo</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">now</span><span class="p">)}</span></div>
+
+
+
+<div class="viewcode-block" id="list_loops">
+<a class="viewcode-back" href="../../_autosummary/openloops.remind.html#openloops.remind.list_loops">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_loops</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">state</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"open"</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Loop</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Loops as summaries, soonest first. ``state``: ``open``, ``closed``, ``all`` or one A2A state."""</span>
+    <span class="n">store</span> <span class="o">=</span> <span class="n">loops_store</span><span class="p">()</span> <span class="k">if</span> <span class="n">store</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">store</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">loop</span> <span class="ow">in</span> <span class="n">_load</span><span class="p">(</span><span class="n">store</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">state</span> <span class="o">==</span> <span class="s2">"all"</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">state</span> <span class="o">==</span> <span class="s2">"open"</span> <span class="ow">and</span> <span class="n">loop</span><span class="o">.</span><span class="n">open</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">state</span> <span class="o">==</span> <span class="s2">"closed"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">loop</span><span class="o">.</span><span class="n">open</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">loop</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">state</span>
+        <span class="p">):</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_summary</span><span class="p">(</span><span class="n">loop</span><span class="p">))</span>
+    <span class="n">far</span> <span class="o">=</span> <span class="s2">"9999"</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"remind_at"</span><span class="p">]</span> <span class="ow">or</span> <span class="n">far</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]))</span></div>
+
+
+
+<div class="viewcode-block" id="done">
+<a class="viewcode-back" href="../../_autosummary/openloops.remind.html#openloops.remind.done">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">done</span><span class="p">(</span>
+    <span class="n">ref</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">note</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"owner"</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Loop</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">deliver</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">settings</span><span class="p">:</span> <span class="n">RemindSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Close a loop as done and cancel its scheduled push, if any."""</span>
+    <span class="n">store</span><span class="p">,</span> <span class="n">deliver</span><span class="p">,</span> <span class="n">settings</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">store</span><span class="p">,</span> <span class="n">deliver</span><span class="p">,</span> <span class="n">settings</span><span class="p">)</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">_loops</span><span class="o">.</span><span class="n">to_utc</span><span class="p">(</span><span class="n">now</span> <span class="ow">or</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">))</span>
+    <span class="n">before</span> <span class="o">=</span> <span class="n">find</span><span class="p">(</span><span class="n">store</span><span class="p">,</span> <span class="n">ref</span><span class="p">)</span>
+    <span class="n">pending</span> <span class="o">=</span> <span class="n">_pending_push</span><span class="p">(</span><span class="n">before</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
+    <span class="n">loop</span> <span class="o">=</span> <span class="n">_loops</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span><span class="n">before</span><span class="p">,</span> <span class="n">now</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="n">by</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">note</span><span class="p">)</span>
+    <span class="n">loop</span> <span class="o">=</span> <span class="n">_settle</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span> <span class="n">deliver</span><span class="o">=</span><span class="n">deliver</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span> <span class="n">now</span><span class="o">=</span><span class="n">now</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="n">_summary</span><span class="p">(</span><span class="n">loop</span><span class="p">),</span> <span class="o">**</span><span class="n">_warning</span><span class="p">(</span><span class="n">pending</span><span class="p">,</span> <span class="n">settings</span><span class="p">)}</span></div>
+
+
+
+<div class="viewcode-block" id="snooze">
+<a class="viewcode-back" href="../../_autosummary/openloops.remind.html#openloops.remind.snooze">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">snooze</span><span class="p">(</span>
+    <span class="n">ref</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">until</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">for_</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">timedelta</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"owner"</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Loop</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">deliver</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">settings</span><span class="p">:</span> <span class="n">RemindSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Bring a loop back later (``until`` a time, or ``for_`` a duration); re-arms its push."""</span>
+    <span class="n">store</span><span class="p">,</span> <span class="n">deliver</span><span class="p">,</span> <span class="n">settings</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">store</span><span class="p">,</span> <span class="n">deliver</span><span class="p">,</span> <span class="n">settings</span><span class="p">)</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">_loops</span><span class="o">.</span><span class="n">to_utc</span><span class="p">(</span><span class="n">now</span> <span class="ow">or</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">))</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">until</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">for_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"give either until (a time) or for (a duration)"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">for_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">when</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="p">(</span><span class="n">parse_in</span><span class="p">(</span><span class="n">for_</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">for_</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">for_</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">when</span> <span class="o">=</span> <span class="n">_as_time</span><span class="p">(</span><span class="n">until</span><span class="p">,</span> <span class="n">now</span><span class="o">=</span><span class="n">now</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">zone</span><span class="p">)</span>
+    <span class="n">before</span> <span class="o">=</span> <span class="n">find</span><span class="p">(</span><span class="n">store</span><span class="p">,</span> <span class="n">ref</span><span class="p">)</span>
+    <span class="n">pending</span> <span class="o">=</span> <span class="n">_pending_push</span><span class="p">(</span><span class="n">before</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
+    <span class="n">loop</span> <span class="o">=</span> <span class="n">_loops</span><span class="o">.</span><span class="n">snooze</span><span class="p">(</span><span class="n">before</span><span class="p">,</span> <span class="n">when</span><span class="p">,</span> <span class="n">now</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="n">by</span><span class="p">)</span>
+    <span class="n">loop</span> <span class="o">=</span> <span class="n">_settle</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span> <span class="n">deliver</span><span class="o">=</span><span class="n">deliver</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span> <span class="n">now</span><span class="o">=</span><span class="n">now</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="o">**</span><span class="n">_summary</span><span class="p">(</span><span class="n">loop</span><span class="p">),</span>
+        <span class="s2">"echo"</span><span class="p">:</span> <span class="n">_echo</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">now</span><span class="p">),</span>
+        <span class="o">**</span><span class="n">_warning</span><span class="p">(</span><span class="n">pending</span><span class="p">,</span> <span class="n">settings</span><span class="p">),</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="tick">
+<a class="viewcode-back" href="../../_autosummary/openloops.remind.html#openloops.remind.tick">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tick</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Loop</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">deliver</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">settings</span><span class="p">:</span> <span class="n">RemindSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Arm what came within the horizon, record what fired, deliver late what was missed.</span>
+
+<span class="sd">    Model-free and idempotent: run it as often as you like (the launchd job runs it</span>
+<span class="sd">    hourly). Returns counts per action and the loops whose channel call failed.</span>
+<span class="sd">    """</span>
+    <span class="n">store</span><span class="p">,</span> <span class="n">deliver</span><span class="p">,</span> <span class="n">settings</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">store</span><span class="p">,</span> <span class="n">deliver</span><span class="p">,</span> <span class="n">settings</span><span class="p">)</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">_loops</span><span class="o">.</span><span class="n">to_utc</span><span class="p">(</span><span class="n">now</span> <span class="ow">or</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">))</span>
+    <span class="n">loops</span><span class="p">,</span> <span class="n">skipped</span> <span class="o">=</span> <span class="n">_load</span><span class="p">(</span><span class="n">store</span><span class="p">)</span>
+    <span class="n">counts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">failed</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">by_id</span> <span class="o">=</span> <span class="p">{</span><span class="n">loop</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="n">loop</span> <span class="k">for</span> <span class="n">loop</span> <span class="ow">in</span> <span class="n">loops</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">_loops</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">loops</span><span class="p">,</span> <span class="n">now</span><span class="p">,</span> <span class="n">horizon</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">horizon</span><span class="p">):</span>
+        <span class="n">seen</span> <span class="o">=</span> <span class="n">by_id</span><span class="p">[</span><span class="n">action</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">store</span><span class="p">[</span><span class="n">seen</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">current</span> <span class="o">!=</span> <span class="n">seen</span><span class="p">:</span>
+            <span class="c1"># Changed since this tick read it (an `ol done` meanwhile): judge it afresh.</span>
+            <span class="n">redo</span> <span class="o">=</span> <span class="n">_loops</span><span class="o">.</span><span class="n">evaluate</span><span class="p">([</span><span class="n">current</span><span class="p">],</span> <span class="n">now</span><span class="p">,</span> <span class="n">horizon</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">horizon</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">redo</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="n">redo</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">loop</span> <span class="o">=</span> <span class="n">_apply</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">deliver</span><span class="o">=</span><span class="n">deliver</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span> <span class="n">now</span><span class="o">=</span><span class="n">now</span><span class="p">)</span>
+        <span class="n">store</span><span class="p">[</span><span class="n">loop</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">loop</span>
+        <span class="k">if</span> <span class="n">loop</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"event"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"delivery-failed"</span><span class="p">:</span>
+            <span class="n">failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">counts</span><span class="p">[</span><span class="n">action</span><span class="p">[</span><span class="s2">"action"</span><span class="p">]]</span> <span class="o">=</span> <span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action</span><span class="p">[</span><span class="s2">"action"</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"at"</span><span class="p">:</span> <span class="n">_loops</span><span class="o">.</span><span class="n">iso</span><span class="p">(</span><span class="n">now</span><span class="p">),</span>
+        <span class="s2">"loops"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">loops</span><span class="p">),</span>
+        <span class="s2">"open"</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">loop</span> <span class="ow">in</span> <span class="n">loops</span> <span class="k">if</span> <span class="n">loop</span><span class="o">.</span><span class="n">open</span><span class="p">),</span>
+        <span class="s2">"actions"</span><span class="p">:</span> <span class="n">counts</span><span class="p">,</span>
+        <span class="s2">"failed"</span><span class="p">:</span> <span class="n">failed</span><span class="p">,</span>
+        <span class="s2">"skipped"</span><span class="p">:</span> <span class="n">skipped</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,43 @@
+openloops.remind
+================
+
+.. automodule:: openloops.remind
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      UNCANCELLABLE_NOTE
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      loops_store
+      parse_in
+      parse_at
+      parse_when
+      attach
+      local
+      remind
+      list_loops
+      done
+      snooze
+      tick
+      find
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      RemindSettings
+      NtfyDelivery
+      LoopsStore
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+   
+      DeliveryError
+   

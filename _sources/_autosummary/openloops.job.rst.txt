@@ -12,13 +12,16 @@ openloops.job
       DFLT_INTERVAL
       RECEIVER_LABEL
       RECEIVER_INTERVAL
-      REFRESH_LABEL
+      REMIND_LABEL
+      REMIND_INTERVAL
    
    .. rubric:: Functions
 
    .. autosummary::
    
       install
+      install_remind
+      remind_job_spec
       install_receiver
       receiver_job_spec
       uninstall

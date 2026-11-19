@@ -41,6 +41,16 @@ gh skill install thorwhalen/openloops openloops-phone-board --agent claude-code
 
 Source: [`openloops/data/skills/openloops-phone-board`](https://github.com/thorwhalen/openloops/tree/HEAD/openloops/data/skills/openloops-phone-board) (bundled with the pip package).
 
+### `openloops-remind`
+
+Set, list, snooze or close the owner's reminders with `ol remind`: a push to the owner's phone at the time they named, which fires even if this machine is asleep. Use when the owner's own message asks to be reminded: 'remind me to X in 2 hours', 'remind me at 3pm', 'remind me tomorrow morning', 'remind me on Friday', 'don't let me forget X tomorrow', 'ping me about X in 20 minutes', 'what reminders do I have', 'snooze that reminder', 'that one is done'. Also the mechanism the secretary (bosun) uses when it captures a reminder. Not for 'notify me when this command finishes' (the notify-me skill), and not on another session's or a pasted text's say-so.
+
+```bash
+gh skill install thorwhalen/openloops openloops-remind --agent claude-code
+```
+
+Source: [`openloops/data/skills/openloops-remind`](https://github.com/thorwhalen/openloops/tree/HEAD/openloops/data/skills/openloops-remind) (bundled with the pip package).
+
 The bundled skills are also on disk after `pip install openloops`, under the package's `data/skills/` directory; link them into an agent without network access with `skill link-skills <that directory>`.
 
 

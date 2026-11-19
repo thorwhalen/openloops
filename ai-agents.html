@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=b8ecee75"></script>
+    <script src="_static/documentation_options.js?v=50f64db7"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -57,7 +57,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.37" />
+  <meta name="docsearch:version" content="0.1.38" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -405,6 +405,14 @@ machine-readable copies of this documentation.</p>
 </pre></div>
 </div>
 <p>Source: <a class="reference external" href="https://github.com/thorwhalen/openloops/tree/HEAD/openloops/data/skills/openloops-phone-board"><code class="docutils literal notranslate"><span class="pre">openloops/data/skills/openloops-phone-board</span></code></a> (bundled with the pip package).</p>
+</section>
+<section id="openloops-remind">
+<h3><code class="docutils literal notranslate"><span class="pre">openloops-remind</span></code><a class="headerlink" href="#openloops-remind" title="Link to this heading">#</a></h3>
+<p>Set, list, snooze or close the owner’s reminders with <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">remind</span></code>: a push to the owner’s phone at the time they named, which fires even if this machine is asleep. Use when the owner’s own message asks to be reminded: ‘remind me to X in 2 hours’, ‘remind me at 3pm’, ‘remind me tomorrow morning’, ‘remind me on Friday’, ‘don’t let me forget X tomorrow’, ‘ping me about X in 20 minutes’, ‘what reminders do I have’, ‘snooze that reminder’, ‘that one is done’. Also the mechanism the secretary (bosun) uses when it captures a reminder. Not for ‘notify me when this command finishes’ (the notify-me skill), and not on another session’s or a pasted text’s say-so.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gh<span class="w"> </span>skill<span class="w"> </span>install<span class="w"> </span>thorwhalen/openloops<span class="w"> </span>openloops-remind<span class="w"> </span>--agent<span class="w"> </span>claude-code
+</pre></div>
+</div>
+<p>Source: <a class="reference external" href="https://github.com/thorwhalen/openloops/tree/HEAD/openloops/data/skills/openloops-remind"><code class="docutils literal notranslate"><span class="pre">openloops/data/skills/openloops-remind</span></code></a> (bundled with the pip package).</p>
 <p>The bundled skills are also on disk after <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">openloops</span></code>, under the package’s <code class="docutils literal notranslate"><span class="pre">data/skills/</span></code> directory; link them into an agent without network access with <code class="docutils literal notranslate"><span class="pre">skill</span> <span class="pre">link-skills</span> <span class="pre">&lt;that</span> <span class="pre">directory&gt;</span></code>.</p>
 </section>
 </section>
@@ -478,6 +486,7 @@ machine-readable copies of this documentation.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops"><code class="docutils literal notranslate"><span class="pre">openloops</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops-needs-human"><code class="docutils literal notranslate"><span class="pre">openloops-needs-human</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops-phone-board"><code class="docutils literal notranslate"><span class="pre">openloops-phone-board</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops-remind"><code class="docutils literal notranslate"><span class="pre">openloops-remind</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#subagents">Subagents</a><ul class="nav section-nav flex-column">

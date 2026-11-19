@@ -25,4 +25,9 @@ openloops.tools
       board_gather
       board_classify
       board_build
+      remind
+      loops
+      done
+      snooze
+      remind_tick
    
