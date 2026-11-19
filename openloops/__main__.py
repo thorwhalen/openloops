@@ -840,6 +840,8 @@ def remind_tick():
     report = tools.remind_tick()
     acted = ", ".join(f"{k} {v}" for k, v in report["actions"].items()) or "nothing to do"
     line = f"{report['at']} remind-tick: {report['open']} open of {report['loops']}; {acted}"
+    if report.get("skipped"):
+        line += f"; unreadable: {', '.join(report['skipped'])}"
     if report["failed"]:
         print(line + f"; FAILED: {', '.join(report['failed'])}", file=sys.stderr)
         sys.exit(1)

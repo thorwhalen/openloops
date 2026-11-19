@@ -66,6 +66,9 @@ PASSED_THROUGH = (
     "OPENLOOPS_TZ",
     "OPENLOOPS_REMIND_CHANNEL",
     "OPENLOOPS_REMIND_HORIZON_HOURS",
+    "NTFY_TOPIC",
+    "CORRESPOND_CONFIG",
+    "XDG_CONFIG_HOME",
 )
 
 
@@ -560,7 +563,12 @@ def install_remind(*, dry_run: bool = False, **kwargs: object) -> dict[str, str]
         Path(str(spec["plist"])),
         Path(str(spec["log"])),
         str(spec["xml"]),
-        smoke=[[sys.executable, "-m", "openloops", "remind-tick", "--help"]],
+        smoke=[
+            [sys.executable, "-m", "openloops", "remind-tick", "--help"],
+            # The tick delivers through correspond: a job that cannot import it would
+            # install cleanly and then fail every hour.
+            [sys.executable, "-c", "import correspond.channels.ntfy"],
+        ],
         env=dict(spec["env"]),  # type: ignore[arg-type]
     )
     return {

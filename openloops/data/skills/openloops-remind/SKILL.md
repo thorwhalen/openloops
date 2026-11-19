@@ -19,7 +19,7 @@ Turn the owner's words into one `--when`, which is a duration or a time. The com
 | in 20 minutes, in 3 hours, in 2 days | `20m`, `3h`, `2d` (`1h30m` works too) |
 | at 3pm (today, or tomorrow if it has passed) | `15:00` |
 | tomorrow morning / on Friday morning | the ISO date: `2026-11-20` means 09:00 that day |
-| Friday at 17:30 | `2026-11-21T17:30` (no zone means the owner's zone) |
+| Friday at 17:30 | `2026-11-20T17:30` (no zone means the owner's zone) |
 | this afternoon, later, this weekend | ask once, with a default filled in ("15:00 today?"), or use 14:00 / 18:00 / Saturday 09:00 and say so |
 | no time at all ("remind me to look at X") | omit `--when`: the loop is listed by `ol loops`, never pushed |
 

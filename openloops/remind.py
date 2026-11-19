@@ -33,7 +33,7 @@ import json
 import os
 import re
 from collections.abc import Iterator, Mapping, MutableMapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -52,6 +52,8 @@ __all__ = [
     "parse_in",
     "parse_at",
     "parse_when",
+    "attach",
+    "local",
     "remind",
     "list_loops",
     "done",
@@ -71,11 +73,13 @@ class RemindSettings:
     """What the owner sets once. ``from_env`` reads ``OPENLOOPS_REMIND_*`` and ``OPENLOOPS_TZ``.
 
     ``channel`` is a correspond reference (``ntfy:`` is the default topic). ``tz`` is an
-    IANA zone for reading and echoing times; ``None`` uses the machine's own.
+    IANA zone for reading and echoing times; ``None`` uses the machine's own, with its
+    daylight-saving rules applied per instant. ``horizon_hours`` is capped at 71 (ntfy
+    schedules three days ahead at most).
     """
 
     channel: str = "ntfy:"
-    horizon_hours: float = 72.0
+    horizon_hours: float = 71.0
     generic_title: str = "Reminder"
     generic_text: str = "A reminder you set is due."
     tz: str | None = None
@@ -94,11 +98,31 @@ class RemindSettings:
 
     @property
     def horizon(self) -> timedelta:
-        return timedelta(hours=self.horizon_hours)
+        return min(timedelta(hours=self.horizon_hours), _loops.MAX_HORIZON)
 
     @property
     def zone(self):
-        return ZoneInfo(self.tz) if self.tz else datetime.now().astimezone().tzinfo
+        """A ``ZoneInfo``, or ``None`` for the machine's own zone (see :func:`attach`)."""
+        return ZoneInfo(self.tz) if self.tz else None
+
+    @property
+    def channel_label(self) -> str:
+        """The channel's name only: a topic in the reference is a bearer secret."""
+        return self.channel.partition(":")[0] + ":"
+
+
+def attach(naive: datetime, zone) -> datetime:
+    """``naive`` read in ``zone``; ``None`` means this machine's zone, DST rules included.
+
+    >>> attach(datetime(2026, 7, 1, 9, 0), timezone.utc).isoformat()
+    '2026-07-01T09:00:00+00:00'
+    """
+    return naive.replace(tzinfo=zone) if zone is not None else naive.astimezone()
+
+
+def local(when: datetime, zone) -> datetime:
+    """``when`` shown in ``zone``, or in this machine's zone (DST-aware) when ``None``."""
+    return when.astimezone(zone) if zone is not None else when.astimezone()
 
 
 class NtfyDelivery:
@@ -119,7 +143,8 @@ class NtfyDelivery:
                 import correspond
             except ImportError as exc:  # pragma: no cover - depends on the extra
                 raise DeliveryError(
-                    "reminders deliver through correspond: pip install 'openloops[remind]'"
+                    "reminders deliver through correspond, which needs Python 3.11+: "
+                    "pip install 'openloops[remind]'"
                 ) from exc
             self._send = self._send or correspond.send
             self._get_channel = self._get_channel or correspond.get_channel
@@ -130,7 +155,10 @@ class NtfyDelivery:
         native: dict[str, Any] = {"sequence_id": loop.id}
         if at is not None:
             native["at"] = int(at.timestamp())
-        result = send(self.ref, text, title=title, priority="high", native=native)
+        try:
+            result = send(self.ref, text, title=title, priority="high", native=native)
+        except Exception as exc:  # correspond raises its own error types
+            raise DeliveryError(f"{type(exc).__name__}: {exc}") from exc
         if not result.ok:
             raise DeliveryError(result.error or "the channel refused the message")
 
@@ -143,8 +171,8 @@ class NtfyDelivery:
     def cancel(self, loop: Loop) -> None:
         send, get_channel = self._correspond()
         channel_name, _, topic = self.ref.partition(":")
-        channel = get_channel(channel_name)
         try:
+            channel = get_channel(channel_name)
             channel.cancel(channel.parse_ref(topic), loop.id)
         except Exception as exc:  # correspond raises its own error types
             raise DeliveryError(str(exc)) from exc
@@ -182,6 +210,7 @@ def loops_store(rootdir: str | Path | None = None) -> LoopsStore:
     return LoopsStore(AtomicTextFiles(root))
 
 
+_ISO = r"\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2})?(Z|[+-]\d{2}:\d{2})?)?"
 _DURATION = re.compile(r"(\d+(?:\.\d+)?)\s*([smhdw])")
 _UNIT = {"s": "seconds", "m": "minutes", "h": "hours", "d": "days", "w": "weeks"}
 
@@ -211,22 +240,25 @@ def parse_at(text: str, *, now: datetime, zone) -> datetime:
     '2026-11-21T09:00:00+00:00'
     """
     raw = text.strip()
+    hint = f"not a time: {text!r} (use HH:MM, YYYY-MM-DD, or YYYY-MM-DDTHH:MM)"
     if re.fullmatch(r"\d{1,2}:\d{2}", raw):
         hour, minute = map(int, raw.split(":"))
-        local_now = now.astimezone(zone)
-        when = local_now.replace(hour=hour, minute=minute, second=0, microsecond=0)
-        if when <= local_now:
-            when += timedelta(days=1)
-        return when
-    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw):
-        return datetime.fromisoformat(raw).replace(hour=9, tzinfo=zone)
+        if hour > 23 or minute > 59:
+            raise ValueError(hint)
+        today = local(now, zone).replace(tzinfo=None)
+        naive = today.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        if attach(naive, zone) <= now:
+            naive += timedelta(days=1)
+        return attach(naive, zone)
+    if not re.fullmatch(_ISO, raw):
+        raise ValueError(hint)
     try:
-        when = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        when = datetime.fromisoformat(raw.replace("Z", "+00:00").replace(" ", "T"))
     except ValueError:
-        raise ValueError(
-            f"not a time: {text!r} (use an ISO date-time, a date, or HH:MM)"
-        ) from None
-    return when if when.tzinfo else when.replace(tzinfo=zone)
+        raise ValueError(hint) from None
+    if len(raw) == 10:  # a date alone: 09:00 that day
+        when = when.replace(hour=9)
+    return when if when.tzinfo else attach(when, zone)
 
 
 def parse_when(text: str, *, now: datetime, zone) -> datetime:
@@ -242,6 +274,29 @@ def parse_when(text: str, *, now: datetime, zone) -> datetime:
         return parse_at(text, now=now, zone=zone)
 
 
+def _as_time(value: str | datetime, *, now: datetime, zone) -> datetime:
+    """A string through :func:`parse_when`; a naive datetime read in ``zone``."""
+    if isinstance(value, str):
+        return parse_when(value, now=now, zone=zone)
+    return value if value.tzinfo else attach(value, zone)
+
+
+def _load(store: Mapping[str, Loop]) -> tuple[list[Loop], list[str]]:
+    """Every loop that reads; the keys of those that do not (one bad file must not stop the rest)."""
+    loops, skipped = [], []
+    for key in list(store):
+        try:
+            loop = store[key]
+        except (KeyError, ValueError, TypeError) as exc:
+            skipped.append(f"{key}: {type(exc).__name__}")
+            continue
+        if loop.id != key:
+            skipped.append(f"{key}: holds {loop.id}")
+            continue
+        loops.append(loop)
+    return loops, skipped
+
+
 def _resolve(store, deliver, settings):
     settings = settings or RemindSettings.from_env()
     store = loops_store() if store is None else store
@@ -250,10 +305,17 @@ def _resolve(store, deliver, settings):
 
 
 def find(store: Mapping[str, Loop], ref: str) -> Loop:
-    """A loop by id or by a unique prefix of it (or of its part after ``loop-``)."""
+    """A loop by id, by a unique prefix (with or without ``loop-``), or by its hex suffix."""
+    ref = (ref or "").strip()
+    if not ref:
+        raise KeyError("name a loop: its id, a unique prefix, or its last part")
     if ref in store:
         return store[ref]
-    matches = [k for k in store if k.startswith(ref) or k.startswith(f"loop-{ref}")]
+    matches = [
+        k
+        for k in store
+        if k.startswith(ref) or k.startswith(f"loop-{ref}") or k.endswith(f"-{ref}")
+    ]
     if len(matches) == 1:
         return store[matches[0]]
     if not matches:
@@ -291,7 +353,7 @@ def _apply(
                 now,
                 "armed",
                 armed={"sequence_id": loop.id, "at": action["at"]},
-                note=f"scheduled on {settings.channel} for {action['at']}",
+                note=f"scheduled on {settings.channel_label} for {action['at']}",
             )
         if kind == "deliver":
             title, text = _push_text(
@@ -314,10 +376,17 @@ def _apply(
             deliver.cancel(loop)
             return _loops.mark(loop, now, "disarmed", armed=None)
     except DeliveryError as exc:
-        return _loops.mark(
-            loop, now, "delivery-failed", by="tick", note=f"{kind}: {exc}"
-        )
+        return _failed(loop, now, f"{kind}: {exc}")
     raise ValueError(f"unknown action {kind!r}")
+
+
+def _failed(loop: Loop, now: datetime, note: str) -> Loop:
+    """Log a channel failure; a repeat of the last one is counted, not appended again."""
+    last = loop.log[-1] if loop.log else {}
+    if last.get("event") == "delivery-failed" and last.get("note") == note:
+        again = {**last, "count": last.get("count", 1) + 1, "last_at": _loops.iso(now)}
+        return replace(loop, log=(*loop.log[:-1], again))
+    return _loops.mark(loop, now, "delivery-failed", by="tick", note=note)
 
 
 def _settle(loop: Loop, *, store, deliver, settings, now: datetime) -> Loop:
@@ -332,7 +401,7 @@ def _echo(loop: Loop, settings: RemindSettings, now: datetime) -> str:
     if not loop.remind_at:
         return "no time set: listed by `ol loops`, never pushed"
     when = _loops.to_utc(loop.remind_at)
-    local = when.astimezone(settings.zone)
+    shown = local(when, settings.zone)
     delta = when - now
     hours, rest = divmod(-(-int(delta.total_seconds()) // 60), 60)  # round up
     days, hours = divmod(hours, 24)
@@ -343,13 +412,13 @@ def _echo(loop: Loop, settings: RemindSettings, now: datetime) -> str:
     if failed:
         how = "NOT scheduled (the channel failed; the next tick retries)"
     elif loop.armed:
-        how = f"push via {settings.channel}"
+        how = f"push via {settings.channel_label}"
     elif loop.state == "input-required":
-        how = f"pushed now via {settings.channel}"
+        how = f"pushed now via {settings.channel_label}"
     else:
         how = "pushed once it is within 3 days (the hourly tick arms it)"
     reveal = "" if loop.reveal else " (title not sent)"
-    return f"{local:%a %d %b %H:%M %Z} (in {ahead}), {how}{reveal}"
+    return f"{shown:%a %d %b %H:%M %Z} (in {ahead}), {how}{reveal}"
 
 
 #: Measured on ntfy.sh, 2026-11-19: a DELETE (or a replacement under the same sequence
@@ -373,8 +442,8 @@ def _pending_push(loop: Loop, now: datetime) -> str | None:
 def _warning(pending: str | None, settings: RemindSettings) -> dict[str, str]:
     if not pending:
         return {}
-    local = _loops.to_utc(pending).astimezone(settings.zone)
-    return {"warning": UNCANCELLABLE_NOTE.format(at=f"{local:%a %d %b %H:%M}")}
+    shown = local(_loops.to_utc(pending), settings.zone)
+    return {"warning": UNCANCELLABLE_NOTE.format(at=f"{shown:%a %d %b %H:%M}")}
 
 
 def _summary(loop: Loop) -> dict[str, Any]:
@@ -421,11 +490,12 @@ def remind(
     if in_ is not None:
         when = now + (parse_in(in_) if isinstance(in_, str) else in_)
     elif at is not None:
-        when = parse_at(at, now=now, zone=settings.zone) if isinstance(at, str) else at
-        if _loops.to_utc(when) <= now:
-            raise ValueError(f"{at} is in the past")
-    if isinstance(due, str):
-        due = parse_at(due, now=now, zone=settings.zone)
+        when = _as_time(at, now=now, zone=settings.zone)
+    if when is not None and _loops.to_utc(when) <= now:
+        shown = local(_loops.to_utc(when), settings.zone)
+        raise ValueError(f"{shown:%a %d %b %H:%M} is not in the future")
+    if due is not None:
+        due = _as_time(due, now=now, zone=settings.zone)
     loop = _loops.new_loop(
         title, remind_at=when, due=due, reveal=reveal, source=source, by=by, now=now
     )
@@ -441,8 +511,7 @@ def list_loops(
     """Loops as summaries, soonest first. ``state``: ``open``, ``closed``, ``all`` or one A2A state."""
     store = loops_store() if store is None else store
     rows = []
-    for key in store:
-        loop = store[key]
+    for loop in _load(store)[0]:
         if (
             state == "all"
             or (state == "open" and loop.open)
@@ -493,11 +562,7 @@ def snooze(
     if for_ is not None:
         when = now + (parse_in(for_) if isinstance(for_, str) else for_)
     else:
-        when = (
-            parse_at(until, now=now, zone=settings.zone)
-            if isinstance(until, str)
-            else until
-        )
+        when = _as_time(until, now=now, zone=settings.zone)
     before = find(store, ref)
     pending = _pending_push(before, now)
     loop = _loops.snooze(before, when, now, by=by)
@@ -523,14 +588,23 @@ def tick(
     """
     store, deliver, settings = _resolve(store, deliver, settings)
     now = _loops.to_utc(now or datetime.now(timezone.utc))
-    loops = [store[k] for k in store]
+    loops, skipped = _load(store)
     counts: dict[str, int] = {}
     failed: list[str] = []
     by_id = {loop.id: loop for loop in loops}
     for action in _loops.evaluate(loops, now, horizon=settings.horizon):
-        loop = _apply(
-            by_id[action["id"]], action, deliver=deliver, settings=settings, now=now
-        )
+        seen = by_id[action["id"]]
+        try:
+            current = store[seen.id]
+        except (KeyError, ValueError, TypeError):
+            continue
+        if current != seen:
+            # Changed since this tick read it (an `ol done` meanwhile): judge it afresh.
+            redo = _loops.evaluate([current], now, horizon=settings.horizon)
+            if not redo:
+                continue
+            action = redo[0]
+        loop = _apply(current, action, deliver=deliver, settings=settings, now=now)
         store[loop.id] = loop
         if loop.log[-1].get("event") == "delivery-failed":
             failed.append(loop.id)
@@ -542,4 +616,5 @@ def tick(
         "open": sum(1 for loop in loops if loop.open),
         "actions": counts,
         "failed": failed,
+        "skipped": skipped,
     }

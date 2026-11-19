@@ -43,6 +43,8 @@ __all__ = [
     "TERMINAL",
     "LISTS",
     "DFLT_HORIZON",
+    "MAX_HORIZON",
+    "MAX_HORIZON",
     "MIN_SCHEDULE_LEAD",
     "Loop",
     "new_loop",
@@ -70,8 +72,10 @@ TERMINAL = frozenset({"completed", "failed", "canceled", "rejected"})
 #: The GTD lists a loop can sit on.
 LISTS = ("in", "next", "waiting", "someday", "reference")
 #: How far ahead a reminder is handed to the delivery channel's own scheduler. ntfy
-#: holds a scheduled message for at most three days.
-DFLT_HORIZON = timedelta(hours=72)
+#: holds a scheduled message for at most three days; an hour's margin absorbs a clock
+#: that runs ahead of the server's.
+MAX_HORIZON = timedelta(hours=71)
+DFLT_HORIZON = MAX_HORIZON
 #: Below this lead a scheduled delivery is refused by ntfy (10 s), so it is sent now.
 MIN_SCHEDULE_LEAD = timedelta(seconds=15)
 
@@ -134,6 +138,10 @@ class Loop:
     carried: int = 0
     armed: Mapping[str, Any] | None = None
     log: tuple[Mapping[str, Any], ...] = field(default_factory=tuple)
+    #: Keys a newer writer added that this version does not know: kept and written back.
+    extra: Mapping[str, Any] = field(default_factory=dict)
+    #: Keys a newer writer added that this version does not know: kept and written back.
+    extra: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if self.state not in STATES:
@@ -151,15 +159,19 @@ class Loop:
 
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
+        extra = d.pop("extra") or {}
         d["contexts"] = list(self.contexts)
         d["log"] = [dict(e) for e in self.log]
-        return d
+        return {**{k: v for k, v in extra.items() if k not in d}, **d}
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> Loop:
-        """Read a stored loop; keys this version does not know are ignored, not fatal."""
-        known = {f.name for f in fields(cls)}
-        return cls(**{k: v for k, v in data.items() if k in known})
+        """Read a stored loop; keys this version does not know are kept in ``extra``."""
+        known = {f.name for f in fields(cls)} - {"extra"}
+        return cls(
+            **{k: v for k, v in data.items() if k in known},
+            extra={k: v for k, v in data.items() if k not in known and k != "extra"},
+        )
 
 
 def _event(now: datetime, event: str, by: str, **extra: Any) -> dict[str, Any]:
@@ -262,7 +274,8 @@ def evaluate(
       slept past the horizon). Sent now, saying how late.
     - ``woke``: due and armed, so the channel has delivered it; the loop now needs its
       owner (``input-required``).
-    - ``disarm``: closed but still armed: cancel the channel's copy.
+    - ``disarm``: closed but still armed, or moved (snoozed) outside the horizon while
+      armed at its old time: cancel the channel's copy.
 
     Proposals (``proposed_by`` set) never produce a delivery.
 
@@ -276,21 +289,34 @@ def evaluate(
     actions: list[dict[str, Any]] = []
     for loop in loops:
         armed_at = (loop.armed or {}).get("at")
+        when = to_utc(loop.remind_at) if loop.remind_at else None
+        armed_here = (
+            armed_at is not None and when is not None and to_utc(armed_at) == when
+        )
         if not loop.open:
             if loop.armed:
                 actions.append({"action": "disarm", "id": loop.id})
             continue
-        if loop.proposed_by or not loop.remind_at or loop.state != "submitted":
+        if loop.armed and not armed_here:
+            # Moved while armed: re-armed below if still inside the horizon, else cancelled.
+            if (
+                loop.proposed_by
+                or when is None
+                or loop.state != "submitted"
+                or when - now > horizon
+            ):
+                actions.append({"action": "disarm", "id": loop.id})
+                continue
+        if loop.proposed_by or when is None or loop.state != "submitted":
             continue
-        when = to_utc(loop.remind_at)
         if when <= now:
-            if armed_at == loop.remind_at:
+            if armed_here:
                 actions.append({"action": "woke", "id": loop.id})
             else:
                 late = int((now - when).total_seconds() // 60)
                 actions.append(
                     {"action": "deliver", "id": loop.id, "late_minutes": late}
                 )
-        elif when - now <= horizon and armed_at != loop.remind_at:
+        elif when - now <= horizon and not armed_here:
             actions.append({"action": "arm", "id": loop.id, "at": loop.remind_at})
     return actions

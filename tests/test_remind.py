@@ -129,7 +129,7 @@ def test_times_and_durations():
     assert R.parse_at("09:30", now=NOW, zone=timezone.utc) == datetime(
         2026, 11, 20, 9, 30, tzinfo=timezone.utc
     )
-    with pytest.raises(ValueError, match="past"):
+    with pytest.raises(ValueError, match="not in the future"):
         R.remind("x", at="2020-01-01T00:00", now=NOW, **_kit())
     with pytest.raises(ValueError, match="not both"):
         R.remind("x", at="10:00", in_="1h", now=NOW, **_kit())
@@ -176,4 +176,99 @@ def test_a_loop_is_validated_and_survives_unknown_keys():
         L.new_loop("x", state="done")
     loop = L.new_loop("x", now=NOW, id="a")
     again = L.Loop.from_dict({**loop.to_dict(), "a_future_field": 1})
-    assert again == loop
+    assert again.extra == {"a_future_field": 1}
+    # Written back, a newer writer's field survives an older reader.
+    assert L.Loop.from_dict(again.to_dict()).to_dict()["a_future_field"] == 1
+
+
+def test_snoozing_an_armed_loop_beyond_the_horizon_cancels_its_old_push():
+    kit = _kit()
+    made = R.remind("x", in_="1h", now=NOW, **kit)
+    later = R.snooze(made["id"], for_="5d", now=NOW + timedelta(minutes=5), **kit)
+    assert [c[0] for c in kit["deliver"].calls] == ["schedule", "cancel"]
+    assert not later["armed"] and "hourly tick arms it" in later["echo"]
+
+
+def test_one_unreadable_file_does_not_stop_the_others(tmp_path):
+    store = R.loops_store(tmp_path)
+    kit = dict(store=store, deliver=FakeDelivery(), settings=SETTINGS)
+    good = R.remind("good", in_="5d", now=NOW, **kit)
+    (tmp_path / "broken.json").write_text("{not json")
+    report = R.tick(now=NOW + timedelta(days=3), **kit)
+    assert report["actions"] == {"arm": 1} and report["skipped"] == [
+        "broken: JSONDecodeError"
+    ]
+    assert [r["id"] for r in R.list_loops(store=store)] == [good["id"]]
+
+
+def test_a_done_that_lands_while_the_tick_runs_is_not_undone():
+    kit = _kit()
+    made = R.remind("x", in_="5d", now=NOW, **kit)
+
+    class DoneMidway(dict):
+        """Hands the tick the open loop first, then the version an `ol done` wrote."""
+
+        reads = 0
+
+        def __getitem__(self, key):
+            self.reads += 1
+            loop = super().__getitem__(key)
+            if self.reads == 2:  # the tick's re-read just before applying
+                closed = L.complete(loop, NOW + timedelta(days=3))
+                super().__setitem__(key, closed)
+                return closed
+            return loop
+
+    store = DoneMidway(kit["store"])
+    R.tick(
+        store=store,
+        deliver=kit["deliver"],
+        settings=SETTINGS,
+        now=NOW + timedelta(days=3),
+    )
+    assert store[made["id"]].state == "completed"
+    assert not kit["deliver"].calls  # it was never armed, so nothing to cancel either
+
+
+def test_a_named_zone_applies_its_own_daylight_saving():
+    from zoneinfo import ZoneInfo
+
+    paris = ZoneInfo("Europe/Paris")
+    summer = R.parse_at("2027-07-01", now=NOW, zone=paris)
+    winter = R.parse_at("2027-01-04", now=NOW, zone=paris)
+    assert summer.utcoffset() == timedelta(hours=2) and winter.utcoffset() == timedelta(
+        hours=1
+    )
+    assert (
+        R.attach(datetime(2027, 7, 1, 9), None).utcoffset()
+        == datetime(2027, 7, 1, 9).astimezone().utcoffset()
+    )
+
+
+def test_bad_references_and_times_are_refused_plainly():
+    kit = _kit()
+    made = R.remind("x", in_="1h", now=NOW, **kit)
+    with pytest.raises(KeyError):
+        R.done("", now=NOW, **kit)
+    assert R.find(kit["store"], made["id"].rsplit("-", 1)[1]).id == made["id"]
+    for bad in ("24:00", "20261120", "tomorrow", "10"):
+        with pytest.raises(ValueError, match="not a time"):
+            R.parse_at(bad, now=NOW, zone=None)
+
+
+def test_the_topic_never_appears_in_the_echo():
+    settings = R.RemindSettings(channel="ntfy:secret-topic-123", tz="UTC")
+    made = R.remind(
+        "x", in_="1h", now=NOW, store={}, deliver=FakeDelivery(), settings=settings
+    )
+    assert "secret-topic-123" not in made["echo"] + str(made["last_note"])
+
+
+def test_a_failing_channel_is_counted_not_logged_every_hour():
+    kit = _kit(fail=True)
+    made = R.remind("x", in_="2h", now=NOW, **kit)
+    for minutes in (60, 61, 62):
+        R.tick(now=NOW + timedelta(minutes=minutes - 59), **kit)
+    log = kit["store"][made["id"]].log
+    assert [e["event"] for e in log] == ["created", "delivery-failed"]
+    assert log[-1]["count"] == 4
