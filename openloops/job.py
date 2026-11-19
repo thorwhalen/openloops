@@ -34,7 +34,11 @@ __all__ = [
     "REFRESH_LABEL",
     "RECEIVER_LABEL",
     "RECEIVER_INTERVAL",
+    "REMIND_LABEL",
+    "REMIND_INTERVAL",
     "install",
+    "install_remind",
+    "remind_job_spec",
     "install_receiver",
     "receiver_job_spec",
     "uninstall",
@@ -59,6 +63,9 @@ PASSED_THROUGH = (
     "CLAUDE_PROJECTS_DIR",
     "XDG_DATA_HOME",
     "XDG_STATE_HOME",
+    "OPENLOOPS_TZ",
+    "OPENLOOPS_REMIND_CHANNEL",
+    "OPENLOOPS_REMIND_HORIZON_HOURS",
 )
 
 
@@ -70,6 +77,10 @@ RECEIVER_LABEL = "openloops.board-receiver"
 RECEIVER_INTERVAL = 300
 #: The board-rebuild job (`ol board-refresh` on a timer; issue #39): no model, so it can
 #: run often; six hours keeps the board within a day of GitHub with margin.
+REMIND_LABEL = "openloops.remind-tick"
+#: Hourly: a reminder is armed on the channel up to three days ahead, so the tick only
+#: needs to catch loops entering that horizon and record the ones that fired.
+REMIND_INTERVAL = 3600
 REFRESH_LABEL = "openloops.board-refresh"
 REFRESH_INTERVAL = 21600
 
@@ -500,6 +511,56 @@ def install_refresh(
         Path(str(spec["log"])),
         str(spec["xml"]),
         smoke=[[sys.executable, "-m", "openloops", "board-refresh", "--help"]],
+        env=dict(spec["env"]),  # type: ignore[arg-type]
+    )
+    return {
+        "plist": str(spec["plist"]),
+        "log": str(spec["log"]),
+        "interval": str(spec["interval"]),
+    }
+
+
+def remind_job_spec(
+    *, interval: int = REMIND_INTERVAL, label: str = REMIND_LABEL
+) -> dict[str, object]:
+    """The reminder tick as data: ``python -m openloops remind-tick`` every ``interval`` s.
+
+    Pure, so it tests anywhere. The job carries no credential: the ntfy topic is resolved
+    by correspond (``NTFY_TOPIC``, else the Keychain), and the owner's zone by
+    ``OPENLOOPS_TZ`` when set in the job's environment.
+    """
+    args = [sys.executable, "-m", "openloops", "remind-tick"]
+    env = job_environment()
+    log_path = _log_path(label)
+    return {
+        "label": label,
+        "program_args": args,
+        "env": env,
+        "interval": interval,
+        "log": str(log_path),
+        "plist": str(_plist_path(label)),
+        "xml": plist_xml(
+            label=label,
+            program_args=args,
+            env=env,
+            interval=interval,
+            log_path=log_path,
+        ),
+    }
+
+
+def install_remind(*, dry_run: bool = False, **kwargs: object) -> dict[str, str]:
+    """Install (or replace) the reminder tick job. ``kwargs`` are :func:`remind_job_spec`'s."""
+    spec = remind_job_spec(**kwargs)  # type: ignore[arg-type]
+    if dry_run:
+        return {k: str(v) for k, v in spec.items() if k in ("plist", "log", "xml")}
+    _require_macos()
+    _bootstrap(
+        str(spec["label"]),
+        Path(str(spec["plist"])),
+        Path(str(spec["log"])),
+        str(spec["xml"]),
+        smoke=[[sys.executable, "-m", "openloops", "remind-tick", "--help"]],
         env=dict(spec["env"]),  # type: ignore[arg-type]
     )
     return {

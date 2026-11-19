@@ -780,6 +780,89 @@ def board_build(
     return f"wrote {result['tasks']} tasks to {result['out_dir']}\n  runs: {runs}"
 
 
+def _loop_line(row: dict) -> str:
+    when = (row.get("remind_at") or "")[:16].replace("T", " ") or "-"
+    flags = ("armed " if row.get("armed") else "") + (
+        "" if row.get("reveal") else "hidden"
+    )
+    return f"{row['id']:<22} {row['state']:<15} {when:<17} {row['title']}  [{flags.strip()}]"
+
+
+def remind(
+    title: str,
+    *,
+    when: str = None,
+    due: str = None,
+    reveal: bool = False,
+    source: str = None,
+):
+    """Remind me of TITLE at WHEN: a push to the phone, even if this machine sleeps.
+
+    WHEN is a duration (20m, 3h, 2d, 1h30m) or a time (15:30, 2026-11-20,
+    2026-11-20T09:00; naive means OPENLOOPS_TZ or this machine's zone). Within three days
+    the push is scheduled on ntfy at once; further out, the hourly tick
+    (`ol install-remind-job`) schedules it when it comes within three days. The push says
+    only "a reminder is due" unless --reveal: ntfy.sh is a public relay, so reveal short
+    labels only, never names, clients or secrets. Prints the one-line echo to repeat.
+    """
+    row = tools.remind(title, when=when, due=due, reveal=reveal, source=source)
+    return f"{row['id']}: {row['title']}\n  {row['echo']}"
+
+
+def loops(*, state: str = "open", json_out: bool = False):
+    """List loops, soonest first: open (default), closed, all, or one state."""
+    rows = tools.loops(state=state)["loops"]
+    if json_out:
+        return json.dumps(rows, indent=1)
+    return "\n".join(_loop_line(r) for r in rows) or f"(no {state} loops)"
+
+
+def done(ref: str, *, note: str = None):
+    """Close loop REF (an id or a unique prefix) as done; cancels its scheduled push."""
+    row = tools.done(ref, note=note)
+    warning = f"\n  note: {row['warning']}" if row.get("warning") else ""
+    return f"done: {row['id']} {row['title']}{warning}"
+
+
+def snooze(ref: str, when: str):
+    """Bring loop REF back at WHEN (a duration or a time); re-schedules its push."""
+    row = tools.snooze(ref, when=when)
+    warning = f"\n  note: {row['warning']}" if row.get("warning") else ""
+    return f"snoozed: {row['id']}\n  {row['echo']}{warning}"
+
+
+def remind_tick():
+    """Arm loops that came within three days, record fired ones, deliver missed ones late.
+
+    Model-free and idempotent; `ol install-remind-job` runs it hourly. Exits 1 when a
+    channel call failed (the loops stay as they were and the next tick retries).
+    """
+    report = tools.remind_tick()
+    acted = ", ".join(f"{k} {v}" for k, v in report["actions"].items()) or "nothing to do"
+    line = f"{report['at']} remind-tick: {report['open']} open of {report['loops']}; {acted}"
+    if report["failed"]:
+        print(line + f"; FAILED: {', '.join(report['failed'])}", file=sys.stderr)
+        sys.exit(1)
+    return line
+
+
+def install_remind_job(*, interval: int = _job.REMIND_INTERVAL, dry_run: bool = False):
+    """Install the reminder tick (macOS launchd): `ol remind-tick` every hour."""
+    result = _job.install_remind(interval=interval, dry_run=dry_run)
+    if dry_run:
+        return result["xml"]
+    return (
+        f"installed {_job.REMIND_LABEL} every {result['interval']}s\n"
+        f"  plist: {result['plist']}\n  log:   {result['log']}"
+    )
+
+
+def uninstall_remind_job():
+    """Unload and remove the reminder tick job."""
+    result = _job.uninstall(label=_job.REMIND_LABEL)
+    return f"removed {result.get('plist', _job.REMIND_LABEL)}"
+
+
 #: Every verb the CLI exposes, in the order `ol --help` lists them.
 _commands = [
     brief,
@@ -791,6 +874,11 @@ _commands = [
     board_classify,
     board_build,
     board_refresh,
+    remind,
+    loops,
+    done,
+    snooze,
+    remind_tick,
     sync,
     ls,
     show,
@@ -803,6 +891,8 @@ _commands = [
     uninstall_receiver_job,
     install_refresh_job,
     uninstall_refresh_job,
+    install_remind_job,
+    uninstall_remind_job,
     receiver_job_status,
 ]
 

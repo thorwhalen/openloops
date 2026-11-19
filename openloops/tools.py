@@ -68,6 +68,11 @@ __all__ = [
     "board_gather",
     "board_classify",
     "board_build",
+    "remind",
+    "loops",
+    "done",
+    "snooze",
+    "remind_tick",
 ]
 
 #: The keys every :func:`ls` row carries, whatever the digest happens to record.
@@ -658,6 +663,73 @@ def board_refresh(
     )
 
 
+def _remind_module():
+    # Imported on use: the reminder runner is not part of `import openloops` (ADR-013).
+    from openloops import remind as _remind
+
+    return _remind
+
+
+def remind(
+    title: str,
+    *,
+    when: str | None = None,
+    due: str | None = None,
+    reveal: bool = False,
+    source: str | None = None,
+) -> dict[str, Any]:
+    """Make a loop that comes back at ``when`` and push it to the phone then.
+
+    ``when`` is a duration (``20m``, ``3h``, ``2d``) or a time (``15:30``, an ISO date or
+    date-time; naive means the owner's zone). Within three days it is scheduled on ntfy at
+    once, so it fires even if this machine sleeps. Without ``when`` the loop is only
+    listed. ``reveal`` lets the title travel in the push (ntfy.sh is a public relay: short
+    labels only). ``source`` is where the ask came from (a URL or a session name). The
+    result's ``echo`` is the line to repeat to the owner.
+    """
+    r = _remind_module()
+    settings = r.RemindSettings.from_env()
+    now = datetime.now(timezone.utc)
+    at = r.parse_when(when, now=now, zone=settings.zone) if when else None
+    return r.remind(
+        title,
+        at=at,
+        due=due,
+        reveal=reveal,
+        source={"kind": "ref", "ref": source} if source else None,
+        settings=settings,
+        now=now,
+    )
+
+
+def loops(*, state: str = "open") -> dict[str, Any]:
+    """The loops, soonest first. ``state``: ``open`` (default), ``closed``, ``all``, or an A2A state."""
+    return {"loops": _remind_module().list_loops(state=state)}
+
+
+def done(ref: str, *, note: str | None = None) -> dict[str, Any]:
+    """Close a loop (by id or a unique prefix) as done, cancelling its scheduled push."""
+    return _remind_module().done(ref, note=note)
+
+
+def snooze(ref: str, *, when: str) -> dict[str, Any]:
+    """Bring a loop back at ``when`` (a duration or a time, as for :func:`remind`); re-arms its push."""
+    r = _remind_module()
+    settings = r.RemindSettings.from_env()
+    now = datetime.now(timezone.utc)
+    return r.snooze(
+        ref,
+        until=r.parse_when(when, now=now, zone=settings.zone),
+        settings=settings,
+        now=now,
+    )
+
+
+def remind_tick() -> dict[str, Any]:
+    """Arm loops that came within three days, record those that fired, deliver late any missed one."""
+    return _remind_module().tick()
+
+
 #: Single source of truth for what every surface exposes. The CLI dispatches this list;
 #: an MCP or HTTP adapter would reference the same names as strings.
 _dispatch_funcs = [
@@ -673,6 +745,11 @@ _dispatch_funcs = [
     board_classify,
     board_build,
     board_refresh,
+    remind,
+    loops,
+    done,
+    snooze,
+    remind_tick,
 ]
 
 
