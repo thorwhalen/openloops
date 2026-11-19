@@ -838,7 +838,9 @@ def remind_tick():
     channel call failed (the loops stay as they were and the next tick retries).
     """
     report = tools.remind_tick()
-    acted = ", ".join(f"{k} {v}" for k, v in report["actions"].items()) or "nothing to do"
+    acted = (
+        ", ".join(f"{k} {v}" for k, v in report["actions"].items()) or "nothing to do"
+    )
     line = f"{report['at']} remind-tick: {report['open']} open of {report['loops']}; {acted}"
     if report.get("skipped"):
         line += f"; unreadable: {', '.join(report['skipped'])}"
