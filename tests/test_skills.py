@@ -94,6 +94,7 @@ def test_bundled_lists_the_read_skill_the_capture_skill_and_the_subagent():
         ("skill", "openloops"),
         ("skill", "openloops-needs-human"),
         ("skill", "openloops-phone-board"),
+        ("skill", "openloops-remind"),
         ("agent", "openloops-sweep"),
     }
 
@@ -165,7 +166,7 @@ def test_the_capture_skill_still_names_what_owed_keys_on():
 def test_a_dry_run_says_what_it_would_do_and_does_none_of_it(tmp_path):
     host = tmp_path / "host"
     plan = skills.install_skills(target=host, dry_run=True)
-    assert plan["dry_run"] and plan["counts"]["install"] == 4
+    assert plan["dry_run"] and plan["counts"]["install"] == 5
     assert not host.exists(), "a dry run must not create the host directory"
     assert all(Path(row["source"]).exists() for row in plan["actions"])
 
@@ -173,12 +174,12 @@ def test_a_dry_run_says_what_it_would_do_and_does_none_of_it(tmp_path):
 def test_installing_twice_is_installing_once(tmp_path):
     host = tmp_path / "host"
     first = skills.install_skills(target=host)
-    assert first["counts"] == {"install": 4, "ok": 0, "conflict": 0}
+    assert first["counts"] == {"install": 5, "ok": 0, "conflict": 0}
     for row in first["actions"]:
         assert Path(row["destination"]).exists()
 
     second = skills.install_skills(target=host)
-    assert second["counts"] == {"install": 0, "ok": 4, "conflict": 0}
+    assert second["counts"] == {"install": 0, "ok": 5, "conflict": 0}
 
 
 def test_copying_twice_is_also_installing_once(tmp_path):
@@ -189,11 +190,11 @@ def test_copying_twice_is_also_installing_once(tmp_path):
     """
     host = tmp_path / "host"
     first = skills.install_skills(target=host, copy=True)
-    assert first["method"] == "copy" and first["counts"]["install"] == 4
+    assert first["method"] == "copy" and first["counts"]["install"] == 5
     installed = host / "skills" / "openloops" / "SKILL.md"
     assert not installed.is_symlink() and installed.read_text(encoding="utf-8")
 
-    assert skills.install_skills(target=host, copy=True)["counts"]["ok"] == 4
+    assert skills.install_skills(target=host, copy=True)["counts"]["ok"] == 5
 
 
 def test_nothing_that_is_already_there_is_ever_overwritten(tmp_path):
@@ -204,7 +205,7 @@ def test_nothing_that_is_already_there_is_ever_overwritten(tmp_path):
     (mine / "SKILL.md").write_text("mine, not yours", encoding="utf-8")
 
     plan = skills.install_skills(target=host)
-    assert plan["counts"] == {"install": 3, "ok": 0, "conflict": 1}
+    assert plan["counts"] == {"install": 4, "ok": 0, "conflict": 1}
     assert (mine / "SKILL.md").read_text(encoding="utf-8") == "mine, not yours"
 
     forced = skills.install_skills(target=host, force=True)

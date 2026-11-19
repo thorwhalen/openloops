@@ -36,9 +36,11 @@ the records.
 - `board_store.py` — the board store API's rules over any MutableMapping (roles,
   immutable events, newest-wins drafts); no network. `board_server.py` — optional
   FastAPI app (`openloops[server]`) wrapping it; nothing else imports it (ADR-009).
+- `loops.py` — the `Loop` record (one commitment: A2A `state`, GTD `list`, `remind_at`/`due`, provenance, append-only log) and the pure `evaluate(loops, now)` → actions (ADR-013). No I/O.
+- `remind.py` — the reminder runner, imported by nothing in the core: `remind`/`done`/`snooze`/`tick` over three seams (`store=` JSON files under `~/.local/share/openloops/loops/`, `deliver=` correspond's ntfy with scheduled delivery and cancel, `settings=` from env). The `openloops[remind]` extra.
 - `tools.py` — **the single surface all dispatch goes through** (CLI today, MCP/HTTP
   later): plain functions taking/returning flat JSON-ready dicts — `sync`, `ls`,
-  `show`, `status`, `owed`, `blocked`, `dashboard`, `published`, `board_*`.
+  `show`, `status`, `owed`, `blocked`, `dashboard`, `published`, `board_*`, `remind`, `loops`, `done`, `snooze`, `remind_tick`.
 - `board_refresh.py` — `refresh_board()`: the model-free board rebuild on a timer (ADR-012; `ol board-refresh`, `ol install-refresh-job`). `merge_refresh()` is the pure merge; the scope and the last-published hash live in `WORK/refresh.json`.
 - `job.py` — the periodic-job (launchd `StartInterval`) design: no daemon, ADR-006; also the board-receiver job (ADR-011).
 - `receiver_tick.py` — run by that job, nothing imports it: a no-model check of the
@@ -69,7 +71,8 @@ pass, or ignore that one failure in a root sandbox.
   Nothing here re-checks a digest's own content against the world after writing it.
 - Never calls a model, never reaches the network, needs no account (import-time or
   run-time) — reads files already on disk, writes files the user already owns. The
-  exceptions: `receiver_tick.py` (ADR-011), which nothing imports; the `gh` reads of
+  exceptions: `receiver_tick.py` (ADR-011), which nothing imports; `remind.py` (ADR-013),
+  which writes the loops store and reaches ntfy through correspond, imported by nothing in the core; the `gh` reads of
   `obligations`/`tasks.gather`; and `board_refresh`'s optional `scp` publish to a host
   the owner names (`--publish-to host:dir`, ADR-012).
 - `openloops/data/skills/` and `openloops/data/agents/` are markdown shipped inside
@@ -77,11 +80,11 @@ pass, or ignore that one failure in a root sandbox.
 
 ## Docs & skills
 
-- ADRs: `docs/adr/001`–`012` (naming, release scope, public/private boundary, loop
+- ADRs: `docs/adr/001`–`013` (naming, release scope, public/private boundary, loop
   state vs process state, the digest-dated rule, periodic-job design, the two seams,
-  board write side in a skill, self-hosted board store, agents decide what is reversible and clearly recommended, the board receiver as a periodic job, the board rebuild as a free timer job).
+  board write side in a skill, self-hosted board store, agents decide what is reversible and clearly recommended, the board receiver as a periodic job, the board rebuild as a free timer job, loops and reminders a channel holds).
 - Shipped skills/subagent: `.claude/skills/openloops`, `.claude/skills/openloops-needs-human`,
-  `.claude/skills/openloops-phone-board`,
+  `.claude/skills/openloops-phone-board`, `.claude/skills/openloops-remind`,
   `.claude/agents/openloops-sweep.md` (also documented via `openloops-sweep` skill).
 
 ## Dependents

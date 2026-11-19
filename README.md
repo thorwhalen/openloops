@@ -6,10 +6,11 @@ scrolled away. An agent got blocked on you and filed an issue you never re-read.
 agent found the real fix belonged in another repository, filed it there, wrote a
 workaround here, and nobody ever told this repository the blocker was closed.
 
-`openloops` finds those and re-checks them. It answers three questions and nothing
-else. It never writes: it does not close, reopen, relabel or comment on anything,
-anywhere, and there is no local database — the transcript, the label and the
-dependency edge *are* the records.
+`openloops` finds those and re-checks them. It answers three questions. It never writes
+to GitHub: it does not close, reopen, relabel or comment on anything, anywhere — the
+transcript, the label and the dependency edge *are* the records.
+
+The one loop it keeps itself is the one you ask for: `ol remind "Review the draft" --when 3h` makes a reminder that pushes to your phone at that time even if your laptop is asleep (see [`ol remind`](#ol-remind--a-reminder-that-fires-while-your-laptop-sleeps)).
 
 **The surface most people want is not a command.** If you delegate development to
 agents, what you want is an agent that runs the commands and tells you what matters.
@@ -624,6 +625,26 @@ The taps on the page become GitHub comments, closed issues and dispatched worker
 **On your own website.** `ol board-build --store http --api /your/prefix/board-store` wires the page to a small document-store API instead of the Artifact store. `pip install openloops[server]` adds `openloops.board_server.mk_app`, a FastAPI app serving the board files and that API under the store rules of `openloops.board_store` (events immutable, drafts newest-wins, receipts written only by the receiver, which never writes events outside a migration import). It authenticates nobody: put it behind your own login and map each identity to `viewer` (you) or `receiver` (the receiving session's account) in its `role_of` ([ADR-009](docs/adr/009-a-self-hosted-board-store.md)).
 
 **A receiver on a timer (macOS).** `ol install-receiver-job WORK_DIR` installs a launchd job that, every five minutes, asks a self-hosted board store over HTTPS, with no model, whether any tap is waiting, and when none is, writes the board's heartbeat. Only when something is waiting does it start `claude -p` with the receiver procedure, capped at `--max-budget-usd` (that tick's session only, not the workers it dispatches). Credentials stay in `~/.config/openloops/board-receiver.env` (mode 600), never in the job. Check with `python3 -m openloops.receiver_tick --check-only` and `ol receiver-job-status`; remove with `ol uninstall-receiver-job`. This is the one part of openloops that reaches the network or starts a model, and only once you install it ([ADR-011](docs/adr/011-the-board-receiver-is-a-periodic-job-with-a-free-check.md)).
+
+## `ol remind` — a reminder that fires while your laptop sleeps
+
+```bash
+pip install 'openloops[remind]'            # adds correspond, which delivers through ntfy (Python 3.11+)
+ol remind "Stretch" --when 20m --reveal    # a duration: 20m, 3h, 2d, 1h30m
+ol remind "Call back" --when 15:30         # a time today (tomorrow if passed), an ISO date (09:00) or date-time
+ol loops                                   # open reminders, soonest first
+ol snooze <id> 1h                          # or: ol snooze <id> 18:00
+ol done <id>                               # close it (see the note below on early cancels)
+ol install-remind-job                      # macOS: the hourly tick (needed for reminders more than 3 days out)
+```
+
+A reminder is a **loop**: one record per commitment, kept as a JSON file under `~/.local/share/openloops/loops/`. Its lifecycle uses the same seven A2A state names as the equerry desk's items (scheduled is `submitted`, fired is `input-required`, done is `completed`), and it already has the fields of a Getting Things Done list item (list, contexts, project, energy, waiting-for), most of them unused for now. The design is [ADR-013](docs/adr/013-loops-and-reminders.md).
+
+How it survives a sleeping machine: a reminder due within three days is handed to ntfy at once as a *scheduled* message, whose sequence id is the loop's id. ntfy delivers it at the time whatever your laptop is doing. `ol done` and `ol snooze` cancel or replace it under the same id, but ntfy.sh does not honour that today (measured 2026-11-19): the original push may still arrive, and both commands say so when it can. The hourly tick arms reminders as they come within three days (ntfy's limit), records the ones that fired, and delivers late, saying how late, anything that was never armed.
+
+**What the push says.** The topic is correspond's default ntfy topic (`NTFY_TOPIC`, else the Keychain). ntfy.sh is a public relay, so a push says only "A reminder you set is due" unless the reminder was made with `--reveal`; then the title travels too. Reveal short labels only.
+
+Settings come from the environment: `OPENLOOPS_TZ` (an IANA zone for reading and echoing times; default this machine's), `OPENLOOPS_REMIND_CHANNEL` (a correspond reference, default `ntfy:`), `OPENLOOPS_REMIND_HORIZON_HOURS` (default 72). The seams (`store=`, `deliver=`, `settings=`) are keyword arguments of `openloops.remind`'s functions.
 
 ## Turning it off
 
