@@ -781,7 +781,13 @@ def board_build(
 
 
 def _loop_line(row: dict) -> str:
-    when = (row.get("remind_at") or "")[:16].replace("T", " ") or "-"
+    from openloops import remind as _remind
+    from openloops.loops import to_utc
+
+    when = "-"
+    if row.get("remind_at"):
+        zone = _remind.RemindSettings.from_env().zone
+        when = f"{_remind.local(to_utc(row['remind_at']), zone):%Y-%m-%d %H:%M}"
     flags = ("armed " if row.get("armed") else "") + (
         "" if row.get("reveal") else "hidden"
     )
@@ -838,7 +844,9 @@ def remind_tick():
     channel call failed (the loops stay as they were and the next tick retries).
     """
     report = tools.remind_tick()
-    acted = ", ".join(f"{k} {v}" for k, v in report["actions"].items()) or "nothing to do"
+    acted = (
+        ", ".join(f"{k} {v}" for k, v in report["actions"].items()) or "nothing to do"
+    )
     line = f"{report['at']} remind-tick: {report['open']} open of {report['loops']}; {acted}"
     if report.get("skipped"):
         line += f"; unreadable: {', '.join(report['skipped'])}"
