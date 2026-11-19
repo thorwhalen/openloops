@@ -37,7 +37,7 @@ from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from openloops import loops as _loops
 from openloops.loops import Loop
@@ -103,7 +103,17 @@ class RemindSettings:
     @property
     def zone(self):
         """A ``ZoneInfo``, or ``None`` for the machine's own zone (see :func:`attach`)."""
-        return ZoneInfo(self.tz) if self.tz else None
+        if not self.tz:
+            return None
+        if self.tz.upper() in ("UTC", "Z"):
+            return timezone.utc  # needs no tz database (Windows ships none)
+        try:
+            return ZoneInfo(self.tz)
+        except ZoneInfoNotFoundError:
+            raise ValueError(
+                f"unknown time zone {self.tz!r} (an IANA name such as Europe/Paris; "
+                "on Windows, pip install tzdata)"
+            ) from None
 
     @property
     def channel_label(self) -> str:

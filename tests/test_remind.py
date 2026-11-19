@@ -231,9 +231,12 @@ def test_a_done_that_lands_while_the_tick_runs_is_not_undone():
 
 
 def test_a_named_zone_applies_its_own_daylight_saving():
-    from zoneinfo import ZoneInfo
+    from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-    paris = ZoneInfo("Europe/Paris")
+    try:
+        paris = ZoneInfo("Europe/Paris")
+    except ZoneInfoNotFoundError:  # Windows without the tzdata package
+        pytest.skip("no IANA time zone database here")
     summer = R.parse_at("2027-07-01", now=NOW, zone=paris)
     winter = R.parse_at("2027-01-04", now=NOW, zone=paris)
     assert summer.utcoffset() == timedelta(hours=2) and winter.utcoffset() == timedelta(

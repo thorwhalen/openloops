@@ -54,7 +54,7 @@ Changelog = "https://github.com/thorwhalen/openloops/blob/main/CHANGELOG.md"
 server = ["fastapi"]
 # `ol remind` delivers through correspond's ntfy channel (ADR-013); the core never
 # imports it. correspond needs Python 3.11+.
-remind = ["correspond>=0.0.54; python_version >= '3.11'"]
+remind = ["correspond>=0.0.54; python_version >= '3.11'", "tzdata; sys_platform == 'win32'"]
 dev = ["pytest>=7.0", "pytest-cov>=4.0", "ruff>=0.1.0", "fastapi", "httpx"]
 
 # The agent-facing surface ships *inside* the package: `openloops/data/skills/` and
