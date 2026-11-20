@@ -1,4 +1,4 @@
-> built 2026-11-20 17:13 UTC from 3b7472c (main) · openloops 0.1.43. Details: build_info.json
+> built 2026-11-20 17:45 UTC from 184de99 (main) · openloops 0.1.44. Details: build_info.json
 
 # index.html.md
 
@@ -652,7 +652,7 @@ Settings come from the environment: `OPENLOOPS_TZ` (an IANA zone for reading and
 
 ## The pile — capture anywhere, clarify later
 
-The GTD *In* list, kept as one GitHub issue per capture in a private repo of yours (default `<your login>/_pile`, or `OPENLOOPS_PILE_REPO`). Anything that can `POST` to the GitHub issues API can capture: an Apple Shortcut (“Hey Siri, pile it”), `gh issue create`, a script. Each capture carries the label `pile` and, optionally, a routing hint label. Nothing in openloops runs on capture: no Action, no webhook.
+The GTD *In* list, kept as one GitHub issue per capture in a private repo of yours (default `<your login>/_pile`, or `OPENLOOPS_PILE_REPO`). Anything that can `POST` to the GitHub issues API can capture: an Apple Shortcut (“Hey Siri, add to my pile”), `gh issue create`, a script. Each capture carries the label `pile` and, optionally, a routing hint label. Nothing in openloops runs on capture: no Action, no webhook.
 
 Emptying it is on demand. Ask your agent to “go through my pile”: the `openloops-pile` skill (installed by `ol install-skills`) reads each item as dictation, proposes where each belongs (a loop via `ol remind`, an idea via `ideadump`, an issue in the repo that owns it, or dropped with a reason), acts after your one “yes”, and closes each pile item with a comment linking where it went. A pile item is never edited and never closed without a comment.
 
@@ -6325,7 +6325,7 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-11-20 17:13 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/3b7472c9003d00bbd19adbbd924547e43a981c1b"><code>3b7472c</code></a> on branch <code>main</code>, for **openloops 0.1.43** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-20 17:45 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/184de99b42025f678204153f9d1c12c60728b32c"><code>184de99</code></a> on branch <code>main</code>, for **openloops 0.1.44** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -6334,7 +6334,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/3b7472c9003d00bbd19adbbd924547e43a981c1b"><code>3b7472c9003d00bbd19adbbd924547e43a981c1b</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/184de99b42025f678204153f9d1c12c60728b32c"><code>184de99b42025f678204153f9d1c12c60728b32c</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -6345,9 +6345,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/44780912343">44780912343</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/44786043979">44786043979</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>3b7472c9003d00bbd19adbbd924547e43a981c1b</code> (in the history of the built commit) |
+| Event commit | <code>184de99b42025f678204153f9d1c12c60728b32c</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -6372,13 +6372,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.43/">0.1.43</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.44/">0.1.44</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 3b7472c9003d00bbd19adbbd924547e43a981c1b
+git checkout 184de99b42025f678204153f9d1c12c60728b32c
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

@@ -648,7 +648,7 @@ Settings come from the environment: `OPENLOOPS_TZ` (an IANA zone for reading and
 
 ## The pile — capture anywhere, clarify later
 
-The GTD *In* list, kept as one GitHub issue per capture in a private repo of yours (default `<your login>/_pile`, or `OPENLOOPS_PILE_REPO`). Anything that can `POST` to the GitHub issues API can capture: an Apple Shortcut (“Hey Siri, pile it”), `gh issue create`, a script. Each capture carries the label `pile` and, optionally, a routing hint label. Nothing in openloops runs on capture: no Action, no webhook.
+The GTD *In* list, kept as one GitHub issue per capture in a private repo of yours (default `<your login>/_pile`, or `OPENLOOPS_PILE_REPO`). Anything that can `POST` to the GitHub issues API can capture: an Apple Shortcut (“Hey Siri, add to my pile”), `gh issue create`, a script. Each capture carries the label `pile` and, optionally, a routing hint label. Nothing in openloops runs on capture: no Action, no webhook.
 
 Emptying it is on demand. Ask your agent to “go through my pile”: the `openloops-pile` skill (installed by `ol install-skills`) reads each item as dictation, proposes where each belongs (a loop via `ol remind`, an idea via `ideadump`, an issue in the repo that owns it, or dropped with a reason), acts after your one “yes”, and closes each pile item with a comment linking where it went. A pile item is never edited and never closed without a comment.
 
