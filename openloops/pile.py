@@ -166,21 +166,41 @@ def parse_item(raw: Mapping[str, Any]) -> PileItem:
 _FIELDS = "number,title,body,labels,createdAt,url,state"
 
 
+#: The repository's own issue connection, not ``gh issue list --label`` (which goes
+#: through the search index): a capture made seconds ago is listed at once. Measured
+#: 2026-11-20: search lagged ~7 s, REST ~5 s, this connection 0 s.
+_ITEMS_QUERY = """
+query($owner: String!, $name: String!, $label: String!, $endCursor: String) {
+  repository(owner: $owner, name: $name) {
+    issues(first: 100, after: $endCursor, states: OPEN, labels: [$label],
+           orderBy: {field: CREATED_AT, direction: ASC}) {
+      nodes { number title body createdAt url state labels(first: 30) { nodes { name } } }
+      pageInfo { hasNextPage endCursor }
+    }
+  }
+}
+"""
+
+
 def items(
     *,
     repo: str | None = None,
     label: str = PILE_LABEL,
-    limit: int = 200,
     run_gh: Callable[..., str] | None = None,
 ) -> list[PileItem]:
-    """The open items carrying ``label`` (default: untriaged), oldest first."""
+    """The open items carrying ``label`` (default: untriaged), oldest first. Read-only."""
     repo = pile_repo(repo, run_gh=run_gh)
+    owner, name = repo.split("/", 1)
     out = _run(
         run_gh,
-        ["issue", "list", "-R", repo, "--state", "open", "--label", label,
-         "--limit", str(limit), "--json", _FIELDS],
+        ["api", "graphql", "--paginate", "-f", f"query={_ITEMS_QUERY}",
+         "-F", f"owner={owner}", "-F", f"name={name}", "-F", f"label={label}",
+         "--jq", ".data.repository.issues.nodes[]"],
     )  # fmt: skip
-    found = [parse_item(r) for r in json.loads(out or "[]")]
+    rows = [json.loads(line) for line in (out or "").splitlines() if line.strip()]
+    for row in rows:
+        row["labels"] = (row.get("labels") or {}).get("nodes") or []
+    found = [parse_item(r) for r in rows]
     return sorted(found, key=lambda i: (i.created, i.number))
 
 
