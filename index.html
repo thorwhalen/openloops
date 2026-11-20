@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=05fb4756"></script>
+    <script src="_static/documentation_options.js?v=a183c34f"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -57,7 +57,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.42" />
+  <meta name="docsearch:version" content="0.1.43" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -998,6 +998,11 @@ ol<span class="w"> </span>install-remind-job<span class="w">                    
 <p><strong>What the push says.</strong> The topic is correspond’s default ntfy topic (<code class="docutils literal notranslate"><span class="pre">NTFY_TOPIC</span></code>, else the Keychain). ntfy.sh is a public relay, so a push says only “A reminder you set is due” unless the reminder was made with <code class="docutils literal notranslate"><span class="pre">--reveal</span></code>; then the title travels too. Reveal short labels only.</p>
 <p>Settings come from the environment: <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_TZ</span></code> (an IANA zone for reading and echoing times; default this machine’s), <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_REMIND_CHANNEL</span></code> (a correspond reference, default <code class="docutils literal notranslate"><span class="pre">ntfy:</span></code>), <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_REMIND_HORIZON_HOURS</span></code> (default 72). The seams (<code class="docutils literal notranslate"><span class="pre">store=</span></code>, <code class="docutils literal notranslate"><span class="pre">deliver=</span></code>, <code class="docutils literal notranslate"><span class="pre">settings=</span></code>) are keyword arguments of <code class="docutils literal notranslate"><span class="pre">openloops.remind</span></code>’s functions.</p>
 </section>
+<section id="the-pile-capture-anywhere-clarify-later">
+<span id="the-pile--capture-anywhere-clarify-later"></span><h2>The pile — capture anywhere, clarify later<a class="headerlink" href="#the-pile-capture-anywhere-clarify-later" title="Link to this heading">#</a></h2>
+<p>The GTD <em>In</em> list, kept as one GitHub issue per capture in a private repo of yours (default <code class="docutils literal notranslate"><span class="pre">&lt;your</span> <span class="pre">login&gt;/_pile</span></code>, or <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_PILE_REPO</span></code>). Anything that can <code class="docutils literal notranslate"><span class="pre">POST</span></code> to the GitHub issues API can capture: an Apple Shortcut (“Hey Siri, pile it”), <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">issue</span> <span class="pre">create</span></code>, a script. Each capture carries the label <code class="docutils literal notranslate"><span class="pre">pile</span></code> and, optionally, a routing hint label. Nothing in openloops runs on capture: no Action, no webhook.</p>
+<p>Emptying it is on demand. Ask your agent to “go through my pile”: the <code class="docutils literal notranslate"><span class="pre">openloops-pile</span></code> skill (installed by <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">install-skills</span></code>) reads each item as dictation, proposes where each belongs (a loop via <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">remind</span></code>, an idea via <code class="docutils literal notranslate"><span class="pre">ideadump</span></code>, an issue in the repo that owns it, or dropped with a reason), acts after your one “yes”, and closes each pile item with a comment linking where it went. A pile item is never edited and never closed without a comment.</p>
+</section>
 <section id="turning-it-off">
 <h2>Turning it off<a class="headerlink" href="#turning-it-off" title="Link to this heading">#</a></h2>
 <p>Nothing here runs unless you type it, or an agent you installed a skill for does. There
@@ -1202,7 +1207,7 @@ they are the two ways a tool like this becomes a liar.</p></li>
 </section>
 </section>
 
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-20 16:39 UTC from <a href="https://github.com/thorwhalen/openloops/commit/b38ef6876400ae233646d483ce87bbc31ad8cb97">b38ef68</a> (main) · openloops 0.1.42 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-20 17:13 UTC from <a href="https://github.com/thorwhalen/openloops/commit/3b7472c9003d00bbd19adbbd924547e43a981c1b">3b7472c</a> (main) · openloops 0.1.43 · <a href="about-this-build.html">about this build</a></p>
 
                 </article>
               
@@ -1272,6 +1277,7 @@ they are the two ways a tool like this becomes a liar.</p></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ol-dashboard-the-same-four-registers-as-one-page"><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">dashboard</span></code> — the same four registers as one page</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ol-board-a-task-board-you-can-clear-from-a-phone"><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">board-*</span></code> — a task board you can clear from a phone</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ol-remind-a-reminder-that-fires-while-your-laptop-sleeps"><code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">remind</span></code> — a reminder that fires while your laptop sleeps</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-pile-capture-anywhere-clarify-later">The pile — capture anywhere, clarify later</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#turning-it-off">Turning it off</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#which-repositories-all-this-is-about">Which repositories all this is about</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-api">Python API</a></li>

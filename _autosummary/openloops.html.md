@@ -773,8 +773,8 @@ nothing is changed on its account.
 
 ```pycon
 >>> plan = install_skills(target='/nonexistent/host', dry_run=True)
->>> plan['counts']['install'], plan['dry_run']
-(5, True)
+>>> plan['counts']['install'] == len(list(bundled())), plan['dry_run']
+(True, True)
 >>> sorted({row['action'] for row in plan['actions']})
 ['install']
 ```

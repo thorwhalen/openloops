@@ -1,4 +1,4 @@
-> built 2026-11-20 16:39 UTC from b38ef68 (main) · openloops 0.1.42. Details: build_info.json
+> built 2026-11-20 17:13 UTC from 3b7472c (main) · openloops 0.1.43. Details: build_info.json
 
 # index.html.md
 
@@ -649,6 +649,12 @@ How it survives a sleeping machine: a reminder due within three days is handed t
 **What the push says.** The topic is correspond’s default ntfy topic (`NTFY_TOPIC`, else the Keychain). ntfy.sh is a public relay, so a push says only “A reminder you set is due” unless the reminder was made with `--reveal`; then the title travels too. Reveal short labels only.
 
 Settings come from the environment: `OPENLOOPS_TZ` (an IANA zone for reading and echoing times; default this machine’s), `OPENLOOPS_REMIND_CHANNEL` (a correspond reference, default `ntfy:`), `OPENLOOPS_REMIND_HORIZON_HOURS` (default 72). The seams (`store=`, `deliver=`, `settings=`) are keyword arguments of `openloops.remind`’s functions.
+
+## The pile — capture anywhere, clarify later
+
+The GTD *In* list, kept as one GitHub issue per capture in a private repo of yours (default `<your login>/_pile`, or `OPENLOOPS_PILE_REPO`). Anything that can `POST` to the GitHub issues API can capture: an Apple Shortcut (“Hey Siri, pile it”), `gh issue create`, a script. Each capture carries the label `pile` and, optionally, a routing hint label. Nothing in openloops runs on capture: no Action, no webhook.
+
+Emptying it is on demand. Ask your agent to “go through my pile”: the `openloops-pile` skill (installed by `ol install-skills`) reads each item as dictation, proposes where each belongs (a loop via `ol remind`, an idea via `ideadump`, an issue in the repo that owns it, or dropped with a reason), acts after your one “yes”, and closes each pile item with a comment linking where it went. A pile item is never edited and never closed without a comment.
 
 ## Turning it off
 
@@ -3421,8 +3427,8 @@ nothing is changed on its account.
 
 ```pycon
 >>> plan = install_skills(target='/nonexistent/host', dry_run=True)
->>> plan['counts']['install'], plan['dry_run']
-(5, True)
+>>> plan['counts']['install'] == len(list(bundled())), plan['dry_run']
+(True, True)
 >>> sorted({row['action'] for row in plan['actions']})
 ['install']
 ```
@@ -5135,7 +5141,7 @@ directly.
 >>> skills_dir().name, agents_dir().name
 ('skills', 'agents')
 >>> sorted(asset.name for asset in bundled())
-['openloops', 'openloops-needs-human', 'openloops-phone-board', 'openloops-remind', 'openloops-sweep']
+['openloops', 'openloops-needs-human', 'openloops-phone-board', 'openloops-pile', 'openloops-remind', 'openloops-sweep']
 ```
 
 ### Module Attributes
@@ -5251,8 +5257,8 @@ nothing is changed on its account.
 
 ```pycon
 >>> plan = install_skills(target='/nonexistent/host', dry_run=True)
->>> plan['counts']['install'], plan['dry_run']
-(5, True)
+>>> plan['counts']['install'] == len(list(bundled())), plan['dry_run']
+(True, True)
 >>> sorted({row['action'] for row in plan['actions']})
 ['install']
 ```
@@ -6319,18 +6325,16 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-11-20 16:39 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/b38ef6876400ae233646d483ce87bbc31ad8cb97"><code>b38ef68</code></a> on branch <code>main</code>, for **openloops 0.1.42** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-20 17:13 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/3b7472c9003d00bbd19adbbd924547e43a981c1b"><code>3b7472c</code></a> on branch <code>main</code>, for **openloops 0.1.43** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.1.42) is behind the latest release on PyPI (0.1.43): `pip install openloops` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/b38ef6876400ae233646d483ce87bbc31ad8cb97"><code>b38ef6876400ae233646d483ce87bbc31ad8cb97</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/3b7472c9003d00bbd19adbbd924547e43a981c1b"><code>3b7472c9003d00bbd19adbbd924547e43a981c1b</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -6341,9 +6345,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/44775259811">44775259811</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/44780912343">44780912343</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>b38ef6876400ae233646d483ce87bbc31ad8cb97</code> (in the history of the built commit) |
+| Event commit | <code>3b7472c9003d00bbd19adbbd924547e43a981c1b</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -6368,13 +6372,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.43/">0.1.43</a>, newer than the documented version (0.1.42).
+Latest release: <a href="https://pypi.org/project/openloops/0.1.43/">0.1.43</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout b38ef6876400ae233646d483ce87bbc31ad8cb97
+git checkout 3b7472c9003d00bbd19adbbd924547e43a981c1b
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
@@ -6425,6 +6429,16 @@ gh skill install thorwhalen/openloops openloops-phone-board --agent claude-code
 ```
 
 Source: [`openloops/data/skills/openloops-phone-board`](https://github.com/thorwhalen/openloops/tree/HEAD/openloops/data/skills/openloops-phone-board) (bundled with the pip package).
+
+### `openloops-pile`
+
+Go through the owner’s capture pile (one GitHub issue per thing they said to Siri or typed on the go, in a private pile repo) and clarify each item into where it belongs: a loop in openloops (`ol remind`), an idea (`ideadump`), an issue in the repo that owns it, or dropped with a reason. Proposes a table first, acts only after the owner says yes, and closes each pile item with a comment saying where it went. Use on ‘dispatch my pile’, ‘go through my pile’, ‘triage my pile’, ‘what’s in my pile’, ‘process my captures’, ‘empty my inbox’ (the GTD In list), ‘clarify my captures’, ‘what did I pile’. Not for capturing a new item (that is the Siri Shortcut, or `gh issue create` on the pile repo) and not for reminders the owner asks for directly (openloops-remind).
+
+```bash
+gh skill install thorwhalen/openloops openloops-pile --agent claude-code
+```
+
+Source: [`openloops/data/skills/openloops-pile`](https://github.com/thorwhalen/openloops/tree/HEAD/openloops/data/skills/openloops-pile) (bundled with the pip package).
 
 ### `openloops-remind`
 
