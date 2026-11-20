@@ -64,6 +64,22 @@ def test_the_receiver_plist_is_a_start_interval_job_that_pins_its_inputs(
     assert "Bash" not in tools, "Bash is limited to the receiver's own commands"
 
 
+def test_the_commands_the_session_runs_are_on_the_jobs_path(
+    tmp_path, fake_claude, monkeypatch
+):
+    """launchd's PATH lacked `crowsnest`, so a receiver posted the owner's answer and
+    then left it `queued` with "crowsnest not available": the dispatch never ran."""
+    bins = tmp_path / "fleet" / "bin"
+    bins.mkdir(parents=True)
+    for name in ("crowsnest", "gh"):
+        (bins / name).write_text("#!/bin/sh\n")
+        (bins / name).chmod(0o755)
+    monkeypatch.setenv("PATH", str(bins))
+    spec = job.receiver_job_spec(tmp_path, claude=str(fake_claude))
+    assert str(bins) in spec["env"]["PATH"].split(":")
+    assert set(spec["missing_commands"]) == {"node", "jq"}
+
+
 def test_the_prompt_points_at_the_packaged_procedure_and_treats_text_as_data(
     tmp_path, fake_claude
 ):
@@ -503,9 +519,7 @@ def test_work_pending_while_another_receiver_is_live_starts_nothing(
     assert "x is the live receiver" in capsys.readouterr().err
 
 
-def test_the_same_work_twice_in_a_row_backs_off_new_work_does_not(
-    board, monkeypatch
-):
+def test_the_same_work_twice_in_a_row_backs_off_new_work_does_not(board, monkeypatch):
     """A session that changed nothing (budget hit, a refused command) is not
     restarted every tick for the same events."""
     started = []
