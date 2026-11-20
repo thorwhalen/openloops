@@ -64,6 +64,9 @@ def test_the_receiver_plist_is_a_start_interval_job_that_pins_its_inputs(
     assert "Bash" not in tools, "Bash is limited to the receiver's own commands"
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="a launchd job: POSIX executables and PATH"
+)
 def test_the_commands_the_session_runs_are_on_the_jobs_path(
     tmp_path, fake_claude, monkeypatch
 ):
