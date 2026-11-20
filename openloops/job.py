@@ -674,7 +674,7 @@ def job_status(
 def pile_nudge_job_spec(
     *,
     interval: int = PILE_NUDGE_INTERVAL,
-    stale_days: float = 3.0,
+    stale_days: float | None = None,
     label: str = PILE_NUDGE_LABEL,
 ) -> dict[str, object]:
     """The pile nudge as data: ``python -m openloops pile-nudge`` every ``interval`` s.

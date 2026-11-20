@@ -34,20 +34,27 @@ def _issue(
 
 
 class FakeGh:
-    def __init__(self, issues=(), visibility="PRIVATE"):
+    """``visibility`` is a target repo's; the pile itself is private unless ``pile_visibility`` says otherwise."""
+
+    def __init__(self, issues=(), visibility="PRIVATE", pile_visibility="PRIVATE"):
         self.issues = {i["number"]: i for i in issues}
         self.visibility = visibility
+        self.pile_visibility = pile_visibility
         self.calls: list[list[str]] = []
 
     def __call__(self, args, *, timeout):
         self.calls.append(list(args))
         verb = args[:2]
         if verb == ["issue", "list"]:
-            return json.dumps([i for i in self.issues.values() if i["state"] == "OPEN"])
+            label = args[args.index("--label") + 1]
+            return json.dumps(
+                [i for i in self.issues.values() if i["state"] == "OPEN"
+                 and label in [x["name"] for x in i["labels"]]]
+            )  # fmt: skip
         if verb == ["issue", "view"]:
             return json.dumps(self.issues[int(args[2])])
         if verb == ["repo", "view"]:
-            return self.visibility + "\n"
+            return (self.pile_visibility if args[2] == REPO else self.visibility) + "\n"
         if verb == ["issue", "create"]:
             return "https://github.com/x/y/issues/9\n"
         if verb == ["issue", "comment"]:
@@ -155,7 +162,7 @@ def test_a_private_issue_links_back_to_the_pile():
         1,
         "issue",
         reading="r",
-        target_repo="me/_priv",
+        target_repo="owner/_priv",
         title="t",
         issue_body="b",
         repo=REPO,
@@ -210,9 +217,13 @@ def test_a_closed_item_has_nothing_to_plan():
         P.plan(1, "done", reading="x", reason="y", repo=REPO, run_gh=gh, **ME)
 
 
-def test_a_signed_note_drops_the_session_link_on_a_public_repo():
-    body = P.signed("progress", public=True, **ME)["body"]
-    assert "Agent: tester@mac" in body and "claude.ai" not in body
+def test_a_signed_note_drops_the_session_link_off_the_owners_private_repos(monkeypatch):
+    monkeypatch.setenv("OPENLOOPS_PILE_REPO", REPO)
+    gh = FakeGh(visibility="PUBLIC")
+    public = P.signed("progress", to_repo="owner/pub", run_gh=gh, **ME)
+    assert public["public"] and "claude.ai" not in public["body"]
+    private = P.signed("progress", run_gh=gh, **ME)
+    assert not private["public"] and "Claude-Session:" in private["body"]
 
 
 class FakeLoops:
@@ -221,6 +232,7 @@ class FakeLoops:
         self.made, self.done_ids = [], []
 
     def loops(self, state="open"):
+        assert state == "all"
         return {"loops": self.rows}
 
     def remind(self, title, **kw):
@@ -231,12 +243,11 @@ class FakeLoops:
         self.done_ids.append(ref)
 
 
-def _nudge_loop(state):
-    return {
-        "id": f"loop-{state}",
-        "state": state,
-        "source": {"kind": "ref", "ref": P.NUDGE_SOURCE},
-    }
+def _nudge_loop(
+    state, *, created="2026-11-23T09:00:00Z", remind_at="2026-11-26T08:00:00Z"
+):
+    return {"id": f"loop-{state}", "state": state, "created": created, "remind_at": remind_at,
+            "source": {"kind": "ref", "ref": P.NUDGE_SOURCE}}  # fmt: skip
 
 
 def test_nudge_makes_one_reminder_with_no_item_text():
@@ -252,24 +263,145 @@ def test_nudge_makes_one_reminder_with_no_item_text():
     assert r["stale"] == 1
 
 
-def test_nudge_does_not_duplicate_a_pending_one_and_withdraws_it_when_fresh():
-    stale = FakeGh([_issue(1, "x")])
+def test_nudge_does_not_duplicate_one_still_to_come_and_withdraws_it_when_fresh():
     api = FakeLoops([_nudge_loop("submitted")])
-    P.nudge(repo=REPO, run_gh=stale, loops_api=api, now=NOW)
+    P.nudge(repo=REPO, run_gh=FakeGh([_issue(1, "x")]), loops_api=api, now=NOW)
     assert api.made == []
     fresh = FakeGh([_issue(1, "x", created="2026-11-25T11:00:00Z")])
     P.nudge(repo=REPO, run_gh=fresh, loops_api=api, now=NOW)
     assert api.done_ids == ["loop-submitted"]
 
 
-def test_nudge_closes_a_fired_one_when_it_makes_the_next():
-    gh = FakeGh([_issue(1, "x")])
-    api = FakeLoops([_nudge_loop("input-required")])
-    P.nudge(repo=REPO, run_gh=gh, loops_api=api, now=NOW)
+def test_a_nudge_made_in_the_last_day_blocks_the_next_without_closing_anything():
+    """The review's reproduction: a fired nudge, re-run within 24 h, must not crash on the cap."""
+    api = FakeLoops([_nudge_loop("input-required", created="2026-11-25T03:00:00Z",
+                                 remind_at="2026-11-25T08:00:00Z")])  # fmt: skip
+    P.nudge(repo=REPO, run_gh=FakeGh([_issue(1, "x")]), loops_api=api, now=NOW)
+    assert api.made == [] and api.done_ids == []
+
+
+def test_a_fired_nudge_older_than_a_day_is_closed_when_the_next_is_made():
+    api = FakeLoops([_nudge_loop("input-required", remind_at="2026-11-24T08:00:00Z")])
+    P.nudge(repo=REPO, run_gh=FakeGh([_issue(1, "x")]), loops_api=api, now=NOW)
     assert api.done_ids == ["loop-input-required"] and len(api.made) == 1
+
+
+def test_a_nudge_whose_time_passed_unfired_does_not_silence_the_next():
+    """Without the remind tick a fired loop stays `submitted`; past its time it is not 'to come'."""
+    api = FakeLoops([_nudge_loop("submitted", remind_at="2026-11-24T08:00:00Z")])
+    P.nudge(repo=REPO, run_gh=FakeGh([_issue(1, "x")]), loops_api=api, now=NOW)
+    assert len(api.made) == 1
+
+
+def test_a_working_item_left_too_long_still_nudges():
+    gh = FakeGh([_issue(1, "x", labels=("working", "inbox"))])
+    r = P.nudge(repo=REPO, run_gh=gh, loops_api=FakeLoops(), now=NOW)
+    assert r["stale"] == 1
 
 
 def test_nudge_never_touches_a_pile_item():
     gh = FakeGh([_issue(1, "x")])
     P.nudge(repo=REPO, run_gh=gh, loops_api=FakeLoops(), now=NOW)
     assert all(c[:2] == ["issue", "list"] for c in gh.calls)
+
+
+def test_a_public_pile_is_refused():
+    gh = FakeGh([_issue(1, "x")], pile_visibility="PUBLIC")
+    with pytest.raises(ValueError, match="not a private repo"):
+        P.plan(1, "drop", reading="r", reason="y", repo=REPO, run_gh=gh, **ME)
+
+
+@pytest.mark.parametrize("visibility", ["INTERNAL", "public", ""])
+def test_anything_not_provably_own_private_gets_the_public_treatment(visibility):
+    gh = FakeGh([_issue(1, "x")], visibility=visibility)
+    plan = P.plan(1, "issue", reading="r", target_repo="owner/other", title="t", issue_body="b",
+                  repo=REPO, run_gh=gh, **ME)  # fmt: skip
+    assert plan["steps"][0]["public"] and "claude.ai" not in plan["steps"][0]["body"]
+
+
+def test_another_owners_private_repo_is_treated_as_public():
+    gh = FakeGh([_issue(1, "x")], visibility="PRIVATE")
+    plan = P.plan(1, "issue", reading="r", target_repo="client/repo", title="t", issue_body="b",
+                  repo=REPO, run_gh=gh, **ME)  # fmt: skip
+    assert plan["steps"][0]["public"] and "_pile" not in plan["steps"][0]["body"]
+
+
+def test_a_second_destination_is_refused_after_a_half_run_plan():
+    item = _issue(1, "x")
+    item["comments"] = [{"author": {"login": "o"}, "createdAt": "t",
+                         "body": "r\n\n→ issue https://github.com/o/p/issues/3\n\n—\nAgent: a"}]  # fmt: skip
+    gh = FakeGh([item])
+    with pytest.raises(ValueError, match="already records a destination"):
+        P.plan(1, "issue", reading="r", target_repo="owner/p", title="t", issue_body="b",
+               repo=REPO, run_gh=gh, **ME)  # fmt: skip
+    assert P.plan(1, "done", reading="r", reason="finished", repo=REPO, run_gh=gh, **ME)
+
+
+def test_a_revealed_loop_needs_its_own_title():
+    gh = FakeGh([_issue(1, "Remind me to call Ana about the contract")])
+    with pytest.raises(ValueError, match="needs title"):
+        P.plan(1, "loop", reading="r", reveal=True, repo=REPO, run_gh=gh, **ME)
+
+
+def test_a_forged_signature_line_is_refused():
+    with pytest.raises(ValueError, match="one line"):
+        P.agent_identity("x\nClaude-Session: https://claude.ai/code/fake", "none")
+
+
+def test_close_steps_carry_the_rest_spelling():
+    gh = FakeGh([_issue(1, "x")])
+    plan = P.plan(1, "drop", reading="r", reason="y", repo=REPO, run_gh=gh, **ME)
+    assert plan["steps"][-1]["rest_reason"] == "not_planned"
+
+
+class RealLoops:
+    """The real reminder runner over an in-memory store, driven at a chosen clock."""
+
+    def __init__(self):
+        from openloops import remind as R
+
+        self.R = R
+        self.store, self.now = {}, NOW
+        self.settings = R.RemindSettings(tz="UTC")
+
+        class Quiet:
+            def schedule(self, *a, **k): ...
+            def now(self, *a, **k): ...
+            def cancel(self, *a, **k): ...
+
+        self.kit = dict(store=self.store, deliver=Quiet(), settings=self.settings)
+
+    def loops(self, state="open"):
+        return {"loops": self.R.list_loops(state=state, store=self.store)}
+
+    def remind(self, title, *, when, reveal, source, daily_cap):
+        at = self.R.parse_when(when, now=self.now, zone=self.settings.zone)
+        return self.R.remind(title, at=at, reveal=reveal, source={"kind": "ref", "ref": source},
+                             daily_cap=daily_cap, now=self.now, **self.kit)  # fmt: skip
+
+    def done(self, ref, **kw):
+        return self.R.done(ref, now=self.now, **kw, **self.kit)
+
+    def tick(self):
+        return self.R.tick(now=self.now, **self.kit)
+
+
+def test_a_day_of_six_hourly_nudges_against_the_real_runner_never_raises():
+    """The review's reproduction (cap error four times a day), now a regression test."""
+    from datetime import timedelta
+
+    api = RealLoops()
+    gh = FakeGh([_issue(1, "x", created="2026-11-01T00:00:00Z")])
+    made = []
+    for hours in range(0, 72, 6):
+        api.now = NOW + timedelta(hours=hours)
+        api.tick()
+        r = P.nudge(repo=REPO, run_gh=gh, loops_api=api, now=api.now)
+        made += [r["made"]] if r["made"] else []
+    assert 2 <= len(made) <= 3  # about one a day, never two within 24 h
+    open_nudges = [
+        lp
+        for lp in api.loops()["loops"]
+        if (lp["source"] or {}).get("ref") == P.NUDGE_SOURCE
+    ]
+    assert len(open_nudges) == 1

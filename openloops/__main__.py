@@ -931,11 +931,19 @@ def pile_propose(*, repo: str = None):
     return json.dumps(tools.pile_propose(repo=repo), indent=2)
 
 
+def _text_arg(value, path, name):
+    """A value given inline or, safer for dictated text, as a file (`-` is stdin)."""
+    if path:
+        return sys.stdin.read() if path == "-" else open(path, encoding="utf-8").read()
+    return value
+
+
 def pile_plan(
     number: int,
     kind: str,
     *,
     reading: str = None,
+    reading_file: str = None,
     by: str = None,
     session: str = None,
     title: str = None,
@@ -943,41 +951,61 @@ def pile_plan(
     reveal: bool = False,
     target_repo: str = None,
     issue_body: str = None,
+    issue_body_file: str = None,
     tags: str = None,
     reason: str = None,
+    force: bool = False,
     repo: str = None,
 ):
     """The signed steps (JSON) that carry out one decision on a pile item. Changes nothing.
 
-    KIND: loop | idea | issue | work | done | drop | ask. `--reading` is how you read the
-    dictation. `--by` names you (default OPENLOOPS_AGENT); `--session` links your session
-    (default: this Claude Code session). Run the steps in order with your own tools,
-    putting what the first produced where a step says {result}: the openloops-pile skill
-    says how. Public target repos get only `--issue-body`.
+    KIND: loop | idea | issue | work | done | drop | ask. `--reading-file` (or `--reading`)
+    is how you read the dictation; prefer the file forms for anything derived from it.
+    `--by` names you (default OPENLOOPS_AGENT); `--session` links your session (default:
+    this Claude Code session; `none` for the name alone). Run the steps in order with your
+    own tools, putting what the first produced where a step says {result}: the
+    openloops-pile skill says how. Only a private repo of the pile's owner gets the
+    dictation's link; anything else gets only the issue body you wrote.
     """
     return json.dumps(
         tools.pile_plan(
-            number, kind, reading=reading, by=by, session=session, title=title,
-            when=when, reveal=reveal, target_repo=target_repo, issue_body=issue_body,
-            tags=tags, reason=reason, repo=repo,
+            number, kind, reading=_text_arg(reading, reading_file, "reading"),
+            by=by, session=session, title=title, when=when, reveal=reveal,
+            target_repo=target_repo,
+            issue_body=_text_arg(issue_body, issue_body_file, "issue body"),
+            tags=tags, reason=reason, force=force, repo=repo,
         ),
         indent=2,
     )  # fmt: skip
 
 
-def pile_sign(text: str, *, by: str = None, session: str = None, public: bool = False):
-    """Print TEXT with your signature (agent name, session link): a progress note's body."""
-    return tools.pile_sign(text, by=by, session=session, public=public)["body"]
+def pile_sign(
+    text: str = None,
+    *,
+    text_file: str = None,
+    by: str = None,
+    session: str = None,
+    to_repo: str = None,
+):
+    """Print TEXT (or `--text-file`, `-` for stdin) signed for a comment on `--to-repo`.
+
+    The default target is the pile. The session link is kept only on a private repo of
+    the pile's owner; anywhere else the signature is your name alone.
+    """
+    body = _text_arg(text, text_file, "text")
+    if not body:
+        raise ValueError("give TEXT or --text-file")
+    return tools.pile_sign(body, by=by, session=session, to_repo=to_repo)["body"]
 
 
-def pile_nudge(*, stale_days: float = 3.0, at: str = "09:00", repo: str = None):
-    """Keep one reminder pending while any pile item is older than `--stale-days`.
+def pile_nudge(*, stale_days: float = None, at: str = "09:00", repo: str = None):
+    """Keep one reminder coming while any pile item waits over `--stale-days` (default 3).
 
     Idempotent: `ol install-pile-nudge-job` runs it every six hours. The push says only
     the count and the oldest age. It never acts on a pile item.
     """
     r = tools.pile_nudge(stale_days=stale_days, at=at, repo=repo)
-    line = f"pile: {r['count']} open, {r['stale']} older than {stale_days:g}d"
+    line = f"pile: {r['count']} open, {r['stale']} stale"
     if r.get("made"):
         line += f"; nudge {r['made']}: {r.get('echo') or ''}"
     if r.get("closed"):

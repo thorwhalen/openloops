@@ -485,6 +485,7 @@ def _summary(loop: Loop) -> dict[str, Any]:
         "last_event": last.get("event"),
         "last_note": last.get("note"),
         "source": dict(loop.source) if loop.source else None,
+        "created": loop.created,
     }
 
 

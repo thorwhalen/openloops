@@ -58,6 +58,7 @@ __all__ = [
     "RESULT",
     "signed",
     "plan",
+    "is_own_private",
     "nudge",
 ]
 
@@ -255,15 +256,21 @@ def agent_identity(
 
     Defaults: ``OPENLOOPS_AGENT``; then Claude Code's own variables, the Remote Control
     session (``https://claude.ai/code/<CLAUDE_CODE_BRIDGE_SESSION_ID>``) or the local
-    session id (``claude-code:<CLAUDE_CODE_SESSION_ID>``).
+    session id (``claude-code:<CLAUDE_CODE_SESSION_ID>``). ``session="none"`` signs with
+    the name alone (a surface that is not this Claude Code session, such as a connector
+    started from one, passes it rather than borrow the session it inherited).
 
     >>> agent_identity(env={"CLAUDE_CODE_BRIDGE_SESSION_ID": "session_01X"})["session"]
     'https://claude.ai/code/session_01X'
+    >>> agent_identity("bosun@tw", "none", env={"CLAUDE_CODE_SESSION_ID": "abc"})
+    {'by': 'bosun@tw', 'session': None}
     """
     env = os.environ if env is None else env
     bridge = env.get("CLAUDE_CODE_BRIDGE_SESSION_ID")
     local = env.get("CLAUDE_CODE_SESSION_ID")
-    if session is None:
+    if session == "none":
+        session = None
+    elif session is None:
         if bridge:
             session = f"https://claude.ai/code/{bridge}"
         elif local:
@@ -273,7 +280,13 @@ def agent_identity(
         or env.get("OPENLOOPS_AGENT")
         or (f"claude-code {local[:8]}" if local else None)
     )
+    for name, value in (("by", by), ("session", session)):
+        if value and _UNSAFE.search(value):
+            raise ValueError(f"{name} must be one line of plain text: {value!r}")
     return {"by": by, "session": session}
+
+
+_UNSAFE = re.compile(r"[\x00-\x1f\x7f]")
 
 
 def signature(by: str, session: str | None = None, *, public: bool = False) -> str:
@@ -298,6 +311,30 @@ def signature(by: str, session: str | None = None, *, public: bool = False) -> s
     return "\n".join(lines)
 
 
+def is_own_private(
+    repo: str, *, owner: str, run_gh: Callable[..., str] | None = None
+) -> bool:
+    """True only for a ``PRIVATE`` repo of ``owner``: anything else is treated as public.
+
+    Fails closed: an internal repo, another owner's private repo (a client's, shared with
+    other people), or a visibility that cannot be read all get the public treatment.
+    """
+    if repo.split("/")[0].lower() != owner.lower():
+        return False
+    try:
+        return _visibility(repo, run_gh=run_gh) == "PRIVATE"
+    except Exception:  # noqa: BLE001 - unreadable means not provably private
+        return False
+
+
+def _private_pile(repo: str, *, run_gh: Callable[..., str] | None) -> None:
+    if not is_own_private(repo, owner=repo.split("/")[0], run_gh=run_gh):
+        raise ValueError(
+            f"{repo} is not a private repo: a pile carries dictation and session links,"
+            " so openloops plans nothing on it"
+        )
+
+
 # --------------------------------------------------------------------------------
 # Planning a yes (openloops never writes to GitHub: the caller carries the plan out)
 # --------------------------------------------------------------------------------
@@ -305,6 +342,10 @@ def signature(by: str, session: str | None = None, *, public: bool = False) -> s
 #: The placeholder a plan's later steps carry for what the first step produced (an
 #: issue URL, a loop id, an idea id). The caller substitutes it.
 RESULT = "{result}"
+#: The comment line that records a destination already made; a second plan refuses.
+_ROUTED_LINE = re.compile(r"^→ (issue|loop|idea) \S", re.M)
+#: GitHub's REST spelling of each ``gh issue close --reason`` value.
+_REST_REASON = {"completed": "completed", "not planned": "not_planned"}
 
 
 def signed(
@@ -312,24 +353,31 @@ def signed(
     *,
     by: str | None = None,
     session: str | None = None,
-    public: bool = False,
+    to_repo: str | None = None,
+    run_gh: Callable[..., str] | None = None,
 ) -> dict[str, Any]:
-    """``text`` with the writer's signature appended: the body of a progress note.
+    """``text`` with the writer's signature, for a comment on ``to_repo`` (default: the pile).
 
-    The session working on an item posts this as a comment on the pile item.
+    The session link is kept only when ``to_repo`` is a private repo of the pile's owner;
+    anywhere else (public, internal, a client's, unreadable) the name alone.
     """
     who = agent_identity(by, session)
+    pile = pile_repo(None, run_gh=run_gh)
+    target = to_repo or pile
+    private = is_own_private(target, owner=pile.split("/")[0], run_gh=run_gh)
     body = (
-        text.rstrip() + "\n" + signature(who["by"] or "", who["session"], public=public)
+        text.rstrip()
+        + "\n"
+        + signature(who["by"] or "", who["session"], public=not private)
     )
-    return {"body": body, **who}
+    return {"body": body, "to_repo": target, "public": not private, **who}
 
 
 def plan(
     number: int,
     kind: str,
     *,
-    reading: str,
+    reading: str | None = None,
     by: str | None = None,
     session: str | None = None,
     title: str | None = None,
@@ -339,6 +387,7 @@ def plan(
     issue_body: str | None = None,
     tags: str | None = None,
     reason: str | None = None,
+    force: bool = False,
     repo: str | None = None,
     run_gh: Callable[..., str] | None = None,
 ) -> dict[str, Any]:
@@ -351,16 +400,23 @@ def plan(
     opens the signed comment. Per ``kind``:
 
     - ``loop``: ``remind`` (``ol remind``; source = the item's URL), then close as routed;
+      ``title`` is required with ``reveal`` (the push crosses a public relay);
     - ``idea``: ``idea`` (``ideadump add`` with the dictation verbatim), then close as routed;
     - ``issue``: ``create_issue`` in ``target_repo`` (``title`` + ``issue_body``
-      required); a public repo gets that text only, no pile link and no session link;
+      required); anything but a private repo of the pile's owner gets that text only,
+      no pile link and no session link;
     - ``work``: hand-off to a session; labelled ``working`` and left open; the session
       posts :func:`signed` notes and finishes with ``done``;
     - ``done``: close as routed, ``reason`` = the evidence;
     - ``drop``: close as not planned, ``reason`` required (never silent);
     - ``ask``: stays on the pile, labelled ``needs-owner``, ``reason`` = the question.
 
-    Step ops: ``remind``, ``idea``, ``create_issue``, ``comment``, ``labels``, ``close``.
+    A destination already recorded on the item (a ``→ issue/loop/idea`` line from an
+    earlier, half-run plan) refuses a second one unless ``force``: finish that plan's
+    remaining steps instead. The pile itself must be a private repo of its owner.
+
+    Step ops: ``remind``, ``idea``, ``create_issue``, ``comment``, ``labels``, ``close``
+    (``reason`` in ``gh``'s spelling, ``rest_reason`` in the REST API's).
     """
     number = int(number)
     if kind not in KINDS:
@@ -373,15 +429,30 @@ def plan(
     if not who["by"]:
         raise ValueError("an agent writing on the pile must name itself (by=, --by)")
     repo = pile_repo(repo, run_gh=run_gh)
+    _private_pile(repo, run_gh=run_gh)
+    owner = repo.split("/")[0]
     item = show(number, repo=repo, run_gh=run_gh)
     if item.state != "open":
         raise ValueError(f"{repo}#{number} is {item.state}: nothing to do")
+    if kind in ("loop", "idea", "issue") and not force:
+        for c in item.comments:
+            if _ROUTED_LINE.search(c.get("body") or "") and "Agent:" in (
+                c.get("body") or ""
+            ):
+                raise ValueError(
+                    f"{repo}#{number} already records a destination; finish that plan's"
+                    " steps (labels, close) instead, or pass force=True"
+                )
 
     first: dict[str, Any] | None = None
     close: str | None = "completed"
     add, remove = [ROUTED], [PILE_LABEL, NEEDS_OWNER, WORKING]
     went = f"→ {RESULT}"
     if kind == "loop":
+        if reveal and not title:
+            raise ValueError(
+                "kind=loop with reveal needs title=: a short label, not the dictation"
+            )
         first = {"op": "remind", "title": title or item.title, "when": when,
                  "reveal": reveal, "source": item.url}  # fmt: skip
         went = f"→ loop {RESULT}"
@@ -392,7 +463,7 @@ def plan(
     elif kind == "issue":
         if not (target_repo and title and issue_body):
             raise ValueError("kind=issue needs target_repo, title and issue_body")
-        public = _visibility(target_repo, run_gh=run_gh) == "PUBLIC"
+        public = not is_own_private(target_repo, owner=owner, run_gh=run_gh)
         body = (
             issue_body.rstrip()
             + "\n"
@@ -410,12 +481,8 @@ def plan(
                 "drop": "why: a drop is never silent", "ask": "the question"}[kind]  # fmt: skip
         raise ValueError(f"kind={kind} needs reason=: {need}")
     if kind == "work":
-        went, close, add, remove = (
-            f"→ handed off: {reason}",
-            None,
-            [WORKING],
-            [PILE_LABEL, NEEDS_OWNER],
-        )
+        went, close, add = f"→ handed off: {reason}", None, [WORKING]
+        remove = [PILE_LABEL, NEEDS_OWNER]
     elif kind == "done":
         went = f"→ done: {reason}"
     elif kind == "drop":
@@ -434,7 +501,8 @@ def plan(
     steps.append({"op": "labels", "repo": repo, "number": number, "add": add,
                   "remove": [x for x in remove if x in item.labels]})  # fmt: skip
     if close:
-        steps.append({"op": "close", "repo": repo, "number": number, "reason": close})
+        steps.append({"op": "close", "repo": repo, "number": number, "reason": close,
+                      "rest_reason": _REST_REASON[close]})  # fmt: skip
     return {"repo": repo, "number": number, "kind": kind, "item": item.url,
             "steps": steps, **who}  # fmt: skip
 
@@ -442,6 +510,9 @@ def plan(
 # --------------------------------------------------------------------------------
 # Nudging (never acting)
 # --------------------------------------------------------------------------------
+
+#: At most one nudge is made in this window, whatever happened to the last one.
+NUDGE_EVERY_HOURS = 24.0
 
 
 def nudge(
@@ -453,27 +524,38 @@ def nudge(
     loops_api: Any = None,
     now: datetime | None = None,
 ) -> dict[str, Any]:
-    """Keep exactly one pending reminder while any pile item is older than ``stale_days``.
+    """Keep one reminder coming while any pile item waits longer than ``stale_days``.
 
-    Idempotent; run it from a timer. When items are stale and no nudge is scheduled, it
-    makes one loop (source ``pile-nudge``) for the next ``at`` in the owner's zone, saying
-    only the count and the oldest age (no item text: the push crosses a public relay).
-    A nudge that already fired is closed when the next one is made; when nothing is
-    stale, a scheduled one is withdrawn. It never touches a pile item.
+    Idempotent; run it from a timer. An item counts while it is on the pile (``pile``)
+    or handed to a session (``working``): a session that died leaves it there. When
+    something is stale, no nudge is still to come, and none was made in the last
+    :data:`NUDGE_EVERY_HOURS`, it closes the nudges that already fired and makes one loop
+    (source ``pile-nudge``) for the next ``at`` in the owner's zone. The push says only the
+    count and the oldest age (it crosses a public relay). When nothing is stale, every
+    open nudge is withdrawn. It never touches a pile item.
     """
     from openloops import tools as _tools  # imported on use: tools imports this module
 
     api = loops_api or _tools
     now = now or datetime.now(timezone.utc)
-    found = items(repo=repo, run_gh=run_gh)
+    found = items(repo=repo, run_gh=run_gh) + items(
+        repo=repo, label=WORKING, run_gh=run_gh
+    )
     stale = [i for i in found if i.age_days(now) >= stale_days]
-    mine = [
+    every = [
         lp
-        for lp in api.loops(state="open")["loops"]
+        for lp in api.loops(state="all")["loops"]
         if (lp.get("source") or {}).get("ref") == NUDGE_SOURCE
     ]
-    pending = [lp for lp in mine if lp.get("state") == "submitted"]
-    fired = [lp for lp in mine if lp.get("state") != "submitted"]
+    still_open = [lp for lp in every if lp.get("state") not in _CLOSED]
+    to_come = [
+        lp
+        for lp in still_open
+        if lp.get("state") == "submitted" and _after(lp.get("remind_at"), now)
+    ]
+    recent = [
+        lp for lp in every if _within(lp.get("created"), now, hours=NUDGE_EVERY_HOURS)
+    ]
     report: dict[str, Any] = {
         "count": len(found),
         "stale": len(stale),
@@ -481,23 +563,42 @@ def nudge(
         "made": None,
         "closed": [],
     }
-    if not stale:
-        for lp in pending:
-            api.done(lp["id"], note="pile no longer stale", only_source=NUDGE_SOURCE)
+
+    def close_all(rows, note):
+        for lp in rows:
+            api.done(lp["id"], note=note, only_source=NUDGE_SOURCE)
             report["closed"].append(lp["id"])
+
+    if not stale:
+        close_all(still_open, "pile no longer stale")
         return report
-    if pending:
+    if to_come or recent:
         return report
-    for lp in fired:
-        api.done(
-            lp["id"], note="superseded by the next nudge", only_source=NUDGE_SOURCE
-        )
-        report["closed"].append(lp["id"])
+    close_all(still_open, "superseded by the next nudge")
     title = f"Pile: {len(found)} waiting, oldest {report['oldest_days']:.0f}d"
     made = api.remind(title, when=at, reveal=True, source=NUDGE_SOURCE, daily_cap=1)
     report["made"] = made.get("id")
     report["echo"] = made.get("echo")
     return report
+
+
+_CLOSED = frozenset({"completed", "failed", "canceled", "rejected"})
+
+
+def _when(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    return datetime.fromisoformat(value.replace("Z", "+00:00"))
+
+
+def _after(value: str | None, now: datetime) -> bool:
+    when = _when(value)
+    return when is not None and when > now
+
+
+def _within(value: str | None, now: datetime, *, hours: float) -> bool:
+    when = _when(value)
+    return when is not None and (now - when).total_seconds() < hours * 3600
 
 
 # --------------------------------------------------------------------------------

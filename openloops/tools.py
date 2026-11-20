@@ -798,7 +798,7 @@ def pile_plan(
     number: int,
     kind: str,
     *,
-    reading: str,
+    reading: str | None = None,
     by: str | None = None,
     session: str | None = None,
     title: str | None = None,
@@ -808,17 +808,19 @@ def pile_plan(
     issue_body: str | None = None,
     tags: str | None = None,
     reason: str | None = None,
+    force: bool = False,
     repo: str | None = None,
 ) -> dict[str, Any]:
     """The signed steps that carry out one decision the owner said yes to. Changes nothing.
 
-    ``kind``: loop (``title``, ``when``), idea (``tags``), issue (``target_repo``,
-    ``title``, ``issue_body``; a public repo gets that text only), work (``reason``: who
-    takes it; stays open, labelled working), done (``reason``: evidence), drop
-    (``reason``), ask (``reason``: the question). The caller runs ``steps`` in order with
-    its own tools and puts what the first step produced where a step says ``{result}``.
-    ``by``/``session`` sign it; they default to ``OPENLOOPS_AGENT`` and Claude Code's
-    session variables.
+    ``reading`` (required) is how you read the item. ``kind``: loop (``title``, ``when``),
+    idea (``tags``), issue (``target_repo``, ``title``, ``issue_body``; anything but a
+    private repo of the pile's owner gets that text only), work (``reason``: who takes
+    it; stays open, labelled working), done (``reason``: evidence), drop (``reason``), ask
+    (``reason``: the question). The caller runs ``steps`` in order with its own tools and
+    puts what the first step produced where a step says ``{result}``. ``by``/``session``
+    sign it (defaults: ``OPENLOOPS_AGENT``, this Claude Code session; ``session="none"``
+    for the name alone). ``force`` plans a second destination for an item that has one.
     """
     return _pile_module().plan(
         number,
@@ -833,6 +835,7 @@ def pile_plan(
         issue_body=issue_body,
         tags=tags,
         reason=reason,
+        force=force,
         repo=repo,
     )
 
@@ -842,17 +845,21 @@ def pile_sign(
     *,
     by: str | None = None,
     session: str | None = None,
-    public: bool = False,
+    to_repo: str | None = None,
 ) -> dict[str, Any]:
-    """``text`` with the writer's signature: the body of a progress note on a pile item."""
-    return _pile_module().signed(text, by=by, session=session, public=public)
+    """``text`` signed for a comment on ``to_repo`` (default: the pile). Changes nothing.
+
+    The session link is kept only on a private repo of the pile's owner.
+    """
+    return _pile_module().signed(text, by=by, session=session, to_repo=to_repo)
 
 
 def pile_nudge(
-    *, stale_days: float = 3.0, at: str = "09:00", repo: str | None = None
+    *, stale_days: float | None = None, at: str = "09:00", repo: str | None = None
 ) -> dict[str, Any]:
-    """Keep one reminder pending while any pile item is older than ``stale_days``. Never acts on an item."""
-    return _pile_module().nudge(stale_days=stale_days, at=at, repo=repo)
+    """Keep one reminder coming while any pile item waits over ``stale_days`` (default 3). Never acts on an item."""
+    p = _pile_module()
+    return p.nudge(stale_days=stale_days or p.DFLT_STALE_DAYS, at=at, repo=repo)
 
 
 #: Single source of truth for what every surface exposes. The CLI dispatches this list;
