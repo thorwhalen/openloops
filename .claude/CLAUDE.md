@@ -84,7 +84,7 @@ pass, or ignore that one failure in a root sandbox.
   state vs process state, the digest-dated rule, periodic-job design, the two seams,
   board write side in a skill, self-hosted board store, agents decide what is reversible and clearly recommended, the board receiver as a periodic job, the board rebuild as a free timer job, loops and reminders a channel holds).
 - Shipped skills/subagent: `.claude/skills/openloops`, `.claude/skills/openloops-needs-human`,
-  `.claude/skills/openloops-phone-board`, `.claude/skills/openloops-remind`,
+  `.claude/skills/openloops-phone-board`, `.claude/skills/openloops-remind`, `.claude/skills/openloops-pile` (triage of the owner's capture pile into loops, ideas and issues),
   `.claude/agents/openloops-sweep.md` (also documented via `openloops-sweep` skill).
 
 ## Dependents
