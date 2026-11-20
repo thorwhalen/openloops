@@ -5,19 +5,17 @@ orphan: true
 
 # About this build
 
-This documentation was built on **2026-11-20 12:35 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/358734774c002a8068b93ee894f14a5fee6fc3a2"><code>3587347</code></a> on branch <code>main</code>, for **openloops 0.1.40** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-20 12:38 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/0a3540dd8b00e49ef02227507868a398f1ea4062"><code>0a3540d</code></a> on branch <code>main</code>, for **openloops 0.1.41** (from <code>pyproject.toml</code>).
 
-:::{warning}
-The documentation and the package may be misaligned:
-
-- The documented version (0.1.40) is behind the latest release on PyPI (0.1.41): `pip install openloops` gives newer code than these docs describe.
+:::{note}
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 :::
 
 ## Source
 
 | | |
 |---|---|
-| Commit | <a href="https://github.com/thorwhalen/openloops/commit/358734774c002a8068b93ee894f14a5fee6fc3a2"><code>358734774c002a8068b93ee894f14a5fee6fc3a2</code></a> |
+| Commit | <a href="https://github.com/thorwhalen/openloops/commit/0a3540dd8b00e49ef02227507868a398f1ea4062"><code>0a3540dd8b00e49ef02227507868a398f1ea4062</code></a> |
 | Branch | <code>main</code> |
 | Tags at this commit | none |
 | Working tree | clean |
@@ -28,9 +26,9 @@ The documentation and the package may be misaligned:
 | | |
 |---|---|
 | Repository | <code>thorwhalen/openloops</code> |
-| Run | <a href="https://github.com/thorwhalen/openloops/actions/runs/44736864660">44736864660</a> |
+| Run | <a href="https://github.com/thorwhalen/openloops/actions/runs/44737252337">44737252337</a> |
 | Ref | <code>refs/heads/main</code> |
-| Event commit | <code>358734774c002a8068b93ee894f14a5fee6fc3a2</code> (in the history of the built commit) |
+| Event commit | <code>0a3540dd8b00e49ef02227507868a398f1ea4062</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -55,13 +53,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.41/">0.1.41</a>, newer than the documented version (0.1.40).
+Latest release: <a href="https://pypi.org/project/openloops/0.1.41/">0.1.41</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 358734774c002a8068b93ee894f14a5fee6fc3a2
+git checkout 0a3540dd8b00e49ef02227507868a398f1ea4062
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
