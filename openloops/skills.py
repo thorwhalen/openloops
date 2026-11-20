@@ -44,7 +44,7 @@ directly.
     >>> skills_dir().name, agents_dir().name
     ('skills', 'agents')
     >>> sorted(asset.name for asset in bundled())
-    ['openloops', 'openloops-needs-human', 'openloops-phone-board', 'openloops-remind', 'openloops-sweep']
+    ['openloops', 'openloops-needs-human', 'openloops-phone-board', 'openloops-pile', 'openloops-remind', 'openloops-sweep']
 """
 
 from __future__ import annotations
