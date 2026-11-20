@@ -165,9 +165,11 @@ const snoozeOpen = new Set();
 const RETRY_MS = 15000, DRAFT_MS = 1000, MAX_INFLIGHT = 4, TAP_GUARD_MS = 400;
 const RECEIPT = { processing: "Claude is on it", posted: "On GitHub", dispatched: "Sent to a worker", recorded: "Recorded", queued: "Queued, no worker yet", failed: "Failed", cancelled: "Cancelled by your undo" };
 const FINAL = new Set(["posted", "dispatched", "recorded", "cancelled"]);
+/* The receiver writes meta/receiver {at} on every check (every 5 min, ADR-011). Older than this, nobody is picking taps up. */
+const RECEIVER_STALE_MIN = 20;
 
 let TASKS = [], RUNS = [], KIT = "";
-let server = { outbox: {}, receipts: {}, drafts: {}, questions: [], receiver: null, schema: null, loaded: false };
+let server = { outbox: {}, receipts: {}, drafts: {}, questions: [], receiver: null, metaSeen: false, schema: null, loaded: false };
 let db = null, dbState = "connecting", storageOk = true, needsRender = false, lastRender = 0, backoff = 0;
 const inflight = new Set(), draftTimers = {}, acted = new Set(), armed = {};
 
@@ -373,6 +375,17 @@ function age(d) {
   return h < 24 ? "today" : h < 24 * 14 ? Math.floor(h / 24) + "d" : h < 24 * 61 ? Math.round(h / 168) + "w" : Math.round(h / 730) + "mo";
 }
 
+/* Minutes as a short duration: "4 min", "3 h", "17 d". */
+const span = mins => mins < 60 ? mins + " min" : mins < 48 * 60 ? Math.round(mins / 60) + " h" : Math.round(mins / 1440) + " d";
+/* Is anything picking up taps? `down` once the store answered and the heartbeat is missing or stale; `seen` says when, for the user. */
+function receiverState() {
+  const at = server.receiver?.at, mins = at ? Math.round((Date.now() - new Date(at)) / 60000) : null;
+  const down = server.metaSeen && (mins === null || mins > RECEIVER_STALE_MIN);
+  return { down, mins, seen: mins === null ? "never" : mins < 1 ? "just now" : span(mins) + " ago" };
+}
+/* Saved events nobody has receipted yet: the taps waiting on the receiver. */
+const unreceipted = () => Object.values(server.outbox).filter(e => !server.receipts[e.id]).length;
+
 function syncLine() {
   const n = Object.keys(pending).length, nStuck = Object.keys(stuck).length, typing = Object.keys(draftTimers).length;
   const unsent = Object.entries(drafts).filter(([, d]) => d.text?.trim()).length;
@@ -388,8 +401,14 @@ function syncLine() {
   else if (db) s.append(el("span", { class: "ok" }, "All saved ✓"));
   if (nStuck) s.append(el("span", { class: "err" }, `${nStuck} refused by the store`));
   if (unsent) s.append(el("span", { class: "draft" }, `${unsent} unsent note${unsent > 1 ? "s" : ""}`));
-  const r = server.receiver;
-  if (r?.at) { const mins = Math.round((Date.now() - new Date(r.at)) / 60000); s.append(el("span", { class: mins > 20 ? "bad" : "draft" }, `Claude checked ${mins < 1 ? "just now" : mins + " min ago"}`)) }
+  const rs = receiverState(), waiting = unreceipted();
+  if (server.metaSeen) s.append(el("span", { class: rs.down ? "bad" : "draft" }, rs.mins === null ? "Claude has never checked this board" : `Claude checked ${rs.seen}`));
+  // A tap that is saved but that nothing will pick up must not look like one that is merely queued.
+  if (rs.down && waiting && b.hidden) {
+    b.hidden = false;
+    b.replaceChildren(`${waiting} saved tap${waiting > 1 ? "s are" : " is"} waiting, but nothing is picking taps up: Claude last checked this board ${rs.seen}. They are kept and will be handled when the receiver runs again. `,
+      el("button", { class: "btn", onclick: () => copy(`${SESSION}: the board receiver is down (last check ${rs.seen}); process the board and restart its job (ol receiver-job-status).`, "Copied: paste it into a session") }, "Copy the ask"));
+  }
   if (nStuck || (n && !db)) s.append(el("button", { onclick: () => copy(`${SESSION}: the board could not save these; apply them: ${JSON.stringify({ pending, stuck })}`, "Copied: paste it into the session") }, "Copy unsaved"));
 }
 
@@ -405,10 +424,13 @@ function receipt(taskId) {
   }
   if (!show) { const e = evs[evs.length - 1]; show = { e, r: server.receipts[e.id], st: server.receipts[e.id]?.status } }
   const { r, st } = show;
-  const label = st === "stuck" ? "Refused by the store" : st === "local" ? "Saving…" : st === "waiting" ? "Saved · waiting for Claude"
-    : (RECEIPT[st] || st) + (st === "dispatched" && r?.result?.worker ? ": " + r.result.worker : "") + (st === "failed" && r?.result?.error ? ": " + r.result.error : "");
+  const rs = receiverState(), dead = st === "waiting" && rs.down;
+  const label = st === "stuck" ? "Refused by the store" : st === "local" ? "Saving…"
+    : st === "waiting" ? (dead ? `Saved · not picked up: Claude last checked ${rs.seen}` : "Saved · waiting for Claude (checks every 5 min)")
+    : (RECEIPT[st] || st) + (st === "dispatched" && r?.result?.worker ? ": " + r.result.worker : "") + (st === "failed" && r?.result?.error ? ": " + r.result.error : "")
+    + (r?.at && st !== "waiting" ? " · " + new Date(r.at).toLocaleString(undefined, { weekday: "short", hour: "2-digit", minute: "2-digit" }) : "");
   const href = r?.result?.comment_url;
-  const bad = st === "failed" || st === "stuck";
+  const bad = st === "failed" || st === "stuck" || dead;
   return href ? el("a", { class: "receipt", href, target: "_blank", rel: "noopener" }, label + " ↗") : el("span", { class: "receipt" + (bad ? " failed" : "") }, label);
 }
 function score(t) { return TIERS.indexOf(t.tier) * 10000 + (t.minutes || 10) * 10 / (1 + (t.unblocks?.length || 0)) }
@@ -639,7 +661,7 @@ async function boot() {
   subscribe("outbox", docs => server.outbox = byId(docs));
   subscribe("receipts", docs => server.receipts = byId(docs));
   subscribe("drafts", docs => { server.drafts = byId(docs); for (const [k, v] of Object.entries(server.drafts)) if (drafts[k] && v.at > drafts[k].at) { drafts[k] = { text: v.text, at: v.at }; save("drafts3", drafts) } });
-  subscribe("meta", docs => { const m = byId(docs); server.receiver = m.receiver || null; server.schema = m.schema?.version || null });
+  subscribe("meta", docs => { const m = byId(docs); server.receiver = m.receiver || null; server.metaSeen = true; server.schema = m.schema?.version || null });
   subscribe("questions", docs => server.questions = docs.flatMap(d => Object.entries(d.data().items || {}).map(([id, q]) => ({ ...q, _id: id }))));
 }
 boot();

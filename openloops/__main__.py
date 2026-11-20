@@ -494,10 +494,18 @@ def install_receiver_job(
     )
     if dry_run:
         return result["xml"]
+    missing = result.get("missing_commands")
+    warning = (
+        f"\nWARNING: not on PATH, so the receiver cannot run them: {missing}"
+        " (a missing crowsnest leaves every answer queued: no worker is dispatched)"
+        if missing
+        else ""
+    )
     return (
         f"installed {_job.RECEIVER_LABEL} every {result['interval']}s\n"
         f"  plist: {result['plist']}\n  log:   {result['log']}\n"
         "check by hand any time: python3 -m openloops.receiver_tick --check-only"
+        + warning
     )
 
 

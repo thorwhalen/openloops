@@ -123,6 +123,11 @@ RECEIVER_TOOLS = " ".join(
     ]
 )
 
+#: Commands the receiver session runs (receiver.md): `node` runs `claude`, `crowsnest`
+#: dispatches the follow-up worker, `gh`/`jq` reach GitHub. launchd's PATH finds none of
+#: them unless their folder is pinned; a missing `crowsnest` leaves every answer `queued`.
+RECEIVER_COMMANDS = ("node", "gh", "jq", "crowsnest")
+
 #: Environment variables the receiver session reads, passed through like the others.
 RECEIVER_PASSED_THROUGH = (
     "OPENLOOPS_OWNERS",
@@ -356,11 +361,16 @@ def receiver_job_spec(
     for var in RECEIVER_PASSED_THROUGH:
         if os.environ.get(var):
             env[var] = os.environ[var]
-    # claude is a node script: launchd's PATH finds neither it nor node unless told.
+    # claude is a node script, and the session calls RECEIVER_COMMANDS: launchd's PATH
+    # finds none of them unless their folders are pinned.
     extra = [str(Path(claude_path).parent)]
-    node = shutil.which("node")
-    if node:
-        extra.append(str(Path(node).parent))
+    missing = []
+    for name in RECEIVER_COMMANDS:
+        found = shutil.which(name)
+        if found:
+            extra.append(str(Path(found).parent))
+        else:
+            missing.append(name)
     env["PATH"] = ":".join(dict.fromkeys([*extra, *env["PATH"].split(":")]))
     args = [
         sys.executable,
@@ -387,6 +397,7 @@ def receiver_job_spec(
         "env": env,
         "interval": interval,
         "work_dir": str(work),
+        "missing_commands": missing,
         "env_file": str(env_path),
         "log": str(log_path),
         "plist": str(_plist_path(label)),
@@ -452,6 +463,7 @@ def install_receiver(
         "plist": str(spec["plist"]),
         "log": str(spec["log"]),
         "interval": str(spec["interval"]),
+        "missing_commands": ", ".join(spec["missing_commands"]),  # type: ignore[arg-type]
     }
 
 

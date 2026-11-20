@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -265,6 +267,49 @@ def test_a_cards_own_options_are_answer_buttons():
     assert 'act(t, "answer", { answer: o,' in page
     # The free-text accept appears only when the recommendation is not one of the options.
     assert "!opts.includes(rec)" in page
+
+
+def test_a_dead_receiver_is_shown_on_the_waiting_tap_not_hidden_behind_it():
+    """A tap saved while no receiver runs read "Saved · waiting for Claude" for days, so the
+    owner could not tell a queued choice from one nothing would ever act on. A missing or
+    stale heartbeat must turn the chip red and raise the banner."""
+    page = (board.board_dir() / "index.html").read_text(encoding="utf-8")
+    assert "Saved · not picked up: Claude last checked" in page
+    assert "nothing is picking taps up" in page
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node is not installed: the behaviour check needs it")
+    start, end = (
+        page.index("/* Minutes as a short duration"),
+        page.index("function syncLine"),
+    )
+    consts = page[page.index("const RECEIVER_STALE_MIN") :].split("\n", 1)[0]
+    script = (
+        consts
+        + "\nlet server = {receiver: null, metaSeen: true, outbox: {}, receipts: {}};\n"
+        + page[start:end]
+        + "\nconst out = {};"
+        + "\nout.never = receiverState();"
+        + "\nserver.receiver = {at: new Date(Date.now() - 17 * 86400e3).toISOString()};"
+        + "\nout.stale = receiverState();"
+        + "\nserver.receiver = {at: new Date(Date.now() - 3 * 60e3).toISOString()};"
+        + "\nout.live = receiverState();"
+        + "\nserver.metaSeen = false; server.receiver = null;"
+        + "\nout.unknown = receiverState();"
+        + "\nserver.outbox = {a: {id: 'a'}, b: {id: 'b'}}; server.receipts = {a: {status: 'posted'}};"
+        + "\nout.waiting = unreceipted();"
+        + "\nconsole.log(JSON.stringify(out));"
+    )
+    res = subprocess.run(
+        [node, "-e", script], capture_output=True, text=True, check=True
+    )
+    out = json.loads(res.stdout)
+    assert out["never"] == {"down": True, "mins": None, "seen": "never"}
+    assert out["stale"]["down"] and out["stale"]["seen"] == "17 d ago"
+    assert not out["live"]["down"] and out["live"]["seen"] == "3 min ago"
+    # Before the store answered, nothing is claimed either way.
+    assert out["unknown"]["down"] is False
+    assert out["waiting"] == 1
 
 
 def test_the_page_renders_the_review_as_text_only():
