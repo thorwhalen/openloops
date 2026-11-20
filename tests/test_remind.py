@@ -290,3 +290,56 @@ def test_the_cli_lists_times_in_the_owners_zone(monkeypatch):
         "reveal": True,
     }
     assert "2026-11-20 08:00" in _loop_line(row)
+
+
+def test_a_surface_touches_only_the_loops_it_set_itself():
+    """A voice connector closes or moves its own reminders; every other loop is not there."""
+    kit = _kit()
+    mine = R.remind(
+        "x", in_="1h", source={"kind": "ref", "ref": "claude-ai"}, now=NOW, **kit
+    )
+    theirs = R.remind(
+        "y", in_="1h", source={"kind": "ref", "ref": "a-session"}, now=NOW, **kit
+    )
+    with pytest.raises(KeyError, match="set from claude-ai"):
+        R.done(theirs["id"], only_source="claude-ai", now=NOW, **kit)
+    with pytest.raises(KeyError, match="set from claude-ai"):
+        R.snooze(theirs["id"], for_="1h", only_source="claude-ai", now=NOW, **kit)
+    assert (
+        R.done(mine["id"], only_source="claude-ai", now=NOW, **kit)["state"]
+        == "completed"
+    )
+
+
+def test_a_snooze_from_a_capped_surface_cannot_push_a_loop_far_away():
+    kit = _kit()
+    made = R.remind("x", in_="1h", now=NOW, **kit)
+    with pytest.raises(ValueError, match="at most 14 days"):
+        R.snooze(made["id"], for_="999d", max_ahead=timedelta(days=14), now=NOW, **kit)
+    assert R.snooze(made["id"], for_="2d", max_ahead=timedelta(days=14), now=NOW, **kit)
+
+
+def test_a_daily_cap_per_source_stops_a_flood():
+    kit = _kit()
+    src = {"kind": "ref", "ref": "claude-ai"}
+    for i in range(3):
+        R.remind(f"r{i}", in_="1h", source=src, daily_cap=3, now=NOW, **kit)
+    with pytest.raises(ValueError, match="cap"):
+        R.remind("r3", in_="1h", source=src, daily_cap=3, now=NOW, **kit)
+    # another source is not counted, and the window moves
+    R.remind(
+        "other",
+        in_="1h",
+        source={"kind": "ref", "ref": "x"},
+        daily_cap=3,
+        now=NOW,
+        **kit,
+    )
+    R.remind(
+        "r4",
+        in_="1h",
+        source=src,
+        daily_cap=3,
+        now=NOW + timedelta(days=1, minutes=1),
+        **kit,
+    )
