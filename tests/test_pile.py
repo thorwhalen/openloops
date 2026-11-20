@@ -45,12 +45,14 @@ class FakeGh:
     def __call__(self, args, *, timeout):
         self.calls.append(list(args))
         verb = args[:2]
-        if verb == ["issue", "list"]:
-            label = args[args.index("--label") + 1]
-            return json.dumps(
-                [i for i in self.issues.values() if i["state"] == "OPEN"
-                 and label in [x["name"] for x in i["labels"]]]
-            )  # fmt: skip
+        if verb == ["api", "graphql"]:
+            label = next(a for a in args if a.startswith("label="))[len("label=") :]
+            rows = [
+                {**i, "labels": {"nodes": i["labels"]}}
+                for i in self.issues.values()
+                if i["state"] == "OPEN" and label in [x["name"] for x in i["labels"]]
+            ]
+            return "\n".join(json.dumps(r) for r in rows)
         if verb == ["issue", "view"]:
             return json.dumps(self.issues[int(args[2])])
         if verb == ["repo", "view"]:
@@ -81,7 +83,7 @@ def test_proposals_change_nothing():
     gh = FakeGh([_issue(1, "Remind me to call back"), _issue(2, "idea: a podcast")])
     kinds = [p["kind"] for p in P.propose(P.items(repo=REPO, run_gh=gh))]
     assert kinds == ["loop", "idea"]
-    assert all(c[:2] in (["issue", "list"],) for c in gh.calls)
+    assert all(c[:2] == ["api", "graphql"] for c in gh.calls)
 
 
 def _ops(plan):
@@ -302,7 +304,7 @@ def test_a_working_item_left_too_long_still_nudges():
 def test_nudge_never_touches_a_pile_item():
     gh = FakeGh([_issue(1, "x")])
     P.nudge(repo=REPO, run_gh=gh, loops_api=FakeLoops(), now=NOW)
-    assert all(c[:2] == ["issue", "list"] for c in gh.calls)
+    assert all(c[:2] == ["api", "graphql"] for c in gh.calls)
 
 
 def test_a_public_pile_is_refused():
