@@ -1,4 +1,4 @@
-> built 2026-11-20 18:07 UTC from 63e332b (main) · openloops 0.1.45. Details: build_info.json
+> built 2026-11-20 18:28 UTC from ba06d71 (main) · openloops 0.1.46. Details: build_info.json
 
 # index.html.md
 
@@ -4633,7 +4633,7 @@ write is [`nudge()`](_autosummary/openloops.pile.html.md#openloops.pile.nudge)�
 | [`pile_repo`](_autosummary/openloops.pile.html.md#openloops.pile.pile_repo)([repo, run_gh])                        | The pile repo: `repo`, else `OPENLOOPS_PILE_REPO`, else `<gh login>/_pile`.                 |
 |---------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
 | [`parse_item`](_autosummary/openloops.pile.html.md#openloops.pile.parse_item)(raw)                                  | A [`PileItem`](_autosummary/openloops.pile.html.md#openloops.pile.PileItem) from `gh`'s JSON for one issue. |
-| [`items`](_autosummary/openloops.pile.html.md#openloops.pile.items)(\*[, repo, label, limit, run_gh])          | The open items carrying `label` (default: untriaged), oldest first.                         |
+| [`items`](_autosummary/openloops.pile.html.md#openloops.pile.items)(\*[, repo, label, run_gh])                 | The open items carrying `label` (default: untriaged), oldest first.                         |
 | [`show`](_autosummary/openloops.pile.html.md#openloops.pile.show)(number, \*[, repo, run_gh])                 | One item with its comments (any state).                                                     |
 | [`heuristic_propose`](_autosummary/openloops.pile.html.md#openloops.pile.heuristic_propose)(item)                          | A first guess from the words alone.                                                         |
 | [`propose`](_autosummary/openloops.pile.html.md#openloops.pile.propose)(found, \*[, proposer])                   | One proposal per item.                                                                      |
@@ -4723,9 +4723,9 @@ other people), or a visibility that cannot be read all get the public treatment.
 * **Return type:**
   [`bool`](https://docs.python.org/3/builtins/functions.html#bool)
 
-### openloops.pile.items(, repo=None, label='pile', limit=200, run_gh=None)
+### openloops.pile.items(, repo=None, label='pile', run_gh=None)
 
-The open items carrying `label` (default: untriaged), oldest first.
+The open items carrying `label` (default: untriaged), oldest first. Read-only.
 
 * **Return type:**
   [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`PileItem`](_autosummary/openloops.pile.html.md#openloops.pile.PileItem)]
@@ -6601,16 +6601,18 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-11-20 18:07 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/63e332bae80d3188226f9b4446ba978b101d4d16"><code>63e332b</code></a> on branch <code>main</code>, for **openloops 0.1.45** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-20 18:28 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/ba06d71e77f594af68cc24cdc4d0ff6cf6b8b88f"><code>ba06d71</code></a> on branch <code>main</code>, for **openloops 0.1.46** (from <code>pyproject.toml</code>).
 
-#### NOTE
-Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
+#### WARNING
+The documentation and the package may be misaligned:
+
+- The documented version (0.1.46) is behind the latest release on PyPI (0.1.47): `pip install openloops` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/63e332bae80d3188226f9b4446ba978b101d4d16"><code>63e332bae80d3188226f9b4446ba978b101d4d16</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/ba06d71e77f594af68cc24cdc4d0ff6cf6b8b88f"><code>ba06d71e77f594af68cc24cdc4d0ff6cf6b8b88f</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -6621,9 +6623,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/44789492523">44789492523</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/44792716900">44792716900</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>63e332bae80d3188226f9b4446ba978b101d4d16</code> (in the history of the built commit) |
+| Event commit | <code>ba06d71e77f594af68cc24cdc4d0ff6cf6b8b88f</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -6648,13 +6650,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.45/">0.1.45</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.47/">0.1.47</a>, newer than the documented version (0.1.46).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 63e332bae80d3188226f9b4446ba978b101d4d16
+git checkout ba06d71e77f594af68cc24cdc4d0ff6cf6b8b88f
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

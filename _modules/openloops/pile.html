@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../../_static/documentation_options.js?v=ce72d79b"></script>
+    <script src="../../_static/documentation_options.js?v=f98a5df1"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.45" />
+  <meta name="docsearch:version" content="0.1.46" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -889,23 +889,43 @@ window.runMermaid = runMermaid;</script>
 <span class="n">_FIELDS</span> <span class="o">=</span> <span class="s2">"number,title,body,labels,createdAt,url,state"</span>
 
 
+<span class="c1">#: The repository's own issue connection, not ``gh issue list --label`` (which goes</span>
+<span class="c1">#: through the search index): a capture made seconds ago is listed at once. Measured</span>
+<span class="c1">#: 2026-11-20: search lagged ~7 s, REST ~5 s, this connection 0 s.</span>
+<span class="n">_ITEMS_QUERY</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">query($owner: String!, $name: String!, $label: String!, $endCursor: String) {</span>
+<span class="s2">  repository(owner: $owner, name: $name) {</span>
+<span class="s2">    issues(first: 100, after: $endCursor, states: OPEN, labels: [$label],</span>
+<span class="s2">           orderBy: {field: CREATED_AT, direction: ASC}) {</span>
+<span class="s2">      nodes { number title body createdAt url state labels(first: 30) { nodes { name } } }</span>
+<span class="s2">      pageInfo { hasNextPage endCursor }</span>
+<span class="s2">    }</span>
+<span class="s2">  }</span>
+<span class="s2">}</span>
+<span class="s2">"""</span>
+
+
 <div class="viewcode-block" id="items">
 <a class="viewcode-back" href="../../_autosummary/openloops.pile.html#openloops.pile.items">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">items</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">PILE_LABEL</span><span class="p">,</span>
-    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
     <span class="n">run_gh</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">PileItem</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">"""The open items carrying ``label`` (default: untriaged), oldest first."""</span>
+<span class="w">    </span><span class="sd">"""The open items carrying ``label`` (default: untriaged), oldest first. Read-only."""</span>
     <span class="n">repo</span> <span class="o">=</span> <span class="n">pile_repo</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">run_gh</span><span class="o">=</span><span class="n">run_gh</span><span class="p">)</span>
+    <span class="n">owner</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">repo</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">_run</span><span class="p">(</span>
         <span class="n">run_gh</span><span class="p">,</span>
-        <span class="p">[</span><span class="s2">"issue"</span><span class="p">,</span> <span class="s2">"list"</span><span class="p">,</span> <span class="s2">"-R"</span><span class="p">,</span> <span class="n">repo</span><span class="p">,</span> <span class="s2">"--state"</span><span class="p">,</span> <span class="s2">"open"</span><span class="p">,</span> <span class="s2">"--label"</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span>
-         <span class="s2">"--limit"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">limit</span><span class="p">),</span> <span class="s2">"--json"</span><span class="p">,</span> <span class="n">_FIELDS</span><span class="p">],</span>
+        <span class="p">[</span><span class="s2">"api"</span><span class="p">,</span> <span class="s2">"graphql"</span><span class="p">,</span> <span class="s2">"--paginate"</span><span class="p">,</span> <span class="s2">"-f"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"query=</span><span class="si">{</span><span class="n">_ITEMS_QUERY</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+         <span class="s2">"-F"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"owner=</span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"-F"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"name=</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"-F"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"label=</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+         <span class="s2">"--jq"</span><span class="p">,</span> <span class="s2">".data.repository.issues.nodes[]"</span><span class="p">],</span>
     <span class="p">)</span>  <span class="c1"># fmt: skip</span>
-    <span class="n">found</span> <span class="o">=</span> <span class="p">[</span><span class="n">parse_item</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">out</span> <span class="ow">or</span> <span class="s2">"[]"</span><span class="p">)]</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="p">(</span><span class="n">out</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+        <span class="n">row</span><span class="p">[</span><span class="s2">"labels"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"labels"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"nodes"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="p">[</span><span class="n">parse_item</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">]</span>
     <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">found</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">created</span><span class="p">,</span> <span class="n">i</span><span class="o">.</span><span class="n">number</span><span class="p">))</span></div>
 
 

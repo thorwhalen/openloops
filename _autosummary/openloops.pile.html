@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=ce72d79b"></script>
+    <script src="../_static/documentation_options.js?v=f98a5df1"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.45" />
+  <meta name="docsearch:version" content="0.1.46" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -469,7 +469,7 @@ write is <a class="reference internal" href="#openloops.pile.nudge" title="openl
 <tr class="row-even"><td><p><a class="reference internal" href="#openloops.pile.parse_item" title="openloops.pile.parse_item"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_item</span></code></a>(raw)</p></td>
 <td><p>A <a class="reference internal" href="#openloops.pile.PileItem" title="openloops.pile.PileItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">PileItem</span></code></a> from <code class="docutils literal notranslate"><span class="pre">gh</span></code>'s JSON for one issue.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.pile.items" title="openloops.pile.items"><code class="xref py py-obj docutils literal notranslate"><span class="pre">items</span></code></a>(*[, repo, label, limit, run_gh])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.pile.items" title="openloops.pile.items"><code class="xref py py-obj docutils literal notranslate"><span class="pre">items</span></code></a>(*[, repo, label, run_gh])</p></td>
 <td><p>The open items carrying <code class="docutils literal notranslate"><span class="pre">label</span></code> (default: untriaged), oldest first.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#openloops.pile.show" title="openloops.pile.show"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show</span></code></a>(number, *[, repo, run_gh])</p></td>
@@ -610,8 +610,8 @@ other people), or a visibility that cannot be read all get the public treatment.
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openloops.pile.items">
-<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">repo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pile'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_gh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/pile.html#items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.pile.items" title="Link to this definition">#</a></dt>
-<dd><p>The open items carrying <code class="docutils literal notranslate"><span class="pre">label</span></code> (default: untriaged), oldest first.</p>
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">repo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pile'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_gh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/pile.html#items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.pile.items" title="Link to this definition">#</a></dt>
+<dd><p>The open items carrying <code class="docutils literal notranslate"><span class="pre">label</span></code> (default: untriaged), oldest first. Read-only.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#openloops.pile.PileItem" title="openloops.pile.PileItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">PileItem</span></code></a>]</span></p>

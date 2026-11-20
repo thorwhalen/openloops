@@ -48,7 +48,7 @@ write is [`nudge()`](#openloops.pile.nudge)’s reminder loop, through openloops
 | [`pile_repo`](#openloops.pile.pile_repo)([repo, run_gh])                        | The pile repo: `repo`, else `OPENLOOPS_PILE_REPO`, else `<gh login>/_pile`.                 |
 |---------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
 | [`parse_item`](#openloops.pile.parse_item)(raw)                                  | A [`PileItem`](#openloops.pile.PileItem) from `gh`'s JSON for one issue. |
-| [`items`](#openloops.pile.items)(\*[, repo, label, limit, run_gh])          | The open items carrying `label` (default: untriaged), oldest first.                         |
+| [`items`](#openloops.pile.items)(\*[, repo, label, run_gh])                 | The open items carrying `label` (default: untriaged), oldest first.                         |
 | [`show`](#openloops.pile.show)(number, \*[, repo, run_gh])                 | One item with its comments (any state).                                                     |
 | [`heuristic_propose`](#openloops.pile.heuristic_propose)(item)                          | A first guess from the words alone.                                                         |
 | [`propose`](#openloops.pile.propose)(found, \*[, proposer])                   | One proposal per item.                                                                      |
@@ -138,9 +138,9 @@ other people), or a visibility that cannot be read all get the public treatment.
 * **Return type:**
   [`bool`](https://docs.python.org/3/builtins/functions.html#bool)
 
-### openloops.pile.items(, repo=None, label='pile', limit=200, run_gh=None)
+### openloops.pile.items(, repo=None, label='pile', run_gh=None)
 
-The open items carrying `label` (default: untriaged), oldest first.
+The open items carrying `label` (default: untriaged), oldest first. Read-only.
 
 * **Return type:**
   [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`PileItem`](#openloops.pile.PileItem)]
