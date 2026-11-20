@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../../_static/documentation_options.js?v=6a0a5382"></script>
+    <script src="../../_static/documentation_options.js?v=ce72d79b"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.44" />
+  <meta name="docsearch:version" content="0.1.45" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -780,6 +780,7 @@ window.runMermaid = runMermaid;</script>
     <span class="s2">"OPENLOOPS_TZ"</span><span class="p">,</span>
     <span class="s2">"OPENLOOPS_REMIND_CHANNEL"</span><span class="p">,</span>
     <span class="s2">"OPENLOOPS_REMIND_HORIZON_HOURS"</span><span class="p">,</span>
+    <span class="s2">"OPENLOOPS_PILE_REPO"</span><span class="p">,</span>
     <span class="s2">"NTFY_TOPIC"</span><span class="p">,</span>
     <span class="s2">"CORRESPOND_CONFIG"</span><span class="p">,</span>
     <span class="s2">"XDG_CONFIG_HOME"</span><span class="p">,</span>
@@ -798,6 +799,9 @@ window.runMermaid = runMermaid;</script>
 <span class="c1">#: Hourly: a reminder is armed on the channel up to three days ahead, so the tick only</span>
 <span class="c1">#: needs to catch loops entering that horizon and record the ones that fired.</span>
 <span class="n">REMIND_INTERVAL</span> <span class="o">=</span> <span class="mi">3600</span>
+<span class="n">PILE_NUDGE_LABEL</span> <span class="o">=</span> <span class="s2">"openloops.pile-nudge"</span>
+<span class="c1">#: Every six hours: the nudge is idempotent, and a pending one is never duplicated.</span>
+<span class="n">PILE_NUDGE_INTERVAL</span> <span class="o">=</span> <span class="mi">21600</span>
 <span class="n">REFRESH_LABEL</span> <span class="o">=</span> <span class="s2">"openloops.board-refresh"</span>
 <span class="n">REFRESH_INTERVAL</span> <span class="o">=</span> <span class="mi">21600</span>
 
@@ -1403,6 +1407,72 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"state_dir"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">state_dir</span><span class="p">()),</span>
     <span class="p">}</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pile_nudge_job_spec</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">PILE_NUDGE_INTERVAL</span><span class="p">,</span>
+    <span class="n">stale_days</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">PILE_NUDGE_LABEL</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The pile nudge as data: ``python -m openloops pile-nudge`` every ``interval`` s.</span>
+
+<span class="sd">    Pure. It reads the pile through ``gh`` (the user's own login) and makes reminders</span>
+<span class="sd">    through the reminder runner, so it needs both ``gh`` and correspond in the job.</span>
+
+<span class="sd">    &gt;&gt;&gt; spec = pile_nudge_job_spec(stale_days=2)</span>
+<span class="sd">    &gt;&gt;&gt; spec["program_args"][-3:]</span>
+<span class="sd">    ['pile-nudge', '--stale-days', '2']</span>
+<span class="sd">    """</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span>
+        <span class="s2">"-m"</span><span class="p">,</span>
+        <span class="s2">"openloops"</span><span class="p">,</span>
+        <span class="s2">"pile-nudge"</span><span class="p">,</span>
+        <span class="s2">"--stale-days"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">stale_days</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">job_environment</span><span class="p">()</span>
+    <span class="n">log_path</span> <span class="o">=</span> <span class="n">_log_path</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"label"</span><span class="p">:</span> <span class="n">label</span><span class="p">,</span>
+        <span class="s2">"program_args"</span><span class="p">:</span> <span class="n">args</span><span class="p">,</span>
+        <span class="s2">"env"</span><span class="p">:</span> <span class="n">env</span><span class="p">,</span>
+        <span class="s2">"interval"</span><span class="p">:</span> <span class="n">interval</span><span class="p">,</span>
+        <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">log_path</span><span class="p">),</span>
+        <span class="s2">"plist"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">_plist_path</span><span class="p">(</span><span class="n">label</span><span class="p">)),</span>
+        <span class="s2">"xml"</span><span class="p">:</span> <span class="n">plist_xml</span><span class="p">(</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="n">program_args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+            <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
+            <span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span>
+            <span class="n">log_path</span><span class="o">=</span><span class="n">log_path</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">install_pile_nudge</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Install (or replace) the pile nudge job. ``kwargs`` are :func:`pile_nudge_job_spec`'s."""</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">pile_nudge_job_spec</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"plist"</span><span class="p">,</span> <span class="s2">"log"</span><span class="p">,</span> <span class="s2">"xml"</span><span class="p">)}</span>
+    <span class="n">_require_macos</span><span class="p">()</span>
+    <span class="n">_bootstrap</span><span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"label"</span><span class="p">]),</span>
+        <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"plist"</span><span class="p">])),</span>
+        <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"log"</span><span class="p">])),</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"xml"</span><span class="p">]),</span>
+        <span class="n">smoke</span><span class="o">=</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-m"</span><span class="p">,</span> <span class="s2">"openloops"</span><span class="p">,</span> <span class="s2">"pile-nudge"</span><span class="p">,</span> <span class="s2">"--help"</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-c"</span><span class="p">,</span> <span class="s2">"import correspond.channels.ntfy"</span><span class="p">],</span>
+        <span class="p">],</span>
+        <span class="n">env</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"env"</span><span class="p">]),</span>  <span class="c1"># type: ignore[arg-type]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"plist"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"plist"</span><span class="p">]),</span>
+        <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"log"</span><span class="p">]),</span>
+        <span class="s2">"interval"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"interval"</span><span class="p">]),</span>
+    <span class="p">}</span>
 </pre></div>
 
                 </article>

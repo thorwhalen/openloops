@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=6a0a5382"></script>
+    <script src="../_static/documentation_options.js?v=ce72d79b"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.44" />
+  <meta name="docsearch:version" content="0.1.45" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -332,6 +332,7 @@
 <li class="toctree-l2"><a class="reference internal" href="openloops.job.html">openloops.job</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.loops.html">openloops.loops</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.obligations.html">openloops.obligations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.pile.html">openloops.pile</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.predicate_safety.html">openloops.predicate_safety</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.publications.html">openloops.publications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="openloops.receiver_tick.html">openloops.receiver_tick</a></li>
@@ -1752,31 +1753,34 @@ which is what makes it safe to suggest when someone suspects a stale digest.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="openloops.obligations.html#module-openloops.obligations" title="openloops.obligations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">obligations</span></code></a></p></td>
 <td><p>What you still owe your agents — re-checked against the world before it is shown.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="openloops.predicate_safety.html#module-openloops.predicate_safety" title="openloops.predicate_safety"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predicate_safety</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="openloops.pile.html#module-openloops.pile" title="openloops.pile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pile</span></code></a></p></td>
+<td><p>The pile: GTD's In list, kept as GitHub issues in a private repo, and its clarify step.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="openloops.predicate_safety.html#module-openloops.predicate_safety" title="openloops.predicate_safety"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predicate_safety</span></code></a></p></td>
 <td><p>Is a <code class="docutils literal notranslate"><span class="pre">manual-task</span></code> verify predicate a pure read?</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="openloops.publications.html#module-openloops.publications" title="openloops.publications"><code class="xref py py-obj docutils literal notranslate"><span class="pre">publications</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="openloops.publications.html#module-openloops.publications" title="openloops.publications"><code class="xref py py-obj docutils literal notranslate"><span class="pre">publications</span></code></a></p></td>
 <td><p>What your agents handed you lately: recently published annals documents, per session.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="openloops.receiver_tick.html#module-openloops.receiver_tick" title="openloops.receiver_tick"><code class="xref py py-obj docutils literal notranslate"><span class="pre">receiver_tick</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="openloops.receiver_tick.html#module-openloops.receiver_tick" title="openloops.receiver_tick"><code class="xref py py-obj docutils literal notranslate"><span class="pre">receiver_tick</span></code></a></p></td>
 <td><p>One tick of the board-receiver job: check for work without a model, then hand over.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="openloops.remind.html#module-openloops.remind" title="openloops.remind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remind</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="openloops.remind.html#module-openloops.remind" title="openloops.remind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remind</span></code></a></p></td>
 <td><p>Reminders: loops kept in a store and delivered through a channel that holds the time.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="openloops.skills.html#module-openloops.skills" title="openloops.skills"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skills</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="openloops.skills.html#module-openloops.skills" title="openloops.skills"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skills</span></code></a></p></td>
 <td><p>The agent-facing surface: two skills, one subagent, and the command that installs them.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="openloops.store.html#module-openloops.store" title="openloops.store"><code class="xref py py-obj docutils literal notranslate"><span class="pre">store</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="openloops.store.html#module-openloops.store" title="openloops.store"><code class="xref py py-obj docutils literal notranslate"><span class="pre">store</span></code></a></p></td>
 <td><p>Where digests live, and where the change-detection cache lives — two different things.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="openloops.tasks.html#module-openloops.tasks" title="openloops.tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tasks</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="openloops.tasks.html#module-openloops.tasks" title="openloops.tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tasks</span></code></a></p></td>
 <td><p>Everything you could act on, as one list of task records: gather, classify, merge.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="openloops.tools.html#module-openloops.tools" title="openloops.tools"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tools</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="openloops.tools.html#module-openloops.tools" title="openloops.tools"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tools</span></code></a></p></td>
 <td><p>The package's single list of operations: plain functions, JSON-ready dicts.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="openloops.transcripts.html#module-openloops.transcripts" title="openloops.transcripts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transcripts</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="openloops.transcripts.html#module-openloops.transcripts" title="openloops.transcripts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transcripts</span></code></a></p></td>
 <td><p>The default <code class="docutils literal notranslate"><span class="pre">transcript_source</span></code>: a direct reader of Claude Code's on-disk state.</p></td>
 </tr>
 </tbody>

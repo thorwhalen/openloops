@@ -1136,6 +1136,7 @@ which is what makes it safe to suggest when someone suspects a stale digest.
 | [`job`](openloops.job.html.md#module-openloops.job)                           | The periodic job: launchd runs `ol sync`, writes, and exits.                            |
 | [`loops`](openloops.loops.html.md#module-openloops.loops)                       | Loops: the one record of a commitment, and the pure function that says what is due.     |
 | [`obligations`](openloops.obligations.html.md#module-openloops.obligations)           | What you still owe your agents — re-checked against the world before it is shown.       |
+| [`pile`](openloops.pile.html.md#module-openloops.pile)                         | The pile: GTD's In list, kept as GitHub issues in a private repo, and its clarify step. |
 | [`predicate_safety`](openloops.predicate_safety.html.md#module-openloops.predicate_safety) | Is a `manual-task` verify predicate a pure read?                                        |
 | [`publications`](openloops.publications.html.md#module-openloops.publications)         | What your agents handed you lately: recently published annals documents, per session.   |
 | [`receiver_tick`](openloops.receiver_tick.html.md#module-openloops.receiver_tick)       | One tick of the board-receiver job: check for work without a model, then hand over.     |

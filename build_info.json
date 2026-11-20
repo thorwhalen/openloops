@@ -1,32 +1,32 @@
 {
   "schema_version": 1,
-  "built_at": "2026-11-20T17:45:37Z",
+  "built_at": "2026-11-20T18:07:27Z",
   "package": {
     "name": "openloops",
-    "version": "0.1.44",
+    "version": "0.1.45",
     "display_name": "openloops",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "184de99b42025f678204153f9d1c12c60728b32c",
-    "short_commit": "184de99",
+    "commit": "63e332bae80d3188226f9b4446ba978b101d4d16",
+    "short_commit": "63e332b",
     "branch": "main",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/thorwhalen/openloops",
-    "commit_url": "https://github.com/thorwhalen/openloops/commit/184de99b42025f678204153f9d1c12c60728b32c",
+    "commit_url": "https://github.com/thorwhalen/openloops/commit/63e332bae80d3188226f9b4446ba978b101d4d16",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "thorwhalen/openloops",
-    "sha": "184de99b42025f678204153f9d1c12c60728b32c",
+    "sha": "63e332bae80d3188226f9b4446ba978b101d4d16",
     "sha_in_history": true,
     "ref": "refs/heads/main",
     "ref_name": "main",
-    "run_id": "44786043979",
-    "run_url": "https://github.com/thorwhalen/openloops/actions/runs/44786043979",
+    "run_id": "44789492523",
+    "run_url": "https://github.com/thorwhalen/openloops/actions/runs/44789492523",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -55,16 +55,16 @@
     "docs_dir": "docsrc"
   },
   "site": {
-    "modules_documented": 22,
-    "objects_documented": 308
+    "modules_documented": 23,
+    "objects_documented": 326
   },
   "pypi": {
     "checked": true,
-    "latest": "0.1.44",
+    "latest": "0.1.45",
     "relation": "same",
     "error": null
   },
-  "reproduce": "git clone https://github.com/thorwhalen/openloops && cd openloops\ngit checkout 184de99b42025f678204153f9d1c12c60728b32c\npip install \"epythet==0.2.22\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/thorwhalen/openloops && cd openloops\ngit checkout 63e332bae80d3188226f9b4446ba978b101d4d16\npip install \"epythet==0.2.22\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
     "aligned": true,

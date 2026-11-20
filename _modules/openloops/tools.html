@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../../_static/documentation_options.js?v=6a0a5382"></script>
+    <script src="../../_static/documentation_options.js?v=ce72d79b"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.44" />
+  <meta name="docsearch:version" content="0.1.45" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -1510,6 +1510,120 @@ window.runMermaid = runMermaid;</script>
 
 
 
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="c1"># The pile: GTD's In list as issues in a private repo (openloops.pile). Every surface</span>
+<span class="c1"># (the `ol pile-*` verbs, the openloops-pile skill, a voice connector) calls these.</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_pile_module</span><span class="p">():</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openloops</span><span class="w"> </span><span class="kn">import</span> <span class="n">pile</span> <span class="k">as</span> <span class="n">_pile</span>
+
+    <span class="k">return</span> <span class="n">_pile</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pile</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"pile"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""What is on the pile: the open items carrying ``label`` (default untriaged), oldest first.</span>
+
+<span class="sd">    Read-only. Each item has ``number``, ``title``, ``said`` (the dictation), ``hint``,</span>
+<span class="sd">    ``age_days`` and ``url``; the envelope has ``repo``, ``count`` and ``oldest_days``.</span>
+<span class="sd">    """</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">_pile_module</span><span class="p">()</span>
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">pile_repo</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(</span><span class="n">now</span><span class="o">=</span><span class="n">now</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">repo</span><span class="o">=</span><span class="n">repo</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"repo"</span><span class="p">:</span> <span class="n">repo</span><span class="p">,</span>
+        <span class="s2">"count"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">found</span><span class="p">),</span>
+        <span class="s2">"oldest_days"</span><span class="p">:</span> <span class="nb">max</span><span class="p">((</span><span class="n">i</span><span class="p">[</span><span class="s2">"age_days"</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">found</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+        <span class="s2">"items"</span><span class="p">:</span> <span class="n">found</span><span class="p">,</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pile_show</span><span class="p">(</span><span class="n">number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""One pile item, any state, with its comments (who handled it, and where it went)."""</span>
+    <span class="k">return</span> <span class="n">_pile_module</span><span class="p">()</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="n">repo</span><span class="o">=</span><span class="n">repo</span><span class="p">)</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pile_propose</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""A model-free first proposal per untriaged item. Changes nothing.</span>
+
+<span class="sd">    ``kind`` is one of loop / idea / issue / ask, with ``why``. An agent reads the</span>
+<span class="sd">    dictation and replaces these with its own before asking the owner.</span>
+<span class="sd">    """</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">_pile_module</span><span class="p">()</span>
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">pile_repo</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"repo"</span><span class="p">:</span> <span class="n">repo</span><span class="p">,</span> <span class="s2">"proposals"</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">propose</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">repo</span><span class="o">=</span><span class="n">repo</span><span class="p">))}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pile_plan</span><span class="p">(</span>
+    <span class="n">number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">reading</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">session</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">when</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">reveal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">target_repo</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">issue_body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tags</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The signed steps that carry out one decision the owner said yes to. Changes nothing.</span>
+
+<span class="sd">    ``reading`` (required) is how you read the item. ``kind``: loop (``title``, ``when``),</span>
+<span class="sd">    idea (``tags``), issue (``target_repo``, ``title``, ``issue_body``; anything but a</span>
+<span class="sd">    private repo of the pile's owner gets that text only), work (``reason``: who takes</span>
+<span class="sd">    it; stays open, labelled working), done (``reason``: evidence), drop (``reason``), ask</span>
+<span class="sd">    (``reason``: the question). The caller runs ``steps`` in order with its own tools and</span>
+<span class="sd">    puts what the first step produced where a step says ``{result}``. ``by``/``session``</span>
+<span class="sd">    sign it (defaults: ``OPENLOOPS_AGENT``, this Claude Code session; ``session="none"``</span>
+<span class="sd">    for the name alone). ``force`` plans a second destination for an item that has one.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">_pile_module</span><span class="p">()</span><span class="o">.</span><span class="n">plan</span><span class="p">(</span>
+        <span class="n">number</span><span class="p">,</span>
+        <span class="n">kind</span><span class="p">,</span>
+        <span class="n">reading</span><span class="o">=</span><span class="n">reading</span><span class="p">,</span>
+        <span class="n">by</span><span class="o">=</span><span class="n">by</span><span class="p">,</span>
+        <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+        <span class="n">when</span><span class="o">=</span><span class="n">when</span><span class="p">,</span>
+        <span class="n">reveal</span><span class="o">=</span><span class="n">reveal</span><span class="p">,</span>
+        <span class="n">target_repo</span><span class="o">=</span><span class="n">target_repo</span><span class="p">,</span>
+        <span class="n">issue_body</span><span class="o">=</span><span class="n">issue_body</span><span class="p">,</span>
+        <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">,</span>
+        <span class="n">reason</span><span class="o">=</span><span class="n">reason</span><span class="p">,</span>
+        <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
+        <span class="n">repo</span><span class="o">=</span><span class="n">repo</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pile_sign</span><span class="p">(</span>
+    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">session</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">to_repo</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""``text`` signed for a comment on ``to_repo`` (default: the pile). Changes nothing.</span>
+
+<span class="sd">    The session link is kept only on a private repo of the pile's owner.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">_pile_module</span><span class="p">()</span><span class="o">.</span><span class="n">signed</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="n">by</span><span class="p">,</span> <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">,</span> <span class="n">to_repo</span><span class="o">=</span><span class="n">to_repo</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pile_nudge</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span> <span class="n">stale_days</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"09:00"</span><span class="p">,</span> <span class="n">repo</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Keep one reminder coming while any pile item waits over ``stale_days`` (default 3). Never acts on an item."""</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">_pile_module</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">nudge</span><span class="p">(</span><span class="n">stale_days</span><span class="o">=</span><span class="n">stale_days</span> <span class="ow">or</span> <span class="n">p</span><span class="o">.</span><span class="n">DFLT_STALE_DAYS</span><span class="p">,</span> <span class="n">at</span><span class="o">=</span><span class="n">at</span><span class="p">,</span> <span class="n">repo</span><span class="o">=</span><span class="n">repo</span><span class="p">)</span>
+
+
 <span class="c1">#: Single source of truth for what every surface exposes. The CLI dispatches this list;</span>
 <span class="c1">#: an MCP or HTTP adapter would reference the same names as strings.</span>
 <span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">[</span>
@@ -1530,6 +1644,12 @@ window.runMermaid = runMermaid;</script>
     <span class="n">done</span><span class="p">,</span>
     <span class="n">snooze</span><span class="p">,</span>
     <span class="n">remind_tick</span><span class="p">,</span>
+    <span class="n">pile</span><span class="p">,</span>
+    <span class="n">pile_show</span><span class="p">,</span>
+    <span class="n">pile_propose</span><span class="p">,</span>
+    <span class="n">pile_plan</span><span class="p">,</span>
+    <span class="n">pile_sign</span><span class="p">,</span>
+    <span class="n">pile_nudge</span><span class="p">,</span>
 <span class="p">]</span>
 
 

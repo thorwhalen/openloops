@@ -1,0 +1,39 @@
+openloops.pile
+==============
+
+.. automodule:: openloops.pile
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      PILE_LABEL
+      KINDS
+      DFLT_STALE_DAYS
+      NUDGE_SOURCE
+      RESULT
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      pile_repo
+      parse_item
+      items
+      show
+      heuristic_propose
+      propose
+      signature
+      agent_identity
+      signed
+      plan
+      is_own_private
+      nudge
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      PileItem
+   

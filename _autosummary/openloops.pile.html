@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<link rel="alternate" type="text/markdown" href="openloops.pile.html.md">
+<link rel="describedby" href="../llms.txt" type="text/markdown">
+<link rel="alternate" type="text/markdown" href="openloops.pile.html.md">
+<link rel="describedby" href="llms.txt">
+    <title>openloops.pile &#8212; openloops</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d75fae25" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx_autodoc_typehints.css?v=057ac668" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/epythet.css?v=93ea43a0" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../_static/documentation_options.js?v=ce72d79b"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=fd10adb8"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/openloops.pile';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="openloops.predicate_safety" href="openloops.predicate_safety.html" />
+    <link rel="prev" title="openloops.obligations" href="openloops.obligations.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.45" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">openloops</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../ai-agents.html">
+    For AI agents
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/thorwhalen/openloops" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../ai-agents.html">
+    For AI agents
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/thorwhalen/openloops" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="openloops.html">openloops</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="openloops.base.html">openloops.base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.blockers.html">openloops.blockers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.board.html">openloops.board</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.board_refresh.html">openloops.board_refresh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.board_server.html">openloops.board_server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.board_store.html">openloops.board_store</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.dashboard.html">openloops.dashboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.digest.html">openloops.digest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.egress.html">openloops.egress</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.job.html">openloops.job</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.loops.html">openloops.loops</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.obligations.html">openloops.obligations</a></li>
+<li class="toctree-l2 current active"><a aria-current="page" class="current reference internal" href="#">openloops.pile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.predicate_safety.html">openloops.predicate_safety</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.publications.html">openloops.publications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.receiver_tick.html">openloops.receiver_tick</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.remind.html">openloops.remind</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.skills.html">openloops.skills</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.store.html">openloops.store</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.tasks.html">openloops.tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.tools.html">openloops.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="openloops.transcripts.html">openloops.transcripts</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../api.html" class="nav-link">API reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="openloops.html" class="nav-link">openloops</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">openloops.pile</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-openloops.pile">
+<span id="openloops-pile"></span><h1>openloops.pile<a class="headerlink" href="#module-openloops.pile" title="Link to this heading">#</a></h1>
+<p>The pile: GTD’s In list, kept as GitHub issues in a private repo, and its clarify step.</p>
+<p>A capture (an Apple Shortcut, the <code class="code docutils literal notranslate"><span class="pre">gh</span></code> CLI, anything that can send a request to the issues
+API) is one open issue labelled <code class="docutils literal notranslate"><span class="pre">pile</span></code> in the owner’s pile repo. This module is the one
+place that reads and changes that pile, so the agent skill (<code class="docutils literal notranslate"><span class="pre">openloops-pile</span></code>), the
+<code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">pile-*</span></code> commands and a voice surface (bosun) all do the same thing:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#openloops.pile.items" title="openloops.pile.items"><code class="xref py py-func docutils literal notranslate"><span class="pre">items()</span></code></a> / <a class="reference internal" href="#openloops.pile.show" title="openloops.pile.show"><code class="xref py py-func docutils literal notranslate"><span class="pre">show()</span></code></a>: what is on the pile, read-only;</p></li>
+<li><p><a class="reference internal" href="#openloops.pile.propose" title="openloops.pile.propose"><code class="xref py py-func docutils literal notranslate"><span class="pre">propose()</span></code></a>: a first proposal per item, from a model-free heuristic by default
+(<code class="docutils literal notranslate"><span class="pre">proposer=</span></code> is the seam an agent’s own reading replaces);</p></li>
+<li><p><a class="reference internal" href="#openloops.pile.plan" title="openloops.pile.plan"><code class="xref py py-func docutils literal notranslate"><span class="pre">plan()</span></code></a>: the steps that carry out one decision the owner said yes to (a loop, an
+idea, an issue in another repo, work handed to a session, done, dropped), ending with
+a signed comment on the pile item saying where it went. **openloops never writes to
+GitHub** (ADR-008, ADR-014): the caller runs the steps with its own tools;</p></li>
+<li><p><a class="reference internal" href="#openloops.pile.signed" title="openloops.pile.signed"><code class="xref py py-func docutils literal notranslate"><span class="pre">signed()</span></code></a>: a signed progress note, for a session working on an item;</p></li>
+<li><p><a class="reference internal" href="#openloops.pile.nudge" title="openloops.pile.nudge"><code class="xref py py-func docutils literal notranslate"><span class="pre">nudge()</span></code></a>: keep one reminder loop pending while items wait too long. It never
+acts on an item.</p></li>
+</ul>
+<p><strong>Every write is signed</strong> (<a class="reference internal" href="#openloops.pile.signature" title="openloops.pile.signature"><code class="xref py py-func docutils literal notranslate"><span class="pre">signature()</span></code></a>): the agent’s name and, on private repos, a
+link to its session, so an idea’s development can always be traced back to who did it.
+<strong>Public destinations get no private content</strong>: an issue filed in a public repo carries
+only the text the caller wrote for it, no dictation, no pile link and no session link.</p>
+<p>Nothing here runs on capture and nothing acts without being called: no Action, no
+webhook (the owner’s rule). GitHub is only read, through <code class="docutils literal notranslate"><span class="pre">gh</span></code> (<code class="docutils literal notranslate"><span class="pre">run_gh=</span></code>); the one
+write is <a class="reference internal" href="#openloops.pile.nudge" title="openloops.pile.nudge"><code class="xref py py-func docutils literal notranslate"><span class="pre">nudge()</span></code></a>’s reminder loop, through openloops’ own reminder runner.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_item</span><span class="p">({</span><span class="s2">"number"</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"call about zodal"</span><span class="p">,</span> <span class="s2">"body"</span><span class="p">:</span> <span class="s2">"call about zodal</span><span class="se">\n\n</span><span class="s2">— pile: inbox"</span><span class="p">,</span>
+<span class="gp">... </span>            <span class="s2">"labels"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"pile"</span><span class="p">},</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"inbox"</span><span class="p">}],</span> <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2026-11-20T10:00:00Z"</span><span class="p">,</span>
+<span class="gp">... </span>            <span class="s2">"url"</span><span class="p">:</span> <span class="s2">"https://github.com/o/_pile/issues/7"</span><span class="p">})</span><span class="o">.</span><span class="n">hint</span>
+<span class="go">'inbox'</span>
+</pre></div>
+</div>
+<p class="rubric">Module Attributes</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.pile.PILE_LABEL" title="openloops.pile.PILE_LABEL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PILE_LABEL</span></code></a></p></td>
+<td><p>The label every untriaged capture carries.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.pile.KINDS" title="openloops.pile.KINDS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KINDS</span></code></a></p></td>
+<td><p>What <code class="xref py py-func docutils literal notranslate"><span class="pre">apply()</span></code> can do with an item.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.pile.DFLT_STALE_DAYS" title="openloops.pile.DFLT_STALE_DAYS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DFLT_STALE_DAYS</span></code></a></p></td>
+<td><p>An item older than this many days makes <a class="reference internal" href="#openloops.pile.nudge" title="openloops.pile.nudge"><code class="xref py py-func docutils literal notranslate"><span class="pre">nudge()</span></code></a> keep a reminder pending.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.pile.NUDGE_SOURCE" title="openloops.pile.NUDGE_SOURCE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NUDGE_SOURCE</span></code></a></p></td>
+<td><p>one per pile, found again by this.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.pile.RESULT" title="openloops.pile.RESULT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RESULT</span></code></a></p></td>
+<td><p>The placeholder a plan's later steps carry for what the first step produced (an issue URL, a loop id, an idea id).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Functions</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.pile.pile_repo" title="openloops.pile.pile_repo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pile_repo</span></code></a>([repo, run_gh])</p></td>
+<td><p>The pile repo: <code class="docutils literal notranslate"><span class="pre">repo</span></code>, else <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_PILE_REPO</span></code>, else <code class="docutils literal notranslate"><span class="pre">&lt;gh</span> <span class="pre">login&gt;/_pile</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.pile.parse_item" title="openloops.pile.parse_item"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_item</span></code></a>(raw)</p></td>
+<td><p>A <a class="reference internal" href="#openloops.pile.PileItem" title="openloops.pile.PileItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">PileItem</span></code></a> from <code class="docutils literal notranslate"><span class="pre">gh</span></code>'s JSON for one issue.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.pile.items" title="openloops.pile.items"><code class="xref py py-obj docutils literal notranslate"><span class="pre">items</span></code></a>(*[, repo, label, limit, run_gh])</p></td>
+<td><p>The open items carrying <code class="docutils literal notranslate"><span class="pre">label</span></code> (default: untriaged), oldest first.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.pile.show" title="openloops.pile.show"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show</span></code></a>(number, *[, repo, run_gh])</p></td>
+<td><p>One item with its comments (any state).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.pile.heuristic_propose" title="openloops.pile.heuristic_propose"><code class="xref py py-obj docutils literal notranslate"><span class="pre">heuristic_propose</span></code></a>(item)</p></td>
+<td><p>A first guess from the words alone.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.pile.propose" title="openloops.pile.propose"><code class="xref py py-obj docutils literal notranslate"><span class="pre">propose</span></code></a>(found, *[, proposer])</p></td>
+<td><p>One proposal per item.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.pile.signature" title="openloops.pile.signature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signature</span></code></a>(by[, session, public])</p></td>
+<td><p>The last lines of every comment an agent writes here.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.pile.agent_identity" title="openloops.pile.agent_identity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">agent_identity</span></code></a>([by, session, env])</p></td>
+<td><p>Who is writing: <code class="docutils literal notranslate"><span class="pre">by</span></code> (an agent or session name) and <code class="docutils literal notranslate"><span class="pre">session</span></code> (a URL or address).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.pile.signed" title="openloops.pile.signed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signed</span></code></a>(text, *[, by, session, to_repo, run_gh])</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">text</span></code> with the writer's signature, for a comment on <code class="docutils literal notranslate"><span class="pre">to_repo</span></code> (default: the pile).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.pile.plan" title="openloops.pile.plan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plan</span></code></a>(number, kind, *[, reading, by, ...])</p></td>
+<td><p>The steps that carry out one decision the owner said yes to, as data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.pile.is_own_private" title="openloops.pile.is_own_private"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_own_private</span></code></a>(repo, *, owner[, run_gh])</p></td>
+<td><p>True only for a <code class="docutils literal notranslate"><span class="pre">PRIVATE</span></code> repo of <code class="docutils literal notranslate"><span class="pre">owner</span></code>: anything else is treated as public.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.pile.nudge" title="openloops.pile.nudge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nudge</span></code></a>(*[, stale_days, at, repo, run_gh, ...])</p></td>
+<td><p>Keep one reminder coming while any pile item waits longer than <code class="docutils literal notranslate"><span class="pre">stale_days</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Classes</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.pile.PileItem" title="openloops.pile.PileItem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PileItem</span></code></a>(number, title, said, hint, labels, ...)</p></td>
+<td><p>One capture.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py data">
+<dt class="sig sig-object py" id="openloops.pile.DFLT_STALE_DAYS">
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">DFLT_STALE_DAYS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3.0</span></span><a class="headerlink" href="#openloops.pile.DFLT_STALE_DAYS" title="Link to this definition">#</a></dt>
+<dd><p>An item older than this many days makes <a class="reference internal" href="#openloops.pile.nudge" title="openloops.pile.nudge"><code class="xref py py-func docutils literal notranslate"><span class="pre">nudge()</span></code></a> keep a reminder pending.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="openloops.pile.KINDS">
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">KINDS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('loop',</span> <span class="pre">'idea',</span> <span class="pre">'issue',</span> <span class="pre">'work',</span> <span class="pre">'done',</span> <span class="pre">'drop',</span> <span class="pre">'ask')</span></span><a class="headerlink" href="#openloops.pile.KINDS" title="Link to this definition">#</a></dt>
+<dd><p>What <code class="xref py py-func docutils literal notranslate"><span class="pre">apply()</span></code> can do with an item.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="openloops.pile.NUDGE_SOURCE">
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">NUDGE_SOURCE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pile-nudge'</span></span><a class="headerlink" href="#openloops.pile.NUDGE_SOURCE" title="Link to this definition">#</a></dt>
+<dd><p>one per pile, found again by this.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The <code class="docutils literal notranslate"><span class="pre">source</span></code> of the nudge loop</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="openloops.pile.PILE_LABEL">
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">PILE_LABEL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pile'</span></span><a class="headerlink" href="#openloops.pile.PILE_LABEL" title="Link to this definition">#</a></dt>
+<dd><p>The label every untriaged capture carries.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openloops.pile.PileItem">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">PileItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">said</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'open'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">tuple()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/pile.html#PileItem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.pile.PileItem" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>One capture. <code class="docutils literal notranslate"><span class="pre">said</span></code> is the dictation, with the Shortcut’s hint line removed.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="openloops.pile.RESULT">
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">RESULT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'{result}'</span></span><a class="headerlink" href="#openloops.pile.RESULT" title="Link to this definition">#</a></dt>
+<dd><p>The placeholder a plan’s later steps carry for what the first step produced (an
+issue URL, a loop id, an idea id). The caller substitutes it.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.pile.agent_identity">
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">agent_identity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/pile.html#agent_identity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.pile.agent_identity" title="Link to this definition">#</a></dt>
+<dd><p>Who is writing: <code class="docutils literal notranslate"><span class="pre">by</span></code> (an agent or session name) and <code class="docutils literal notranslate"><span class="pre">session</span></code> (a URL or address).</p>
+<p>Defaults: <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_AGENT</span></code>; then Claude Code’s own variables, the Remote Control
+session (<code class="docutils literal notranslate"><span class="pre">https://claude.ai/code/&lt;CLAUDE_CODE_BRIDGE_SESSION_ID&gt;</span></code>) or the local
+session id (<code class="docutils literal notranslate"><span class="pre">claude-code:&lt;CLAUDE_CODE_SESSION_ID&gt;</span></code>). <code class="docutils literal notranslate"><span class="pre">session=&quot;none&quot;</span></code> signs with
+the name alone (a surface that is not this Claude Code session, such as a connector
+started from one, passes it rather than borrow the session it inherited).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">agent_identity</span><span class="p">(</span><span class="n">env</span><span class="o">=</span><span class="p">{</span><span class="s2">"CLAUDE_CODE_BRIDGE_SESSION_ID"</span><span class="p">:</span> <span class="s2">"session_01X"</span><span class="p">})[</span><span class="s2">"session"</span><span class="p">]</span>
+<span class="go">'https://claude.ai/code/session_01X'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">agent_identity</span><span class="p">(</span><span class="s2">"bosun@tw"</span><span class="p">,</span> <span class="s2">"none"</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="p">{</span><span class="s2">"CLAUDE_CODE_SESSION_ID"</span><span class="p">:</span> <span class="s2">"abc"</span><span class="p">})</span>
+<span class="go">{'by': 'bosun@tw', 'session': None}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.pile.heuristic_propose">
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">heuristic_propose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/pile.html#heuristic_propose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.pile.heuristic_propose" title="Link to this definition">#</a></dt>
+<dd><p>A first guess from the words alone. An agent’s reading replaces it (<code class="docutils literal notranslate"><span class="pre">proposer=</span></code>).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">it</span> <span class="o">=</span> <span class="n">parse_item</span><span class="p">({</span><span class="s2">"number"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"x"</span><span class="p">,</span> <span class="s2">"body"</span><span class="p">:</span> <span class="s2">"Remind me to call Ana tomorrow"</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="s2">"labels"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2026-11-20T10:00:00Z"</span><span class="p">,</span> <span class="s2">"url"</span><span class="p">:</span> <span class="s2">"u"</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">heuristic_propose</span><span class="p">(</span><span class="n">it</span><span class="p">)[</span><span class="s2">"kind"</span><span class="p">]</span>
+<span class="go">'loop'</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.pile.is_own_private">
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">is_own_private</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">owner</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_gh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/pile.html#is_own_private"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.pile.is_own_private" title="Link to this definition">#</a></dt>
+<dd><p>True only for a <code class="docutils literal notranslate"><span class="pre">PRIVATE</span></code> repo of <code class="docutils literal notranslate"><span class="pre">owner</span></code>: anything else is treated as public.</p>
+<p>Fails closed: an internal repo, another owner’s private repo (a client’s, shared with
+other people), or a visibility that cannot be read all get the public treatment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.pile.items">
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">repo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pile'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_gh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/pile.html#items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.pile.items" title="Link to this definition">#</a></dt>
+<dd><p>The open items carrying <code class="docutils literal notranslate"><span class="pre">label</span></code> (default: untriaged), oldest first.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#openloops.pile.PileItem" title="openloops.pile.PileItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">PileItem</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.pile.nudge">
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">nudge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">stale_days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'09:00'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_gh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loops_api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">now</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/pile.html#nudge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.pile.nudge" title="Link to this definition">#</a></dt>
+<dd><p>Keep one reminder coming while any pile item waits longer than <code class="docutils literal notranslate"><span class="pre">stale_days</span></code>.</p>
+<p>Idempotent; run it from a timer. An item counts while it is on the pile (<code class="docutils literal notranslate"><span class="pre">pile</span></code>)
+or handed to a session (<code class="docutils literal notranslate"><span class="pre">working</span></code>): a session that died leaves it there. When
+something is stale, no nudge is still to come, and none was made in the last
+<code class="xref py py-data docutils literal notranslate"><span class="pre">NUDGE_EVERY_HOURS</span></code>, it closes the nudges that already fired and makes one loop
+(source <code class="docutils literal notranslate"><span class="pre">pile-nudge</span></code>) for the next <code class="docutils literal notranslate"><span class="pre">at</span></code> in the owner’s zone. The push says only the
+count and the oldest age (it crosses a public relay). When nothing is stale, every
+open nudge is withdrawn. It never touches a pile item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.pile.parse_item">
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">parse_item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/pile.html#parse_item"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.pile.parse_item" title="Link to this definition">#</a></dt>
+<dd><p>A <a class="reference internal" href="#openloops.pile.PileItem" title="openloops.pile.PileItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">PileItem</span></code></a> from <code class="docutils literal notranslate"><span class="pre">gh</span></code>’s JSON for one issue. Pure.</p>
+<p>The hint is the first label that is not a status label, else the body’s
+<code class="docutils literal notranslate"><span class="pre">—</span> <span class="pre">pile:</span> <span class="pre">&lt;hint&gt;</span></code> line (kept by the Shortcut in case a label is dropped).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_item</span><span class="p">({</span><span class="s2">"number"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"t"</span><span class="p">,</span> <span class="s2">"body"</span><span class="p">:</span> <span class="s2">"no hint here"</span><span class="p">,</span> <span class="s2">"labels"</span><span class="p">:</span> <span class="p">[],</span>
+<span class="gp">... </span>            <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2026-11-20T10:00:00Z"</span><span class="p">,</span> <span class="s2">"url"</span><span class="p">:</span> <span class="s2">"u"</span><span class="p">})</span><span class="o">.</span><span class="n">hint</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#openloops.pile.PileItem" title="openloops.pile.PileItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">PileItem</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.pile.pile_repo">
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">pile_repo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_gh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/pile.html#pile_repo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.pile.pile_repo" title="Link to this definition">#</a></dt>
+<dd><p>The pile repo: <code class="docutils literal notranslate"><span class="pre">repo</span></code>, else <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_PILE_REPO</span></code>, else <code class="docutils literal notranslate"><span class="pre">&lt;gh</span> <span class="pre">login&gt;/_pile</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.pile.plan">
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">plan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">reading</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">when</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reveal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_repo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issue_body</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reason</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_gh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/pile.html#plan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.pile.plan" title="Link to this definition">#</a></dt>
+<dd><p>The steps that carry out one decision the owner said yes to, as data. Changes nothing.</p>
+<p>openloops never writes to GitHub (ADR-008, ADR-014): the caller runs the steps in
+order, with its own tools (<code class="docutils literal notranslate"><span class="pre">gh</span></code> in a Claude Code session, the connector’s comment
+and create tools on a voice surface), substituting <a class="reference internal" href="#openloops.pile.RESULT" title="openloops.pile.RESULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">RESULT</span></code></a> in later steps
+with what the first step produced. <code class="docutils literal notranslate"><span class="pre">reading</span></code> is the agent’s interpretation, and
+opens the signed comment. Per <code class="docutils literal notranslate"><span class="pre">kind</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">loop</span></code>: <code class="docutils literal notranslate"><span class="pre">remind</span></code> (<code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">remind</span></code>; source = the item’s URL), then close as routed;
+<code class="docutils literal notranslate"><span class="pre">title</span></code> is required with <code class="docutils literal notranslate"><span class="pre">reveal</span></code> (the push crosses a public relay);</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">idea</span></code>: <code class="docutils literal notranslate"><span class="pre">idea</span></code> (<code class="docutils literal notranslate"><span class="pre">ideadump</span> <span class="pre">add</span></code> with the dictation verbatim), then close as routed;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">issue</span></code>: <code class="docutils literal notranslate"><span class="pre">create_issue</span></code> in <code class="docutils literal notranslate"><span class="pre">target_repo</span></code> (<code class="docutils literal notranslate"><span class="pre">title</span></code> + <code class="docutils literal notranslate"><span class="pre">issue_body</span></code>
+required); anything but a private repo of the pile’s owner gets that text only,
+no pile link and no session link;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">work</span></code>: hand-off to a session; labelled <code class="docutils literal notranslate"><span class="pre">working</span></code> and left open; the session
+posts <a class="reference internal" href="#openloops.pile.signed" title="openloops.pile.signed"><code class="xref py py-func docutils literal notranslate"><span class="pre">signed()</span></code></a> notes and finishes with <code class="docutils literal notranslate"><span class="pre">done</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">done</span></code>: close as routed, <code class="docutils literal notranslate"><span class="pre">reason</span></code> = the evidence;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">drop</span></code>: close as not planned, <code class="docutils literal notranslate"><span class="pre">reason</span></code> required (never silent);</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ask</span></code>: stays on the pile, labelled <code class="docutils literal notranslate"><span class="pre">needs-owner</span></code>, <code class="docutils literal notranslate"><span class="pre">reason</span></code> = the question.</p></li>
+</ul>
+<p>A destination already recorded on the item (a <code class="docutils literal notranslate"><span class="pre">→</span> <span class="pre">issue/loop/idea</span></code> line from an
+earlier, half-run plan) refuses a second one unless <code class="docutils literal notranslate"><span class="pre">force</span></code>: finish that plan’s
+remaining steps instead. The pile itself must be a private repo of its owner.</p>
+<p>Step ops: <code class="docutils literal notranslate"><span class="pre">remind</span></code>, <code class="docutils literal notranslate"><span class="pre">idea</span></code>, <code class="docutils literal notranslate"><span class="pre">create_issue</span></code>, <code class="docutils literal notranslate"><span class="pre">comment</span></code>, <code class="docutils literal notranslate"><span class="pre">labels</span></code>, <code class="docutils literal notranslate"><span class="pre">close</span></code>
+(<code class="docutils literal notranslate"><span class="pre">reason</span></code> in <code class="docutils literal notranslate"><span class="pre">gh</span></code>’s spelling, <code class="docutils literal notranslate"><span class="pre">rest_reason</span></code> in the REST API’s).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.pile.propose">
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">propose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">found</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proposer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;function</span> <span class="pre">heuristic_propose&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/pile.html#propose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.pile.propose" title="Link to this definition">#</a></dt>
+<dd><p>One proposal per item. Proposals change nothing; <code class="xref py py-func docutils literal notranslate"><span class="pre">apply()</span></code> acts on a yes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.pile.show">
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">repo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_gh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/pile.html#show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.pile.show" title="Link to this definition">#</a></dt>
+<dd><p>One item with its comments (any state).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#openloops.pile.PileItem" title="openloops.pile.PileItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">PileItem</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.pile.signature">
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">signature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">by</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">public</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/pile.html#signature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.pile.signature" title="Link to this definition">#</a></dt>
+<dd><p>The last lines of every comment an agent writes here.</p>
+<p>On a public repo only the name: a session link is private context.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">signature</span><span class="p">(</span><span class="s2">"gtd-capture@mac"</span><span class="p">,</span> <span class="s2">"https://claude.ai/code/session_01X"</span><span class="p">))</span>
+
+<span class="go">—</span>
+<span class="go">Agent: gtd-capture@mac</span>
+<span class="go">Claude-Session: https://claude.ai/code/session_01X</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signature</span><span class="p">(</span><span class="s2">"gtd-capture@mac"</span><span class="p">,</span> <span class="s2">"https://claude.ai/code/session_01X"</span><span class="p">,</span> <span class="n">public</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">'Agent: gtd-capture@mac'</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openloops.pile.signed">
+<span class="sig-prename descclassname"><span class="pre">openloops.pile.</span></span><span class="sig-name descname"><span class="pre">signed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_repo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_gh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/pile.html#signed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.pile.signed" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">text</span></code> with the writer’s signature, for a comment on <code class="docutils literal notranslate"><span class="pre">to_repo</span></code> (default: the pile).</p>
+<p>The session link is kept only when <code class="docutils literal notranslate"><span class="pre">to_repo</span></code> is a private repo of the pile’s owner;
+anywhere else (public, internal, a client’s, unreadable) the name alone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="openloops.obligations.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">openloops.obligations</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="openloops.predicate_safety.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">openloops.predicate_safety</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.DFLT_STALE_DAYS"><code class="docutils literal notranslate"><span class="pre">DFLT_STALE_DAYS</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.KINDS"><code class="docutils literal notranslate"><span class="pre">KINDS</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.NUDGE_SOURCE"><code class="docutils literal notranslate"><span class="pre">NUDGE_SOURCE</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.PILE_LABEL"><code class="docutils literal notranslate"><span class="pre">PILE_LABEL</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.PileItem"><code class="docutils literal notranslate"><span class="pre">PileItem</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.RESULT"><code class="docutils literal notranslate"><span class="pre">RESULT</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.agent_identity"><code class="docutils literal notranslate"><span class="pre">agent_identity()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.heuristic_propose"><code class="docutils literal notranslate"><span class="pre">heuristic_propose()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.is_own_private"><code class="docutils literal notranslate"><span class="pre">is_own_private()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.items"><code class="docutils literal notranslate"><span class="pre">items()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.nudge"><code class="docutils literal notranslate"><span class="pre">nudge()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.parse_item"><code class="docutils literal notranslate"><span class="pre">parse_item()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.pile_repo"><code class="docutils literal notranslate"><span class="pre">pile_repo()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.plan"><code class="docutils literal notranslate"><span class="pre">plan()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.propose"><code class="docutils literal notranslate"><span class="pre">propose()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.signature"><code class="docutils literal notranslate"><span class="pre">signature()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.pile.signed"><code class="docutils literal notranslate"><span class="pre">signed()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/_autosummary/openloops.pile.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

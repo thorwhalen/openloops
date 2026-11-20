@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=6a0a5382"></script>
+    <script src="_static/documentation_options.js?v=ce72d79b"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -57,7 +57,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.44" />
+  <meta name="docsearch:version" content="0.1.45" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -1000,8 +1000,18 @@ ol<span class="w"> </span>install-remind-job<span class="w">                    
 </section>
 <section id="the-pile-capture-anywhere-clarify-later">
 <span id="the-pile--capture-anywhere-clarify-later"></span><h2>The pile — capture anywhere, clarify later<a class="headerlink" href="#the-pile-capture-anywhere-clarify-later" title="Link to this heading">#</a></h2>
-<p>The GTD <em>In</em> list, kept as one GitHub issue per capture in a private repo of yours (default <code class="docutils literal notranslate"><span class="pre">&lt;your</span> <span class="pre">login&gt;/_pile</span></code>, or <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_PILE_REPO</span></code>). Anything that can <code class="docutils literal notranslate"><span class="pre">POST</span></code> to the GitHub issues API can capture: an Apple Shortcut (“Hey Siri, add to my pile”), <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">issue</span> <span class="pre">create</span></code>, a script. Each capture carries the label <code class="docutils literal notranslate"><span class="pre">pile</span></code> and, optionally, a routing hint label. Nothing in openloops runs on capture: no Action, no webhook.</p>
-<p>Emptying it is on demand. Ask your agent to “go through my pile”: the <code class="docutils literal notranslate"><span class="pre">openloops-pile</span></code> skill (installed by <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">install-skills</span></code>) reads each item as dictation, proposes where each belongs (a loop via <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">remind</span></code>, an idea via <code class="docutils literal notranslate"><span class="pre">ideadump</span></code>, an issue in the repo that owns it, or dropped with a reason), acts after your one “yes”, and closes each pile item with a comment linking where it went. A pile item is never edited and never closed without a comment.</p>
+<p>The GTD <em>In</em> list, kept as one GitHub issue per capture in a private repo of yours (default <code class="docutils literal notranslate"><span class="pre">&lt;your</span> <span class="pre">login&gt;/_pile</span></code>, or <code class="docutils literal notranslate"><span class="pre">OPENLOOPS_PILE_REPO</span></code>). Anything that can send a request to the GitHub issues API can capture: an Apple Shortcut (“Hey Siri, add to my pile”), the <code class="docutils literal notranslate"><span class="pre">gh</span></code> CLI, a script. Each capture carries the label <code class="docutils literal notranslate"><span class="pre">pile</span></code> and, optionally, a routing hint label. Nothing in openloops runs on capture: no Action, no webhook.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ol<span class="w"> </span>pile<span class="w">                     </span><span class="c1"># what is on it, oldest first (read-only)</span>
+ol<span class="w"> </span>pile-show<span class="w"> </span><span class="m">12</span><span class="w">             </span><span class="c1"># one item with its comments: who handled it and where it went</span>
+ol<span class="w"> </span>pile-propose<span class="w">             </span><span class="c1"># a free first guess per item: loop, idea, issue or ask</span>
+ol<span class="w"> </span>pile-plan<span class="w"> </span><span class="m">12</span><span class="w"> </span>drop<span class="w"> </span>--reading-file<span class="w"> </span>r.md<span class="w"> </span>--reason<span class="w"> </span><span class="s2">"not a capture"</span><span class="w">  </span><span class="c1"># the signed steps, as JSON</span>
+ol<span class="w"> </span>pile-sign<span class="w"> </span>--text-file<span class="w"> </span>note.md<span class="w"> </span>--by<span class="w"> </span>my-session<span class="w"> </span>--to-repo<span class="w"> </span>o/r<span class="w">      </span><span class="c1"># a signed progress note</span>
+ol<span class="w"> </span>pile-nudge<span class="w">               </span><span class="c1"># keep one reminder pending while items wait over 3 days</span>
+ol<span class="w"> </span>install-pile-nudge-job<span class="w">   </span><span class="c1"># macOS: run the nudge every six hours</span>
+</pre></div>
+</div>
+<p><strong>openloops reads and plans; it never writes to GitHub</strong> (<a class="reference internal" href="#docs/adr/014-the-pile-reads-and-plans-the-caller-writes.md"><span class="xref myst">ADR-014</span></a>). <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">pile-plan</span></code> returns the steps that carry out one decision (make a loop, add an idea, open an issue, comment, change labels, close), and the caller runs them with its own tools: <code class="docutils literal notranslate"><span class="pre">gh</span></code> in an agent session, the connector’s own tools on a voice surface. Every comment in a plan is signed with the agent’s name and, on a private repo of the pile’s owner, its session link, so an item’s development can be traced back to who did it. Anything else (a public, internal or someone else’s repo, or one whose visibility cannot be read) gets only the text the caller wrote for it. The pile itself must be private.</p>
+<p>Emptying the pile is on demand. Ask your agent “what’s on my pile”, “go through my pile” or “take care of pile item 12”: the <code class="docutils literal notranslate"><span class="pre">openloops-pile</span></code> skill (installed by <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">install-skills</span></code>) proposes where each item belongs, acts after your one “yes”, and closes each pile item with a signed comment linking where it went. A pile item is never edited and never closed without a comment.</p>
 </section>
 <section id="turning-it-off">
 <h2>Turning it off<a class="headerlink" href="#turning-it-off" title="Link to this heading">#</a></h2>
@@ -1207,7 +1217,7 @@ they are the two ways a tool like this becomes a liar.</p></li>
 </section>
 </section>
 
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-20 17:45 UTC from <a href="https://github.com/thorwhalen/openloops/commit/184de99b42025f678204153f9d1c12c60728b32c">184de99</a> (main) · openloops 0.1.44 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-20 18:07 UTC from <a href="https://github.com/thorwhalen/openloops/commit/63e332bae80d3188226f9b4446ba978b101d4d16">63e332b</a> (main) · openloops 0.1.45 · <a href="about-this-build.html">about this build</a></p>
 
                 </article>
               

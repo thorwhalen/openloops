@@ -648,9 +648,21 @@ Settings come from the environment: `OPENLOOPS_TZ` (an IANA zone for reading and
 
 ## The pile — capture anywhere, clarify later
 
-The GTD *In* list, kept as one GitHub issue per capture in a private repo of yours (default `<your login>/_pile`, or `OPENLOOPS_PILE_REPO`). Anything that can `POST` to the GitHub issues API can capture: an Apple Shortcut (“Hey Siri, add to my pile”), `gh issue create`, a script. Each capture carries the label `pile` and, optionally, a routing hint label. Nothing in openloops runs on capture: no Action, no webhook.
+The GTD *In* list, kept as one GitHub issue per capture in a private repo of yours (default `<your login>/_pile`, or `OPENLOOPS_PILE_REPO`). Anything that can send a request to the GitHub issues API can capture: an Apple Shortcut (“Hey Siri, add to my pile”), the `gh` CLI, a script. Each capture carries the label `pile` and, optionally, a routing hint label. Nothing in openloops runs on capture: no Action, no webhook.
 
-Emptying it is on demand. Ask your agent to “go through my pile”: the `openloops-pile` skill (installed by `ol install-skills`) reads each item as dictation, proposes where each belongs (a loop via `ol remind`, an idea via `ideadump`, an issue in the repo that owns it, or dropped with a reason), acts after your one “yes”, and closes each pile item with a comment linking where it went. A pile item is never edited and never closed without a comment.
+```bash
+ol pile                     # what is on it, oldest first (read-only)
+ol pile-show 12             # one item with its comments: who handled it and where it went
+ol pile-propose             # a free first guess per item: loop, idea, issue or ask
+ol pile-plan 12 drop --reading-file r.md --reason "not a capture"  # the signed steps, as JSON
+ol pile-sign --text-file note.md --by my-session --to-repo o/r      # a signed progress note
+ol pile-nudge               # keep one reminder pending while items wait over 3 days
+ol install-pile-nudge-job   # macOS: run the nudge every six hours
+```
+
+**openloops reads and plans; it never writes to GitHub** ([ADR-014]()). `ol pile-plan` returns the steps that carry out one decision (make a loop, add an idea, open an issue, comment, change labels, close), and the caller runs them with its own tools: `gh` in an agent session, the connector’s own tools on a voice surface. Every comment in a plan is signed with the agent’s name and, on a private repo of the pile’s owner, its session link, so an item’s development can be traced back to who did it. Anything else (a public, internal or someone else’s repo, or one whose visibility cannot be read) gets only the text the caller wrote for it. The pile itself must be private.
+
+Emptying the pile is on demand. Ask your agent “what’s on my pile”, “go through my pile” or “take care of pile item 12”: the `openloops-pile` skill (installed by `ol install-skills`) proposes where each item belongs, acts after your one “yes”, and closes each pile item with a signed comment linking where it went. A pile item is never edited and never closed without a comment.
 
 ## Turning it off
 

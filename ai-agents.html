@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=6a0a5382"></script>
+    <script src="_static/documentation_options.js?v=ce72d79b"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -57,7 +57,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.44" />
+  <meta name="docsearch:version" content="0.1.45" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -408,7 +408,7 @@ machine-readable copies of this documentation.</p>
 </section>
 <section id="openloops-pile">
 <h3><code class="docutils literal notranslate"><span class="pre">openloops-pile</span></code><a class="headerlink" href="#openloops-pile" title="Link to this heading">#</a></h3>
-<p>Go through the owner’s capture pile (one GitHub issue per thing they said to Siri or typed on the go, in a private pile repo) and clarify each item into where it belongs: a loop in openloops (<code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">remind</span></code>), an idea (<code class="docutils literal notranslate"><span class="pre">ideadump</span></code>), an issue in the repo that owns it, or dropped with a reason. Proposes a table first, acts only after the owner says yes, and closes each pile item with a comment saying where it went. Use on ‘dispatch my pile’, ‘go through my pile’, ‘triage my pile’, ‘what’s in my pile’, ‘process my captures’, ‘empty my inbox’ (the GTD In list), ‘clarify my captures’, ‘what did I pile’. Not for capturing a new item (that is the Siri Shortcut, or <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">issue</span> <span class="pre">create</span></code> on the pile repo) and not for reminders the owner asks for directly (openloops-remind).</p>
+<p>The owner’s capture pile (one GitHub issue per thing they said to Siri, ‘Add to My Pile’, in a private pile repo): say what is on it, clarify each item into where it belongs (a loop via <code class="docutils literal notranslate"><span class="pre">ol</span> <span class="pre">remind</span></code>, an idea via <code class="docutils literal notranslate"><span class="pre">ideadump</span></code>, an issue in the repo that owns it, work handed to a session, or dropped with a reason), and take care of one item end to end. Proposes first, acts only on the owner’s yes, signs every comment with the agent’s name and session link. Use on ‘what’s on my pile’, ‘tell me about my pile’, ‘go through my pile’, ‘dispatch my pile’, ‘triage my pile’, ‘take care of pile item N’, ‘work on that pile item’, ‘process my captures’, ‘empty my inbox’ (the GTD In list), and for a session handed a pile item (‘report progress on the pile item’). Not for capturing (the Siri Shortcut or a new issue on the pile repo) nor for reminders asked for directly (openloops-remind).</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gh<span class="w"> </span>skill<span class="w"> </span>install<span class="w"> </span>thorwhalen/openloops<span class="w"> </span>openloops-pile<span class="w"> </span>--agent<span class="w"> </span>claude-code
 </pre></div>
 </div>
