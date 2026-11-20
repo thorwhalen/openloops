@@ -314,11 +314,24 @@ def _resolve(store, deliver, settings):
     return store, deliver, settings
 
 
-def find(store: Mapping[str, Loop], ref: str) -> Loop:
-    """A loop by id, by a unique prefix (with or without ``loop-``), or by its hex suffix."""
+def _source_ref(loop: Loop) -> str:
+    return str((loop.source or {}).get("ref") or "")
+
+
+def find(
+    store: Mapping[str, Loop], ref: str, *, only_source: str | None = None
+) -> Loop:
+    """A loop by id, by a unique prefix (with or without ``loop-``), or by its hex suffix.
+
+    ``only_source`` narrows the search to loops whose ``source.ref`` is exactly that: a
+    surface that may only touch what it set itself (a voice connector) passes its own
+    name, and every other loop is, for it, not there.
+    """
     ref = (ref or "").strip()
     if not ref:
         raise KeyError("name a loop: its id, a unique prefix, or its last part")
+    if only_source is not None:
+        store = {k: v for k, v in store.items() if _source_ref(v) == only_source}
     if ref in store:
         return store[ref]
     matches = [
@@ -329,7 +342,8 @@ def find(store: Mapping[str, Loop], ref: str) -> Loop:
     if len(matches) == 1:
         return store[matches[0]]
     if not matches:
-        raise KeyError(f"no loop {ref!r}")
+        set_from = f" set from {only_source}" if only_source is not None else ""
+        raise KeyError(f"no loop {ref!r}{set_from}")
     raise KeyError(
         f"{ref!r} matches {len(matches)} loops: {', '.join(sorted(matches))}"
     )
@@ -482,6 +496,7 @@ def remind(
     reveal: bool = False,
     source: Mapping[str, Any] | None = None,
     by: str = "owner",
+    daily_cap: int | None = None,
     store: MutableMapping[str, Loop] | None = None,
     deliver: Any = None,
     settings: RemindSettings | None = None,
@@ -491,9 +506,26 @@ def remind(
 
     Give at most one of ``at`` and ``in_``; with neither, the loop is listed but never
     pushed. Returns the loop's summary and ``echo``, the one line to repeat to the owner.
+
+    ``daily_cap`` refuses a new loop once that many loops from the same ``source.ref``
+    were created in the last 24 hours: a surface driven by a model that reads other
+    people's text pins it, so a steered loop cannot flood the phone or the push quota.
     """
     store, deliver, settings = _resolve(store, deliver, settings)
     now = _loops.to_utc(now or datetime.now(timezone.utc))
+    if daily_cap is not None:
+        ref = str((source or {}).get("ref") or "")
+        since = now - timedelta(days=1)
+        recent = [
+            loop
+            for loop in _load(store)[0]
+            if _source_ref(loop) == ref and _loops.to_utc(loop.created) > since
+        ]
+        if len(recent) >= daily_cap:
+            raise ValueError(
+                f"{len(recent)} reminders from {ref or 'this source'} in the last 24 hours, "
+                f"which is the cap ({daily_cap}); set more from the Mac"
+            )
     if at is not None and in_ is not None:
         raise ValueError("give a time (at) or a delay (in), not both")
     when = None
@@ -538,6 +570,7 @@ def done(
     *,
     note: str | None = None,
     by: str = "owner",
+    only_source: str | None = None,
     store: MutableMapping[str, Loop] | None = None,
     deliver: Any = None,
     settings: RemindSettings | None = None,
@@ -546,7 +579,7 @@ def done(
     """Close a loop as done and cancel its scheduled push, if any."""
     store, deliver, settings = _resolve(store, deliver, settings)
     now = _loops.to_utc(now or datetime.now(timezone.utc))
-    before = find(store, ref)
+    before = find(store, ref, only_source=only_source)
     pending = _pending_push(before, now)
     loop = _loops.complete(before, now, by=by, note=note)
     loop = _settle(loop, store=store, deliver=deliver, settings=settings, now=now)
@@ -559,6 +592,8 @@ def snooze(
     until: str | datetime | None = None,
     for_: str | timedelta | None = None,
     by: str = "owner",
+    only_source: str | None = None,
+    max_ahead: timedelta | None = None,
     store: MutableMapping[str, Loop] | None = None,
     deliver: Any = None,
     settings: RemindSettings | None = None,
@@ -573,7 +608,11 @@ def snooze(
         when = now + (parse_in(for_) if isinstance(for_, str) else for_)
     else:
         when = _as_time(until, now=now, zone=settings.zone)
-    before = find(store, ref)
+    if max_ahead is not None and _loops.to_utc(when) - now > max_ahead:
+        raise ValueError(
+            f"a snooze from here moves a loop at most {max_ahead.days} days ahead"
+        )
+    before = find(store, ref, only_source=only_source)
     pending = _pending_push(before, now)
     loop = _loops.snooze(before, when, now, by=by)
     loop = _settle(loop, store=store, deliver=deliver, settings=settings, now=now)

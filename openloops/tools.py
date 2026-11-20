@@ -15,7 +15,7 @@ from __future__ import annotations
 import json
 
 from collections.abc import Mapping, MutableMapping
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -677,6 +677,7 @@ def remind(
     due: str | None = None,
     reveal: bool = False,
     source: str | None = None,
+    daily_cap: int | None = None,
 ) -> dict[str, Any]:
     """Make a loop that comes back at ``when`` and push it to the phone then.
 
@@ -697,6 +698,7 @@ def remind(
         due=due,
         reveal=reveal,
         source={"kind": "ref", "ref": source} if source else None,
+        daily_cap=daily_cap,
         settings=settings,
         now=now,
     )
@@ -707,19 +709,35 @@ def loops(*, state: str = "open") -> dict[str, Any]:
     return {"loops": _remind_module().list_loops(state=state)}
 
 
-def done(ref: str, *, note: str | None = None) -> dict[str, Any]:
-    """Close a loop (by id or a unique prefix) as done, cancelling its scheduled push."""
-    return _remind_module().done(ref, note=note)
+def done(
+    ref: str, *, note: str | None = None, only_source: str | None = None
+) -> dict[str, Any]:
+    """Close a loop (by id or a unique prefix) as done, cancelling its scheduled push.
+
+    ``only_source``: touch only a loop whose ``source.ref`` is that (a surface's own).
+    """
+    return _remind_module().done(ref, note=note, only_source=only_source)
 
 
-def snooze(ref: str, *, when: str) -> dict[str, Any]:
-    """Bring a loop back at ``when`` (a duration or a time, as for :func:`remind`); re-arms its push."""
+def snooze(
+    ref: str,
+    *,
+    when: str,
+    only_source: str | None = None,
+    max_days: int | None = None,
+) -> dict[str, Any]:
+    """Bring a loop back at ``when`` (a duration or a time, as for :func:`remind`); re-arms its push.
+
+    ``only_source`` as for :func:`done`; ``max_days`` refuses a time further ahead than that.
+    """
     r = _remind_module()
     settings = r.RemindSettings.from_env()
     now = datetime.now(timezone.utc)
     return r.snooze(
         ref,
         until=r.parse_when(when, now=now, zone=settings.zone),
+        only_source=only_source,
+        max_ahead=timedelta(days=max_days) if max_days else None,
         settings=settings,
         now=now,
     )

@@ -809,6 +809,7 @@ def remind(
     due: str = None,
     reveal: bool = False,
     source: str = None,
+    daily_cap: int = 0,
 ):
     """Remind me of TITLE at WHEN: a push to the phone, even if this machine sleeps.
 
@@ -818,8 +819,17 @@ def remind(
     (`ol install-remind-job`) schedules it when it comes within three days. The push says
     only "a reminder is due" unless --reveal: ntfy.sh is a public relay, so reveal short
     labels only, never names, clients or secrets. Prints the one-line echo to repeat.
+    `--daily-cap N` refuses a new reminder once N came from the same `--source` in the
+    last 24 hours (a surface a model drives pins it).
     """
-    row = tools.remind(title, when=when, due=due, reveal=reveal, source=source)
+    row = tools.remind(
+        title,
+        when=when,
+        due=due,
+        reveal=reveal,
+        source=source,
+        daily_cap=daily_cap or None,
+    )
     return f"{row['id']}: {row['title']}\n  {row['echo']}"
 
 
@@ -831,16 +841,24 @@ def loops(*, state: str = "open", json_out: bool = False):
     return "\n".join(_loop_line(r) for r in rows) or f"(no {state} loops)"
 
 
-def done(ref: str, *, note: str = None):
-    """Close loop REF (an id or a unique prefix) as done; cancels its scheduled push."""
-    row = tools.done(ref, note=note)
+def done(ref: str, *, note: str = None, only_source: str = None):
+    """Close loop REF (an id or a unique prefix) as done; cancels its scheduled push.
+
+    `--only-source NAME` touches only a loop set with `--source NAME` (a surface's own).
+    """
+    row = tools.done(ref, note=note, only_source=only_source)
     warning = f"\n  note: {row['warning']}" if row.get("warning") else ""
     return f"done: {row['id']} {row['title']}{warning}"
 
 
-def snooze(ref: str, when: str):
-    """Bring loop REF back at WHEN (a duration or a time); re-schedules its push."""
-    row = tools.snooze(ref, when=when)
+def snooze(ref: str, when: str, *, only_source: str = None, max_days: int = 0):
+    """Bring loop REF back at WHEN (a duration or a time); re-schedules its push.
+
+    `--only-source NAME` as for `ol done`; `--max-days N` refuses a time further ahead.
+    """
+    row = tools.snooze(
+        ref, when=when, only_source=only_source, max_days=max_days or None
+    )
     warning = f"\n  note: {row['warning']}" if row.get("warning") else ""
     return f"snoozed: {row['id']}\n  {row['echo']}{warning}"
 
