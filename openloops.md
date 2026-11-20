@@ -1,4 +1,4 @@
-> built 2026-11-20 12:38 UTC from 0a3540d (main) · openloops 0.1.41. Details: build_info.json
+> built 2026-11-20 16:39 UTC from b38ef68 (main) · openloops 0.1.42. Details: build_info.json
 
 # index.html.md
 
@@ -4886,19 +4886,19 @@ the title then travels too. Reveal short labels only, never names, clients or se
 
 ### Functions
 
-| [`loops_store`](_autosummary/openloops.remind.html.md#openloops.remind.loops_store)([rootdir])                         | The default store: `~/.local/share/openloops/loops/<id>.json`.                                                                                |
-|-------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| [`parse_in`](_autosummary/openloops.remind.html.md#openloops.remind.parse_in)(text)                                 | A duration such as `20m`, `3h`, `2d` or `1h30m`.                                                                                              |
-| [`parse_at`](_autosummary/openloops.remind.html.md#openloops.remind.parse_at)(text, \*, now, zone)                  | An ISO date-time (naive means `zone`), an ISO date (09:00 that day) or `HH:MM` (the next one).                                                |
-| [`parse_when`](_autosummary/openloops.remind.html.md#openloops.remind.parse_when)(text, \*, now, zone)                | A duration from `now` (`3h`, `1h30m`) or a time ([`parse_at()`](_autosummary/openloops.remind.html.md#openloops.remind.parse_at)): the one form a CLI flag takes. |
-| [`attach`](_autosummary/openloops.remind.html.md#openloops.remind.attach)(naive, zone)                            | `naive` read in `zone`; `None` means this machine's zone, DST rules included.                                                                 |
-| [`local`](_autosummary/openloops.remind.html.md#openloops.remind.local)(when, zone)                              | `when` shown in `zone`, or in this machine's zone (DST-aware) when `None`.                                                                    |
-| [`remind`](_autosummary/openloops.remind.html.md#openloops.remind.remind)(title, \*[, at, in_, due, reveal, ...]) | Make a loop that comes back at `at` (or after `in_`), arm it, and say when.                                                                   |
-| [`list_loops`](_autosummary/openloops.remind.html.md#openloops.remind.list_loops)(\*[, state, store])                 | Loops as summaries, soonest first.                                                                                                            |
-| [`done`](_autosummary/openloops.remind.html.md#openloops.remind.done)(ref, \*[, note, by, store, deliver, ...]) | Close a loop as done and cancel its scheduled push, if any.                                                                                   |
-| [`snooze`](_autosummary/openloops.remind.html.md#openloops.remind.snooze)(ref, \*[, until, for_, by, store, ...]) | Bring a loop back later (`until` a time, or `for_` a duration); re-arms its push.                                                             |
-| [`tick`](_autosummary/openloops.remind.html.md#openloops.remind.tick)(\*[, store, deliver, settings, now])      | Arm what came within the horizon, record what fired, deliver late what was missed.                                                            |
-| [`find`](_autosummary/openloops.remind.html.md#openloops.remind.find)(store, ref)                               | A loop by id, by a unique prefix (with or without `loop-`), or by its hex suffix.                                                             |
+| [`loops_store`](_autosummary/openloops.remind.html.md#openloops.remind.loops_store)([rootdir])                             | The default store: `~/.local/share/openloops/loops/<id>.json`.                                                                                |
+|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| [`parse_in`](_autosummary/openloops.remind.html.md#openloops.remind.parse_in)(text)                                     | A duration such as `20m`, `3h`, `2d` or `1h30m`.                                                                                              |
+| [`parse_at`](_autosummary/openloops.remind.html.md#openloops.remind.parse_at)(text, \*, now, zone)                      | An ISO date-time (naive means `zone`), an ISO date (09:00 that day) or `HH:MM` (the next one).                                                |
+| [`parse_when`](_autosummary/openloops.remind.html.md#openloops.remind.parse_when)(text, \*, now, zone)                    | A duration from `now` (`3h`, `1h30m`) or a time ([`parse_at()`](_autosummary/openloops.remind.html.md#openloops.remind.parse_at)): the one form a CLI flag takes. |
+| [`attach`](_autosummary/openloops.remind.html.md#openloops.remind.attach)(naive, zone)                                | `naive` read in `zone`; `None` means this machine's zone, DST rules included.                                                                 |
+| [`local`](_autosummary/openloops.remind.html.md#openloops.remind.local)(when, zone)                                  | `when` shown in `zone`, or in this machine's zone (DST-aware) when `None`.                                                                    |
+| [`remind`](_autosummary/openloops.remind.html.md#openloops.remind.remind)(title, \*[, at, in_, due, reveal, ...])     | Make a loop that comes back at `at` (or after `in_`), arm it, and say when.                                                                   |
+| [`list_loops`](_autosummary/openloops.remind.html.md#openloops.remind.list_loops)(\*[, state, store])                     | Loops as summaries, soonest first.                                                                                                            |
+| [`done`](_autosummary/openloops.remind.html.md#openloops.remind.done)(ref, \*[, note, by, only_source, store, ...]) | Close a loop as done and cancel its scheduled push, if any.                                                                                   |
+| [`snooze`](_autosummary/openloops.remind.html.md#openloops.remind.snooze)(ref, \*[, until, for_, by, ...])            | Bring a loop back later (`until` a time, or `for_` a duration); re-arms its push.                                                             |
+| [`tick`](_autosummary/openloops.remind.html.md#openloops.remind.tick)(\*[, store, deliver, settings, now])          | Arm what came within the horizon, record what fired, deliver late what was missed.                                                            |
+| [`find`](_autosummary/openloops.remind.html.md#openloops.remind.find)(store, ref, \*[, only_source])                | A loop by id, by a unique prefix (with or without `loop-`), or by its hex suffix.                                                             |
 
 ### Classes
 
@@ -4977,16 +4977,20 @@ the server honours it, an early `done` or `snooze` is said, not hidden.
 * **Return type:**
   [`datetime`](https://docs.python.org/3/library/datetime.html#datetime.datetime)
 
-### openloops.remind.done(ref, , note=None, by='owner', store=None, deliver=None, settings=None, now=None)
+### openloops.remind.done(ref, , note=None, by='owner', only_source=None, store=None, deliver=None, settings=None, now=None)
 
 Close a loop as done and cancel its scheduled push, if any.
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.remind.find(store, ref)
+### openloops.remind.find(store, ref, , only_source=None)
 
 A loop by id, by a unique prefix (with or without `loop-`), or by its hex suffix.
+
+`only_source` narrows the search to loops whose `source.ref` is exactly that: a
+surface that may only touch what it set itself (a voice connector) passes its own
+name, and every other loop is, for it, not there.
 
 * **Return type:**
   [`Loop`](_autosummary/openloops.loops.html.md#openloops.loops.Loop)
@@ -5054,17 +5058,21 @@ A duration from `now` (`3h`, `1h30m`) or a time ([`parse_at()`](_autosummary/ope
 * **Return type:**
   [`datetime`](https://docs.python.org/3/library/datetime.html#datetime.datetime)
 
-### openloops.remind.remind(title, , at=None, in_=None, due=None, reveal=False, source=None, by='owner', store=None, deliver=None, settings=None, now=None)
+### openloops.remind.remind(title, , at=None, in_=None, due=None, reveal=False, source=None, by='owner', daily_cap=None, store=None, deliver=None, settings=None, now=None)
 
 Make a loop that comes back at `at` (or after `in_`), arm it, and say when.
 
 Give at most one of `at` and `in_`; with neither, the loop is listed but never
 pushed. Returns the loop’s summary and `echo`, the one line to repeat to the owner.
 
+`daily_cap` refuses a new loop once that many loops from the same `source.ref`
+were created in the last 24 hours: a surface driven by a model that reads other
+people’s text pins it, so a steered loop cannot flood the phone or the push quota.
+
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.remind.snooze(ref, , until=None, for_=None, by='owner', store=None, deliver=None, settings=None, now=None)
+### openloops.remind.snooze(ref, , until=None, for_=None, by='owner', only_source=None, max_ahead=None, store=None, deliver=None, settings=None, now=None)
 
 Bring a loop back later (`until` a time, or `for_` a duration); re-arms its push.
 
@@ -5838,10 +5846,10 @@ two surfaces is a sign that there are two implementations, and there is one here
 | [`board_gather`](_autosummary/openloops.tools.html.md#openloops.tools.board_gather)(\*[, owners, exclude_owners, ...])   | Every open item that asks something of you, across owners: the board's input.                                                           |
 | [`board_classify`](_autosummary/openloops.tools.html.md#openloops.tools.board_classify)(\*, candidates[, enriched, out])   | Task records: the heuristic classifier over gathered candidates, overlaid by richer ones.                                               |
 | [`board_build`](_autosummary/openloops.tools.html.md#openloops.tools.board_build)(\*, records, out_dir[, ...])          | Write the phone task board (page, `tasks.json`, `runs.json`) into `out_dir`.                                                            |
-| [`remind`](_autosummary/openloops.tools.html.md#openloops.tools.remind)(title, \*[, when, due, reveal, source])    | Make a loop that comes back at `when` and push it to the phone then.                                                                    |
+| [`remind`](_autosummary/openloops.tools.html.md#openloops.tools.remind)(title, \*[, when, due, reveal, ...])       | Make a loop that comes back at `when` and push it to the phone then.                                                                    |
 | [`loops`](_autosummary/openloops.tools.html.md#openloops.tools.loops)(\*[, state])                                | The loops, soonest first.                                                                                                               |
-| [`done`](_autosummary/openloops.tools.html.md#openloops.tools.done)(ref, \*[, note])                             | Close a loop (by id or a unique prefix) as done, cancelling its scheduled push.                                                         |
-| [`snooze`](_autosummary/openloops.tools.html.md#openloops.tools.snooze)(ref, \*, when)                             | Bring a loop back at `when` (a duration or a time, as for [`remind()`](_autosummary/openloops.tools.html.md#openloops.tools.remind)); re-arms its push. |
+| [`done`](_autosummary/openloops.tools.html.md#openloops.tools.done)(ref, \*[, note, only_source])                | Close a loop (by id or a unique prefix) as done, cancelling its scheduled push.                                                         |
+| [`snooze`](_autosummary/openloops.tools.html.md#openloops.tools.snooze)(ref, \*, when[, only_source, max_days])    | Bring a loop back at `when` (a duration or a time, as for [`remind()`](_autosummary/openloops.tools.html.md#openloops.tools.remind)); re-arms its push. |
 | [`remind_tick`](_autosummary/openloops.tools.html.md#openloops.tools.remind_tick)()                                     | Arm loops that came within three days, record those that fired, deliver late any missed one.                                            |
 
 ### openloops.tools.ROW_FIELDS *= ('session', 'source', 'state', 'title', 'ai_title', 'project', 'branches', 'started', 'ended', 'last_turn', 'turns', 'model', 'confidence', 'verified')*
@@ -5950,9 +5958,11 @@ same three-state rule as a reader looking at the page.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.tools.done(ref, , note=None)
+### openloops.tools.done(ref, , note=None, only_source=None)
 
 Close a loop (by id or a unique prefix) as done, cancelling its scheduled push.
+
+`only_source`: touch only a loop whose `source.ref` is that (a surface’s own).
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
@@ -6026,7 +6036,7 @@ True
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.tools.remind(title, , when=None, due=None, reveal=False, source=None)
+### openloops.tools.remind(title, , when=None, due=None, reveal=False, source=None, daily_cap=None)
 
 Make a loop that comes back at `when` and push it to the phone then.
 
@@ -6064,9 +6074,11 @@ into, where the same session can legitimately appear more than once.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.tools.snooze(ref, , when)
+### openloops.tools.snooze(ref, , when, only_source=None, max_days=None)
 
 Bring a loop back at `when` (a duration or a time, as for [`remind()`](_autosummary/openloops.tools.html.md#openloops.tools.remind)); re-arms its push.
+
+`only_source` as for [`done()`](_autosummary/openloops.tools.html.md#openloops.tools.done); `max_days` refuses a time further ahead than that.
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
@@ -6307,16 +6319,18 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-11-20 12:38 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/0a3540dd8b00e49ef02227507868a398f1ea4062"><code>0a3540d</code></a> on branch <code>main</code>, for **openloops 0.1.41** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-20 16:39 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/b38ef6876400ae233646d483ce87bbc31ad8cb97"><code>b38ef68</code></a> on branch <code>main</code>, for **openloops 0.1.42** (from <code>pyproject.toml</code>).
 
-#### NOTE
-Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
+#### WARNING
+The documentation and the package may be misaligned:
+
+- The documented version (0.1.42) is behind the latest release on PyPI (0.1.43): `pip install openloops` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/0a3540dd8b00e49ef02227507868a398f1ea4062"><code>0a3540dd8b00e49ef02227507868a398f1ea4062</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/b38ef6876400ae233646d483ce87bbc31ad8cb97"><code>b38ef6876400ae233646d483ce87bbc31ad8cb97</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -6327,9 +6341,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/44737252337">44737252337</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/44775259811">44775259811</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>0a3540dd8b00e49ef02227507868a398f1ea4062</code> (in the history of the built commit) |
+| Event commit | <code>b38ef6876400ae233646d483ce87bbc31ad8cb97</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -6354,13 +6368,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.41/">0.1.41</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.43/">0.1.43</a>, newer than the documented version (0.1.42).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 0a3540dd8b00e49ef02227507868a398f1ea4062
+git checkout b38ef6876400ae233646d483ce87bbc31ad8cb97
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

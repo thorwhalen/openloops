@@ -30,10 +30,10 @@ two surfaces is a sign that there are two implementations, and there is one here
 | [`board_gather`](#openloops.tools.board_gather)(\*[, owners, exclude_owners, ...])   | Every open item that asks something of you, across owners: the board's input.                                                           |
 | [`board_classify`](#openloops.tools.board_classify)(\*, candidates[, enriched, out])   | Task records: the heuristic classifier over gathered candidates, overlaid by richer ones.                                               |
 | [`board_build`](#openloops.tools.board_build)(\*, records, out_dir[, ...])          | Write the phone task board (page, `tasks.json`, `runs.json`) into `out_dir`.                                                            |
-| [`remind`](#openloops.tools.remind)(title, \*[, when, due, reveal, source])    | Make a loop that comes back at `when` and push it to the phone then.                                                                    |
+| [`remind`](#openloops.tools.remind)(title, \*[, when, due, reveal, ...])       | Make a loop that comes back at `when` and push it to the phone then.                                                                    |
 | [`loops`](#openloops.tools.loops)(\*[, state])                                | The loops, soonest first.                                                                                                               |
-| [`done`](#openloops.tools.done)(ref, \*[, note])                             | Close a loop (by id or a unique prefix) as done, cancelling its scheduled push.                                                         |
-| [`snooze`](#openloops.tools.snooze)(ref, \*, when)                             | Bring a loop back at `when` (a duration or a time, as for [`remind()`](#openloops.tools.remind)); re-arms its push. |
+| [`done`](#openloops.tools.done)(ref, \*[, note, only_source])                | Close a loop (by id or a unique prefix) as done, cancelling its scheduled push.                                                         |
+| [`snooze`](#openloops.tools.snooze)(ref, \*, when[, only_source, max_days])    | Bring a loop back at `when` (a duration or a time, as for [`remind()`](#openloops.tools.remind)); re-arms its push. |
 | [`remind_tick`](#openloops.tools.remind_tick)()                                     | Arm loops that came within three days, record those that fired, deliver late any missed one.                                            |
 
 ### openloops.tools.ROW_FIELDS *= ('session', 'source', 'state', 'title', 'ai_title', 'project', 'branches', 'started', 'ended', 'last_turn', 'turns', 'model', 'confidence', 'verified')*
@@ -142,9 +142,11 @@ same three-state rule as a reader looking at the page.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.tools.done(ref, , note=None)
+### openloops.tools.done(ref, , note=None, only_source=None)
 
 Close a loop (by id or a unique prefix) as done, cancelling its scheduled push.
+
+`only_source`: touch only a loop whose `source.ref` is that (a surface’s own).
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
@@ -218,7 +220,7 @@ True
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.tools.remind(title, , when=None, due=None, reveal=False, source=None)
+### openloops.tools.remind(title, , when=None, due=None, reveal=False, source=None, daily_cap=None)
 
 Make a loop that comes back at `when` and push it to the phone then.
 
@@ -256,9 +258,11 @@ into, where the same session can legitimately appear more than once.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.tools.snooze(ref, , when)
+### openloops.tools.snooze(ref, , when, only_source=None, max_days=None)
 
 Bring a loop back at `when` (a duration or a time, as for [`remind()`](#openloops.tools.remind)); re-arms its push.
+
+`only_source` as for [`done()`](#openloops.tools.done); `max_days` refuses a time further ahead than that.
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]

@@ -41,19 +41,19 @@ the title then travels too. Reveal short labels only, never names, clients or se
 
 ### Functions
 
-| [`loops_store`](#openloops.remind.loops_store)([rootdir])                         | The default store: `~/.local/share/openloops/loops/<id>.json`.                                                                                |
-|-------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| [`parse_in`](#openloops.remind.parse_in)(text)                                 | A duration such as `20m`, `3h`, `2d` or `1h30m`.                                                                                              |
-| [`parse_at`](#openloops.remind.parse_at)(text, \*, now, zone)                  | An ISO date-time (naive means `zone`), an ISO date (09:00 that day) or `HH:MM` (the next one).                                                |
-| [`parse_when`](#openloops.remind.parse_when)(text, \*, now, zone)                | A duration from `now` (`3h`, `1h30m`) or a time ([`parse_at()`](#openloops.remind.parse_at)): the one form a CLI flag takes. |
-| [`attach`](#openloops.remind.attach)(naive, zone)                            | `naive` read in `zone`; `None` means this machine's zone, DST rules included.                                                                 |
-| [`local`](#openloops.remind.local)(when, zone)                              | `when` shown in `zone`, or in this machine's zone (DST-aware) when `None`.                                                                    |
-| [`remind`](#openloops.remind.remind)(title, \*[, at, in_, due, reveal, ...]) | Make a loop that comes back at `at` (or after `in_`), arm it, and say when.                                                                   |
-| [`list_loops`](#openloops.remind.list_loops)(\*[, state, store])                 | Loops as summaries, soonest first.                                                                                                            |
-| [`done`](#openloops.remind.done)(ref, \*[, note, by, store, deliver, ...]) | Close a loop as done and cancel its scheduled push, if any.                                                                                   |
-| [`snooze`](#openloops.remind.snooze)(ref, \*[, until, for_, by, store, ...]) | Bring a loop back later (`until` a time, or `for_` a duration); re-arms its push.                                                             |
-| [`tick`](#openloops.remind.tick)(\*[, store, deliver, settings, now])      | Arm what came within the horizon, record what fired, deliver late what was missed.                                                            |
-| [`find`](#openloops.remind.find)(store, ref)                               | A loop by id, by a unique prefix (with or without `loop-`), or by its hex suffix.                                                             |
+| [`loops_store`](#openloops.remind.loops_store)([rootdir])                             | The default store: `~/.local/share/openloops/loops/<id>.json`.                                                                                |
+|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| [`parse_in`](#openloops.remind.parse_in)(text)                                     | A duration such as `20m`, `3h`, `2d` or `1h30m`.                                                                                              |
+| [`parse_at`](#openloops.remind.parse_at)(text, \*, now, zone)                      | An ISO date-time (naive means `zone`), an ISO date (09:00 that day) or `HH:MM` (the next one).                                                |
+| [`parse_when`](#openloops.remind.parse_when)(text, \*, now, zone)                    | A duration from `now` (`3h`, `1h30m`) or a time ([`parse_at()`](#openloops.remind.parse_at)): the one form a CLI flag takes. |
+| [`attach`](#openloops.remind.attach)(naive, zone)                                | `naive` read in `zone`; `None` means this machine's zone, DST rules included.                                                                 |
+| [`local`](#openloops.remind.local)(when, zone)                                  | `when` shown in `zone`, or in this machine's zone (DST-aware) when `None`.                                                                    |
+| [`remind`](#openloops.remind.remind)(title, \*[, at, in_, due, reveal, ...])     | Make a loop that comes back at `at` (or after `in_`), arm it, and say when.                                                                   |
+| [`list_loops`](#openloops.remind.list_loops)(\*[, state, store])                     | Loops as summaries, soonest first.                                                                                                            |
+| [`done`](#openloops.remind.done)(ref, \*[, note, by, only_source, store, ...]) | Close a loop as done and cancel its scheduled push, if any.                                                                                   |
+| [`snooze`](#openloops.remind.snooze)(ref, \*[, until, for_, by, ...])            | Bring a loop back later (`until` a time, or `for_` a duration); re-arms its push.                                                             |
+| [`tick`](#openloops.remind.tick)(\*[, store, deliver, settings, now])          | Arm what came within the horizon, record what fired, deliver late what was missed.                                                            |
+| [`find`](#openloops.remind.find)(store, ref, \*[, only_source])                | A loop by id, by a unique prefix (with or without `loop-`), or by its hex suffix.                                                             |
 
 ### Classes
 
@@ -132,16 +132,20 @@ the server honours it, an early `done` or `snooze` is said, not hidden.
 * **Return type:**
   [`datetime`](https://docs.python.org/3/library/datetime.html#datetime.datetime)
 
-### openloops.remind.done(ref, , note=None, by='owner', store=None, deliver=None, settings=None, now=None)
+### openloops.remind.done(ref, , note=None, by='owner', only_source=None, store=None, deliver=None, settings=None, now=None)
 
 Close a loop as done and cancel its scheduled push, if any.
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.remind.find(store, ref)
+### openloops.remind.find(store, ref, , only_source=None)
 
 A loop by id, by a unique prefix (with or without `loop-`), or by its hex suffix.
+
+`only_source` narrows the search to loops whose `source.ref` is exactly that: a
+surface that may only touch what it set itself (a voice connector) passes its own
+name, and every other loop is, for it, not there.
 
 * **Return type:**
   [`Loop`](openloops.loops.html.md#openloops.loops.Loop)
@@ -209,17 +213,21 @@ A duration from `now` (`3h`, `1h30m`) or a time ([`parse_at()`](#openloops.remin
 * **Return type:**
   [`datetime`](https://docs.python.org/3/library/datetime.html#datetime.datetime)
 
-### openloops.remind.remind(title, , at=None, in_=None, due=None, reveal=False, source=None, by='owner', store=None, deliver=None, settings=None, now=None)
+### openloops.remind.remind(title, , at=None, in_=None, due=None, reveal=False, source=None, by='owner', daily_cap=None, store=None, deliver=None, settings=None, now=None)
 
 Make a loop that comes back at `at` (or after `in_`), arm it, and say when.
 
 Give at most one of `at` and `in_`; with neither, the loop is listed but never
 pushed. Returns the loop’s summary and `echo`, the one line to repeat to the owner.
 
+`daily_cap` refuses a new loop once that many loops from the same `source.ref`
+were created in the last 24 hours: a surface driven by a model that reads other
+people’s text pins it, so a steered loop cannot flood the phone or the push quota.
+
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### openloops.remind.snooze(ref, , until=None, for_=None, by='owner', store=None, deliver=None, settings=None, now=None)
+### openloops.remind.snooze(ref, , until=None, for_=None, by='owner', only_source=None, max_ahead=None, store=None, deliver=None, settings=None, now=None)
 
 Bring a loop back later (`until` a time, or `for_` a duration); re-arms its push.
 
