@@ -8,7 +8,7 @@ metadata:
 
 # openloops-pile: empty the In list, one clarified item at a time
 
-The **pile** is GTD's *In* list. The owner throws things into it from anywhere ("Hey Siri, pile it", a dictated sentence, an optional routing hint), and it lands as one issue in a private repo. Your job is the *clarify* step: decide what each item is and move it to the place that will hold it. The pile only works if it is emptied, and if nothing in it is ever lost: every item ends either somewhere else, with a link, or dropped with a reason.
+The **pile** is GTD's *In* list. The owner throws things into it from anywhere ("Hey Siri, add to my pile", a dictated sentence, an optional routing hint), and it lands as one issue in a private repo. Your job is the *clarify* step: decide what each item is and move it to the place that will hold it. The pile only works if it is emptied, and if nothing in it is ever lost: every item ends either somewhere else, with a link, or dropped with a reason.
 
 ## 0. Find the pile
 
@@ -79,4 +79,4 @@ Then report to the owner in a few lines: how many items went where, which ones w
 
 ## Capture, for completeness
 
-The owner captures with an Apple Shortcut that `POST`s to `https://api.github.com/repos/<pile>/issues` with `{title, body, labels: ["pile", <hint>]}`, using a fine-grained token scoped to the pile repo with Issues read and write only. An agent that needs to pile something the owner said (not something it thought of) does the same with `gh issue create -R "$PILE" --label pile --title ... --body ...`. Agents do not pile their own ideas: a proposal from an agent goes on the board or in an issue, marked as a proposal.
+The owner captures with an Apple Shortcut that `POST`s to `https://api.github.com/repos/<pile>/issues` with `{title, body, labels: ["pile", <hint>]}`, using a fine-grained token scoped to the pile repo with Issues read and write only. The shortcut's name is its Siri phrase: a short one ("Pile it") was not recognised by voice, and "Add to My Pile" was (2026-11-20). An agent that needs to pile something the owner said (not something it thought of) does the same with `gh issue create -R "$PILE" --label pile --title ... --body ...`. Agents do not pile their own ideas: a proposal from an agent goes on the board or in an issue, marked as a proposal.
