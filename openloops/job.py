@@ -66,6 +66,7 @@ PASSED_THROUGH = (
     "OPENLOOPS_TZ",
     "OPENLOOPS_REMIND_CHANNEL",
     "OPENLOOPS_REMIND_HORIZON_HOURS",
+    "OPENLOOPS_PILE_REPO",
     "NTFY_TOPIC",
     "CORRESPOND_CONFIG",
     "XDG_CONFIG_HOME",
@@ -84,6 +85,9 @@ REMIND_LABEL = "openloops.remind-tick"
 #: Hourly: a reminder is armed on the channel up to three days ahead, so the tick only
 #: needs to catch loops entering that horizon and record the ones that fired.
 REMIND_INTERVAL = 3600
+PILE_NUDGE_LABEL = "openloops.pile-nudge"
+#: Every six hours: the nudge is idempotent, and a pending one is never duplicated.
+PILE_NUDGE_INTERVAL = 21600
 REFRESH_LABEL = "openloops.board-refresh"
 REFRESH_INTERVAL = 21600
 
@@ -664,4 +668,70 @@ def job_status(
         "log": str(log),
         "last_write": evidence,
         "state_dir": str(state_dir()),
+    }
+
+
+def pile_nudge_job_spec(
+    *,
+    interval: int = PILE_NUDGE_INTERVAL,
+    stale_days: float = 3.0,
+    label: str = PILE_NUDGE_LABEL,
+) -> dict[str, object]:
+    """The pile nudge as data: ``python -m openloops pile-nudge`` every ``interval`` s.
+
+    Pure. It reads the pile through ``gh`` (the user's own login) and makes reminders
+    through the reminder runner, so it needs both ``gh`` and correspond in the job.
+
+    >>> spec = pile_nudge_job_spec(stale_days=2)
+    >>> spec["program_args"][-3:]
+    ['pile-nudge', '--stale-days', '2']
+    """
+    args = [
+        sys.executable,
+        "-m",
+        "openloops",
+        "pile-nudge",
+        "--stale-days",
+        f"{stale_days:g}",
+    ]
+    env = job_environment()
+    log_path = _log_path(label)
+    return {
+        "label": label,
+        "program_args": args,
+        "env": env,
+        "interval": interval,
+        "log": str(log_path),
+        "plist": str(_plist_path(label)),
+        "xml": plist_xml(
+            label=label,
+            program_args=args,
+            env=env,
+            interval=interval,
+            log_path=log_path,
+        ),
+    }
+
+
+def install_pile_nudge(*, dry_run: bool = False, **kwargs: object) -> dict[str, str]:
+    """Install (or replace) the pile nudge job. ``kwargs`` are :func:`pile_nudge_job_spec`'s."""
+    spec = pile_nudge_job_spec(**kwargs)  # type: ignore[arg-type]
+    if dry_run:
+        return {k: str(v) for k, v in spec.items() if k in ("plist", "log", "xml")}
+    _require_macos()
+    _bootstrap(
+        str(spec["label"]),
+        Path(str(spec["plist"])),
+        Path(str(spec["log"])),
+        str(spec["xml"]),
+        smoke=[
+            [sys.executable, "-m", "openloops", "pile-nudge", "--help"],
+            [sys.executable, "-c", "import correspond.channels.ntfy"],
+        ],
+        env=dict(spec["env"]),  # type: ignore[arg-type]
+    )
+    return {
+        "plist": str(spec["plist"]),
+        "log": str(spec["log"]),
+        "interval": str(spec["interval"]),
     }

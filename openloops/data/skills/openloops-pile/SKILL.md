@@ -1,82 +1,89 @@
 ---
 name: openloops-pile
-description: "Go through the owner's capture pile (one GitHub issue per thing they said to Siri or typed on the go, in a private pile repo) and clarify each item into where it belongs: a loop in openloops (`ol remind`), an idea (`ideadump`), an issue in the repo that owns it, or dropped with a reason. Proposes a table first, acts only after the owner says yes, and closes each pile item with a comment saying where it went. Use on 'dispatch my pile', 'go through my pile', 'triage my pile', 'what's in my pile', 'process my captures', 'empty my inbox' (the GTD In list), 'clarify my captures', 'what did I pile'. Not for capturing a new item (that is the Siri Shortcut, or `gh issue create` on the pile repo) and not for reminders the owner asks for directly (openloops-remind)."
+description: "The owner's capture pile (one GitHub issue per thing they said to Siri, 'Add to My Pile', in a private pile repo): say what is on it, clarify each item into where it belongs (a loop via `ol remind`, an idea via `ideadump`, an issue in the repo that owns it, work handed to a session, or dropped with a reason), and take care of one item end to end. Proposes first, acts only on the owner's yes, signs every comment with the agent's name and session link. Use on 'what's on my pile', 'tell me about my pile', 'go through my pile', 'dispatch my pile', 'triage my pile', 'take care of pile item N', 'work on that pile item', 'process my captures', 'empty my inbox' (the GTD In list), and for a session handed a pile item ('report progress on the pile item'). Not for capturing (the Siri Shortcut or a new issue on the pile repo) nor for reminders asked for directly (openloops-remind)."
 metadata:
   audience: agents
-  decided: "2026-11-20: capture into a private GitHub issue pile, triage on demand by an agent, no GitHub Actions; the pile is GTD's In list and feeds openloops loops rather than sitting beside them"
+  decided: "2026-11-20: capture into a private GitHub issue pile; triage on demand, never automatic; openloops reads and plans, the caller writes (ADR-014); every agent comment signed with name + session link"
 ---
 
-# openloops-pile: empty the In list, one clarified item at a time
+# openloops-pile: say what's there, clarify it, take care of it
 
-The **pile** is GTD's *In* list. The owner throws things into it from anywhere ("Hey Siri, add to my pile", a dictated sentence, an optional routing hint), and it lands as one issue in a private repo. Your job is the *clarify* step: decide what each item is and move it to the place that will hold it. The pile only works if it is emptied, and if nothing in it is ever lost: every item ends either somewhere else, with a link, or dropped with a reason.
+The **pile** is GTD's *In* list: the owner says "Hey Siri, add to my pile", and the capture lands as one issue labelled `pile` in a private repo. Nothing happens to it until someone asks. Three asks, one core (`ol pile*`, ADR-014):
 
-## 0. Find the pile
+| The owner says | You do |
+|---|---|
+| "what's on my pile", "tell me about my pile" | §1, read-only |
+| "go through / dispatch / triage my pile" | §1, §2, §3 for every item |
+| "take care of pile item N", "work on that one" | §2, §3 for that item, then §4 |
+
+## 1. See it (read-only)
 
 ```bash
-PILE="${OPENLOOPS_PILE_REPO:-$(gh api user -q .login)/_pile}"
-gh issue list -R "$PILE" --label pile --state open --limit 100 --json number,title,body,labels,createdAt,url
+ol pile                 # oldest first: number, age, hint, the words
+ol pile-show N          # one item with its comments: who handled it, where it went
 ```
 
-The pile repo's own `README.md` holds the owner's **routing map**: which hint label goes to which repo or corpus, and any standing rules. Read it first (`gh api "repos/$PILE/readme" -q .content | base64 -d`). It is private, so it may name clients and projects; nothing from it goes into a public repo.
+Summarise in a few lines: the count, the oldest age, and one short line per item. The pile repo is `OPENLOOPS_PILE_REPO`, else `<gh login>/_pile`. Its README holds the owner's **routing map** (hint label → repo); read it before routing: `gh api "repos/$(ol pile -j | jq -r .repo)/readme" -q .content | base64 -d`. The repo is private and so is the README: nothing from either goes into a public repo.
 
-Labels: `pile` = captured, not yet triaged. A **hint** label (`inbox`, `equerry`, `cosmograph`, ...) is the owner's routing guess at capture time; a hint is a guess, not an order. The Shortcut also writes the hint as a last body line (`— pile: <hint>`), in case the label was dropped. `needs-owner`, `routed`, `dropped` are the outcomes below.
+## 2. Read and propose
 
-## 1. Read each item as dictation
+The body is raw speech-to-text. **Never edit it**: it is the source. Read it as the owner meant it. Package names are the usual casualties ("zoe dal" is `zodal`, "cross nest" is `crowsnest`): check a guess with `projreg search "<word>"` or `rg -il <stem> "$PTH_FILEPATH"`, and say which words you resolved. `ol pile-propose` gives a free first guess per item (loop / idea / issue / ask). Replace it with your reading.
 
-The body is raw speech-to-text. **Never edit the issue body**: it is the source. Read it the way the owner meant it:
-
-- Package and project names are the usual casualties ("zoe dal" is `zodal`, "cross nest" is `crowsnest`, "dole" is `dol`). Check a guess against the fleet: `projreg search "<word>"`, `priv pkg list-packages | rg -i <stem>`, or `rg -il <stem> "$PTH_FILEPATH"`.
-- Say which words you resolved, so a wrong guess is visible ("'cross nest' read as crowsnest").
-- If one slip changes the meaning and you cannot tell, it is a question for the owner (step 3), not a guess.
-
-## 2. Clarify: what is it?
-
-David Allen's question, then the place:
-
-| It is | It goes to | How |
+| It is | kind | the plan needs |
 |---|---|---|
-| A step **the owner** will do, with a time | a loop that pushes at that time | `ol remind "<title>" --when <when> --source <pile issue url>` (the openloops-remind skill: its `--when` table and its `--reveal` rule) |
-| A step the owner will do, no time | a loop on Next, listed, never pushed | `ol remind "<title>" --source <pile issue url>` |
-| Work for **an agent or a repo** | an issue in the repo that owns it | `gh issue create -R <owner/repo> ...` with your reading, linking the pile item (see the privacy rule below) |
-| An **idea** for later, not a commitment | ideadump | `ideadump add "<the dictation, verbatim>" --title ... --summary "<your reading>" --source <pile issue url>` |
-| Something to keep, not to do (a fact, a link) | reference, where the owner keeps such things | name the place you propose; ask once if there is none |
-| Already done, a duplicate, or noise | dropped | close with the reason |
+| a step the owner will do, at a time | `loop` | `--title`, `--when` (the openloops-remind skill's table and `--reveal` rule) |
+| a step the owner will do, no time | `loop` | `--title` (listed on Next, never pushed) |
+| work for a repo | `issue` | `--target-repo`, `--title`, `--issue-body` (see privacy) |
+| work an agent should do now | `issue` or `work`, then §4 | `--reason` names who takes it |
+| an idea for later | `idea` | `--tags`; the words go verbatim |
+| unclear | `ask` | `--reason` = the one question; the item stays, labelled `needs-owner` |
+| done already, duplicate, noise | `done` / `drop` | `--reason` = the evidence, or why |
 
-One pile item may become two things (an idea *and* a next step); say so.
+Show one table, one row per item, with your recommendation in every row, then one question with a default: "Go with these? (yes / change N)". **Nothing happens before that yes.** On voice: the count, then one item per sentence, five at most.
 
-**The privacy rule.** The pile is private; the destination may not be. Check `gh repo view <repo> --json visibility -q .visibility`. For a **public** repo, write the issue in terms any user of that package could read: the technical ask only, never the raw dictation, a person, a client, or why the owner wants it. The full words stay in the pile item, which you link only from the private side (comment on the pile item with the new issue's URL; do not link the pile from the public issue). Prefer creating a new issue to `gh issue transfer`: a transfer moves the raw words, and GitHub refuses private-to-public transfers anyway.
+**Privacy.** The pile is private; a destination may be public. `plan` checks the target's visibility. A public issue gets only your `--issue-body`, written so any user of that package could read it: the technical ask only, never the dictation, a person, a client or why the owner wants it. The pile item links to it, never the reverse.
 
-**Do not dispatch work from here.** Routing an item to a repo files an issue; whether a session picks it up is the owner's call (or the lookout's, through the crowsnest-dispatch skill, when the owner says "and get someone on it").
-
-## 3. Propose, then act on one "yes"
-
-Never act on a pile item before the owner has seen the plan. Show one table, one row per item, a recommendation in every row:
-
-```
-#  | said (short)                       | reading                         | proposed
-12 | "remind me to call the zoe dal..." | call about zodal release, Fri   | ol remind, Fri 2026-11-27 09:00
-13 | "idea a podcast about..."          | podcast idea on agent fleets    | ideadump, tags: podcast, fleet
-14 | "cosmograph the label overlap..."  | label overlap bug in cosmograph | issue in <repo> (public: technical text only)
-```
-
-Then one short question with a default: "Go with all of these? (yes / change N)". The owner's "yes" covers the table as shown; a change to one row does not reopen the others. For an item you cannot place, say so in its row with your best guess and mark it `needs-owner`: it stays in the pile, labelled, with your question as a comment, and the rest proceed.
-
-**Voice (bosun):** read the count, then one item at a time, each as one sentence with its proposed place, and take "yes", "skip" or a correction per item. Five at a time at most; the rest wait for next time.
-
-## 4. Close the loop on each item
-
-After the destination exists, on the pile item:
+## 3. Act on the yes: plan, then run the steps
 
 ```bash
-gh issue comment <n> -R "$PILE" --body "<reading, one or two lines>. Resolved words: <...>. → <link to the loop id / issue url / idea id>"
-gh issue edit <n> -R "$PILE" --remove-label pile --add-label routed
-gh issue close <n> -R "$PILE" --reason completed
+ol pile-plan N <kind> --reading "<your reading, resolved words included>" [kind's options] > plan.json
 ```
 
-A drop is the same with `dropped`, `--reason "not planned"`, and the reason in the comment ("duplicate of #9", "done already: <evidence>"). **Never close an item without a comment**: a silent drop is the one failure the trusted system cannot survive (openloops' GTD trust rules: never drop silently, every agent-made item traces to its source, done needs evidence).
+The plan is signed: `Agent:` is `--by` (default `OPENLOOPS_AGENT`, else this Claude Code session), and `Claude-Session:` is this session's link (on public repos the name only). **Use your crowsnest name for `--by`** when you have one (`<name>@<home>`). Run the steps in order. Whatever the first step produced (an issue URL, a loop id, an idea id) replaces `{result}` in later steps:
 
-Then report to the owner in a few lines: how many items went where, which ones wait on them (`needs-owner`), and the pile's count now.
+| op | run |
+|---|---|
+| `remind` | `ol remind "<title>" [--when W] [--reveal] --source <source>` → the loop id |
+| `idea` | `ideadump add "<words>" --title … --summary … --tags … --source <source>` → the idea id |
+| `create_issue` | `gh issue create -R <repo> --title "<title>" --body-file <body in a file>` → the URL |
+| `comment` | `gh issue comment <number> -R <repo> --body-file <body in a file>` |
+| `labels` | `gh issue edit <number> -R <repo> --add-label <each add> --remove-label <each remove>` |
+| `close` | `gh issue close <number> -R <repo> --reason "<reason>"` |
+
+Bodies go through `--body-file` (a file in your scratch directory), never inline on the command line: the dictation is data, not shell. Report to the owner in a few lines: how many went where, which wait on them (`needs-owner`), and the pile's count now.
+
+## 4. Take care of an item: hand it to a session
+
+After the owner's yes, the item goes to the session that will develop it:
+
+1. Route it (`issue` in the owning repo when there is one), or plan `work` with `--reason "handed to <session name>"`: the item stays open, labelled `working`.
+2. Hand it off with the **crowsnest-dispatch** skill: the brief names the pile item URL, the routed issue, and §5 below as the reporting rule.
+
+## 5. When you are the session working on a pile item
+
+Post progress where the owner will look for it, signed, so the idea's development traces back to you:
+
+```bash
+ol pile-sign "<what you did, found or decided, and why>" --by <your name> > note.md
+gh issue comment <N> -R <pile repo> --body-file note.md
+```
+
+Sign the routed issue's comments the same way (on a public repo, `ol pile-sign … --public`: the name only). When it is finished, `ol pile-plan N done --reason "<evidence: PR, commit, link>"` and run the steps.
+
+## Nudges
+
+`ol pile-nudge` (every six hours once `ol install-pile-nudge-job` is installed) keeps one reminder pending while any item is older than three days: "Pile: 4 waiting, oldest 6d" at 09:00. It never acts on an item, and nothing else runs on capture.
 
 ## Capture, for completeness
 
-The owner captures with an Apple Shortcut that `POST`s to `https://api.github.com/repos/<pile>/issues` with `{title, body, labels: ["pile", <hint>]}`, using a fine-grained token scoped to the pile repo with Issues read and write only. The shortcut's name is its Siri phrase: a short one ("Pile it") was not recognised by voice, and "Add to My Pile" was (2026-11-20). An agent that needs to pile something the owner said (not something it thought of) does the same with `gh issue create -R "$PILE" --label pile --title ... --body ...`. Agents do not pile their own ideas: a proposal from an agent goes on the board or in an issue, marked as a proposal.
+The Shortcut "Add to My Pile" posts `{title, body, labels: ["pile", <hint>]}` with a token scoped to the pile repo's issues and adds the hint as a last body line (`— pile: <hint>`). Its name is its Siri phrase. A short one ("Pile it") was not recognised by voice (2026-11-20). An agent piles only what the owner said, never its own ideas.
