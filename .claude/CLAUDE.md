@@ -38,9 +38,13 @@ the records.
   FastAPI app (`openloops[server]`) wrapping it; nothing else imports it (ADR-009).
 - `loops.py` — the `Loop` record (one commitment: A2A `state`, GTD `list`, `remind_at`/`due`, provenance, append-only log) and the pure `evaluate(loops, now)` → actions (ADR-013). No I/O.
 - `remind.py` — the reminder runner, imported by nothing in the core: `remind`/`done`/`snooze`/`tick` over three seams (`store=` JSON files under `~/.local/share/openloops/loops/`, `deliver=` correspond's ntfy with scheduled delivery and cancel, `settings=` from env). The `openloops[remind]` extra.
+- `pile.py` — the capture pile (GTD In list as issues in a private repo): `items`/`show`
+  (read), `propose` (heuristic, `proposer=` seam), `plan` (the signed steps for one
+  decision, as data: the caller writes, ADR-014), `signed`, `nudge` (one pending reminder
+  loop while items are stale; never touches an item).
 - `tools.py` — **the single surface all dispatch goes through** (CLI today, MCP/HTTP
   later): plain functions taking/returning flat JSON-ready dicts — `sync`, `ls`,
-  `show`, `status`, `owed`, `blocked`, `dashboard`, `published`, `board_*`, `remind`, `loops`, `done`, `snooze`, `remind_tick`.
+  `show`, `status`, `owed`, `blocked`, `dashboard`, `published`, `board_*`, `remind`, `loops`, `done`, `snooze`, `remind_tick`, `pile*`.
 - `board_refresh.py` — `refresh_board()`: the model-free board rebuild on a timer (ADR-012; `ol board-refresh`, `ol install-refresh-job`). `merge_refresh()` is the pure merge; the scope and the last-published hash live in `WORK/refresh.json`.
 - `job.py` — the periodic-job (launchd `StartInterval`) design: no daemon, ADR-006; also the board-receiver job (ADR-011).
 - `receiver_tick.py` — run by that job, nothing imports it: a no-model check of the
@@ -80,9 +84,9 @@ pass, or ignore that one failure in a root sandbox.
 
 ## Docs & skills
 
-- ADRs: `docs/adr/001`–`013` (naming, release scope, public/private boundary, loop
+- ADRs: `docs/adr/001`–`014` (naming, release scope, public/private boundary, loop
   state vs process state, the digest-dated rule, periodic-job design, the two seams,
-  board write side in a skill, self-hosted board store, agents decide what is reversible and clearly recommended, the board receiver as a periodic job, the board rebuild as a free timer job, loops and reminders a channel holds).
+  board write side in a skill, self-hosted board store, agents decide what is reversible and clearly recommended, the board receiver as a periodic job, the board rebuild as a free timer job, loops and reminders a channel holds, the pile: openloops reads and plans, the caller writes).
 - Shipped skills/subagent: `.claude/skills/openloops`, `.claude/skills/openloops-needs-human`,
   `.claude/skills/openloops-phone-board`, `.claude/skills/openloops-remind`, `.claude/skills/openloops-pile` (triage of the owner's capture pile into loops, ideas and issues),
   `.claude/agents/openloops-sweep.md` (also documented via `openloops-sweep` skill).

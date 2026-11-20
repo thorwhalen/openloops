@@ -748,6 +748,120 @@ def remind_tick() -> dict[str, Any]:
     return _remind_module().tick()
 
 
+# --------------------------------------------------------------------------------
+# The pile: GTD's In list as issues in a private repo (openloops.pile). Every surface
+# (the `ol pile-*` verbs, the openloops-pile skill, a voice connector) calls these.
+# --------------------------------------------------------------------------------
+
+
+def _pile_module():
+    from openloops import pile as _pile
+
+    return _pile
+
+
+def pile(*, repo: str | None = None, label: str = "pile") -> dict[str, Any]:
+    """What is on the pile: the open items carrying ``label`` (default untriaged), oldest first.
+
+    Read-only. Each item has ``number``, ``title``, ``said`` (the dictation), ``hint``,
+    ``age_days`` and ``url``; the envelope has ``repo``, ``count`` and ``oldest_days``.
+    """
+    p = _pile_module()
+    repo = p.pile_repo(repo)
+    now = datetime.now(timezone.utc)
+    found = [i.as_dict(now=now) for i in p.items(repo=repo, label=label)]
+    return {
+        "repo": repo,
+        "count": len(found),
+        "oldest_days": max((i["age_days"] for i in found), default=0.0),
+        "items": found,
+    }
+
+
+def pile_show(number: int, *, repo: str | None = None) -> dict[str, Any]:
+    """One pile item, any state, with its comments (who handled it, and where it went)."""
+    return _pile_module().show(number, repo=repo).as_dict()
+
+
+def pile_propose(*, repo: str | None = None) -> dict[str, Any]:
+    """A model-free first proposal per untriaged item. Changes nothing.
+
+    ``kind`` is one of loop / idea / issue / ask, with ``why``. An agent reads the
+    dictation and replaces these with its own before asking the owner.
+    """
+    p = _pile_module()
+    repo = p.pile_repo(repo)
+    return {"repo": repo, "proposals": p.propose(p.items(repo=repo))}
+
+
+def pile_plan(
+    number: int,
+    kind: str,
+    *,
+    reading: str | None = None,
+    by: str | None = None,
+    session: str | None = None,
+    title: str | None = None,
+    when: str | None = None,
+    reveal: bool = False,
+    target_repo: str | None = None,
+    issue_body: str | None = None,
+    tags: str | None = None,
+    reason: str | None = None,
+    force: bool = False,
+    repo: str | None = None,
+) -> dict[str, Any]:
+    """The signed steps that carry out one decision the owner said yes to. Changes nothing.
+
+    ``reading`` (required) is how you read the item. ``kind``: loop (``title``, ``when``),
+    idea (``tags``), issue (``target_repo``, ``title``, ``issue_body``; anything but a
+    private repo of the pile's owner gets that text only), work (``reason``: who takes
+    it; stays open, labelled working), done (``reason``: evidence), drop (``reason``), ask
+    (``reason``: the question). The caller runs ``steps`` in order with its own tools and
+    puts what the first step produced where a step says ``{result}``. ``by``/``session``
+    sign it (defaults: ``OPENLOOPS_AGENT``, this Claude Code session; ``session="none"``
+    for the name alone). ``force`` plans a second destination for an item that has one.
+    """
+    return _pile_module().plan(
+        number,
+        kind,
+        reading=reading,
+        by=by,
+        session=session,
+        title=title,
+        when=when,
+        reveal=reveal,
+        target_repo=target_repo,
+        issue_body=issue_body,
+        tags=tags,
+        reason=reason,
+        force=force,
+        repo=repo,
+    )
+
+
+def pile_sign(
+    text: str,
+    *,
+    by: str | None = None,
+    session: str | None = None,
+    to_repo: str | None = None,
+) -> dict[str, Any]:
+    """``text`` signed for a comment on ``to_repo`` (default: the pile). Changes nothing.
+
+    The session link is kept only on a private repo of the pile's owner.
+    """
+    return _pile_module().signed(text, by=by, session=session, to_repo=to_repo)
+
+
+def pile_nudge(
+    *, stale_days: float | None = None, at: str = "09:00", repo: str | None = None
+) -> dict[str, Any]:
+    """Keep one reminder coming while any pile item waits over ``stale_days`` (default 3). Never acts on an item."""
+    p = _pile_module()
+    return p.nudge(stale_days=stale_days or p.DFLT_STALE_DAYS, at=at, repo=repo)
+
+
 #: Single source of truth for what every surface exposes. The CLI dispatches this list;
 #: an MCP or HTTP adapter would reference the same names as strings.
 _dispatch_funcs = [
@@ -768,6 +882,12 @@ _dispatch_funcs = [
     done,
     snooze,
     remind_tick,
+    pile,
+    pile_show,
+    pile_propose,
+    pile_plan,
+    pile_sign,
+    pile_nudge,
 ]
 
 

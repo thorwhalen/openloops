@@ -899,6 +899,144 @@ def uninstall_remind_job():
     return f"removed {result.get('plist', _job.REMIND_LABEL)}"
 
 
+def pile(*, repo: str = None, label: str = "pile", json_out: bool = False):
+    """What is on your pile (the GTD In list): open captures, oldest first. Read-only.
+
+    The pile repo is `--repo`, else OPENLOOPS_PILE_REPO, else `<your login>/_pile`.
+    """
+    result = tools.pile(repo=repo, label=label)
+    if json_out:
+        return json.dumps(result, indent=2)
+    if not result["items"]:
+        return f"{result['repo']}: nothing on the pile"
+    lines = [
+        f"{result['repo']}: {result['count']} on the pile, oldest {result['oldest_days']:.0f}d"
+    ]
+    for item in result["items"]:
+        said = " ".join(item["said"].split())
+        said = said if len(said) <= 90 else said[:89] + "…"
+        lines.append(
+            f"  #{item['number']:<4} {item['age_days']:>4.0f}d  {item['hint'] or '-':<11} {said}"
+        )
+    return "\n".join(lines)
+
+
+def pile_show(number: int, *, repo: str = None):
+    """One pile item with its comments: what was said, who handled it, where it went."""
+    return json.dumps(tools.pile_show(number, repo=repo), indent=2)
+
+
+def pile_propose(*, repo: str = None):
+    """A model-free first proposal per untriaged item (JSON). Changes nothing."""
+    return json.dumps(tools.pile_propose(repo=repo), indent=2)
+
+
+def _text_arg(value, path, name):
+    """A value given inline or, safer for dictated text, as a file (`-` is stdin)."""
+    if path:
+        return sys.stdin.read() if path == "-" else open(path, encoding="utf-8").read()
+    return value
+
+
+def pile_plan(
+    number: int,
+    kind: str,
+    *,
+    reading: str = None,
+    reading_file: str = None,
+    by: str = None,
+    session: str = None,
+    title: str = None,
+    when: str = None,
+    reveal: bool = False,
+    target_repo: str = None,
+    issue_body: str = None,
+    issue_body_file: str = None,
+    tags: str = None,
+    reason: str = None,
+    force: bool = False,
+    repo: str = None,
+):
+    """The signed steps (JSON) that carry out one decision on a pile item. Changes nothing.
+
+    KIND: loop | idea | issue | work | done | drop | ask. `--reading-file` (or `--reading`)
+    is how you read the dictation; prefer the file forms for anything derived from it.
+    `--by` names you (default OPENLOOPS_AGENT); `--session` links your session (default:
+    this Claude Code session; `none` for the name alone). Run the steps in order with your
+    own tools, putting what the first produced where a step says {result}: the
+    openloops-pile skill says how. Only a private repo of the pile's owner gets the
+    dictation's link; anything else gets only the issue body you wrote.
+    """
+    return json.dumps(
+        tools.pile_plan(
+            number, kind, reading=_text_arg(reading, reading_file, "reading"),
+            by=by, session=session, title=title, when=when, reveal=reveal,
+            target_repo=target_repo,
+            issue_body=_text_arg(issue_body, issue_body_file, "issue body"),
+            tags=tags, reason=reason, force=force, repo=repo,
+        ),
+        indent=2,
+    )  # fmt: skip
+
+
+def pile_sign(
+    text: str = None,
+    *,
+    text_file: str = None,
+    by: str = None,
+    session: str = None,
+    to_repo: str = None,
+):
+    """Print TEXT (or `--text-file`, `-` for stdin) signed for a comment on `--to-repo`.
+
+    The default target is the pile. The session link is kept only on a private repo of
+    the pile's owner; anywhere else the signature is your name alone.
+    """
+    body = _text_arg(text, text_file, "text")
+    if not body:
+        raise ValueError("give TEXT or --text-file")
+    return tools.pile_sign(body, by=by, session=session, to_repo=to_repo)["body"]
+
+
+def pile_nudge(*, stale_days: float = None, at: str = "09:00", repo: str = None):
+    """Keep one reminder coming while any pile item waits over `--stale-days` (default 3).
+
+    Idempotent: `ol install-pile-nudge-job` runs it every six hours. The push says only
+    the count and the oldest age. It never acts on a pile item.
+    """
+    r = tools.pile_nudge(stale_days=stale_days, at=at, repo=repo)
+    line = f"pile: {r['count']} open, {r['stale']} stale"
+    if r.get("made"):
+        line += f"; nudge {r['made']}: {r.get('echo') or ''}"
+    if r.get("closed"):
+        line += f"; closed {', '.join(r['closed'])}"
+    return line
+
+
+def install_pile_nudge_job(
+    *,
+    interval: int = _job.PILE_NUDGE_INTERVAL,
+    stale_days: float = 3.0,
+    dry_run: bool = False,
+):
+    """Install the pile nudge (macOS launchd): `ol pile-nudge` every six hours."""
+    result = _job.install_pile_nudge(
+        interval=interval, stale_days=stale_days, dry_run=dry_run
+    )
+    if dry_run:
+        return result["xml"]
+    return (
+        f"installed {_job.PILE_NUDGE_LABEL} every {result['interval']}s\n"
+        f"  plist: {result['plist']}\n  log:   {result['log']}"
+    )
+
+
+def uninstall_pile_nudge_job():
+    """Unload and remove the pile nudge job."""
+    result = _job.uninstall(label=_job.PILE_NUDGE_LABEL)
+    return f"removed {result.get('plist', _job.PILE_NUDGE_LABEL)}"
+
+
 #: Every verb the CLI exposes, in the order `ol --help` lists them.
 _commands = [
     brief,
@@ -915,6 +1053,12 @@ _commands = [
     done,
     snooze,
     remind_tick,
+    pile,
+    pile_show,
+    pile_propose,
+    pile_plan,
+    pile_sign,
+    pile_nudge,
     sync,
     ls,
     show,
@@ -929,6 +1073,8 @@ _commands = [
     uninstall_refresh_job,
     install_remind_job,
     uninstall_remind_job,
+    install_pile_nudge_job,
+    uninstall_pile_nudge_job,
     receiver_job_status,
 ]
 

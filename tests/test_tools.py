@@ -128,6 +128,12 @@ def test_the_dispatch_list_is_the_public_surface():
         "done",
         "snooze",
         "remind_tick",
+        "pile",
+        "pile_show",
+        "pile_propose",
+        "pile_plan",
+        "pile_sign",
+        "pile_nudge",
     }
     for func in tools._dispatch_funcs:
         assert func.__doc__, f"{func.__name__} needs a docstring — it is the CLI help"
