@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../../_static/documentation_options.js?v=f48ec9ae"></script>
+    <script src="../../_static/documentation_options.js?v=967b4925"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.39" />
+  <meta name="docsearch:version" content="0.1.40" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -837,6 +837,11 @@ window.runMermaid = runMermaid;</script>
     <span class="p">]</span>
 <span class="p">)</span>
 
+<span class="c1">#: Commands the receiver session runs (receiver.md): `node` runs `claude`, `crowsnest`</span>
+<span class="c1">#: dispatches the follow-up worker, `gh`/`jq` reach GitHub. launchd's PATH finds none of</span>
+<span class="c1">#: them unless their folder is pinned; a missing `crowsnest` leaves every answer `queued`.</span>
+<span class="n">RECEIVER_COMMANDS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"node"</span><span class="p">,</span> <span class="s2">"gh"</span><span class="p">,</span> <span class="s2">"jq"</span><span class="p">,</span> <span class="s2">"crowsnest"</span><span class="p">)</span>
+
 <span class="c1">#: Environment variables the receiver session reads, passed through like the others.</span>
 <span class="n">RECEIVER_PASSED_THROUGH</span> <span class="o">=</span> <span class="p">(</span>
     <span class="s2">"OPENLOOPS_OWNERS"</span><span class="p">,</span>
@@ -1078,11 +1083,16 @@ window.runMermaid = runMermaid;</script>
     <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">RECEIVER_PASSED_THROUGH</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">var</span><span class="p">):</span>
             <span class="n">env</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
-    <span class="c1"># claude is a node script: launchd's PATH finds neither it nor node unless told.</span>
+    <span class="c1"># claude is a node script, and the session calls RECEIVER_COMMANDS: launchd's PATH</span>
+    <span class="c1"># finds none of them unless their folders are pinned.</span>
     <span class="n">extra</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">claude_path</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">)]</span>
-    <span class="n">node</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">"node"</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">node</span><span class="p">:</span>
-        <span class="n">extra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">))</span>
+    <span class="n">missing</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">RECEIVER_COMMANDS</span><span class="p">:</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
+            <span class="n">extra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">found</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">missing</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
     <span class="n">env</span><span class="p">[</span><span class="s2">"PATH"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">":"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">([</span><span class="o">*</span><span class="n">extra</span><span class="p">,</span> <span class="o">*</span><span class="n">env</span><span class="p">[</span><span class="s2">"PATH"</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">":"</span><span class="p">)]))</span>
     <span class="n">args</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span>
@@ -1109,6 +1119,7 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"env"</span><span class="p">:</span> <span class="n">env</span><span class="p">,</span>
         <span class="s2">"interval"</span><span class="p">:</span> <span class="n">interval</span><span class="p">,</span>
         <span class="s2">"work_dir"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">work</span><span class="p">),</span>
+        <span class="s2">"missing_commands"</span><span class="p">:</span> <span class="n">missing</span><span class="p">,</span>
         <span class="s2">"env_file"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">env_path</span><span class="p">),</span>
         <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">log_path</span><span class="p">),</span>
         <span class="s2">"plist"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">_plist_path</span><span class="p">(</span><span class="n">label</span><span class="p">)),</span>
@@ -1177,6 +1188,7 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"plist"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"plist"</span><span class="p">]),</span>
         <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"log"</span><span class="p">]),</span>
         <span class="s2">"interval"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"interval"</span><span class="p">]),</span>
+        <span class="s2">"missing_commands"</span><span class="p">:</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"missing_commands"</span><span class="p">]),</span>  <span class="c1"># type: ignore[arg-type]</span>
     <span class="p">}</span></div>
 
 
