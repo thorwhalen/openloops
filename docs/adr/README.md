@@ -19,6 +19,9 @@ session identifiers that motivated it are not, and never will be — see
 | [ADR-010](010-agents-decide-what-is-reversible-and-clear.md) | Agents decide what is reversible and clearly recommended; the owner can veto | accepted |
 | [ADR-011](011-the-board-receiver-is-a-periodic-job-with-a-free-check.md) | The board receiver is a periodic job whose idle ticks cost nothing | accepted |
 | [ADR-012](012-the-board-rebuild-is-a-free-timer-job.md) | The board rebuild is a model-free timer job that reuses what it already knows | accepted |
+| [ADR-013](013-loops-and-reminders.md) | Loops and reminders a channel holds | accepted |
+| [ADR-014](014-the-pile-reads-and-plans-the-caller-writes.md) | The pile: openloops reads and plans, the caller writes | accepted |
+| [ADR-015](015-a-manual-task-can-close-itself.md) | A manual task can close itself: the act reports, the check decides, one module writes | **proposed** |
 
 ## Where these came from
 
