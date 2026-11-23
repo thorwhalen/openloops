@@ -86,7 +86,7 @@ pass, or ignore that one failure in a root sandbox.
 
 - ADRs: `docs/adr/001`–`014` (naming, release scope, public/private boundary, loop
   state vs process state, the digest-dated rule, periodic-job design, the two seams,
-  board write side in a skill, self-hosted board store, agents decide what is reversible and clearly recommended, the board receiver as a periodic job, the board rebuild as a free timer job, loops and reminders a channel holds, the pile: openloops reads and plans, the caller writes).
+  board write side in a skill, self-hosted board store, agents decide what is reversible and clearly recommended, the board receiver as a periodic job, the board rebuild as a free timer job, loops and reminders a channel holds, the pile: openloops reads and plans, the caller writes). ADR-015 is **proposed, not accepted** (a manual task can close itself): do not build from it until its status changes.
 - Shipped skills/subagent: `.claude/skills/openloops`, `.claude/skills/openloops-needs-human`,
   `.claude/skills/openloops-phone-board`, `.claude/skills/openloops-remind`, `.claude/skills/openloops-pile` (triage of the owner's capture pile into loops, ideas and issues),
   `.claude/agents/openloops-sweep.md` (also documented via `openloops-sweep` skill).
