@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../../_static/documentation_options.js?v=5df2d9e8"></script>
+    <script src="../../_static/documentation_options.js?v=b5e87a2a"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.47" />
+  <meta name="docsearch:version" content="0.1.48" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -858,30 +858,51 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span> <span class="k">if</span> <span class="n">line</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_origin_of</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The record's ``origin`` object (who or what the prompt came from), ``{}`` if none."""</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"origin"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">origin</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_peer_record</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether the CLI marked the record as a message from another session.</span>
+
+<span class="sd">    A sub-agent's hand-back carries the same ``kind`` with a ``senderTaskId``: it is the</span>
+<span class="sd">    session's own work coming back inside its turn, not another session writing to it.</span>
+<span class="sd">    """</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">_origin_of</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">origin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kind"</span><span class="p">)</span> <span class="o">==</span> <span class="n">PEER</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">origin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"senderTaskId"</span><span class="p">)</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_starts_turn</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""A ``user`` record that begins a turn: not a tool's result, not text the tooling</span>
-<span class="sd">    injected into a running turn, not a compaction summary."""</span>
+<span class="sd">    injected into a running turn, not a compaction summary.</span>
+
+<span class="sd">    A message from another session is delivered once the running turn has ended and the</span>
+<span class="sd">    session answers it, so it begins a turn although the CLI writes it as ``isMeta``:</span>
+<span class="sd">    without that, the reply to it would be read as the reply to the prompt before it.</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"type"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"user"</span>
-        <span class="ow">and</span> <span class="ow">not</span> <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"isMeta"</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"isMeta"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_is_peer_record</span><span class="p">(</span><span class="n">record</span><span class="p">))</span>
         <span class="ow">and</span> <span class="ow">not</span> <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"isCompactSummary"</span><span class="p">)</span>
         <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_tool_result</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
     <span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_origin</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-    <span class="n">kind</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"origin"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kind"</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"origin"</span><span class="p">),</span> <span class="n">Mapping</span><span class="p">)</span>
-        <span class="k">else</span> <span class="kc">None</span>
-    <span class="p">)</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">_origin_of</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+    <span class="n">kind</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kind"</span><span class="p">)</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="n">_PEER_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">tagged</span> <span class="o">=</span> <span class="n">_PEER_NAME_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span> <span class="k">if</span> <span class="n">found</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">text</span> <span class="ow">and</span> <span class="n">_is_peer_record</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
+        <span class="c1"># The CLI names the sender itself; the tag in the text is the older carrier.</span>
+        <span class="k">return</span> <span class="n">PEER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">origin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">tagged</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">tagged</span> <span class="k">else</span> <span class="s2">""</span><span class="p">))</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span> <span class="ow">or</span> <span class="p">(</span><span class="n">kind</span> <span class="ow">and</span> <span class="n">kind</span> <span class="o">!=</span> <span class="n">HUMAN</span><span class="p">)</span> <span class="ow">or</span> <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"promptSource"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"sdk"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">SYSTEM</span><span class="p">,</span> <span class="s2">""</span>
-    <span class="n">found</span> <span class="o">=</span> <span class="n">_PEER_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">HUMAN</span><span class="p">,</span> <span class="s2">""</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="n">_PEER_NAME_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">PEER</span><span class="p">,</span> <span class="n">name</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">name</span> <span class="k">else</span> <span class="s2">""</span>
+    <span class="k">return</span> <span class="n">PEER</span><span class="p">,</span> <span class="n">tagged</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">tagged</span> <span class="k">else</span> <span class="s2">""</span>
 
 
 <div class="viewcode-block" id="exchanges">

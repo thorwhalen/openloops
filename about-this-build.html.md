@@ -2,7 +2,7 @@
 
 # About this build
 
-This documentation was built on **2026-11-23 09:04 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/32df9a86ab6bf483889d7324e0ec82b1a8ccdfad"><code>32df9a8</code></a> on branch <code>main</code>, for **openloops 0.1.47** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-24 12:48 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/4a7a9ff2903e646ea2a979c9060c5da0095e263d"><code>4a7a9ff</code></a> on branch <code>main</code>, for **openloops 0.1.48** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -11,7 +11,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/32df9a86ab6bf483889d7324e0ec82b1a8ccdfad"><code>32df9a86ab6bf483889d7324e0ec82b1a8ccdfad</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/4a7a9ff2903e646ea2a979c9060c5da0095e263d"><code>4a7a9ff2903e646ea2a979c9060c5da0095e263d</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -22,9 +22,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/45143557922">45143557922</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/45396837933">45396837933</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>32df9a86ab6bf483889d7324e0ec82b1a8ccdfad</code> (in the history of the built commit) |
+| Event commit | <code>4a7a9ff2903e646ea2a979c9060c5da0095e263d</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -49,13 +49,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.47/">0.1.47</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/openloops/0.1.48/">0.1.48</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout 32df9a86ab6bf483889d7324e0ec82b1a8ccdfad
+git checkout 4a7a9ff2903e646ea2a979c9060c5da0095e263d
 pip install "epythet==0.2.25"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

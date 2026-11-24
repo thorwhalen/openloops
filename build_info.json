@@ -1,32 +1,32 @@
 {
   "schema_version": 1,
-  "built_at": "2026-11-23T09:04:57Z",
+  "built_at": "2026-11-24T12:48:49Z",
   "package": {
     "name": "openloops",
-    "version": "0.1.47",
+    "version": "0.1.48",
     "display_name": "openloops",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "32df9a86ab6bf483889d7324e0ec82b1a8ccdfad",
-    "short_commit": "32df9a8",
+    "commit": "4a7a9ff2903e646ea2a979c9060c5da0095e263d",
+    "short_commit": "4a7a9ff",
     "branch": "main",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/thorwhalen/openloops",
-    "commit_url": "https://github.com/thorwhalen/openloops/commit/32df9a86ab6bf483889d7324e0ec82b1a8ccdfad",
+    "commit_url": "https://github.com/thorwhalen/openloops/commit/4a7a9ff2903e646ea2a979c9060c5da0095e263d",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "thorwhalen/openloops",
-    "sha": "32df9a86ab6bf483889d7324e0ec82b1a8ccdfad",
+    "sha": "4a7a9ff2903e646ea2a979c9060c5da0095e263d",
     "sha_in_history": true,
     "ref": "refs/heads/main",
     "ref_name": "main",
-    "run_id": "45143557922",
-    "run_url": "https://github.com/thorwhalen/openloops/actions/runs/45143557922",
+    "run_id": "45396837933",
+    "run_url": "https://github.com/thorwhalen/openloops/actions/runs/45396837933",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -60,11 +60,11 @@
   },
   "pypi": {
     "checked": true,
-    "latest": "0.1.47",
+    "latest": "0.1.48",
     "relation": "same",
     "error": null
   },
-  "reproduce": "git clone https://github.com/thorwhalen/openloops && cd openloops\ngit checkout 32df9a86ab6bf483889d7324e0ec82b1a8ccdfad\npip install \"epythet==0.2.25\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/thorwhalen/openloops && cd openloops\ngit checkout 4a7a9ff2903e646ea2a979c9060c5da0095e263d\npip install \"epythet==0.2.25\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
     "aligned": true,
