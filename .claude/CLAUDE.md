@@ -21,6 +21,9 @@ the records.
 - `_sync.py` — `sync()`: the incremental pass; `transcript_source=` and
   `digests_store=` are its two keyword seams, both defaulting to something that
   works with zero config.
+- `exchanges.py` — `exchanges()`: each prompt of a transcript paired with its turn's reply
+  (origin: typed, another session, tooling) and `question_sentences()`; pure, no model. Not in
+  `tools.py`: consumers import it. Its `Exchange` fields are a contract (crowsnest reads them).
 - `obligations.py` — `owed()`: manual-task issues filed across the fleet, re-checked
   against current GitHub state before being shown.
 - `blockers.py` — the other open-loop kind: a fix filed in repo Y for a problem
@@ -86,7 +89,7 @@ pass, or ignore that one failure in a root sandbox.
 
 - ADRs: `docs/adr/001`–`014` (naming, release scope, public/private boundary, loop
   state vs process state, the digest-dated rule, periodic-job design, the two seams,
-  board write side in a skill, self-hosted board store, agents decide what is reversible and clearly recommended, the board receiver as a periodic job, the board rebuild as a free timer job, loops and reminders a channel holds, the pile: openloops reads and plans, the caller writes). ADR-015 is **proposed, not accepted** (a manual task can close itself): do not build from it until its status changes.
+  board write side in a skill, self-hosted board store, agents decide what is reversible and clearly recommended, the board receiver as a periodic job, the board rebuild as a free timer job, loops and reminders a channel holds, the pile: openloops reads and plans, the caller writes). ADR-015 is **proposed, not accepted** (a manual task can close itself): do not build from it until its status changes. ADR-016 is **proposed, not accepted** (a session can be rendered as a private page): same rule.
 - Shipped skills/subagent: `.claude/skills/openloops`, `.claude/skills/openloops-needs-human`,
   `.claude/skills/openloops-phone-board`, `.claude/skills/openloops-remind`, `.claude/skills/openloops-pile` (triage of the owner's capture pile into loops, ideas and issues),
   `.claude/agents/openloops-sweep.md` (also documented via `openloops-sweep` skill).
