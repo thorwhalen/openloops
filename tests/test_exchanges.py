@@ -80,6 +80,53 @@ def test_a_peer_message_is_named_and_never_mined_for_questions():
     )
 
 
+def test_a_peer_message_the_cli_marks_as_meta_still_starts_a_turn():
+    # The current record shape: `isMeta` with `origin.kind == "peer"` and the sender in
+    # `origin.name`. The reply after it answers the peer, not the question before it.
+    peer = {"kind": "peer", "name": "cn", "from": "uds:/x.sock", "body": "Status?"}
+    text = '<cross-session-message from="uds:/x.sock" from-name="cn">Status?</cross-session-message>'
+    recs = [
+        user("Why is it red?", at=stamp(1, 1), uuid="u1"),
+        assistant("Because the test is flaky.", at=stamp(1, 2)),
+        user(text, at=stamp(1, 3), uuid="u2", isMeta=True, origin=peer),
+        assistant("Idle, nothing open.", at=stamp(1, 4)),
+    ]
+    asked, relayed = exchanges(recs)
+    assert (asked.origin, asked.reply) == (HUMAN, "Because the test is flaky.")
+    assert (relayed.origin, relayed.sender, relayed.prompt, relayed.reply) == (
+        PEER,
+        "cn",
+        "Status?",
+        "Idle, nothing open.",
+    )
+    assert relayed.questions == ()
+
+
+def test_a_peer_record_without_the_tag_takes_its_sender_from_origin():
+    peer = {"kind": "peer", "name": "worker", "from": "uds:/y.sock"}
+    (got,) = exchanges(
+        [user("Done, see the ledger.", at=stamp(1, 1), isMeta=True, origin=peer)]
+    )
+    assert (got.origin, got.sender) == (PEER, "worker")
+
+
+def test_a_sub_agent_hand_back_stays_inside_the_turn_that_sent_it():
+    hand_back = {
+        "kind": "peer",
+        "name": "explorer",
+        "senderTaskId": "t1",
+        "handback": True,
+    }
+    recs = [
+        user("Where is it defined?", at=stamp(1, 1), uuid="u1"),
+        assistant("Looking; I sent an agent.", at=stamp(1, 2)),
+        user("report text", at=stamp(1, 3), isMeta=True, origin=hand_back),
+        assistant("It is in base.py.", at=stamp(1, 4)),
+    ]
+    (only,) = exchanges(recs)
+    assert (only.origin, only.reply) == (HUMAN, "It is in base.py.")
+
+
 def test_sidechains_meta_and_compaction_do_not_start_turns():
     recs = [
         user("Why is it red?", at=stamp(1, 1), uuid="u1"),
