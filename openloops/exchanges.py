@@ -138,30 +138,51 @@ def _prompt_text(record: Mapping) -> str:
     return "\n".join(line for line in lines if line).strip()
 
 
+def _origin_of(record: Mapping) -> Mapping:
+    """The record's ``origin`` object (who or what the prompt came from), ``{}`` if none."""
+    origin = record.get("origin")
+    return origin if isinstance(origin, Mapping) else {}
+
+
+def _is_peer_record(record: Mapping) -> bool:
+    """Whether the CLI marked the record as a message from another session.
+
+    A sub-agent's hand-back carries the same ``kind`` with a ``senderTaskId``: it is the
+    session's own work coming back inside its turn, not another session writing to it.
+    """
+    origin = _origin_of(record)
+    return origin.get("kind") == PEER and not origin.get("senderTaskId")
+
+
 def _starts_turn(record: Mapping) -> bool:
     """A ``user`` record that begins a turn: not a tool's result, not text the tooling
-    injected into a running turn, not a compaction summary."""
+    injected into a running turn, not a compaction summary.
+
+    A message from another session is delivered once the running turn has ended and the
+    session answers it, so it begins a turn although the CLI writes it as ``isMeta``:
+    without that, the reply to it would be read as the reply to the prompt before it.
+    """
     return (
         record.get("type") == "user"
-        and not record.get("isMeta")
+        and (not record.get("isMeta") or _is_peer_record(record))
         and not record.get("isCompactSummary")
         and not _is_tool_result(record)
     )
 
 
 def _origin(record: Mapping, text: str) -> tuple[str, str]:
-    kind = (
-        (record.get("origin") or {}).get("kind")
-        if isinstance(record.get("origin"), Mapping)
-        else None
-    )
+    origin = _origin_of(record)
+    kind = origin.get("kind")
+    found = _PEER_RE.search(text)
+    tagged = _PEER_NAME_RE.search(found.group(0)) if found else None
+    if text and _is_peer_record(record):
+        # The CLI names the sender itself; the tag in the text is the older carrier.
+        return PEER, str(origin.get("name") or (tagged.group(1) if tagged else ""))
     if not text or (kind and kind != HUMAN) or record.get("promptSource") == "sdk":
         return SYSTEM, ""
-    found = _PEER_RE.search(text)
     if not found:
         return HUMAN, ""
-    name = _PEER_NAME_RE.search(found.group(0))
-    return PEER, name.group(1) if name else ""
+    return PEER, tagged.group(1) if tagged else ""
 
 
 def exchanges(records: Iterable[Mapping], *, key: str = "") -> tuple[Exchange, ...]:
