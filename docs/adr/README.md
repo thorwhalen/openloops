@@ -22,6 +22,7 @@ session identifiers that motivated it are not, and never will be — see
 | [ADR-013](013-loops-and-reminders.md) | Loops and reminders a channel holds | accepted |
 | [ADR-014](014-the-pile-reads-and-plans-the-caller-writes.md) | The pile: openloops reads and plans, the caller writes | accepted |
 | [ADR-015](015-a-manual-task-can-close-itself.md) | A manual task can close itself: the act reports, the check decides, one module writes | **proposed** |
+| [ADR-016](016-a-session-can-be-rendered-as-a-private-page.md) | A session can be rendered as a page: pure, script-free, and private by rule | **proposed** |
 
 ## Where these came from
 
