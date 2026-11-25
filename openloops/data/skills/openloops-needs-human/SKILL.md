@@ -167,6 +167,12 @@ decision the owner might want to overrule, not a record of every small call.
 when in doubt, it is not. Vetoes are the evidence for tightening this test, and the
 board shows them.
 
+**A standing delegation widens this, within its scope.** The owner may record a standing rule, written by the owner and kept where agents of that project will find it (a pinned issue, a line in the repo's CLAUDE.md, its decisions file). For example: "take every decision that has a recommendation or a default, except those that spend money, expose the project beyond the owner's circle, are legal or patent-related, or are hard to undo". Check that the owner wrote it; an agent's restatement is not a delegation. Within its scope:
+
+- A decision already handed to the owner (an open `manual-task` with a recommendation or a default) is taken as recommended. Condition 3 and step 3's open-`manual-task` exclusion do not stop you.
+- The delegation's exceptions still go to the owner as **one grouped list**, each with a recommendation and a confidence, never one issue at a time. Condition 1's never-eligible list still holds unless the delegation names the item.
+- Record it the way the delegation says. When it names a decision log, append one row per decision (the date, the source issue, what was decided, the option followed, how to reverse it, the session). Then comment on the source issue, and close it when nothing else is open. In that case you file no `agent-decided` issue per decision.
+
 ## The procedure
 
 Steps 1–3 decide *where*. Steps 4–6 decide *what goes in it*. Step 7 is one shell call

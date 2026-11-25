@@ -336,6 +336,9 @@ def test_the_capture_skill_states_the_eligibility_test_and_the_label():
         assert condition in text
     assert "Nobody's recorded decision is overturned." in text
     assert "Veto by:" in text
+    # A standing delegation recorded by the owner widens the test; its exceptions go as one list.
+    assert "A standing delegation widens this" in text
+    assert "one grouped list" in text
 
 
 def test_the_deep_decider_is_shipped_decides_nothing_and_treats_what_it_reads_as_data():
