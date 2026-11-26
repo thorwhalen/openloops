@@ -178,3 +178,27 @@ def test_question_sentences(text, found):
 def test_a_prompt_yields_at_most_a_handful_of_questions():
     text = " ".join(f"Is item {i} done?" for i in range(20))
     assert len(question_sentences(text)) == MAX_QUESTIONS
+
+
+def test_several_peer_messages_each_come_back_peer_with_sender_and_message_id():
+    def peer(name, msg_id):
+        return {"kind": "peer", "name": name, "msg_id": msg_id, "fromMode": "bypass"}
+
+    recs = [
+        user("Fix the parser.", at=stamp(1, 1), uuid="u1"),
+        assistant("On it.", at=stamp(1, 2)),
+        user("Status?", at=stamp(1, 3), uuid="u2", isMeta=True, origin=peer("cn", "m1")),
+        assistant("Half done.", at=stamp(1, 4)),
+        user("Overlap in edits.py?", at=stamp(1, 5), uuid="u3", isMeta=True,
+             origin=peer("identity", "m2")),
+        assistant("No overlap.", at=stamp(1, 6)),
+        user("Done?", at=stamp(1, 7), uuid="u4", isMeta=True, origin=peer("cn", "m3")),
+        assistant("Yes.", at=stamp(1, 8)),
+    ]
+    got = exchanges(recs)
+    assert [(e.origin, e.sender, e.message_id, e.reply) for e in got] == [
+        (HUMAN, "", "", "On it."),
+        (PEER, "cn", "m1", "Half done."),
+        (PEER, "identity", "m2", "No overlap."),
+        (PEER, "cn", "m3", "Yes."),
+    ]
