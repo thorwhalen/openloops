@@ -273,7 +273,7 @@ one — a predicate that passes while half the ask is outstanding is worse than 
 
 ### 4. What goes in the body
 
-Four fields are required. Put them at the top, unfolded, in this order.
+Four fields are required, and a fifth is optional (`**Session:**`). Put them at the top, unfolded, in this order.
 
 ```markdown
 **Ask:** <one line, imperative, the action the human takes>
@@ -283,6 +283,8 @@ Four fields are required. Put them at the top, unfolded, in this order.
 **Evidence:** <a plain URL, or a commit sha>
 
 **Blocks:** <one line: what stops until this is done. "Nothing" is a valid answer.>
+
+**Session:** <optional: your session id, so the owner can tie the ask to the session that opened it. Private repos only: a session link never goes in a public issue.>
 
 <details>
 <summary>What I found</summary>
