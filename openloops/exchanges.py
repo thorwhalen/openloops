@@ -106,7 +106,8 @@ class Exchange:
     ``origin`` is :data:`HUMAN`, :data:`PEER` (``sender`` names the session) or
     :data:`SYSTEM` (a notification, a headless ``-p`` run, or nothing typed).
     ``reply`` is the last assistant text before the next prompt, ``''`` while the turn
-    is still running or ended without words. ``questions`` is filled for a human
+    is still running or ended without words. ``message_id`` is the CLI's id for a peer message (``origin.msg_id``), ``''`` otherwise.
+    ``questions`` is filled for a human
     prompt only.
     """
 
@@ -118,6 +119,7 @@ class Exchange:
     reply: str = ""
     replied_at: str = ""
     sender: str = ""
+    message_id: str = ""
     questions: tuple[str, ...] = ()
 
     def as_dict(self) -> dict:
@@ -229,6 +231,11 @@ def exchanges(records: Iterable[Mapping], *, key: str = "") -> tuple[Exchange, .
                 "asked_at": _stamp(record),
                 "prompt": text,
                 "sender": sender,
+                "message_id": (
+                    str(_origin_of(record).get("msg_id") or "")
+                    if origin == PEER
+                    else ""
+                ),
                 "questions": question_sentences(text) if origin == HUMAN else (),
             }
         elif current is not None and record.get("type") == "assistant":
