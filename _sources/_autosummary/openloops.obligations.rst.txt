@@ -20,6 +20,7 @@ openloops.obligations
       configured_owners
       gh_issues
       owed
+      parse_session
       parse_verify
       shell_predicate
    

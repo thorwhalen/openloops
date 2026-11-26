@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=56cc1d78"></script>
+    <script src="../_static/documentation_options.js?v=61349712"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.51" />
+  <meta name="docsearch:version" content="0.1.52" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -564,10 +564,13 @@ fields that a plain <code class="docutils literal notranslate"><span class="pre"
 <tr class="row-odd"><td><p><a class="reference internal" href="#openloops.obligations.owed" title="openloops.obligations.owed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">owed</span></code></a>(*[, verify, owners, trusted_owners, ...])</p></td>
 <td><p>The open <code class="code docutils literal notranslate"><span class="pre">manual-task</span></code> obligations, each re-checked against the world.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#openloops.obligations.parse_verify" title="openloops.obligations.parse_verify"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_verify</span></code></a>(body)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.obligations.parse_session" title="openloops.obligations.parse_session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_session</span></code></a>(body)</p></td>
+<td><p>The <code class="docutils literal notranslate"><span class="pre">**Session:**</span></code> field of an issue body, <code class="docutils literal notranslate"><span class="pre">''</span></code> when absent.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.obligations.parse_verify" title="openloops.obligations.parse_verify"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_verify</span></code></a>(body)</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">(predicate,</span> <span class="pre">verify_text)</span></code> for an issue body.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#openloops.obligations.shell_predicate" title="openloops.obligations.shell_predicate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shell_predicate</span></code></a>(command, *[, timeout])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#openloops.obligations.shell_predicate" title="openloops.obligations.shell_predicate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shell_predicate</span></code></a>(command, *[, timeout])</p></td>
 <td><p>The default <code class="docutils literal notranslate"><span class="pre">run_predicate</span></code>: run the command in a subshell, bounded in time.</p></td>
 </tr>
 </tbody>
@@ -625,7 +628,7 @@ it becomes <code class="docutils literal notranslate"><span class="pre">listed:<
 
 <dl class="py data">
 <dt class="sig sig-object py" id="openloops.obligations.OBLIGATION_FIELDS">
-<span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">OBLIGATION_FIELDS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('repo',</span> <span class="pre">'number',</span> <span class="pre">'title',</span> <span class="pre">'url',</span> <span class="pre">'created',</span> <span class="pre">'age_days',</span> <span class="pre">'state',</span> <span class="pre">'verify',</span> <span class="pre">'predicate',</span> <span class="pre">'evidence',</span> <span class="pre">'documents')</span></span><a class="headerlink" href="#openloops.obligations.OBLIGATION_FIELDS" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">OBLIGATION_FIELDS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('repo',</span> <span class="pre">'number',</span> <span class="pre">'title',</span> <span class="pre">'url',</span> <span class="pre">'created',</span> <span class="pre">'age_days',</span> <span class="pre">'state',</span> <span class="pre">'verify',</span> <span class="pre">'predicate',</span> <span class="pre">'evidence',</span> <span class="pre">'documents',</span> <span class="pre">'session')</span></span><a class="headerlink" href="#openloops.obligations.OBLIGATION_FIELDS" title="Link to this definition">#</a></dt>
 <dd><p>Every key on every row, whatever the issue happened to say. A row shape that varies
 by issue makes <code class="docutils literal notranslate"><span class="pre">row[&quot;predicate&quot;]</span></code> a coin flip and makes a JSON schema a lie.</p>
 </dd></dl>
@@ -639,10 +642,11 @@ by issue makes <code class="docutils literal notranslate"><span class="pre">row[
 
 <dl class="py class">
 <dt class="sig sig-object py" id="openloops.obligations.Obligation">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">Obligation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">age_days</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'open'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">documents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/obligations.html#Obligation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.obligations.Obligation" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">Obligation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">age_days</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'open'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">documents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/obligations.html#Obligation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.obligations.Obligation" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>One open <code class="code docutils literal notranslate"><span class="pre">manual-task</span></code> issue, with the verdict its own predicate returned.</p>
-<p><code class="docutils literal notranslate"><span class="pre">verify</span></code> is the <code class="docutils literal notranslate"><span class="pre">**Verify:**</span></code> field exactly as the issue wrote it and
+<p><code class="docutils literal notranslate"><span class="pre">session</span></code> is the optional <code class="docutils literal notranslate"><span class="pre">**Session:**</span></code> field (the id or link of the session that
+opened the issue), <code class="docutils literal notranslate"><span class="pre">''</span></code> when absent. <code class="docutils literal notranslate"><span class="pre">verify</span></code> is the <code class="docutils literal notranslate"><span class="pre">**Verify:**</span></code> field exactly as the issue wrote it and
 <code class="docutils literal notranslate"><span class="pre">predicate</span></code> is the runnable command extracted from it — both are carried so a
 reader can disagree with <code class="docutils literal notranslate"><span class="pre">state</span></code> rather than absorb it.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Obligation</span><span class="p">(</span><span class="s1">'acme/widget'</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">'t'</span><span class="p">,</span> <span class="s1">'u'</span><span class="p">,</span> <span class="s1">'2026-01-01T00:00:00Z'</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">state</span>
@@ -783,6 +787,24 @@ to exit status substitutes). With both injected this reaches no network and need
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="openloops.obligations.parse_session">
+<span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">parse_session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/obligations.html#parse_session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.obligations.parse_session" title="Link to this definition">#</a></dt>
+<dd><p>The <code class="docutils literal notranslate"><span class="pre">**Session:**</span></code> field of an issue body, <code class="docutils literal notranslate"><span class="pre">''</span></code> when absent.</p>
+<p>Quoted code blocks are ignored, as for <code class="docutils literal notranslate"><span class="pre">Verify:</span></code>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_session</span><span class="p">(</span><span class="s1">'**Session:** 0a1b2c3d'</span><span class="p">)</span>
+<span class="go">'0a1b2c3d'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parse_session</span><span class="p">(</span><span class="s1">'**Verify:** `true`'</span><span class="p">)</span>
+<span class="go">''</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="openloops.obligations.parse_verify">
 <span class="sig-prename descclassname"><span class="pre">openloops.obligations.</span></span><span class="sig-name descname"><span class="pre">parse_verify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/obligations.html#parse_verify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.obligations.parse_verify" title="Link to this definition">#</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">(predicate,</span> <span class="pre">verify_text)</span></code> for an issue body. Both are <code class="docutils literal notranslate"><span class="pre">''</span></code> when absent.</p>
@@ -907,6 +929,7 @@ an exit status — a timeout, a shell that would not start — comes back as
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.configured_owners"><code class="docutils literal notranslate"><span class="pre">configured_owners()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.gh_issues"><code class="docutils literal notranslate"><span class="pre">gh_issues()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.owed"><code class="docutils literal notranslate"><span class="pre">owed()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.parse_session"><code class="docutils literal notranslate"><span class="pre">parse_session()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.parse_verify"><code class="docutils literal notranslate"><span class="pre">parse_verify()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#openloops.obligations.shell_predicate"><code class="docutils literal notranslate"><span class="pre">shell_predicate()</span></code></a></li>
 </ul>

@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../../_static/documentation_options.js?v=56cc1d78"></script>
+    <script src="../../_static/documentation_options.js?v=61349712"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.51" />
+  <meta name="docsearch:version" content="0.1.52" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -868,6 +868,7 @@ window.runMermaid = runMermaid;</script>
     <span class="s2">"configured_owners"</span><span class="p">,</span>
     <span class="s2">"gh_issues"</span><span class="p">,</span>
     <span class="s2">"owed"</span><span class="p">,</span>
+    <span class="s2">"parse_session"</span><span class="p">,</span>
     <span class="s2">"parse_verify"</span><span class="p">,</span>
     <span class="s2">"shell_predicate"</span><span class="p">,</span>
 <span class="p">]</span>
@@ -954,7 +955,8 @@ window.runMermaid = runMermaid;</script>
 <span class="k">class</span><span class="w"> </span><span class="nc">Obligation</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""One open `manual-task` issue, with the verdict its own predicate returned.</span>
 
-<span class="sd">    ``verify`` is the ``**Verify:**`` field exactly as the issue wrote it and</span>
+<span class="sd">    ``session`` is the optional ``**Session:**`` field (the id or link of the session that</span>
+<span class="sd">    opened the issue), ``''`` when absent. ``verify`` is the ``**Verify:**`` field exactly as the issue wrote it and</span>
 <span class="sd">    ``predicate`` is the runnable command extracted from it — both are carried so a</span>
 <span class="sd">    reader can disagree with ``state`` rather than absorb it.</span>
 
@@ -973,6 +975,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">predicate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="n">evidence</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="n">documents</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="n">session</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
 
 <div class="viewcode-block" id="Obligation.as_dict">
 <a class="viewcode-back" href="../../_autosummary/openloops.obligations.html#openloops.Obligation.as_dict">[docs]</a>
@@ -1168,6 +1171,12 @@ window.runMermaid = runMermaid;</script>
     <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">,</span>
 <span class="p">)</span>
 
+<span class="c1">#: The optional ``**Session:** &lt;id or link&gt;`` field: which session opened the issue.</span>
+<span class="n">_SESSION_FIELD</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s2">"^[ \t&gt;]*(?:\*\*)?Session(?:\*\*)?\s*:(?:\*\*)?[ \t]*(?P&lt;text&gt;\S.*?)[ \t]*$"</span><span class="p">,</span>
+    <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">,</span>
+<span class="p">)</span>
+
 <span class="c1">#: A markdown code span, with however many backticks it opened with.</span>
 <span class="n">_CODE_SPAN</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(?P&lt;ticks&gt;`+)(?P&lt;code&gt;.+?)(?P=ticks)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
 
@@ -1295,6 +1304,23 @@ window.runMermaid = runMermaid;</script>
     <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">pattern</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">body</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">):</span>
         <span class="n">seen</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">".,;:"</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">seen</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="parse_session">
+<a class="viewcode-back" href="../../_autosummary/openloops.obligations.html#openloops.parse_session">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_session</span><span class="p">(</span><span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The ``**Session:**`` field of an issue body, ``''`` when absent.</span>
+
+<span class="sd">    Quoted code blocks are ignored, as for ``Verify:``.</span>
+
+<span class="sd">    &gt;&gt;&gt; parse_session('**Session:** 0a1b2c3d')</span>
+<span class="sd">    '0a1b2c3d'</span>
+<span class="sd">    &gt;&gt;&gt; parse_session('**Verify:** `true`')</span>
+<span class="sd">    ''</span>
+<span class="sd">    """</span>
+    <span class="n">match</span> <span class="o">=</span> <span class="n">_SESSION_FIELD</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">_without_quoted_code</span><span class="p">(</span><span class="n">body</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"text"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"` "</span><span class="p">)</span> <span class="k">if</span> <span class="n">match</span> <span class="k">else</span> <span class="s2">""</span></div>
+
 
 
 <div class="viewcode-block" id="parse_verify">
@@ -1781,6 +1807,7 @@ window.runMermaid = runMermaid;</script>
                 <span class="n">predicate</span><span class="o">=</span><span class="n">command</span><span class="p">,</span>
                 <span class="n">evidence</span><span class="o">=</span><span class="n">evidence</span><span class="p">,</span>
                 <span class="n">documents</span><span class="o">=</span><span class="n">document_links</span><span class="p">(</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">),</span>
+                <span class="n">session</span><span class="o">=</span><span class="n">parse_session</span><span class="p">(</span><span class="n">issue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="p">)</span>
 

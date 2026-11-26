@@ -366,13 +366,14 @@ JSON-ready form.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
-### *class* openloops.Obligation(repo, number, title, url, created, age_days, state='open', verify='', predicate='', evidence='', documents=())
+### *class* openloops.Obligation(repo, number, title, url, created, age_days, state='open', verify='', predicate='', evidence='', documents=(), session='')
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 One open `manual-task` issue, with the verdict its own predicate returned.
 
-`verify` is the `**Verify:**` field exactly as the issue wrote it and
+`session` is the optional `**Session:**` field (the id or link of the session that
+opened the issue), `''` when absent. `verify` is the `**Verify:**` field exactly as the issue wrote it and
 `predicate` is the runnable command extracted from it — both are carried so a
 reader can disagree with `state` rather than absorb it.
 

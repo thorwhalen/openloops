@@ -1,4 +1,4 @@
-> built 2026-11-26 17:42 UTC from d002e44 (main) · openloops 0.1.51. Details: build_info.json
+> built 2026-11-26 17:45 UTC from 488cc9d (main) · openloops 0.1.52. Details: build_info.json
 
 # index.html.md
 
@@ -3032,13 +3032,14 @@ JSON-ready form.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
-### *class* openloops.Obligation(repo, number, title, url, created, age_days, state='open', verify='', predicate='', evidence='', documents=())
+### *class* openloops.Obligation(repo, number, title, url, created, age_days, state='open', verify='', predicate='', evidence='', documents=(), session='')
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 One open `manual-task` issue, with the verdict its own predicate returned.
 
-`verify` is the `**Verify:**` field exactly as the issue wrote it and
+`session` is the optional `**Session:**` field (the id or link of the session that
+opened the issue), `''` when absent. `verify` is the `**Verify:**` field exactly as the issue wrote it and
 `predicate` is the runnable command extracted from it — both are carried so a
 reader can disagree with `state` rather than absorb it.
 
@@ -4330,6 +4331,7 @@ An owner you did not name is never executed, and never silently believed:
 |----------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
 | [`gh_issues`](_autosummary/openloops.obligations.html.md#openloops.obligations.gh_issues)(\*, owners[, label, state, limit, ...]) | The default `issues_source`: the open `manual-task` issues, from `gh`.       |
 | [`owed`](_autosummary/openloops.obligations.html.md#openloops.obligations.owed)(\*[, verify, owners, trusted_owners, ...])   | The open `manual-task` obligations, each re-checked against the world.       |
+| [`parse_session`](_autosummary/openloops.obligations.html.md#openloops.obligations.parse_session)(body)                               | The `**Session:**` field of an issue body, `''` when absent.                 |
 | [`parse_verify`](_autosummary/openloops.obligations.html.md#openloops.obligations.parse_verify)(body)                                | `(predicate, verify_text)` for an issue body.                                |
 | [`shell_predicate`](_autosummary/openloops.obligations.html.md#openloops.obligations.shell_predicate)(command, \*[, timeout])           | The default `run_predicate`: run the command in a subshell, bounded in time. |
 
@@ -4368,7 +4370,7 @@ Raised only by the listing path, and never propagated to a caller of [`owed()`](
 it becomes `listed: False` plus an `error`, which every surface must render as
 `?`. Turning it into an empty list would be the one unrecoverable bug here.
 
-### openloops.obligations.OBLIGATION_FIELDS *= ('repo', 'number', 'title', 'url', 'created', 'age_days', 'state', 'verify', 'predicate', 'evidence', 'documents')*
+### openloops.obligations.OBLIGATION_FIELDS *= ('repo', 'number', 'title', 'url', 'created', 'age_days', 'state', 'verify', 'predicate', 'evidence', 'documents', 'session')*
 
 Every key on every row, whatever the issue happened to say. A row shape that varies
 by issue makes `row["predicate"]` a coin flip and makes a JSON schema a lie.
@@ -4378,13 +4380,14 @@ by issue makes `row["predicate"]` a coin flip and makes a JSON schema a lie.
 The three states, in the order a reader cares about them. `open` is
 [`openloops.base.OPEN`](_autosummary/openloops.base.html.md#openloops.base.OPEN): a loop that is still open is the same idea either way.
 
-### *class* openloops.obligations.Obligation(repo, number, title, url, created, age_days, state='open', verify='', predicate='', evidence='', documents=())
+### *class* openloops.obligations.Obligation(repo, number, title, url, created, age_days, state='open', verify='', predicate='', evidence='', documents=(), session='')
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 One open `manual-task` issue, with the verdict its own predicate returned.
 
-`verify` is the `**Verify:**` field exactly as the issue wrote it and
+`session` is the optional `**Session:**` field (the id or link of the session that
+opened the issue), `''` when absent. `verify` is the `**Verify:**` field exactly as the issue wrote it and
 `predicate` is the runnable command extracted from it — both are carried so a
 reader can disagree with `state` rather than absorb it.
 
@@ -4517,6 +4520,22 @@ A listing that could not run is not “nothing owed”:
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.obligations.parse_session(body)
+
+The `**Session:**` field of an issue body, `''` when absent.
+
+Quoted code blocks are ignored, as for `Verify:`.
+
+```pycon
+>>> parse_session('**Session:** 0a1b2c3d')
+'0a1b2c3d'
+>>> parse_session('**Verify:** `true`')
+''
+```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### openloops.obligations.parse_verify(body)
 
@@ -6602,18 +6621,16 @@ mislabels a large fraction of real sessions:
 
 # About this build
 
-This documentation was built on **2026-11-26 17:42 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/d002e443a069021a179cd5c3c1f003a636476afb"><code>d002e44</code></a> on branch <code>main</code>, for **openloops 0.1.51** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-26 17:45 UTC** from commit <a href="https://github.com/thorwhalen/openloops/commit/488cc9dd13268a5456b82ff8b77943f66df9abb7"><code>488cc9d</code></a> on branch <code>main</code>, for **openloops 0.1.52** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.1.51) is behind the latest release on PyPI (0.1.52): `pip install openloops` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                             |
 |---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/d002e443a069021a179cd5c3c1f003a636476afb"><code>d002e443a069021a179cd5c3c1f003a636476afb</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/openloops/commit/488cc9dd13268a5456b82ff8b77943f66df9abb7"><code>488cc9dd13268a5456b82ff8b77943f66df9abb7</code></a> |
 | Branch              | <code>main</code>                                                                                                                                           |
 | Tags at this commit | none                                                                                                                                                        |
 | Working tree        | clean                                                                                                                                                       |
@@ -6624,9 +6641,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/openloops</code>                                                          |
-| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/45869656081">45869656081</a> |
+| Run          | <a href="https://github.com/thorwhalen/openloops/actions/runs/45870168620">45870168620</a> |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>d002e443a069021a179cd5c3c1f003a636476afb</code> (in the history of the built commit) |
+| Event commit | <code>488cc9dd13268a5456b82ff8b77943f66df9abb7</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -6651,13 +6668,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/openloops/0.1.52/">0.1.52</a>, newer than the documented version (0.1.51).
+Latest release: <a href="https://pypi.org/project/openloops/0.1.52/">0.1.52</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/openloops && cd openloops
-git checkout d002e443a069021a179cd5c3c1f003a636476afb
+git checkout 488cc9dd13268a5456b82ff8b77943f66df9abb7
 pip install "epythet==0.2.25"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

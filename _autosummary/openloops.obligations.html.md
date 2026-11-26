@@ -144,6 +144,7 @@ An owner you did not name is never executed, and never silently believed:
 |----------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
 | [`gh_issues`](#openloops.obligations.gh_issues)(\*, owners[, label, state, limit, ...]) | The default `issues_source`: the open `manual-task` issues, from `gh`.       |
 | [`owed`](#openloops.obligations.owed)(\*[, verify, owners, trusted_owners, ...])   | The open `manual-task` obligations, each re-checked against the world.       |
+| [`parse_session`](#openloops.obligations.parse_session)(body)                               | The `**Session:**` field of an issue body, `''` when absent.                 |
 | [`parse_verify`](#openloops.obligations.parse_verify)(body)                                | `(predicate, verify_text)` for an issue body.                                |
 | [`shell_predicate`](#openloops.obligations.shell_predicate)(command, \*[, timeout])           | The default `run_predicate`: run the command in a subshell, bounded in time. |
 
@@ -182,7 +183,7 @@ Raised only by the listing path, and never propagated to a caller of [`owed()`](
 it becomes `listed: False` plus an `error`, which every surface must render as
 `?`. Turning it into an empty list would be the one unrecoverable bug here.
 
-### openloops.obligations.OBLIGATION_FIELDS *= ('repo', 'number', 'title', 'url', 'created', 'age_days', 'state', 'verify', 'predicate', 'evidence', 'documents')*
+### openloops.obligations.OBLIGATION_FIELDS *= ('repo', 'number', 'title', 'url', 'created', 'age_days', 'state', 'verify', 'predicate', 'evidence', 'documents', 'session')*
 
 Every key on every row, whatever the issue happened to say. A row shape that varies
 by issue makes `row["predicate"]` a coin flip and makes a JSON schema a lie.
@@ -192,13 +193,14 @@ by issue makes `row["predicate"]` a coin flip and makes a JSON schema a lie.
 The three states, in the order a reader cares about them. `open` is
 [`openloops.base.OPEN`](openloops.base.html.md#openloops.base.OPEN): a loop that is still open is the same idea either way.
 
-### *class* openloops.obligations.Obligation(repo, number, title, url, created, age_days, state='open', verify='', predicate='', evidence='', documents=())
+### *class* openloops.obligations.Obligation(repo, number, title, url, created, age_days, state='open', verify='', predicate='', evidence='', documents=(), session='')
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 One open `manual-task` issue, with the verdict its own predicate returned.
 
-`verify` is the `**Verify:**` field exactly as the issue wrote it and
+`session` is the optional `**Session:**` field (the id or link of the session that
+opened the issue), `''` when absent. `verify` is the `**Verify:**` field exactly as the issue wrote it and
 `predicate` is the runnable command extracted from it — both are carried so a
 reader can disagree with `state` rather than absorb it.
 
@@ -331,6 +333,22 @@ A listing that could not run is not “nothing owed”:
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
+### openloops.obligations.parse_session(body)
+
+The `**Session:**` field of an issue body, `''` when absent.
+
+Quoted code blocks are ignored, as for `Verify:`.
+
+```pycon
+>>> parse_session('**Session:** 0a1b2c3d')
+'0a1b2c3d'
+>>> parse_session('**Verify:** `true`')
+''
+```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### openloops.obligations.parse_verify(body)
 
