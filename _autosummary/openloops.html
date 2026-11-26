@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=f2b49961"></script>
+    <script src="../_static/documentation_options.js?v=56cc1d78"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.50" />
+  <meta name="docsearch:version" content="0.1.51" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -835,14 +835,15 @@ no generation timestamp, which is what lets the regeneration test in
 
 <dl class="py class">
 <dt class="sig sig-object py" id="openloops.Exchange">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">Exchange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uuid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asked_at</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reply</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replied_at</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sender</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">questions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/exchanges.html#Exchange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.Exchange" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">openloops.</span></span><span class="sig-name descname"><span class="pre">Exchange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uuid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asked_at</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reply</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replied_at</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sender</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">questions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openloops/exchanges.html#Exchange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openloops.Exchange" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>One prompt a session received and the reply its turn ended with.</p>
 <p><code class="docutils literal notranslate"><span class="pre">uuid</span></code> is the prompt record’s own id, stable for the life of the transcript.
 <code class="docutils literal notranslate"><span class="pre">origin</span></code> is <code class="xref py py-data docutils literal notranslate"><span class="pre">HUMAN</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">PEER</span></code> (<code class="docutils literal notranslate"><span class="pre">sender</span></code> names the session) or
 <code class="xref py py-data docutils literal notranslate"><span class="pre">SYSTEM</span></code> (a notification, a headless <code class="docutils literal notranslate"><span class="pre">-p</span></code> run, or nothing typed).
 <code class="docutils literal notranslate"><span class="pre">reply</span></code> is the last assistant text before the next prompt, <code class="docutils literal notranslate"><span class="pre">''</span></code> while the turn
-is still running or ended without words. <code class="docutils literal notranslate"><span class="pre">questions</span></code> is filled for a human
+is still running or ended without words. <code class="docutils literal notranslate"><span class="pre">message_id</span></code> is the CLI’s id for a peer message (<code class="docutils literal notranslate"><span class="pre">origin.msg_id</span></code>), <code class="docutils literal notranslate"><span class="pre">''</span></code> otherwise.
+<code class="docutils literal notranslate"><span class="pre">questions</span></code> is filled for a human
 prompt only.</p>
 <dl class="field-list simple">
 </dl>

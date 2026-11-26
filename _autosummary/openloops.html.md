@@ -313,7 +313,7 @@ JSON-ready form (without the markdown body).
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### *class* openloops.Exchange(session, uuid, origin, asked_at, prompt, reply='', replied_at='', sender='', questions=())
+### *class* openloops.Exchange(session, uuid, origin, asked_at, prompt, reply='', replied_at='', sender='', message_id='', questions=())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -323,7 +323,8 @@ One prompt a session received and the reply its turn ended with.
 `origin` is `HUMAN`, `PEER` (`sender` names the session) or
 `SYSTEM` (a notification, a headless `-p` run, or nothing typed).
 `reply` is the last assistant text before the next prompt, `''` while the turn
-is still running or ended without words. `questions` is filled for a human
+is still running or ended without words. `message_id` is the CLI’s id for a peer message (`origin.msg_id`), `''` otherwise.
+`questions` is filled for a human
 prompt only.
 
 #### as_dict()

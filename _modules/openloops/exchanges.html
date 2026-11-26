@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../../_static/documentation_options.js?v=f2b49961"></script>
+    <script src="../../_static/documentation_options.js?v=56cc1d78"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -411,7 +411,7 @@ window.runMermaid = runMermaid;</script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.50" />
+  <meta name="docsearch:version" content="0.1.51" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -822,7 +822,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ``origin`` is :data:`HUMAN`, :data:`PEER` (``sender`` names the session) or</span>
 <span class="sd">    :data:`SYSTEM` (a notification, a headless ``-p`` run, or nothing typed).</span>
 <span class="sd">    ``reply`` is the last assistant text before the next prompt, ``''`` while the turn</span>
-<span class="sd">    is still running or ended without words. ``questions`` is filled for a human</span>
+<span class="sd">    is still running or ended without words. ``message_id`` is the CLI's id for a peer message (``origin.msg_id``), ``''`` otherwise.</span>
+<span class="sd">    ``questions`` is filled for a human</span>
 <span class="sd">    prompt only.</span>
 <span class="sd">    """</span>
 
@@ -834,6 +835,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">reply</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="n">replied_at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="n">sender</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">message_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="n">questions</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
 
 <div class="viewcode-block" id="Exchange.as_dict">
@@ -951,6 +953,11 @@ window.runMermaid = runMermaid;</script>
                 <span class="s2">"asked_at"</span><span class="p">:</span> <span class="n">_stamp</span><span class="p">(</span><span class="n">record</span><span class="p">),</span>
                 <span class="s2">"prompt"</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span>
                 <span class="s2">"sender"</span><span class="p">:</span> <span class="n">sender</span><span class="p">,</span>
+                <span class="s2">"message_id"</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">_origin_of</span><span class="p">(</span><span class="n">record</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"msg_id"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">origin</span> <span class="o">==</span> <span class="n">PEER</span>
+                    <span class="k">else</span> <span class="s2">""</span>
+                <span class="p">),</span>
                 <span class="s2">"questions"</span><span class="p">:</span> <span class="n">question_sentences</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="k">if</span> <span class="n">origin</span> <span class="o">==</span> <span class="n">HUMAN</span> <span class="k">else</span> <span class="p">(),</span>
             <span class="p">}</span>
         <span class="k">elif</span> <span class="n">current</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"type"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"assistant"</span><span class="p">:</span>
