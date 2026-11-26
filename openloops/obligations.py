@@ -154,6 +154,7 @@ __all__ = [
     "configured_owners",
     "gh_issues",
     "owed",
+    "parse_session",
     "parse_verify",
     "shell_predicate",
 ]
@@ -229,7 +230,8 @@ class PredicateOutcome:
 class Obligation:
     """One open `manual-task` issue, with the verdict its own predicate returned.
 
-    ``verify`` is the ``**Verify:**`` field exactly as the issue wrote it and
+    ``session`` is the optional ``**Session:**`` field (the id or link of the session that
+    opened the issue), ``''`` when absent. ``verify`` is the ``**Verify:**`` field exactly as the issue wrote it and
     ``predicate`` is the runnable command extracted from it — both are carried so a
     reader can disagree with ``state`` rather than absorb it.
 
@@ -248,6 +250,7 @@ class Obligation:
     predicate: str = ""
     evidence: str = ""
     documents: tuple[str, ...] = ()
+    session: str = ""
 
     def as_dict(self) -> dict[str, Any]:
         """JSON-ready form."""
@@ -433,6 +436,12 @@ _VERIFY_FIELD = re.compile(
     re.IGNORECASE | re.MULTILINE,
 )
 
+#: The optional ``**Session:** <id or link>`` field: which session opened the issue.
+_SESSION_FIELD = re.compile(
+    r"^[ \t>]*(?:\*\*)?Session(?:\*\*)?\s*:(?:\*\*)?[ \t]*(?P<text>\S.*?)[ \t]*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+
 #: A markdown code span, with however many backticks it opened with.
 _CODE_SPAN = re.compile(r"(?P<ticks>`+)(?P<code>.+?)(?P=ticks)", re.DOTALL)
 
@@ -560,6 +569,20 @@ def document_links(
     for match in pattern.finditer(body or ""):
         seen.setdefault(match.group(0).rstrip(".,;:"), None)
     return tuple(seen)
+
+
+def parse_session(body: str) -> str:
+    """The ``**Session:**`` field of an issue body, ``''`` when absent.
+
+    Quoted code blocks are ignored, as for ``Verify:``.
+
+    >>> parse_session('**Session:** 0a1b2c3d')
+    '0a1b2c3d'
+    >>> parse_session('**Verify:** `true`')
+    ''
+    """
+    match = _SESSION_FIELD.search(_without_quoted_code(body or ""))
+    return match.group("text").strip("` ") if match else ""
 
 
 def parse_verify(body: str) -> tuple[str, str]:
@@ -1038,6 +1061,7 @@ def owed(
                 predicate=command,
                 evidence=evidence,
                 documents=document_links(issue.get("body") or ""),
+                session=parse_session(issue.get("body") or ""),
             )
         )
 

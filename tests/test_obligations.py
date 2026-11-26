@@ -962,3 +962,12 @@ def test_gh_names_a_rate_limit_refusal_as_its_own_kind(monkeypatch):
     with pytest.raises(GhUnavailable) as caught:
         _gh(["search", "issues"], timeout=1)
     assert not isinstance(caught.value, GhRateLimited)
+
+
+def test_session_field_is_parsed_and_absent_means_empty():
+    from openloops.obligations import parse_session
+
+    assert parse_session("**Ask:** x\n\n**Session:** abc-123\n") == "abc-123"
+    assert parse_session("Session: `abc`") == "abc"
+    assert parse_session("```\n**Session:** quoted\n```") == ""
+    assert parse_session("**Verify:** `true`") == ""
